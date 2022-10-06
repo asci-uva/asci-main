@@ -1,0 +1,52 @@
+Things I did:
+
+pre-requisites:
+Install 
+
+//OPTIONAL: Shows the images you have on your machine
+docker images
+
+//Pull all the necessary images
+docker pull postgres
+docker pull php
+docker pull httpd
+
+
+//Pull the project from our Github (Not much there yet)
+git clone http://github.com/asci-uva/asci-main
+
+//Build images (only have to do this once apparently)
+docker compose build
+
+//start the project
+docker compose up
+
+
+
+
+##CONNECTING TO THE DATABASE
+
+#OPTION 1: Connect remotely
+psql -U postgres -h localhost -p 5432
+
+
+#OPTION 2: Connect to docker container first
+----------------------
+#Show ports / ids for running containers
+docker ps
+
+#Connect to the postgres container
+#Replace <CONTAINER_ID> with the id from previous command above
+docker exec -it <CONTAINER_ID> bash
+
+#Connect to the actual DB. Afterwards you can run queries and such on the command line.
+psql -U postgres
+----------------------
+
+
+
+#DB NAME
+asci
+
+#test table:
+select username from test_table where username='mrf8t';
