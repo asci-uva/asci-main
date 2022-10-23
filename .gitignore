@@ -1,2 +1,3 @@
 #ignore everything inside of the db/ folder (data is private)
 ./db
+./backend/src/vendor
