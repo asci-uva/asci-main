@@ -46,3 +46,14 @@ docker compose up
 ```
 
 You can also add the option *-d* flag if you want to continue using your terminal window for other tasks. Navigate to *localhost* in your browser to see the project.
+
+
+## Update composer
+
+Before you access the project, you should install composer dependencies.  This can be done by:
+
+```
+docker exec -it <CONTAINER_ID> bash
+cd /opt/src
+composer install
+```
