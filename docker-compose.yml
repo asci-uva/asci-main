@@ -18,7 +18,7 @@ services:
 
     container_name: 'ASCI_php'
     ports:
-      - 10080:80
+      - 8081:80
     volumes:
       - ./backend/src/:/opt/src/
       - ./backend/www/:/var/www/html/
