@@ -42,6 +42,8 @@ docker exec -it <CONTAINER_ID> bash
 #Connect to the actual DB. Afterwards you can run queries and such on the command line.
 psql -U postgres
 ----------------------
+#Alternatively, connect through postgres on your local machine (so you must have psql installed)
+psql -U postgres -W -h localhost -p 15432 postgres
 
 
 
