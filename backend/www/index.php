@@ -40,7 +40,9 @@ try {
     // Get the request body for processing
     $input = file_get_contents("php://input");
     if ($input == null) {
-        throw new \Exception("No input given to the server");
+        header("Content-Type: application/json");
+        echo json_encode(["Error" => "No input given"]);
+        exit();
     }
     
     // Parse the JSON input
