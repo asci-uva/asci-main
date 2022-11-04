@@ -13,10 +13,32 @@ function Contact() {
   }
   let json0;
 
+
+  //#TODO: add a server address?
+  let url0 = ''; 
+  //server address
+  //data will be a json file
+  const sendJson = (json0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json0,
+    }).then((response) => response.json())
+      .then((data) => {
+        console.log('Success:', data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  }
+  
   const handleSubmit = (e) =>{
     e.preventDefault();
     json0 = JSON.stringify(userInfo);
     console.log(json0);
+    sendJson(json0);
   }
 
   return (
