@@ -1,11 +1,14 @@
 import React from "react";
 import {useState} from "react";
+import { useNavigate } from 'react-router-dom';
+
 
 //https://www.youtube.com/watch?v=IkMND33x0qQ
 function Contact() {
   const [username, setUsername] = useState("user name");
   const [passwd, setPasswd] = useState("password");
   const [purpose, setPurpose] = useState("unknown");
+  const navigate = useNavigate();
   let userInfo = {
     name : username,
     password: passwd,
@@ -13,12 +16,15 @@ function Contact() {
   }
   let json0;
 
-
-  //#TODO: add a server address?
+  // we assume a success response aka 'data' value will look like this
+  // {"username":"aa0123", "login":"yes"}
+  // note: not tested yet
+  
+  // #TODO: add a server address?
   let url0 = ''; 
   //server address
   //data will be a json file
-  const sendJson = (json0) =>{
+  const sendJson = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
       headers: {
@@ -27,7 +33,11 @@ function Contact() {
       body: json0,
     }).then((response) => response.json())
       .then((data) => {
-        console.log('Success:', data);
+        if (data.login==="yes") {
+          navigate('/question');
+        } else {
+          console.log('Failure or error');
+        }
       })
       .catch((error) => {
         console.error('Error:', error);
@@ -38,7 +48,7 @@ function Contact() {
     e.preventDefault();
     json0 = JSON.stringify(userInfo);
     console.log(json0);
-    sendJson(json0);
+    sendJson(json0,url0);
   }
 
   return (
