@@ -1,18 +1,38 @@
 import React from "react";
+import {useState} from "react";
 
+//https://www.youtube.com/watch?v=IkMND33x0qQ
 function Contact() {
+  const [username, setUsername] = useState("user name");
+  const [passwd, setPasswd] = useState("password");
+  const [purpose, setPurpose] = useState("");
+  
   return (
-    <div className="contact">
-      <div class="container">
-        <div class="row align-items-center my-5">
-          <div class="col-lg-5">
-            <h1 class="font-weight-light">Login</h1>
-            <p>
-              Add login textbox
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="question">
+      <h2>Login</h2>
+      <form>
+        <label>Username</label>
+        <input
+          type = "text"
+          required
+          value = {username}
+          onChange={(e)=>setUsername(e.target.value)}
+        />
+        <label>Password</label>
+        <textarea
+          required
+          value = {passwd}
+          onChange={(e)=>setPasswd(e.target.value)}>
+        </textarea>
+        <label>New to the queue?</label>
+        <select 
+          value={purpose}
+          onChange={(e)=>setPurpose(e.target.value)}>
+          <option value="Assignment">Register</option>
+          <option value="Logistic">Login</option>
+        </select>
+        <button>Submit</button>
+      </form>
     </div>
   );
 }
