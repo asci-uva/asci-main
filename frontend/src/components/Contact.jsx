@@ -5,12 +5,24 @@ import {useState} from "react";
 function Contact() {
   const [username, setUsername] = useState("user name");
   const [passwd, setPasswd] = useState("password");
-  const [purpose, setPurpose] = useState("");
-  
+  const [purpose, setPurpose] = useState("unknown");
+  let userInfo = {
+    name : username,
+    password: passwd,
+    category : purpose
+  }
+  let json0;
+
+  const handleSubmit = (e) =>{
+    e.preventDefault();
+    json0 = JSON.stringify(userInfo);
+    console.log(json0);
+  }
+
   return (
     <div className="question">
       <h2>Login</h2>
-      <form>
+      <form onSubmit={handleSubmit}>
         <label>Username</label>
         <input
           type = "text"
