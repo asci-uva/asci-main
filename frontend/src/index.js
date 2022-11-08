@@ -10,6 +10,7 @@ import {
   Question,
   Contact,
   Ta,
+  StudentWaitingRoom
 } from "./components";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -21,6 +22,7 @@ root.render(
       <Route path="/contact" element={<Contact />} />
       <Route path="/question" element={<Question />} />
       <Route path="/ta" element={<Ta />} />
+      <Route path="/studentwaitingroom" element={<StudentWaitingRoom />} />
     </Routes>
     <Footer />
   </Router>,
