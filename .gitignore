@@ -3,4 +3,5 @@ db
 backend/log
 backend/src/vendor
 backend/src/composer.lock
-frontend/node-module
+frontend/node_modules
+node_modules
