@@ -1,4 +1,5 @@
 #ignore everything inside of the db/ folder (data is private)
 db
+backend/log
 backend/src/vendor
 backend/src/composer.lock

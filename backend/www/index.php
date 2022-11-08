@@ -40,15 +40,13 @@ try {
     // Get the request body for processing
     $input = file_get_contents("php://input");
     if ($input == null) {
-        header("Content-Type: application/json");
-        echo json_encode(["Error" => "No input given"]);
-        exit();
+        throw new \asci\exceptions\ASCIException("No input given");
     }
     
     // Parse the JSON input
     $jsonInput = json_decode($input, true);
     if ($jsonInput == null) {
-        throw new \Exception("Could not parse input");
+        throw new \asci\exceptions\ASCIException("Could not parse input");
     }
     
     // Instantiate and run the server
