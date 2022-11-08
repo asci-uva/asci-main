@@ -1,6 +1,6 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import "./index.css";
+import ReactDOM from "react-dom/client";
 
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import {
@@ -9,18 +9,21 @@ import {
   Home,
   Question,
   Contact,
+  Ta,
 } from "./components";
 
-ReactDOM.render(
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
   <Router>
     <Navigation />
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/question" element={<Question />} />
+      <Route path="/ta" element={<Ta />} />
     </Routes>
     <Footer />
   </Router>,
-
-  document.getElementById("root")
 );
+
+

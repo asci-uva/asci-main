@@ -26,6 +26,11 @@ function Navigation() {
                   Question
                 </NavLink>
               </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/ta">
+                  Ta
+                </NavLink>
+              </li>
             </ul>
           </div>
         </div>
