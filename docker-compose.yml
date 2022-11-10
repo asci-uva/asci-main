@@ -23,7 +23,7 @@ services:
     ports:
       - 8081:80
     volumes:
-      - ./backend/src/:/opt/src/
+      - ./backend/src/asci/:/opt/src/asci/
       - ./backend/www/:/var/www/html/
       - ./backend/log/:/opt/log/
     depends_on:
