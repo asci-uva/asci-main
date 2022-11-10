@@ -16,7 +16,7 @@ CREATE TYPE "session"."status" AS ENUM (
 
 CREATE TABLE "oh"."users" (
   "id" SERIAL PRIMARY KEY,
-  "computing_id" CHAR(6),
+  "computing_id" VARCHAR(7),
   "first_name" TEXT,
   "last_name" TEXT,
   "preferred_name" TEXT,
