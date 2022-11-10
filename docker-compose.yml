@@ -2,19 +2,22 @@ version: '3.3'
 
 services:
   db:
-    image: postgres
+    build:
+      dockerfile: ./backend/docker/postgres/Dockerfile
     container_name: 'ASCI_db'
     restart: on-failure
     ports:
       - 15432:5432
     environment:
-      POSTGRES_PASSWORD: samplePassword
+      POSTGRES_USER: asci
+      POSTGRES_PASSWORD: asci
+      POSTGRES_DB: asci
     volumes:
       - ./db:/var/lib/postgresql/data
   php:
     build:
       context: ./backend/
-      dockerfile: ./docker/Dockerfile
+      dockerfile: ./docker/php/Dockerfile
 
     container_name: 'ASCI_php'
     ports:

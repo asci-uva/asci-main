@@ -11,7 +11,6 @@ COPY ./php-ini/php.prod.ini /usr/local/etc/php/php.ini
 
 WORKDIR /opt/src/
 COPY ../src/composer.json composer.json
-COPY ../src/composer.lock composer.lock
 RUN composer install \
     --no-interaction \
     --no-plugins \
