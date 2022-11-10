@@ -104,6 +104,15 @@ class Server {
         // Decide what to do based on the command given to the server
         switch ($this->input["command"]) {
 
+            case "hello": 
+                $this->setResponse([
+                    "response"=>"Hi, this works",
+                    "second"=>[
+                        "more", "json"
+                    ]
+                ]);
+                break;
+
             default:
                 $this->setResponse(["response" => "Hello world!"]);
 
