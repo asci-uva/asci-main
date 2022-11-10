@@ -17,10 +17,9 @@ function Question() {
     navigate('/studentwaitingroom');
   };
   
-  return (
+  return ( 
     <div className="question">
       <h2>What would you like to inquire?</h2>
-      <form>
       <form onSubmit={handleSubmit}>
         <label>Title:</label>
         <input
