@@ -5,3 +5,8 @@ export { default as Question } from "./Question";
 export { default as Login } from "./Login";
 export { default as Ta } from "./Ta";
 export { default as StudentWaitingRoom } from "./StudentWaitingRoom";
+export { default as HandleStudent } from "./HandleStudent";
+export { default as Meeting } from "./Meeting";
+export { default as TASurvey } from "./TASurvey";
+
+

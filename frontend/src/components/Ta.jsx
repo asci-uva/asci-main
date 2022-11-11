@@ -1,16 +1,30 @@
 import React from "react";
 import {useState} from "react";
+import { useNavigate } from 'react-router-dom';
 
 function Ta() {
   const [title, setTitle] = useState("question overview");
   const [details, setDetails] = useState("question details");
   const [purpose, setPurpose] = useState("");
-  
+  const navigate = useNavigate();
+
+  const handleLogout = (e) =>{
+    e.preventDefault();
+    navigate('/home');
+  }
+
+  const handleWork = (e) =>{
+    e.preventDefault();
+    navigate('/handlestudent');
+  }
+
+
   return (
     <div className="question">
       <div>
         <h2>You are now logged in as CSTA</h2>
-        <button>logoff</button>
+        
+        <button onClick={handleWork}>Start working</button>
       </div>
       <form>
         <label>My working hour starts at</label>
@@ -40,8 +54,8 @@ function Ta() {
           <option value="Assignment">Assignment</option>
           <option value="Logistic">Logistic</option>
         </select>
-        <button>Start working</button>
       </form>
+      <button onClick={handleLogout}>logoff</button>
     </div>
   );
 }

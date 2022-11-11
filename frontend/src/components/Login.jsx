@@ -35,6 +35,7 @@ function Login() {
     }).then((response) => response.json())
       .then((data) => {
         console.log(data);
+        navigate('/Ta');
         // if (data.login==="yes") {
         //   navigate('/question');
         // } else {
@@ -44,7 +45,7 @@ function Login() {
       })
       .catch((error) => {
         console.error('Error:', error);
-        navigate('/studentwaitingroom');
+        
       });
   }
   
