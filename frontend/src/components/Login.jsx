@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 //https://www.youtube.com/watch?v=IkMND33x0qQ
-function Contact() {
+function Login() {
   const [username, setUsername] = useState("user name");
   const [passwd, setPasswd] = useState("password");
   const [purpose, setPurpose] = useState("unknown");
@@ -40,9 +40,11 @@ function Contact() {
         // } else {
         //   console.log('Failure or error');
         // }
+        //navigate('/studentwaitingroom');
       })
       .catch((error) => {
         console.error('Error:', error);
+        navigate('/studentwaitingroom');
       });
   }
   
@@ -83,4 +85,4 @@ function Contact() {
   );
 }
 
-export default Contact;
+export default Login;

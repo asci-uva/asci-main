@@ -8,7 +8,7 @@ import {
   Footer,
   Home,
   Question,
-  Contact,
+  Login,
   Ta,
   StudentWaitingRoom
 } from "./components";
@@ -19,7 +19,7 @@ root.render(
     <Navigation />
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/contact" element={<Contact />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/question" element={<Question />} />
       <Route path="/ta" element={<Ta />} />
       <Route path="/studentwaitingroom" element={<StudentWaitingRoom />} />
