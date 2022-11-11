@@ -10,9 +10,9 @@ function Contact() {
   const [purpose, setPurpose] = useState("unknown");
   const navigate = useNavigate();
   let userInfo = {
-    name : username,
-    password: passwd,
-    category : purpose
+    command : username,
+    // password: passwd,
+    // category : purpose
   }
   let json0;
 
@@ -21,7 +21,7 @@ function Contact() {
   // note: not tested yet
   
   // #TODO: add a server address?
-  let url0 = ''; 
+  let url0 = 'http://localhost:8081/'; 
   //server address
   //data will be a json file
   const sendJson = (json0, url0) =>{
@@ -29,15 +29,17 @@ function Contact() {
       method: 'POST', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
       },
       body: json0,
     }).then((response) => response.json())
       .then((data) => {
-        if (data.login==="yes") {
-          navigate('/question');
-        } else {
-          console.log('Failure or error');
-        }
+        console.log(data);
+        // if (data.login==="yes") {
+        //   navigate('/question');
+        // } else {
+        //   console.log('Failure or error');
+        // }
       })
       .catch((error) => {
         console.error('Error:', error);
