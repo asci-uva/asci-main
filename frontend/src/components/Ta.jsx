@@ -6,16 +6,45 @@ function Ta() {
   const [title, setTitle] = useState("question overview");
   const [details, setDetails] = useState("question details");
   const [purpose, setPurpose] = useState("");
+  const [workingState, setWorkingState] = useState(true);
   const navigate = useNavigate();
+  let taInfo = {
+    command: workingState
+  }
+
+  let json0;
+  let url0 = 'http://localhost:8081/'; 
+  const sendJson = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json0,
+    }).then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        if(workingState === true){
+          navigate('/handlestudent');
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        
+      });
+  }
 
   const handleLogout = (e) =>{
     e.preventDefault();
-    navigate('/home');
+    navigate('/login');
   }
 
   const handleWork = (e) =>{
     e.preventDefault();
-    navigate('/handlestudent');
+    setWorkingState(e.target.value)
+    json0 = JSON.stringify(taInfo);
+    console.log(json0);
+    sendJson(json0,url0);
   }
 
 

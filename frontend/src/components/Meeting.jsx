@@ -3,9 +3,9 @@ import {useState} from "react";
 import { useNavigate } from 'react-router-dom';
 
 function Meeting() {
-  const [title, setTitle] = useState("");
-  const [details, setDetails] = useState("question details");
-  const [purpose, setPurpose] = useState("");
+  // const [title, setTitle] = useState("");
+  // const [details, setDetails] = useState("question details");
+  // const [purpose, setPurpose] = useState("");
   const navigate = useNavigate();
 
   const handleLogout = (e) =>{

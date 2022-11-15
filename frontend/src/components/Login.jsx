@@ -29,19 +29,12 @@ function Login() {
       method: 'POST', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
       },
       body: json0,
     }).then((response) => response.json())
       .then((data) => {
         console.log(data);
         navigate('/Ta');
-        // if (data.login==="yes") {
-        //   navigate('/question');
-        // } else {
-        //   console.log('Failure or error');
-        // }
-        //navigate('/studentwaitingroom');
       })
       .catch((error) => {
         console.error('Error:', error);
