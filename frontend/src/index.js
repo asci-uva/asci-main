@@ -21,7 +21,7 @@ root.render(
   <Router>
     <Navigation />
     <Routes>
-      <Route path="/home" element={<Home />} />
+      <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/question" element={<Question />} />
       <Route path="/ta" element={<Ta />} />

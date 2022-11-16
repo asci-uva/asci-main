@@ -12,18 +12,13 @@ function Navigation() {
           <div>
             <ul className="navbar-nav ml-auto">
               <li className="nav-item">
-                <NavLink className="nav-link" to="/home">
+                <NavLink className="nav-link" to="/">
                   Home
                 </NavLink>
               </li>
               <li className="nav-item">
                 <NavLink className="nav-link" to="/login">
                   Login
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/question">
-                  Question
                 </NavLink>
               </li>
             </ul>

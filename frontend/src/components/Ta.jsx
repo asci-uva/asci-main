@@ -1,5 +1,5 @@
 import React from "react";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 
 function Ta() {
@@ -8,6 +8,18 @@ function Ta() {
   const [purpose, setPurpose] = useState("");
   const [workingState, setWorkingState] = useState(true);
   const navigate = useNavigate();
+  
+
+  useEffect(() => {
+    if (localStorage.getItem("authorizedTA") === null || localStorage.getItem('authorizedTA')==="false") {
+      navigate('/login');
+    } else {
+    }
+  }, []);
+
+
+
+
   let taInfo = {
     command: workingState
   }
@@ -36,6 +48,7 @@ function Ta() {
 
   const handleLogout = (e) =>{
     e.preventDefault();
+    localStorage.clear();
     navigate('/login');
   }
 

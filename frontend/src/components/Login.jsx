@@ -1,6 +1,6 @@
 import React from "react";
-import {useState} from "react";
-import { useNavigate } from 'react-router-dom';
+import {useState, useEffect} from "react";
+import { useNavigate} from 'react-router-dom';
 
 
 //https://www.youtube.com/watch?v=IkMND33x0qQ
@@ -9,6 +9,15 @@ function Login() {
   const [passwd, setPasswd] = useState("password");
   const [purpose, setPurpose] = useState("unknown");
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (localStorage.getItem('loggedin')==="true") {
+      navigate(-1);
+    } else {
+    }
+  }, []);
+  
+  
   let userInfo = {
     command : username,
     // password: passwd,
@@ -34,6 +43,8 @@ function Login() {
     }).then((response) => response.json())
       .then((data) => {
         console.log(data);
+        localStorage.setItem('authorizedTA', 'true');
+        localStorage.setItem('loggedin', 'true');
         navigate('/Ta');
       })
       .catch((error) => {
