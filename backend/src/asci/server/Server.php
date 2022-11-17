@@ -113,6 +113,8 @@ class Server {
                 ]);
                 break;
             case "login":
+                $executor = new \asci\server\ServerExecutor();
+                $executor->printResult();
                 $result = $this->loginHandler();
                 $this->setResponse([
                     array("userid"=> "jre3wjh",

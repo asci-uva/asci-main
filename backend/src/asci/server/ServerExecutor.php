@@ -11,7 +11,37 @@
  *            the Regents of the University of California
  */
 namespace asci\server;
+//todo: we might want seperate classes around certain functionality 
+use asci\server\database\DatabaseConnector as DatabaseConnector;
 
 class ServerExecutor{
+    /**
+     * Database connector object
+     *
+     * @var \asci\server\database\DatabaseConnector object.
+     */
+    private $db = null;
+    public $result = null;
+
+    public function __construct(){
+//        $this->db = new \asci\server\database\DatabaseConnector();
+        $this->db = new DatabaseConnector();
+        $query = "select * from oh.users;";
+        $this->result = $this->db->query($query, array());
+        $this->printResult();
+    }
+   public function printResult(){
+       $this->lookup = array();
+//       while ($res = $this->db->fetchRow($this->result)) {
+//           $lookup[$res["id"]] = $res["value"];
+//       }
+       echo "<pre>";
+       echo "THIS WORKS\n";
+//        echo $this->lookup;
+       echo print_r($this->db->fetchRow($this->result));
+        echo "AFTER RESULT\n";
+        echo "</pre>";
+   }
+    
     
 }
