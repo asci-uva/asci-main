@@ -16,7 +16,7 @@ CREATE TABLE "users" (
   "first_name" TEXT,
   "last_name" TEXT,
   "preferred_name" TEXT,
-  "password" CHAR(64)
+  "password" VARCHAR(255)
 );
 
 CREATE TABLE "user_courses" (
@@ -34,7 +34,7 @@ CREATE TABLE "courses" (
   "semester" TEXT
 );
 
-CREATE TABLE "users" (
+CREATE TABLE "session_users" (
   "session_id" INT PRIMARY KEY,
   "user_id" INT,
   "role" roles
@@ -45,7 +45,7 @@ CREATE TABLE "sessions" (
   "course_id" INT,
   "issue" TEXT,
   "issue_subject" TEXT,
-  "status" session.status,
+  "status" status,
   "entry_time" timestamp,
   "fulfillment_time" timestamp,
   "exit_time" timestamp
@@ -67,7 +67,7 @@ CREATE TABLE "logs" (
 
 ALTER TABLE "user_courses" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "users" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "session_users" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
 ALTER TABLE "feedback" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
@@ -77,6 +77,6 @@ ALTER TABLE "sessions" ADD FOREIGN KEY ("course_id") REFERENCES "courses" ("id")
 
 ALTER TABLE "logs" ADD FOREIGN KEY ("session_id") REFERENCES "sessions" ("id");
 
-ALTER TABLE "users" ADD FOREIGN KEY ("session_id") REFERENCES "sessions" ("id");
+ALTER TABLE "session_users" ADD FOREIGN KEY ("session_id") REFERENCES "sessions" ("id");
 
 ALTER TABLE "feedback" ADD FOREIGN KEY ("session_id") REFERENCES "sessions" ("id");
