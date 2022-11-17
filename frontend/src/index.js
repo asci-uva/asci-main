@@ -20,6 +20,7 @@ root.render(
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/contact" element={<Contact />} />
+      {/* Contact here is represented as login on the website */}
       <Route path="/question" element={<Question />} />
       <Route path="/ta" element={<Ta />} />
       <Route path="/studentwaitingroom" element={<StudentWaitingRoom />} />

@@ -112,6 +112,14 @@ class Server {
                     ]
                 ]);
                 break;
+            case "login":
+                $result = $this->loginHandler();
+                $this->setResponse([
+                    array("userid"=> "jre3wjh",
+                      "login"=> $result,
+                      "error"=>"none")
+                ]);
+                break;
 
             default:
                 $this->setResponse(["response" => "Hello world!"]);
@@ -132,6 +140,17 @@ class Server {
     public function getResponseHeaders() {
 
         return $this->responseHeaders;
+    }
+
+    /**
+     * Handle User Login
+     *
+     * Sets current session for new
+     *
+     * @return bool login success
+     */
+    public function loginHandler(){
+        return false;
     }
 
     /**

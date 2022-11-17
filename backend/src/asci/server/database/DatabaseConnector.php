@@ -103,7 +103,6 @@ class DatabaseConnector {
      * @throws \asci\exceptions\ASCIDatabaseException
      */
     public function __construct() {
-
         // Read the configuration file
         $host = Config::$DATABASE["host"];
         $port = Config::$DATABASE["port"];
