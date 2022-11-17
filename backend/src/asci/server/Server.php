@@ -20,7 +20,8 @@ namespace asci\server;
  *
  * @author Robbie Hott
  */
-class Server {
+class Server
+{
 
     /**
      * Input parameters from the querier
@@ -34,9 +35,9 @@ class Server {
      *
      * @var array Response headers
      */
-    private $responseHeaders = array (
-            "Content-Type: application/json"
-        );
+    private $responseHeaders = array(
+        "Content-Type: application/json"
+    );
 
     /**
      * Response Array
@@ -62,13 +63,14 @@ class Server {
      *
      * @param array $input Input to the server
      */
-    public function __construct($input) {
+    public function __construct($input)
+    {
         global $log;
 
         $this->input = $input;
         $this->timing = $_SERVER["REQUEST_TIME_FLOAT"];
         $this->response = array(
-                "request" => $this->input,
+            "request" => $this->input,
         );
 
 
@@ -84,7 +86,8 @@ class Server {
      *
      * @param array $response The response as an assocative array
      */
-    private function setResponse($response) {
+    private function setResponse($response)
+    {
         $this->response = array_merge($this->response, $response);
     }
 
@@ -93,24 +96,33 @@ class Server {
      *
      * Starts the server
      */
-    public function run() {
+    public function run()
+    {
 
         $this->logger->addDebug("Server starting to handle request", array("input" => $this->input));
 
         if ($this->input == null || empty($this->input)) {
-            return; 
+            return;
         }
 
         // Decide what to do based on the command given to the server
         switch ($this->input["command"]) {
 
-            case "hello": 
+            case "hello":
                 $this->setResponse([
-                    "response"=>"Hi, this works",
-                    "second"=>[
-                        "more", "json"
+                    "response" => "Hi, this works",
+                    "second" => [
+                        "more",
+                        "json"
                     ]
                 ]);
+                break;
+
+            case "register":
+                $user = new User();
+                $this->setResponse(
+                    $user->register($this->input["userid"],$this->input["password"])
+                );
                 break;
 
             default:
@@ -129,7 +141,8 @@ class Server {
      *
      * @return array headers for output
      */
-    public function getResponseHeaders() {
+    public function getResponseHeaders()
+    {
 
         return $this->responseHeaders;
     }
@@ -145,8 +158,9 @@ class Server {
      *
      * @return string server response appropriately encoded
      */
-    public function getResponse() {
-        $this->response["timing"] =round((microtime(true) - $this->timing) * 1000, 2);
+    public function getResponse()
+    {
+        $this->response["timing"] = round((microtime(true) - $this->timing) * 1000, 2);
         return json_encode($this->response, JSON_PRETTY_PRINT);
     }
 }
