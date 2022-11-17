@@ -1,20 +1,16 @@
-CREATE SCHEMA "oh";
-
-CREATE SCHEMA "session";
-
-CREATE TYPE "oh"."roles" AS ENUM (
+CREATE TYPE "roles" AS ENUM (
   'student',
   'instructor',
   'ta'
 );
 
-CREATE TYPE "session"."status" AS ENUM (
+CREATE TYPE "status" AS ENUM (
   'waiting',
   'in_progress',
   'completed'
 );
 
-CREATE TABLE "oh"."users" (
+CREATE TABLE "users" (
   "id" SERIAL PRIMARY KEY,
   "computing_id" VARCHAR(7),
   "first_name" TEXT,
@@ -23,14 +19,14 @@ CREATE TABLE "oh"."users" (
   "password" CHAR(64)
 );
 
-CREATE TABLE "oh"."user_courses" (
+CREATE TABLE "user_courses" (
   "user_id" INT,
   "course_id" INT,
-  "role" oh.roles,
+  "role" roles,
   PRIMARY KEY ("user_id", "course_id")
 );
 
-CREATE TABLE "oh"."courses" (
+CREATE TABLE "courses" (
   "id" INT PRIMARY KEY,
   "mnemonic" VARCHAR(10),
   "number" SMALLINT,
@@ -38,13 +34,13 @@ CREATE TABLE "oh"."courses" (
   "semester" TEXT
 );
 
-CREATE TABLE "session"."users" (
+CREATE TABLE "users" (
   "session_id" INT PRIMARY KEY,
   "user_id" INT,
-  "role" oh.roles
+  "role" roles
 );
 
-CREATE TABLE "session"."sessions" (
+CREATE TABLE "sessions" (
   "id" INT PRIMARY KEY,
   "course_id" INT,
   "issue" TEXT,
@@ -55,32 +51,32 @@ CREATE TABLE "session"."sessions" (
   "exit_time" timestamp
 );
 
-CREATE TABLE "session"."feedback" (
+CREATE TABLE "feedback" (
   "session_id" INT PRIMARY KEY,
   "user_id" INT,
-  "role" oh.roles,
+  "role" roles,
   "rating" INT,
   "feedback" TEXT
 );
 
-CREATE TABLE "session"."logs" (
+CREATE TABLE "logs" (
   "session_id" INT PRIMARY KEY,
   "action" TEXT,
   "timestamp" timestamp DEFAULT (now())
 );
 
-ALTER TABLE "oh"."user_courses" ADD FOREIGN KEY ("user_id") REFERENCES "oh"."users" ("id");
+ALTER TABLE "user_courses" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "session"."users" ADD FOREIGN KEY ("user_id") REFERENCES "oh"."users" ("id");
+ALTER TABLE "users" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "session"."feedback" ADD FOREIGN KEY ("user_id") REFERENCES "oh"."users" ("id");
+ALTER TABLE "feedback" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "oh"."user_courses" ADD FOREIGN KEY ("course_id") REFERENCES "oh"."courses" ("id");
+ALTER TABLE "user_courses" ADD FOREIGN KEY ("course_id") REFERENCES "courses" ("id");
 
-ALTER TABLE "session"."sessions" ADD FOREIGN KEY ("course_id") REFERENCES "oh"."courses" ("id");
+ALTER TABLE "sessions" ADD FOREIGN KEY ("course_id") REFERENCES "courses" ("id");
 
-ALTER TABLE "session"."logs" ADD FOREIGN KEY ("session_id") REFERENCES "session"."sessions" ("id");
+ALTER TABLE "logs" ADD FOREIGN KEY ("session_id") REFERENCES "sessions" ("id");
 
-ALTER TABLE "session"."users" ADD FOREIGN KEY ("session_id") REFERENCES "session"."sessions" ("id");
+ALTER TABLE "users" ADD FOREIGN KEY ("session_id") REFERENCES "sessions" ("id");
 
-ALTER TABLE "session"."feedback" ADD FOREIGN KEY ("session_id") REFERENCES "session"."sessions" ("id");
+ALTER TABLE "feedback" ADD FOREIGN KEY ("session_id") REFERENCES "sessions" ("id");
