@@ -1,5 +1,5 @@
 import React from "react";
-import {useState} from "react";
+import {useState,useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 
 function TASurvey() {
@@ -8,6 +8,15 @@ function TASurvey() {
   const [likeAi, setPurpose] = useState("");
   const [surveyState, setSurveyState] = useState(true)
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem("authorizedTA") === null || localStorage.getItem('authorizedTA')==="false") {
+      navigate('/login');
+    } else if (localStorage.getItem("been2meeting") === "true"){
+    } else{
+      navigate(-1);
+    }
+  }, []);
 
   let surveyInfo = {
     command: surveyState
@@ -28,6 +37,8 @@ function TASurvey() {
         //retrieve the student assigned
         console.log(data);
         if(surveyState === true){
+          localStorage.removeItem("been2meeting");
+          localStorage.removeItem("been2handle");
           navigate('/handlestudent');
         }
       })

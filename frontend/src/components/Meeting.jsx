@@ -1,5 +1,5 @@
 import React from "react";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 
 function Meeting() {
@@ -12,6 +12,16 @@ function Meeting() {
   let endMeeting = {
     command: meetingState
   }
+
+  useEffect(() => {
+    if (localStorage.getItem("authorizedTA") === null || localStorage.getItem('authorizedTA')==="false") {
+      navigate('/login');
+    } else if (localStorage.getItem("been2handle") === "true" && localStorage.getItem("been2meeting") === null){
+      
+    } else{
+      navigate(-1);
+    }
+  }, []);
 
   let json0;
   let url0 = 'http://localhost:8081/';
@@ -27,6 +37,7 @@ function Meeting() {
       .then((data) => {
         console.log(data);
         if(meetingState === false){
+          localStorage.setItem('been2meeting', 'true');
           navigate('/TAsurvey');
         }
       })
@@ -38,7 +49,8 @@ function Meeting() {
 
   const handleLogout = (e) =>{
     e.preventDefault();
-    navigate('/home');
+    localStorage.clear();
+    navigate('/');
   }
 
   const handleSurvey = (e) =>{

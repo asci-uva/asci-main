@@ -13,7 +13,7 @@ function JoinQueue() {
 
   const handleLogout = (e) =>{
     e.preventDefault();
-    navigate('/home');
+    navigate('/');
   }
 
   const handleQuestion = (e) =>{

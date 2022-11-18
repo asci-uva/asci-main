@@ -9,6 +9,15 @@ function HandleStudent() {
   const [assign, setAssign] = useState(true)
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (localStorage.getItem("authorizedTA") === null || localStorage.getItem('authorizedTA')==="false") {
+      navigate('/login');
+    } else if (localStorage.getItem("been2handle") === null && localStorage.getItem("been2ta") === "true"){
+    } else{
+      navigate(-1);
+    }
+  }, []);
+
   let assignStudent = {
     command: assign
   }
@@ -28,6 +37,7 @@ function HandleStudent() {
         //retrieve the student assigned
         console.log(data);
         if(assign === true){
+          localStorage.setItem('been2handle', 'true');
           navigate('/meeting');
         }
       })
@@ -39,7 +49,8 @@ function HandleStudent() {
 
   const handleLogout = (e) =>{
     e.preventDefault();
-    navigate('/home');
+    localStorage.clear();
+    navigate('/');
   }
 
   const handleAssign = (e) =>{

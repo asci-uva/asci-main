@@ -13,11 +13,12 @@ function Ta() {
   useEffect(() => {
     if (localStorage.getItem("authorizedTA") === null || localStorage.getItem('authorizedTA')==="false") {
       navigate('/login');
-    } else {
+    } else if (localStorage.getItem("been2ta") === "true" ){
+      navigate(-1);
+    }
+    else {
     }
   }, []);
-
-
 
 
   let taInfo = {
@@ -37,6 +38,7 @@ function Ta() {
       .then((data) => {
         console.log(data);
         if(workingState === true){
+          localStorage.setItem('been2ta', 'true');
           navigate('/handlestudent');
         }
       })
