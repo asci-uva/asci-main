@@ -8,4 +8,6 @@ export { default as StudentWaitingRoom } from "./StudentWaitingRoom";
 export { default as HandleStudent } from "./HandleStudent";
 export { default as Meeting } from "./Meeting";
 export { default as TASurvey } from "./TASurvey";
-
+export { default as JoinQueue } from "./JoinQueue";
+export { default as StudentMeeting } from "./StudentMeeting";
+export { default as StudentSurvey } from "./StudentSurvey";
