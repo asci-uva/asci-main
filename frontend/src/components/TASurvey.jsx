@@ -6,11 +6,41 @@ function TASurvey() {
   const [glitches, setTitle] = useState("");
   const [likeWeb, setDetails] = useState("");
   const [likeAi, setPurpose] = useState("");
+  const [surveyState, setSurveyState] = useState(true)
   const navigate = useNavigate();
 
+  let surveyInfo = {
+    command: surveyState
+  }
+
+  let json0;
+  let url0 = 'http://localhost:8081/';
+
+  const sendJson = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json0,
+    }).then((response) => response.json())
+      .then((data) => {
+        //retrieve the student assigned
+        console.log(data);
+        if(surveyState === true){
+          navigate('/handlestudent');
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  }
   const handleRating = (e) =>{
     e.preventDefault();
-    navigate('/handlestudent');
+    setSurveyState(e.target.value)
+    json0 = JSON.stringify(surveyInfo);
+    console.log(json0);
+    sendJson(json0,url0);
   }
 
   return (

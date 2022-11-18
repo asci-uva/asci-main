@@ -6,7 +6,35 @@ function Meeting() {
   // const [title, setTitle] = useState("");
   // const [details, setDetails] = useState("question details");
   // const [purpose, setPurpose] = useState("");
+  const [meetingState, setMeetingState] = useState(false);
   const navigate = useNavigate();
+
+  let endMeeting = {
+    command: meetingState
+  }
+
+  let json0;
+  let url0 = 'http://localhost:8081/';
+
+  const sendJson = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json0,
+    }).then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        if(meetingState === false){
+          navigate('/TAsurvey');
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  }
+  
 
   const handleLogout = (e) =>{
     e.preventDefault();
@@ -16,7 +44,11 @@ function Meeting() {
   const handleSurvey = (e) =>{
     let confirmaion = prompt("Please type CONFIRM to end meeting");
     if (confirmaion === "CONFIRM") {
-      navigate('/TASurvey');
+      //navigate('/TASurvey');
+      setMeetingState(e.target.value)
+      json0 = JSON.stringify(endMeeting);
+      console.log(json0);
+      sendJson(json0,url0);
     } else {
       document.getElementById("warning").innerHTML ="To end meeting you have to type CONFIRM";
     }
