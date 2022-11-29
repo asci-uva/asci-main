@@ -36,7 +36,7 @@ root.render(
       <Route path="/StudentMeeting" element={<StudentMeeting />} />
       <Route path="/StudentSurvey" element={<StudentSurvey />} />
     </Routes>
-    <Footer />
+    <Footer/>
   </Router>,
 );
 

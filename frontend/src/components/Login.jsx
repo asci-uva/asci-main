@@ -12,6 +12,8 @@ function Login() {
   
   useEffect(() => {
     if (localStorage.getItem('loggedin')==="true") {
+      //right now redirect to the previous page
+      //TODO: should it be redirecting to Ta/Student page
       navigate(-1);
     } else {
     }
