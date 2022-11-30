@@ -65,6 +65,19 @@ CREATE TABLE "logs" (
   "timestamp" timestamp DEFAULT (now())
 );
 
+CREATE TABLE "queue" (
+  "user_id" INT,
+  "course_id" INT,
+  "issue" TEXT,
+  "issue_subject" TEXT,
+  "status" status,
+  "entry_time" timestamp
+);
+
+ALTER TABLE "queue" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
+ALTER TABLE "queue" ADD FOREIGN KEY ("course_id") REFERENCES "courses" ("id");
+
 ALTER TABLE "user_courses" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
 ALTER TABLE "session_users" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
