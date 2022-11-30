@@ -40,6 +40,13 @@ class Config {
      *
      * @var array database connection information
      */
+//    public static $DATABASE = array (
+//        "database" => "db_name",
+//        "host" => "hostname.com",
+//        "port" => 5432,
+//        "user" => "user_id",
+//        "password" => "full_password"
+//    );
     public static $DATABASE = array (
         "database" => "asci",
         "host" => "ASCI_db",

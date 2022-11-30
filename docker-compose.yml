@@ -28,3 +28,11 @@ services:
       - ./backend/log/:/opt/log/
     depends_on:
       - db
+  react:
+    build:
+      context: ./frontend/
+      dockerfile: ./docker/Dockerfile
+
+    container_name: 'ASCI_react'
+    ports:
+      - 3000:3000

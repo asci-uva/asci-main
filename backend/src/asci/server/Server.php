@@ -117,6 +117,16 @@ class Server
                     ]
                 ]);
                 break;
+            case "login":
+                $executor = new \asci\server\ServerExecutor();
+                $executor->printResult();
+                $result = $this->loginHandler();
+                $this->setResponse([
+                    array("userid"=> "jre3wjh",
+                      "login"=> $result,
+                      "error"=>"none")
+                ]);
+                break;
 
             case "register":
                 $user = new User();
@@ -145,6 +155,17 @@ class Server
     {
 
         return $this->responseHeaders;
+    }
+
+    /**
+     * Handle User Login
+     *
+     * Sets current session for new
+     *
+     * @return bool login success
+     */
+    public function loginHandler(){
+        return false;
     }
 
     /**
