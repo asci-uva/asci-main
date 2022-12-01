@@ -37,6 +37,7 @@ CREATE TABLE "courses" (
 CREATE TABLE "session_users" (
   "session_id" INT PRIMARY KEY,
   "user_id" INT,
+  "queue_id" INT,
   "role" roles
 );
 
@@ -66,13 +67,17 @@ CREATE TABLE "logs" (
 );
 
 CREATE TABLE "queue" (
+  "id" INT PRIMARY KEY,
   "user_id" INT,
   "course_id" INT,
   "issue" TEXT,
   "issue_subject" TEXT,
   "status" status,
-  "entry_time" timestamp
+  "entry_time" timestamp,
+  "exit_time" timestamp
 );
+
+ALTER TABLE "session_users" ADD FOREIGN KEY ("queue_id") REFERENCES "queue" ("id");
 
 ALTER TABLE "queue" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
