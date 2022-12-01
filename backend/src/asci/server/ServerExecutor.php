@@ -28,20 +28,25 @@ class ServerExecutor{
         $this->db = new \asci\server\database\DBUser();
     }
 
-   public function printResult(){
-       $this->lookup = array();
-//       while ($res = $this->db->fetchRow($this->result)) {
-//           $lookup[$res["id"]] = $res["value"];
-//       }
-       echo "<pre>";
-       echo "THIS WORKS\n";
-//        echo $this->lookup;
-       echo print_r($this->db->fetchRow($this->result));
-        echo "AFTER RESULT\n";
-        echo "</pre>";
-   }
+    /**
+     * Handle User Login
+     *
+     * Sets current session for new
+     *
+     * @return bool login success
+     */
+    public function loginHandler($data){
+        return false;
+    }
 
-   public function createUser($data) {
+    /**
+     * Creates a new User in the database
+     *
+     * Generates password, new User then stores into DB
+     *
+     * @return bool login success
+     */
+    public function createUser($data) {
     $data["password"] = password_hash($data["password"], PASSWORD_DEFAULT);
     $user = new \asci\data\User($data);
     return $this->db->createUser($user);

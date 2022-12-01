@@ -107,8 +107,8 @@ class Server
 
         // Decide what to do based on the command given to the server
         switch ($this->input["command"]) {
-
             case "hello":
+                print_r($this->input);
                 $this->setResponse([
                     "response" => "Hi, this works",
                     "second" => [
@@ -119,7 +119,6 @@ class Server
                 break;
             case "login":
                 $executor = new \asci\server\ServerExecutor();
-                $executor->printResult();
                 $result = $this->loginHandler();
                 $this->setResponse([
                     array("userid"=> "jre3wjh",
@@ -181,16 +180,6 @@ class Server
         return $this->responseHeaders;
     }
 
-    /**
-     * Handle User Login
-     *
-     * Sets current session for new
-     *
-     * @return bool login success
-     */
-    public function loginHandler(){
-        return false;
-    }
 
     /**
      * Get Return Statement
