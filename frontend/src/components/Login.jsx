@@ -1,14 +1,25 @@
 import React from "react";
-import {useState} from "react";
-import { useNavigate } from 'react-router-dom';
+import {useState, useEffect} from "react";
+import { useNavigate} from 'react-router-dom';
 
 
 //https://www.youtube.com/watch?v=IkMND33x0qQ
-function Contact() {
+function Login() {
   const [username, setUsername] = useState("user name");
   const [passwd, setPasswd] = useState("password");
   const [purpose, setPurpose] = useState("unknown");
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (localStorage.getItem('loggedin')==="true") {
+      //right now redirect to the previous page
+      //TODO: should it be redirecting to Ta/Student page
+      navigate(-1);
+    } else {
+    }
+  }, []);
+  
+  
   let userInfo = {
     command : username,
     // password: passwd,
@@ -29,20 +40,18 @@ function Contact() {
       method: 'POST', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
       },
       body: json0,
     }).then((response) => response.json())
       .then((data) => {
         console.log(data);
-        // if (data.login==="yes") {
-        //   navigate('/question');
-        // } else {
-        //   console.log('Failure or error');
-        // }
+        localStorage.setItem('authorizedTA', 'true');
+        localStorage.setItem('loggedin', 'true');
+        navigate('/Ta');
       })
       .catch((error) => {
         console.error('Error:', error);
+        
       });
   }
   
@@ -83,4 +92,4 @@ function Contact() {
   );
 }
 
-export default Contact;
+export default Login;

@@ -8,9 +8,15 @@ import {
   Footer,
   Home,
   Question,
-  Contact,
+  Login,
   Ta,
-  StudentWaitingRoom
+  StudentWaitingRoom,
+  HandleStudent,
+  Meeting,
+  TASurvey,
+  StudentMeeting,
+  JoinQueue,
+  StudentSurvey,
 } from "./components";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -19,13 +25,18 @@ root.render(
     <Navigation />
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/contact" element={<Contact />} />
-      {/* Contact here is represented as login on the website */}
+      <Route path="/login" element={<Login />} />
       <Route path="/question" element={<Question />} />
       <Route path="/ta" element={<Ta />} />
       <Route path="/studentwaitingroom" element={<StudentWaitingRoom />} />
+      <Route path="/handlestudent" element={<HandleStudent />} />
+      <Route path="/meeting" element={<Meeting />} />
+      <Route path="/TASurvey" element={<TASurvey />} />
+      <Route path="/JoinQueue" element={<JoinQueue />} />
+      <Route path="/StudentMeeting" element={<StudentMeeting />} />
+      <Route path="/StudentSurvey" element={<StudentSurvey />} />
     </Routes>
-    <Footer />
+    <Footer/>
   </Router>,
 );
 

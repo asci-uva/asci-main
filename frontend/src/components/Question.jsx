@@ -12,14 +12,12 @@ function Question() {
 
   const handleSubmit = event => {
     event.preventDefault();
-
-    // 👇️ redirect to /contacts
     navigate('/studentwaitingroom');
   };
   
   return ( 
     <div className="question">
-      <h2>What would you like to inquire?</h2>
+      <h2>What is your question today?</h2>
       <form onSubmit={handleSubmit}>
         <label>Title:</label>
         <input
