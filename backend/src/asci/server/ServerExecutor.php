@@ -25,11 +25,9 @@ class ServerExecutor{
 
     public function __construct(){
 //        $this->db = new \asci\server\database\DatabaseConnector();
-        $this->db = new DatabaseConnector();
-        $query = "select * from oh.users;";
-        $this->result = $this->db->query($query, array());
-        $this->printResult();
+        $this->db = new \asci\server\database\DBUser();
     }
+
    public function printResult(){
        $this->lookup = array();
 //       while ($res = $this->db->fetchRow($this->result)) {
@@ -42,6 +40,23 @@ class ServerExecutor{
         echo "AFTER RESULT\n";
         echo "</pre>";
    }
-    
-    
+
+   public function createUser($data) {
+    $data["password"] = password_hash($data["password"], PASSWORD_DEFAULT);
+    $user = new \asci\data\User($data);
+    return $this->db->createUser($user);
+   }
+
+   public function createCourse($data) {
+    $course = new \asci\data\Course($data);
+    return $this->db->createCourse($course);
+   }
+
+   public function joinQueue($userid, $courseid, $issue, $issue_subject) {
+    return $this->db->joinQueue($userid, $courseid, $issue, $issue_subject);
+   }
+
+   public function leaveQueue($userid) {
+    return $this->db->leaveQueue($userid);
+   }
 }

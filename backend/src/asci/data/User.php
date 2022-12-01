@@ -37,25 +37,25 @@ class User implements \Serializable {
 
     public function fromArray($data) {
         $this->computing_id = $data["computing_id"] ?? null;
-        $this->first_name = $data["first_name"] ?? null;
-        $this->last_name = $data["last_name"] ?? null;
-        $this->preferred_name = $data["preferred_name"] ?? null;
+        $this->first_name = $data["fname"] ?? null;
+        $this->last_name = $data["lname"] ?? null;
+        $this->preferred_name = $data["pname"] ?? null;
         $this->hashedPassword = $data["hashedPassword"] ?? null;
         return true;
     }
 
-    public function toArray($data) {
+    public function toArray() {
         return array(
             "computing_id" => $this->computing_id,
-            "first_name" => $this->first_name,
-            "last_name" => $this->last_name,
-            "preferred_name" => $this->preferred_name,
+            "fname" => $this->first_name,
+            "lname" => $this->last_name,
+            "pname" => $this->preferred_name,
             "hashedPassword" => $this->hashedPassword
         );
     }
 
-    public function toJSON($shorten = true) {
-        return json_encode($this->toArray($shorten), JSON_PRETTY_PRINT);
+    public function toJSON() {
+        return json_encode($this->toArray(), JSON_PRETTY_PRINT);
     }
 
     public function fromJSON($json) {

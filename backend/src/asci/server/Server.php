@@ -128,6 +128,30 @@ class Server
                 ]);
                 break;
 
+            case "createUser":
+                $executor = new \asci\server\ServerExecutor();
+                $result = $executor->createUser($this->input);
+                $this->setResponse(["results" => $result]);
+                break;
+            
+            case "createCourse":
+                $executor = new \asci\server\ServerExecutor();
+                $result = $executor->createCourse($this->input);
+                $this->setResponse(["results" => $result]);
+                break;
+
+            case "joinQueue":
+                $executor = new \asci\server\ServerExecutor();
+                $result = $executor->joinQueue($this->input['userid'], $this->input['courseid'], $this->input['issue'], $this->input['issue_subject']);
+                $this->setResponse(["results" => $result]);
+                break;
+
+            case "leaveQueue":
+                $executor = new \asci\server\ServerExecutor();
+                $result = $executor->leaveQueue($this->input['userid']);
+                $this->setResponse(["results" => $result]);
+                break;
+
             case "register":
                 $user = new User();
                 $this->setResponse(

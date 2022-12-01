@@ -4,7 +4,7 @@ CREATE TYPE "roles" AS ENUM (
   'ta'
 );
 
-CREATE TYPE "status" AS ENUM (
+CREATE TYPE "status_type" AS ENUM (
   'waiting',
   'in_progress',
   'completed'
@@ -13,9 +13,9 @@ CREATE TYPE "status" AS ENUM (
 CREATE TABLE "users" (
   "id" SERIAL PRIMARY KEY,
   "computing_id" VARCHAR(7),
-  "first_name" TEXT,
-  "last_name" TEXT,
-  "preferred_name" TEXT,
+  "fname" TEXT,
+  "lname" TEXT,
+  "pname" TEXT,
   "password" VARCHAR(255)
 );
 
@@ -27,7 +27,7 @@ CREATE TABLE "user_courses" (
 );
 
 CREATE TABLE "courses" (
-  "id" INT PRIMARY KEY,
+  "id" SERIAL PRIMARY KEY,
   "mnemonic" VARCHAR(10),
   "number" SMALLINT,
   "name" TEXT,
@@ -35,25 +35,25 @@ CREATE TABLE "courses" (
 );
 
 CREATE TABLE "session_users" (
-  "session_id" INT PRIMARY KEY,
+  "session_id" SERIAL PRIMARY KEY,
   "user_id" INT,
   "queue_id" INT,
   "role" roles
 );
 
 CREATE TABLE "sessions" (
-  "id" INT PRIMARY KEY,
+  "id" SERIAL PRIMARY KEY,
   "course_id" INT,
   "issue" TEXT,
   "issue_subject" TEXT,
-  "status" status,
-  "entry_time" timestamp,
+  "status" status_type,
+  "entry_time" timestamp DEFAULT (now()),
   "fulfillment_time" timestamp,
   "exit_time" timestamp
 );
 
 CREATE TABLE "feedback" (
-  "session_id" INT PRIMARY KEY,
+  "session_id" SERIAL PRIMARY KEY,
   "user_id" INT,
   "role" roles,
   "rating" INT,
@@ -61,19 +61,19 @@ CREATE TABLE "feedback" (
 );
 
 CREATE TABLE "logs" (
-  "session_id" INT PRIMARY KEY,
+  "session_id" SERIAL PRIMARY KEY,
   "action" TEXT,
   "timestamp" timestamp DEFAULT (now())
 );
 
 CREATE TABLE "queue" (
-  "id" INT PRIMARY KEY,
+  "id" SERIAL PRIMARY KEY,
   "user_id" INT,
   "course_id" INT,
   "issue" TEXT,
   "issue_subject" TEXT,
-  "status" status,
-  "entry_time" timestamp,
+  "status" status_type,
+  "entry_time" timestamp DEFAULT (now()),
   "exit_time" timestamp
 );
 

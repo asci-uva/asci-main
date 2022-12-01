@@ -54,4 +54,23 @@ class DBUser
             return false;
         }
     }
+
+    public function createCourse($course)
+    {
+        $result = $this->sql->insertCourse(
+            $course->getMnemonic(),                
+            $course->getNumber(),
+            $course->getName(),
+            $course->getSemester()
+        );
+        return $result;
+    }
+
+    public function joinQueue($userid, $courseid, $issue, $issue_subject) {
+        return $this->sql->joinQueue($userid, $courseid, $issue, $issue_subject);
+    }
+
+    public function leaveQueue($userid) {
+        return $this->sql->leaveQueue($userid);
+    }
 }
