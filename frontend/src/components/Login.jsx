@@ -6,8 +6,8 @@ import { useNavigate} from 'react-router-dom';
 //https://www.youtube.com/watch?v=IkMND33x0qQ
 function Login() {
   const [username, setUsername] = useState("user name");
-  const [passwd, setPasswd] = useState("password");
-  const [purpose, setPurpose] = useState("unknown");
+  const [password, setPassword] = useState("password");
+  const [command, setCommand] = useState("unknown");
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -21,9 +21,9 @@ function Login() {
   
   
   let userInfo = {
-    command : username,
-    // password: passwd,
-    // category : purpose
+    user : username,
+    password: password,
+    command : command
   }
   let json0;
 
@@ -32,7 +32,7 @@ function Login() {
   // note: not tested yet
   
   // #TODO: add a server address?
-  let url0 = 'http://localhost:8081/'; 
+  let url0 = 'http://localhost:8081/index.php'; 
   //server address
   //data will be a json file
   const sendJson = (json0, url0) =>{
@@ -76,15 +76,15 @@ function Login() {
         <label>Password</label>
         <textarea
           required
-          value = {passwd}
-          onChange={(e)=>setPasswd(e.target.value)}>
+          value = {password}
+          onChange={(e)=>setPassword(e.target.value)}>
         </textarea>
         <label>New to the queue?</label>
         <select 
-          value={purpose}
-          onChange={(e)=>setPurpose(e.target.value)}>
+          value={command}
+          onChange={(e)=>setCommand(e.target.value)}>
           <option value="Assignment">Register</option>
-          <option value="Logistic">Login</option>
+          <option value="Login">Login</option>
         </select>
         <button>Submit</button>
       </form>

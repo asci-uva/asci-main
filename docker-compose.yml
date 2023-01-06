@@ -33,6 +33,9 @@ services:
       context: ./frontend/
       dockerfile: ./docker/Dockerfile
 
+    environment:
+       - CHOKIDAR_USEPOLLING=true
+
     container_name: 'ASCI_react'
     ports:
       - 3000:3000
