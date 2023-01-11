@@ -32,9 +32,9 @@ root.render(
       <Route path="/handlestudent" element={<HandleStudent />} />
       <Route path="/meeting" element={<Meeting />} />
       <Route path="/TASurvey" element={<TASurvey />} />
-      <Route path="/JoinQueue" element={<JoinQueue />} />
-      <Route path="/StudentMeeting" element={<StudentMeeting />} />
-      <Route path="/StudentSurvey" element={<StudentSurvey />} />
+      <Route path="/joinQueue" element={<JoinQueue />} />
+      <Route path="/studentMeeting" element={<StudentMeeting />} />
+      <Route path="/studentSurvey" element={<StudentSurvey />} />
     </Routes>
     <Footer/>
   </Router>,

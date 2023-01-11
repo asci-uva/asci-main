@@ -24,8 +24,9 @@ class ServerExecutor{
     public $result = null;
 
     public function __construct(){
+        //TODO: Put these back in and get database connection working
 //        $this->db = new \asci\server\database\DatabaseConnector();
-        $this->db = new \asci\server\database\DBUser();
+        //$this->db = new \asci\server\database\DBUser();
     }
 
     /**

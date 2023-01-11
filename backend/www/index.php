@@ -27,7 +27,7 @@ include ("/opt/src/vendor/autoload.php");
  */
 if (\asci\Config::$DEBUG_MODE) {
     error_reporting(E_ALL);
-    ini_set('display_errors', 1);
+    ini_set('display_errors', 0);
 }
 
 
@@ -63,6 +63,7 @@ try {
     // Return the content type and output of the server
     foreach ($server->getResponseHeaders() as $header)
         header($header);
+    
     echo $server->getResponse();
 } catch (Exception $e) {
     header("Content-Type: application/json");

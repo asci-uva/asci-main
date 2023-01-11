@@ -30,7 +30,7 @@ class Config {
     /**
      * @var boolean Whether the system is in DEBUG mode
      */
-    public static $DEBUG_MODE = true;
+    public static $DEBUG_MODE = false;
 
 
     /**
@@ -49,10 +49,10 @@ class Config {
 //    );
     public static $DATABASE = array (
         "database" => "asci",
-        "host" => "ASCI_db",
+        "host" => "db",
         "port" => 5432,
-        "user" => "asci",
-        "password" => "asci"
+        "user" => "postgres",
+        "password" => "samplePassword"
     );
 
     /**

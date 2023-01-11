@@ -14,7 +14,7 @@ function Login() {
     if (localStorage.getItem('loggedin')==="true") {
       //right now redirect to the previous page
       //TODO: should it be redirecting to Ta/Student page
-      navigate(-1);
+      //navigate(-1);
     } else {
     }
   }, []);
@@ -23,9 +23,7 @@ function Login() {
   let userInfo = {
     user : username,
     password: password,
-    command : command
   }
-  let json0;
 
   // we assume a success response aka 'data' value will look like this
   // {"username":"aa0123", "login":"yes"}
@@ -42,24 +40,38 @@ function Login() {
         'Content-Type': 'application/json',
       },
       body: json0,
-    }).then((response) => response.json())
-      .then((data) => {
+    }).then(response => response.json())
+    .then(data => {
         console.log(data);
-        localStorage.setItem('authorizedTA', 'true');
-        localStorage.setItem('loggedin', 'true');
-        navigate('/Ta');
+        let success = data.success;
+        if(success == "true"){
+          console.log("LOGIN Successful");
+          localStorage.setItem('loggedin', 'true');
+          navigate('/joinQueue');
+        }
+        else{
+          console.log("LOGIN Failed");
+          navigate('/login');
+        }
+        //localStorage.setItem('authorizedTA', 'true');
+        //localStorage.setItem('loggedin', 'true');
+        //navigate('/Login');
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.log("There was an error:", error);
         
       });
   }
   
   const handleSubmit = (e) =>{
     e.preventDefault();
-    json0 = JSON.stringify(userInfo);
-    console.log(json0);
-    sendJson(json0,url0);
+    let json = {};
+    json.command = "login";
+    json.userInfo = userInfo;
+
+    let jsonString = JSON.stringify(json);
+    console.log(jsonString);
+    sendJson(jsonString,url0);
   }
 
   return (

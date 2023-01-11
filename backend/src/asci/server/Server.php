@@ -118,12 +118,13 @@ class Server
                 ]);
                 break;
             case "login":
-                $executor = new \asci\server\ServerExecutor();
-                $result = $this->loginHandler();
+                //$executor = new \asci\server\ServerExecutor();
+                //$result = $this->loginHandler();
+                
                 $this->setResponse([
-                    array("userid"=> "jre3wjh",
-                      "login"=> $result,
-                      "error"=>"none")
+                    "userid" => "mrf8t",
+                    "role" => "student",
+                    "success" => "true"
                 ]);
                 break;
 
