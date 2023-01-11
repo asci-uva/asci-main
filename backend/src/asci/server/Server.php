@@ -124,6 +124,18 @@ class Server
                 $this->setResponse([
                     "userid" => "mrf8t",
                     "role" => "student",
+                    "token" => "xkd143fghfldkahde",
+                    "success" => "true"
+                ]);
+                break;
+
+            //given userId and token, see if this user is already logged in
+            //send failure notice if not and frontend will kick to login screen
+            case "sessionPing":
+                $this->setResponse([
+                    "userid" => "mrf8t",
+                    "role" => "student",
+                    "token" => "xkd143fghfldkahde",
                     "success" => "true"
                 ]);
                 break;

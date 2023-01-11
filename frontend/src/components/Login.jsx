@@ -11,11 +11,12 @@ function Login() {
   const navigate = useNavigate();
   
   useEffect(() => {
-    if (localStorage.getItem('loggedin')==="true") {
-      //right now redirect to the previous page
-      //TODO: should it be redirecting to Ta/Student page
-      //navigate(-1);
-    } else {
+
+    console.log("Checking if token exists");
+    //If token is set, kick to home screen to check validity of session
+    if (localStorage.getItem('asci-token') !== null) {
+      console.log("it does, sending to home page");
+      navigate("/");
     }
   }, []);
   
@@ -25,11 +26,7 @@ function Login() {
     password: password,
   }
 
-  // we assume a success response aka 'data' value will look like this
-  // {"username":"aa0123", "login":"yes"}
-  // note: not tested yet
-  
-  // #TODO: add a server address?
+   
   let url0 = 'http://localhost:8081/index.php'; 
   //server address
   //data will be a json file
@@ -45,20 +42,23 @@ function Login() {
         console.log(data);
         let success = data.success;
         if(success == "true"){
+
           console.log("LOGIN Successful");
-          localStorage.setItem('loggedin', 'true');
-          navigate('/joinQueue');
+          localStorage.setItem('asci-user', data.userid);
+          localStorage.setItem('asci-token', data.token);
+          localStorage.setItem('asci-role', data.role);
+          navigate('/');
         }
         else{
           console.log("LOGIN Failed");
           navigate('/login');
         }
-        //localStorage.setItem('authorizedTA', 'true');
-        //localStorage.setItem('loggedin', 'true');
+
         //navigate('/Login');
       })
       .catch((error) => {
         console.log("There was an error:", error);
+        navigate("/error");
         
       });
   }
@@ -82,22 +82,15 @@ function Login() {
         <input
           type = "text"
           required
-          value = {username}
+          value = {"user"}
           onChange={(e)=>setUsername(e.target.value)}
         />
         <label>Password</label>
         <textarea
           required
-          value = {password}
+          value = {"pass"}
           onChange={(e)=>setPassword(e.target.value)}>
         </textarea>
-        <label>New to the queue?</label>
-        <select 
-          value={command}
-          onChange={(e)=>setCommand(e.target.value)}>
-          <option value="Assignment">Register</option>
-          <option value="Login">Login</option>
-        </select>
         <button>Submit</button>
       </form>
     </div>

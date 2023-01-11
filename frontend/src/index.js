@@ -17,6 +17,7 @@ import {
   StudentMeeting,
   JoinQueue,
   StudentSurvey,
+  Error,
 } from "./components";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -35,6 +36,7 @@ root.render(
       <Route path="/joinQueue" element={<JoinQueue />} />
       <Route path="/studentMeeting" element={<StudentMeeting />} />
       <Route path="/studentSurvey" element={<StudentSurvey />} />
+      <Route path="/error" element={<Error />} />
     </Routes>
     <Footer/>
   </Router>,
