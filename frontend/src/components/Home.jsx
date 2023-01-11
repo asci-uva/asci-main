@@ -12,13 +12,14 @@ import { useNavigate} from 'react-router-dom';
 		//
 
 function Home() {
+
 	const navigate = useNavigate();
 	let url = 'http://localhost:8081/index.php'; 
   
   	//This function runs on page load!
   	useEffect(() => {
 
-    	console.log("Checking if token exists");
+    	console.log("HOME: Checking if token exists");
 	    //If token is set, kick to home screen to check validity of session
 	    if (localStorage.getItem('asci-token') !== null) {
 	      //user seems to be logged in. Let's check if session is valid
@@ -31,17 +32,10 @@ function Home() {
           request.command = "sessionPing";
           request.user = user;
           request.token = token;
-          let result = checkSession(request, url);
-          if(result === true){
-          	//send to proper page
-          	console.log("Session updated. Sending to question page");
-          	navigate("/question")
-          }
-          else{
-          	//kick to login page
-          	console.log("Session not active, kicking to login page");
-          	//navigate("/login");
-          }
+          checkSession(request, url); 
+	    }
+	    else{
+	    	navigate("/login");
 	    }
   	}, []);
 
@@ -55,26 +49,50 @@ function Home() {
 	      body: JSON.stringify(json0),
 	    }).then(response => response.json())
 	    .then(data => {
-	        console.log(data);
+	        console.log("Data is: ", data);
 	        let success = data.success;
-	        if(success == "true"){
+	        if(success === "true"){
 
-	          console.log("Session is active");
+	          console.log("HOME: Session is active");
 	          localStorage.setItem('asci-user', data.userid);
 	          localStorage.setItem('asci-token', data.token);
 	          localStorage.setItem('asci-role', data.role);
-	          return true;
+	          routeToCorrectPage(true, data.state);
 	        }
 	        else{
-	          console.log("Session not active");
-	          return false;
+	          console.log("HOME: Session not active");
+	          routeToCorrectPage(false);
 	        }
 	      })
 	      .catch((error) => {
-	        console.log("There was an error:", error);
+	        console.log("HOME: There was an error:", error);
 	        navigate("/error");
 	        
 	      });
+	}
+
+	//This function routes them to correct page
+  	function routeToCorrectPage(result, state){
+	    if(result == true){
+          	//send to proper page
+          	console.log("HOME: Session updated. Sending to correct next page");
+          	console.log("HOME: State is ", state);
+          	//based on queuestate, send to correct page
+          	if(state === "none"){
+          		navigate("/joinQueue");
+          	}
+          	else if(state === "onQueue"){
+          		navigate("/studentWaitingRoom");
+          	}
+          	else if(state === "beingHelped"){
+          		navigate("/studentMeeting");
+          	}
+          }
+          else{
+          	//kick to login page
+          	console.log("HOME: Session not active, kicking to login page");
+          	navigate("/login");
+          }
 	}
 
 
