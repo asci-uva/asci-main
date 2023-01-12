@@ -9,4 +9,9 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 COPY ./php-ini/php.prod.ini /usr/local/etc/php/php.ini
 
+WORKDIR /opt/src/
+COPY ../src/composer.json composer.json
+RUN composer install --no-interaction --no-plugins --no-scripts --no-dev --prefer-dist
+RUN composer dump-autoload --optimize --apcu --no-dev
+
 RUN service apache2 restart

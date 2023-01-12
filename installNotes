@@ -52,3 +52,14 @@ asci
 
 #test table:
 select username from test_table where username='mrf8t';
+
+#Getting the backend to work
+might need to remove the db folder before building
+docker compose build --no-cache
+
+#Getting the frontend to work
+cd into /frontend
+`npm install`
+`npm start`
+`docker compose build`
+`docker compose up`

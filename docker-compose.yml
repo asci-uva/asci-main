@@ -2,26 +2,40 @@ version: '3.3'
 
 services:
   db:
-    image: postgres
+    build:
+      dockerfile: ./backend/docker/postgres/Dockerfile
     container_name: 'ASCI_db'
     restart: on-failure
     ports:
       - 15432:5432
     environment:
-      POSTGRES_PASSWORD: samplePassword
+      POSTGRES_USER: asci
+      POSTGRES_PASSWORD: asci
+      POSTGRES_DB: asci
     volumes:
       - ./db:/var/lib/postgresql/data
   php:
     build:
       context: ./backend/
-      dockerfile: ./docker/Dockerfile
+      dockerfile: ./docker/php/Dockerfile
 
     container_name: 'ASCI_php'
     ports:
       - 8081:80
     volumes:
-      - ./backend/src/:/opt/src/
+      - ./backend/src/asci/:/opt/src/asci/
       - ./backend/www/:/var/www/html/
       - ./backend/log/:/opt/log/
     depends_on:
       - db
+  react:
+    build:
+      context: ./frontend/
+      dockerfile: ./docker/Dockerfile
+
+    environment:
+       - CHOKIDAR_USEPOLLING=true
+
+    container_name: 'ASCI_react'
+    ports:
+      - 3000:3000

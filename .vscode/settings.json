@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 15432,
+            "askForPassword": true,
+            "driver": "PostgreSQL",
+            "name": "ascidb",
+            "database": "asci",
+            "username": "asci"
+        }
+    ]
+}

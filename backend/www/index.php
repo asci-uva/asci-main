@@ -1,4 +1,11 @@
 <?php
+header("Access-Control-Allow-Origin: http://localhost:3000");
+//header("Access-Control-Allow-Credentials ")
+
+
+header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Origin, Content-Type, Accept");
 /**
  * Landing page of internal server api
  *
@@ -20,7 +27,7 @@ include ("/opt/src/vendor/autoload.php");
  */
 if (\asci\Config::$DEBUG_MODE) {
     error_reporting(E_ALL);
-    ini_set('display_errors', 1);
+    ini_set('display_errors', 0);
 }
 
 
@@ -56,6 +63,7 @@ try {
     // Return the content type and output of the server
     foreach ($server->getResponseHeaders() as $header)
         header($header);
+    
     echo $server->getResponse();
 } catch (Exception $e) {
     header("Content-Type: application/json");

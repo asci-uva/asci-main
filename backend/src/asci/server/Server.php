@@ -20,7 +20,8 @@ namespace asci\server;
  *
  * @author Robbie Hott
  */
-class Server {
+class Server
+{
 
     /**
      * Input parameters from the querier
@@ -34,9 +35,9 @@ class Server {
      *
      * @var array Response headers
      */
-    private $responseHeaders = array (
-            "Content-Type: application/json"
-        );
+    private $responseHeaders = array(
+        "Content-Type: application/json"
+    );
 
     /**
      * Response Array
@@ -62,13 +63,14 @@ class Server {
      *
      * @param array $input Input to the server
      */
-    public function __construct($input) {
+    public function __construct($input)
+    {
         global $log;
 
         $this->input = $input;
         $this->timing = $_SERVER["REQUEST_TIME_FLOAT"];
         $this->response = array(
-                "request" => $this->input,
+            "request" => $this->input,
         );
 
 
@@ -84,7 +86,8 @@ class Server {
      *
      * @param array $response The response as an assocative array
      */
-    private function setResponse($response) {
+    private function setResponse($response)
+    {
         $this->response = array_merge($this->response, $response);
     }
 
@@ -93,24 +96,181 @@ class Server {
      *
      * Starts the server
      */
-    public function run() {
+    public function run()
+    {
 
         $this->logger->addDebug("Server starting to handle request", array("input" => $this->input));
 
         if ($this->input == null || empty($this->input)) {
-            return; 
+            return;
         }
 
         // Decide what to do based on the command given to the server
         switch ($this->input["command"]) {
-
-            case "hello": 
+            case "hello":
+                print_r($this->input);
                 $this->setResponse([
-                    "response"=>"Hi, this works",
-                    "second"=>[
-                        "more", "json"
+                    "response" => "Hi, this works",
+                    "second" => [
+                        "more",
+                        "json"
                     ]
                 ]);
+                break;
+            case "login":
+                //$executor = new \asci\server\ServerExecutor();
+                //$result = $this->loginHandler();
+                
+                $this->setResponse([
+                    "userid" => "mrf8t",
+                    "role" => "student",
+                    "token" => "xkd143fghfldkahde",
+                    "success" => "true"
+                ]);
+                break;
+
+            //given userId and token, see if this user is already logged in
+            //send failure notice if not and frontend will kick to login screen
+            //state (for students) is "none", "onQueue", or "beingHelped" (Might change)
+            case "sessionPing":
+                $this->setResponse([
+                    "userid" => "mrf8t",
+                    "role" => "student",
+                    "token" => "xkd143fghfldkahde",
+                    "success" => "true",
+                    "state" => "none"
+                ]);
+                break;
+
+            //given a userId and token, make sure user is logged in and 
+            //return list of active course objects that student is enrolled in.
+            case "getCourses":
+
+                $this->setResponse(
+                [
+                    "userid" => "mrf8t",
+                    "role" => "student",
+                    "token" => "xkd143fghfldkahde",
+                    "success" => "true",
+                    "courses" => 
+                        [
+                            "1" => "CS2130 - Sp23",
+                            "2" => "CS3100 - Sp23"
+                        ]
+                ]
+                );
+                break;
+
+            //given student id, token, courseid. Join the queue
+            //if student, token pair is valid and they can
+            case "joinQueue":
+                /*$executor = new \asci\server\ServerExecutor();
+                $result = $executor->joinQueue($this->input['userid'], $this->input['courseid'], $this->input['issue'], $this->input['issue_subject']);
+                $this->setResponse(["results" => $result]);*/
+                $this->setResponse(
+                [
+                    "userid" => "mrf8t",
+                    "role" => "student",
+                    "token" => "xkd143fghfldkahde",
+                    "loggedIn" => "true",
+                    "success" => "true"
+                ]
+                );
+                break;
+
+            //Updates student with queue status (still on queue)
+            //what position, etc. 
+            case "getQueueStatus":
+                //random position so we can changes being polled
+                $position = rand(1,10);
+                $readyToHelp = "false";
+                if ($position < 2)
+                    $readyToHelp = "true";
+
+                $this->setResponse(
+                [
+                    "userid" => "mrf8t",
+                    "role" => "student",
+                    "token" => "xkd143fghfldkahde",
+                    "success" => "true",
+                    "onQueue" => "true",
+                    "courseName" => "CS2130 - Sp23",
+                    "queuePosition" => $position,
+                    "beingHelped" => $readyToHelp,
+                    "loggedIn" => "true"
+                ]
+                );
+                break;
+
+            case "leaveQueue":
+                //$executor = new \asci\server\ServerExecutor();
+                //$result = $executor->leaveQueue($this->input['userid']);
+                //$this->setResponse(["results" => $result]);
+
+                $this->setResponse(
+                [
+                    "userid" => "mrf8t",
+                    "role" => "student",
+                    "token" => "xkd143fghfldkahde",
+                    "success" => "true"
+                ]
+                );
+                break;
+
+            case "meetingInfo":
+                //$executor = new \asci\server\ServerExecutor();
+                //$result = $executor->leaveQueue($this->input['userid']);
+                //$this->setResponse(["results" => $result]);
+
+                $this->setResponse(
+                [
+                    "userid" => "mrf8t",
+                    "role" => "student",
+                    "token" => "xkd143fghfldkahde",
+                    "success" => "true",
+                    "taId" => "abc3ta",
+                    "taName" => "Abby Teachalots"
+                ]
+                );
+                break;
+
+            case "leaveMeeting":
+
+                $this->setResponse(
+                [
+                    "userid" => "mrf8t",
+                    "role" => "student",
+                    "token" => "xkd143fghfldkahde",
+                    "success" => "true",
+                ]
+                );
+                break;
+
+
+
+
+            /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/
+
+            case "createUser":
+                $executor = new \asci\server\ServerExecutor();
+                $result = $executor->createUser($this->input);
+                $this->setResponse(["results" => $result]);
+                break;
+            
+            case "createCourse":
+                $executor = new \asci\server\ServerExecutor();
+                $result = $executor->createCourse($this->input);
+                $this->setResponse(["results" => $result]);
+                break;
+
+            
+
+            
+            case "register":
+                $user = new User();
+                $this->setResponse(
+                    $user->register($this->input["userid"],$this->input["password"])
+                );
                 break;
 
             default:
@@ -129,10 +289,12 @@ class Server {
      *
      * @return array headers for output
      */
-    public function getResponseHeaders() {
+    public function getResponseHeaders()
+    {
 
         return $this->responseHeaders;
     }
+
 
     /**
      * Get Return Statement
@@ -145,8 +307,9 @@ class Server {
      *
      * @return string server response appropriately encoded
      */
-    public function getResponse() {
-        $this->response["timing"] =round((microtime(true) - $this->timing) * 1000, 2);
+    public function getResponse()
+    {
+        $this->response["timing"] = round((microtime(true) - $this->timing) * 1000, 2);
         return json_encode($this->response, JSON_PRETTY_PRINT);
     }
 }
