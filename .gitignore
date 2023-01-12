@@ -3,3 +3,4 @@ db
 backend/log
 backend/src/vendor
 backend/src/composer.lock
+.DS_Store
