@@ -12,5 +12,7 @@ RUN npm install
 COPY . .
 # Expose the port on which the app will be running (3000 is the default that `serve` uses)
 EXPOSE 3000
+# Build the app
+RUN npm run build
 # Start the app
 CMD ["npm", "run", "start"]

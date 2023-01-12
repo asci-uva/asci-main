@@ -35,6 +35,8 @@ services:
 
     environment:
        - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./frontend/build/:/app/build/
 
     container_name: 'ASCI_react'
     ports:
