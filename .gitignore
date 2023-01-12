@@ -10,3 +10,5 @@ backend/src/composer.lock
 frontend/node_modules
 node_modules
 build
+
+.DS_Store
