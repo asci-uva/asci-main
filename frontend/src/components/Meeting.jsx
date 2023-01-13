@@ -3,81 +3,143 @@ import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 
 function Meeting() {
-  // const [title, setTitle] = useState("");
-  // const [details, setDetails] = useState("question details");
-  // const [purpose, setPurpose] = useState("");
-  const [meetingState, setMeetingState] = useState(false);
+
+  let user = "";
+  let token = "";
+
+  let url = 'http://localhost:8081/';
+  
+  const [studentName, setStudentName] = useState("LOADING");
+  const [studentId, setStudentId] = useState("LOADING");
+
   const navigate = useNavigate();
 
-  let endMeeting = {
-    command: meetingState
-  }
-
   useEffect(() => {
-    if (localStorage.getItem("authorizedTA") === null || localStorage.getItem('authorizedTA')==="false") {
-      navigate('/login');
-    } else if (localStorage.getItem("been2handle") === "true" && localStorage.getItem("been2meeting") === null){
-      
-    } else{
-      navigate(-1);
+
+    //Ping the server and make sure this person is actually a TA
+    console.log("TA: Checking if token exists");
+    
+    //If token is set, kick to home screen to check validity of session
+    if (localStorage.getItem('asci-token') !== null) {
+      //try to get the user's courses
+      user = localStorage.getItem('asci-user');
+      token = localStorage.getItem('asci-token');
+
+      //Get meeting details
+      let request = {};
+      request.command = "getTAMeetingDetails";
+      request.user = user;
+      request.token = token;
+      getMeetingDetails(request, url);  
     }
+    else{
+      navigate("/login");
+    }
+    
+    
   }, []);
 
-  let json0;
-  let url0 = 'http://localhost:8081/';
-
-  const sendJson = (json0, url0) =>{
+  //This gets the meeting details and displays them
+  const getMeetingDetails = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',
       },
-      body: json0,
-    }).then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        if(meetingState === false){
-          localStorage.setItem('been2meeting', 'true');
-          navigate('/TAsurvey');
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+        console.log("Data is: ", data);
+
+        /* If user is somehow not logged in, kick to home page */
+        if(data.loggedIn !== "true"){
+          navigate("/");
+        }
+        else{
+
+          //if request succeeded
+          if(data.success === "true"){
+            setStudentName(data.student.name);
+            setStudentId(data.student.userid);
+          }
+          else{
+            console.log("Meeting details failed for some reason");
+            navigate("/");
+          }
         }
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.log("HOME: There was an error:", error);
+        navigate("/error");
+        
       });
-  }
-  
 
+    }
+
+  
   const handleLogout = (e) =>{
     e.preventDefault();
     localStorage.clear();
     navigate('/');
   }
 
-  const handleSurvey = (e) =>{
-    let confirmaion = prompt("Please type CONFIRM to end meeting");
-    if (confirmaion === "CONFIRM") {
-      //navigate('/TASurvey');
-      setMeetingState(e.target.value)
-      json0 = JSON.stringify(endMeeting);
-      console.log(json0);
-      sendJson(json0,url0);
-    } else {
-      document.getElementById("warning").innerHTML ="To end meeting you have to type CONFIRM";
-    }
+  const handleEndMeeting = (e) =>{
+    //End the meeting
+    let request = {};
+    request.command = "TAEndMeeting";
+    request.user = user;
+    request.token = token;
+    endMeeting(request, url);
   }
+
+  //ends meeting
+  const endMeeting = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+        console.log("Data is: ", data);
+
+        /* If user is somehow not logged in, kick to home page */
+        if(data.loggedIn !== "true"){
+          navigate("/");
+        }
+        else{
+
+          //if request succeeded
+          if(data.success === "true"){
+            navigate("/handleStudent");
+          }
+          else{
+            console.log("Ending meeting failed");
+            navigate("/");
+          }
+        }
+      })
+      .catch((error) => {
+        console.log("HOME: There was an error:", error);
+        navigate("/error");
+        
+      });
+
+    }
 
   return (
     <div className="question">
       <div>
-        <h2>Emergency meeting</h2>
+        <h2>You are in a meeting with a student</h2>
         <button onClick={handleLogout}>logoff</button>
       </div>
       <div>
-        <h5>This is a place holder for student information for the TAs</h5>
+        <h5>You are currently helping {studentName} ({studentId})</h5>
       </div>
       <div>
-        <h2>End meeting</h2>
-        <button onClick={handleSurvey}>End meeting</button>
+        <h2>Ready to end the meeting?</h2>
+        <button onClick={handleEndMeeting}>End meeting</button>
         <p style={{   
           fontSize: '15px',
           padding: '20px',

@@ -82,15 +82,16 @@ function Login() {
         <input
           type = "text"
           required
-          value = {"user"}
+          value = {username}
           onChange={(e)=>setUsername(e.target.value)}
         />
         <label>Password</label>
-        <textarea
+        <input
+          type = "text"
           required
-          value = {"pass"}
-          onChange={(e)=>setPassword(e.target.value)}>
-        </textarea>
+          value = {password}
+          onChange={(e)=>setPassword(e.target.value)}
+          />
         <button>Submit</button>
       </form>
     </div>

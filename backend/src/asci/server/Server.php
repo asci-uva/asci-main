@@ -123,7 +123,7 @@ class Server
                 
                 $this->setResponse([
                     "userid" => "mrf8t",
-                    "role" => "student",
+                    "role" => "ta",
                     "token" => "xkd143fghfldkahde",
                     "success" => "true"
                 ]);
@@ -132,10 +132,11 @@ class Server
             //given userId and token, see if this user is already logged in
             //send failure notice if not and frontend will kick to login screen
             //state (for students) is "none", "onQueue", or "beingHelped" (Might change)
+            //state for students can be none, working, helping (a student)
             case "sessionPing":
                 $this->setResponse([
                     "userid" => "mrf8t",
-                    "role" => "student",
+                    "role" => "ta",
                     "token" => "xkd143fghfldkahde",
                     "success" => "true",
                     "state" => "none"
@@ -149,7 +150,7 @@ class Server
                 $this->setResponse(
                 [
                     "userid" => "mrf8t",
-                    "role" => "student",
+                    "role" => "ta",
                     "token" => "xkd143fghfldkahde",
                     "success" => "true",
                     "courses" => 
@@ -247,6 +248,83 @@ class Server
                 break;
 
 
+            /* TA SPECIFIC FUNCTIONS ARE BELOW THIS POINT */
+
+            //given a userId and token, make sure user is logged in and 
+            //user is TA and return list of active course objects that TA is teaching.
+            case "getTACourses":
+
+                $this->setResponse(
+                [
+                    "userid" => "mrf8t",
+                    "role" => "ta",
+                    "token" => "xkd143fghfldkahde",
+                    "success" => "true",
+                    "courses" => 
+                        [
+                            "1" => "CS2130 - Sp23",
+                            "2" => "CS3100 - Sp23"
+                        ]
+                ]
+                );
+                break;
+
+            case "startTAWorking":
+
+                $this->setResponse(
+                [
+                    "userid" => "mrf8t",
+                    "role" => "student",
+                    "token" => "xkd143fghfldkahde",
+                    "loggedIn" => "true",
+                    "success" => "true"
+                ]
+                );
+                break;
+
+            case "getStudentForTA":
+
+                $this->setResponse(
+                [
+                    "userid" => "mrf8t",
+                    "role" => "student",
+                    "token" => "xkd143fghfldkahde",
+                    "loggedIn" => "true",
+                    "success" => "true",
+                ]
+                );
+                break;
+
+
+            case "getTAMeetingDetails":
+
+                $this->setResponse(
+                [
+                    "userid" => "mrf8t",
+                    "role" => "student",
+                    "token" => "xkd143fghfldkahde",
+                    "loggedIn" => "true",
+                    "success" => "true",
+                    "student" => [
+                        "userid" => "std1ab",
+                        "name" => "Stevie Learns"
+                    ]
+                ]
+                );
+                break;
+                
+            case "TAEndMeeting":
+
+                $this->setResponse(
+                [
+                    "userid" => "mrf8t",
+                    "role" => "student",
+                    "token" => "xkd143fghfldkahde",
+                    "loggedIn" => "true",
+                    "success" => "true",
+                ]
+                );
+                break;
 
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/

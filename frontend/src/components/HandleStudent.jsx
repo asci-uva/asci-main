@@ -6,46 +6,37 @@ function HandleStudent() {
   // const [title, setTitle] = useState("question overview");
   // const [details, setDetails] = useState("question details");
   // const [purpose, setPurpose] = useState("");
+  let user = "";
+  let token = "";
+
+  let url = 'http://localhost:8081/';
+
   const [assign, setAssign] = useState(true)
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (localStorage.getItem("authorizedTA") === null || localStorage.getItem('authorizedTA')==="false") {
-      navigate('/login');
-    } else if (localStorage.getItem("been2handle") === null && localStorage.getItem("been2ta") === "true"){
-    } else{
-      navigate(-1);
+    //Ping the server and make sure this person is actually a TA
+    console.log("TA: Checking if token exists");
+    
+    //If token is set, kick to home screen to check validity of session
+    if (localStorage.getItem('asci-token') !== null) {
+      //try to get the user's courses
+      user = localStorage.getItem('asci-user');
+      token = localStorage.getItem('asci-token');
     }
+    else{
+      navigate("/login");
+    }
+    
+    
   }, []);
 
   let assignStudent = {
     command: assign
   }
 
-  let json0;
-  let url0 = 'http://localhost:8081/';
 
-  const sendJson = (json0, url0) =>{
-    fetch(url0, {
-      method: 'POST', // or 'PUT'
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json0,
-    }).then((response) => response.json())
-      .then((data) => {
-        //retrieve the student assigned
-        console.log(data);
-        if(assign === true){
-          localStorage.setItem('been2handle', 'true');
-          navigate('/meeting');
-        }
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
-  }
-  
+
 
   const handleLogout = (e) =>{
     e.preventDefault();
@@ -55,11 +46,50 @@ function HandleStudent() {
 
   const handleAssign = (e) =>{
     e.preventDefault();
-    setAssign(e.target.value)
-    json0 = JSON.stringify(assignStudent);
-    console.log(json0);
-    sendJson(json0,url0);
+    
+    //Get a student
+    let request = {};
+    request.command = "getStudentForTA";
+    request.user = user;
+    request.token = token;
+    getStudent(request, url); 
   }
+
+  //This gets a student
+  const getStudent = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+        console.log("Data is: ", data);
+
+        /* If user is somehow not logged in, kick to home page */
+        if(data.loggedIn !== "true"){
+          navigate("/");
+        }
+        else{
+
+          //if request succeeded
+          if(data.success === "true"){
+            navigate("/meeting");
+          }
+          else{
+            console.log("TA: getting student failed for some reason");
+            navigate("/");
+          }
+        }
+      })
+      .catch((error) => {
+        console.log("HOME: There was an error:", error);
+        navigate("/error");
+        
+      });
+
+    }
 
   return (
     <div className="question">

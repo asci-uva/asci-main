@@ -56,8 +56,7 @@ function Home() {
 	          console.log("HOME: Session is active");
 	          localStorage.setItem('asci-user', data.userid);
 	          localStorage.setItem('asci-token', data.token);
-	          localStorage.setItem('asci-role', data.role);
-	          routeToCorrectPage(true, data.state);
+	          routeToCorrectPage(true, data);
 	        }
 	        else{
 	          console.log("HOME: Session not active");
@@ -72,20 +71,31 @@ function Home() {
 	}
 
 	//This function routes them to correct page
-  	function routeToCorrectPage(result, state){
-	    if(result == true){
+  	function routeToCorrectPage(result, data){
+	    if(result === true && data.role === "student"){
           	//send to proper page
           	console.log("HOME: Session updated. Sending to correct next page");
-          	console.log("HOME: State is ", state);
+          	console.log("HOME: State is ", data.state);
           	//based on queuestate, send to correct page
-          	if(state === "none"){
+          	if(data.state === "none"){
           		navigate("/joinQueue");
           	}
-          	else if(state === "onQueue"){
+          	else if(data.state === "onQueue"){
           		navigate("/studentWaitingRoom");
           	}
-          	else if(state === "beingHelped"){
+          	else if(data.state === "beingHelped"){
           		navigate("/studentMeeting");
+          	}
+          }
+          else if(result === true && data.role === "ta"){
+          	if(data.state === "none"){
+          		navigate("/ta");
+          	}
+          	else if(data.state === "working"){
+          		navigate("/handleStudent");
+          	}
+          	else if(data.state === "helping"){
+          		navigate("/meeting");
           	}
           }
           else{

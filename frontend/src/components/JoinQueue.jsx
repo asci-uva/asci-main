@@ -126,6 +126,7 @@ function JoinQueue() {
           }
           else{
             console.log("JQ: Error, joining the queue didn't succeed");
+            navigate("/");
           }
         }
       })

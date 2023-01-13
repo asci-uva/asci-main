@@ -3,47 +3,76 @@ import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 
 function Ta() {
-  const [title, setTitle] = useState("question overview");
-  const [details, setDetails] = useState("question details");
-  const [purpose, setPurpose] = useState("");
-  const [workingState, setWorkingState] = useState(true);
+  
   const navigate = useNavigate();
+  
+  let user = "";
+  let token = "";
+  
+  const [purpose, setPurpose] = useState(0);
+  const [courses, setCourses] = useState({
+      0: "Select course..."
+    });
+
+  let url = 'http://localhost:8081/index.php'; 
   
 
   useEffect(() => {
-    if (localStorage.getItem("authorizedTA") === null || localStorage.getItem('authorizedTA')==="false") {
-      navigate('/login');
-    } else if (localStorage.getItem("been2ta") === "true" ){
-      navigate(-1);
+    //Ping the server and make sure this person is actually a TA
+    console.log("TA: Checking if token exists");
+    
+    //If token is set, kick to home screen to check validity of session
+    if (localStorage.getItem('asci-token') !== null) {
+      //try to get the user's courses
+      user = localStorage.getItem('asci-user');
+      token = localStorage.getItem('asci-token');
+
+      //setup json command
+      let request = {};
+      request.command = "getTACourses";
+      request.user = user;
+      request.token = token;
+      getCourses(request, url); 
     }
-    else {
+    else{
+      navigate("/login");
     }
+    
   }, []);
 
 
-  let taInfo = {
-    command: workingState
-  }
-
-  let json0;
-  let url0 = 'http://localhost:8081/'; 
-  const sendJson = (json0, url0) =>{
+  //This function checks the users session
+  const getCourses = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',
       },
-      body: json0,
-    }).then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        if(workingState === true){
-          localStorage.setItem('been2ta', 'true');
-          navigate('/handlestudent');
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+        console.log("Data is: ", data);
+        let success = data.success;
+        
+        if(success === "true"){
+
+          console.log("TA: Successfully fetched courses");
+          let c = {0: "Select course..."}
+          for(var key in data.courses){
+            c[key] = data.courses[key];
+          }
+
+          setCourses(c);
+          
+        }
+        else{
+          console.log("TA: Session not active or some other problem detected by server");
+          navigate("/");
         }
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.log("JQ: There was an error:", error);
+        navigate("/error");
         
       });
   }
@@ -56,50 +85,79 @@ function Ta() {
 
   const handleWork = (e) =>{
     e.preventDefault();
-    setWorkingState(e.target.value)
-    json0 = JSON.stringify(taInfo);
-    console.log(json0);
-    sendJson(json0,url0);
+    console.log("Course id: ", purpose);
+    console.log("Course name: ", courses[purpose])
+
+    //Start Working
+    let request = {};
+    request.command = "startTAWorking";
+    request.user = user;
+    request.token = token;
+    request.courseId = purpose;
+    startWork(request, url); 
   }
+
+  //This function starts TA working
+  const startWork = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+        console.log("Data is: ", data);
+
+        /* If user is somehow not logged in, kick to home page */
+        if(data.loggedIn !== "true"){
+          navigate("/");
+        }
+        else{
+
+          //if request succeeded
+          if(data.success === "true"){
+            navigate("/handleStudent");
+          }
+          else{
+            console.log("TA: Starting work did not succeed");
+            navigate("/");
+          }
+        }
+      })
+      .catch((error) => {
+        console.log("HOME: There was an error:", error);
+        navigate("/error");
+        
+      });
+
+    }
 
 
   return (
     <div className="question">
       <div>
         <h2>You are now logged in as CSTA</h2>
+        <button onClick={handleLogout}>logoff</button>
         
-        <button onClick={handleWork}>Start working</button>
       </div>
+
       <form>
-        <label>My working hour starts at</label>
-        <input
-          type = "text"
-          required
-          value = {title}
-          onChange={(e)=>setTitle(e.target.value)}
-        />
-        <label>My working hour ends at</label>
-        <input
-          type = "text"
-          required
-          value = {title}
-          onChange={(e)=>setTitle(e.target.value)}
-        />
-        <label>Topics I am prepared to answer:</label>
-        <textarea
-          required
-          value = {details}
-          onChange={(e)=>setDetails(e.target.value)}>
-        </textarea>
-        <label>Types of question I answer:</label>
+      <label>Which Class Are You Here For?</label>
         <select 
           value={purpose}
           onChange={(e)=>setPurpose(e.target.value)}>
-          <option value="Assignment">Assignment</option>
-          <option value="Logistic">Logistic</option>
+          {Object.keys(courses).map(
+                k => (
+                <option key={k} value={k}>
+                    {courses[k]}
+                </option>
+                )
+          )}
         </select>
+        <button onClick={handleWork}>Start working</button>
       </form>
-      <button onClick={handleLogout}>logoff</button>
+      
     </div>
   );
 }
