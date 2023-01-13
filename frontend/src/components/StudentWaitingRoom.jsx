@@ -8,16 +8,27 @@ function StudentWaitingRoom() {
 
 	const [position, setPosition] = useState(-1);
 	const [courseName, setCourseName] = useState("...");
+	
+	//variables for managing polling the server
+	let polling = false;
+	let timeoutId = 0;
 
 	let user = "";
 	let token = "";
-	let polling = false;
 	let url = 'http://localhost:8081/index.php'; 
   
     //This function runs on page load!
     useEffect(() => {
+    	console.log("waiting room mounted, start polling");
     	polling = true;
     	poll();
+
+    	//called when this component unmounts
+    	return () => {
+            console.log("Waiting room: Stopping polling");
+            clearTimeout(timeoutId);
+            polling = false;
+        }
       
     }, []);
 
@@ -42,7 +53,6 @@ function StudentWaitingRoom() {
 	        getStatus(request, url); 
 	      }
 	      else{
-	      	polling = false;
 	        navigate("/login");
 	      }
  	}
@@ -60,41 +70,39 @@ function StudentWaitingRoom() {
           console.log("Data is: ", data);
           
           if(data.success !== "true"){
-          	console.log("Waiting room: Session not active");
-          	polling = false;
+          	console.log("Waiting room: Session not active");          	
             navigate("/");
           }
 
           if(data.onQueue !== "true"){
           	console.log("Waiting room: Student not on a queue");
-          	polling = false;
           	navigate("/");
           }
 
           if(data.loggedIn !== "true"){
           	console.log("Student isn't logged in!");
-          	polling = false;
           	navigate("/");
           }
 
           if(data.beingHelped === "true"){
           	console.log("Waiting room: Student is being helped now!");
-          	polling = false;
           	navigate("/studentMeeting");
           }
 
           //whew, made it. Display the course name and queue position
+          console.log("WR: Displaying new queue position");
           setCourseName(data.courseName);
           setPosition(data.queuePosition);
+          console.log("Polling is: ", polling);
 
-          if(polling === true){
-          	setTimeout(poll, 7000);
+          if(polling == true){
+          	console.log("WR: Setting timeout for next poll");
+          	timeoutId = setTimeout(poll, 7000);
       	  }
           
         })
         .catch((error) => {
           console.log("Waiting room: There was an error:", error);
-          polling = false;
           navigate("/error");
           
         });
@@ -128,12 +136,10 @@ function StudentWaitingRoom() {
           
           if(data.success === "true"){
           	console.log("Left queue");
-          	polling = false;
             navigate("/");
           }
           else{
           	console.log("Leaving queue failed");
-          	polling = false;
           	navigate("/error");
           }
 
@@ -141,7 +147,6 @@ function StudentWaitingRoom() {
         })
         .catch((error) => {
           console.log("Waiting room: There was an error leaving the queue:", error);
-          polling = false;
           navigate("/error");
           
         });

@@ -123,7 +123,7 @@ class Server
                 
                 $this->setResponse([
                     "userid" => "mrf8t",
-                    "role" => "ta",
+                    "role" => "student",
                     "token" => "xkd143fghfldkahde",
                     "success" => "true"
                 ]);
@@ -136,7 +136,7 @@ class Server
             case "sessionPing":
                 $this->setResponse([
                     "userid" => "mrf8t",
-                    "role" => "ta",
+                    "role" => "student",
                     "token" => "xkd143fghfldkahde",
                     "success" => "true",
                     "state" => "none"
@@ -150,7 +150,7 @@ class Server
                 $this->setResponse(
                 [
                     "userid" => "mrf8t",
-                    "role" => "ta",
+                    "role" => "student",
                     "token" => "xkd143fghfldkahde",
                     "success" => "true",
                     "courses" => 
@@ -312,7 +312,7 @@ class Server
                 ]
                 );
                 break;
-                
+
             case "TAEndMeeting":
 
                 $this->setResponse(
