@@ -23,10 +23,33 @@ class ServerExecutor{
     private $db = null;
     public $result = null;
 
+    public $userStore = null; // The user storage 
+
+    /***
+     *  index.php --> Server.run() --> ServerExecutor functions (do the work)
+     *
+     *  CONTROLLER -- /server
+     *  ServerExecutor:
+     *      - db --- connection to the database
+     *      - userStore --- a DBUser object (functions to handle user stuff)
+     *          - DBUser takes User object, calls functions in SQL.php that actually have SQL
+     *
+     *  MODEL     -- /data
+     *  Data objects:
+     *      - /data/User - A user object (name, id, ...)
+     *          - fetch from the DB use userStore (DBuser->fetchUser())
+     *          - instantiate from front end and verify by fetch to DB
+     *
+     */
+
+
     public function __construct(){
+        global $log;
+        
         //TODO: Put these back in and get database connection working
-//        $this->db = new \asci\server\database\DatabaseConnector();
-        //$this->db = new \asci\server\database\DBUser();
+        $this->db = new \asci\server\database\DatabaseConnector();
+        $this->userStore = new \asci\server\database\DBUser($db);
+        // Check $_SERVER["uid"]; // their computing ID  (name and id can come from roster)
     }
 
     /**
@@ -48,21 +71,26 @@ class ServerExecutor{
      * @return bool login success
      */
     public function createUser($data) {
-    $data["password"] = password_hash($data["password"], PASSWORD_DEFAULT);
-    $user = new \asci\data\User($data);
-    return $this->db->createUser($user);
-   }
+        $data["password"] = password_hash($data["password"], PASSWORD_DEFAULT);
+        $user = new \asci\data\User($data);
 
-   public function createCourse($data) {
-    $course = new \asci\data\Course($data);
-    return $this->db->createCourse($course);
-   }
+        return $this->userStore->createUser($user);
+    }
 
-   public function joinQueue($userid, $courseid, $issue, $issue_subject) {
-    return $this->db->joinQueue($userid, $courseid, $issue, $issue_subject);
-   }
+    public function createCourse($data) {
+        $course = new \asci\data\Course($data);
+        return $this->userStore->createCourse($course);
+    }
 
-   public function leaveQueue($userid) {
-    return $this->db->leaveQueue($userid);
-   }
+    public function registerUser($data) {
+        return $this->userStore->register($data["userid"],$data["password"])
+    }
+
+    public function joinQueue($userid, $courseid, $issue, $issue_subject) {
+        return $this->userStore->joinQueue($userid, $courseid, $issue, $issue_subject);
+    }
+
+    public function leaveQueue($userid) {
+        return $this->userStore->leaveQueue($userid);
+    }
 }

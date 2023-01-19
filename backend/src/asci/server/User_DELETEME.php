@@ -8,9 +8,9 @@ class User
 {
     public $DB;
 
-    public function __construct()
+    public function __construct($db)
     {
-        $this->DB = new DatabaseConnector();
+        $this->DB = $db;
 
         $this->DB->prepare("exists", "
             SELECT COUNT(*) FROM users WHERE computing_id = $1;

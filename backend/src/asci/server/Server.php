@@ -100,6 +100,7 @@ class Server
     {
 
         $this->logger->addDebug("Server starting to handle request", array("input" => $this->input));
+        $executor = new \asci\server\ServerExecutor();
 
         if ($this->input == null || empty($this->input)) {
             return;
@@ -330,13 +331,11 @@ class Server
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/
 
             case "createUser":
-                $executor = new \asci\server\ServerExecutor();
                 $result = $executor->createUser($this->input);
                 $this->setResponse(["results" => $result]);
                 break;
             
             case "createCourse":
-                $executor = new \asci\server\ServerExecutor();
                 $result = $executor->createCourse($this->input);
                 $this->setResponse(["results" => $result]);
                 break;
@@ -345,10 +344,8 @@ class Server
 
             
             case "register":
-                $user = new User();
-                $this->setResponse(
-                    $user->register($this->input["userid"],$this->input["password"])
-                );
+                $result = $executor->registerUser($this->input);
+                $this->setResponse(["results" => $result]);
                 break;
 
             default:

@@ -12,23 +12,15 @@ class DBUser
     private $sql = null;
 
     /**
-     * Database connector object
-     *
-     * @var \asci\server\database\DatabaseConnector object.
-     */
-    private $DB = null;
-
-    /**
      * @var \Monolog\Logger $logger Logger for this class
      */
     private $logger = null;
 
-    public function __construct()
+    public function __construct($db)
     {
         global $log;
-        $this->DB = new \asci\server\database\DatabaseConnector();
 
-        $this->sql = new \asci\server\database\SQL($this->DB);
+        $this->sql = new \asci\server\database\SQL($db);
         $this->logger = new \Monolog\Logger('DBUser');
         $this->logger->pushHandler($log);
     }
