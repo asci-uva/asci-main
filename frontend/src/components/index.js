@@ -12,3 +12,4 @@ export { default as JoinQueue } from "./JoinQueue";
 export { default as StudentMeeting } from "./StudentMeeting";
 export { default as StudentSurvey } from "./StudentSurvey";
 export { default as Error } from "./Error";
+export { default as SelectCourse } from "./SelectCourse";

@@ -4,56 +4,83 @@ namespace asci\data;
 
 class User implements \Serializable {
 
+    private $id;
     private $computing_id;
-    private $first_name;
-    private $last_name;
-    private $preferred_name;
-    private $hashedPassword;
+    private $fname;
+    private $lname;
+    private $pname;
+    private $password;
 
-    public function __construct($data)
-    { 
-        $this->fromArray($data);
+
+    public function __construct()
+    {
+        
+        
     }
 
-    public function getComputingID() {
-        return $this->computing_id;
+    public function fromData($id, $computing_id, $fname, $lname, $pname, $password){
+        $this->id = $id;
+        $this->computing_id = $computing_id;
+        $this->fname = $fname;
+        $this->lname = $lname;
+        $this->pname = $pname;
+        $this->password = $password;
     }
 
-    public function getFirstName() {
-        return $this->first_name;
-    }
-
-    public function getLastName() {
-        return $this->last_name;
-    }
-
-    public function getPreferredName() {
-        return $this->preferred_name;
-    }
-
-    public function getHashedPassword() {
-        return $this->hashedPassword;
-    }
-
-    public function fromArray($data) {
-        $this->computing_id = $data["computing_id"] ?? null;
-        $this->first_name = $data["fname"] ?? null;
-        $this->last_name = $data["lname"] ?? null;
-        $this->preferred_name = $data["pname"] ?? null;
-        $this->hashedPassword = $data["hashedPassword"] ?? null;
-        return true;
+    public function fromArray($row){
+        $this->id = $row['id'] ?? null;
+        $this->computing_id = $row['computing_id'] ?? null;
+        $this->fname = $row['fname'] ?? null;
+        $this->lname = $row['lname'] ?? null;
+        $this->pname = $row['pname'] ?? null;
+        $this->password = $row['password'] ?? null;
+        return $this;
     }
 
     public function toArray() {
         return array(
+            "id" => $this->id,
             "computing_id" => $this->computing_id,
-            "fname" => $this->first_name,
-            "lname" => $this->last_name,
-            "pname" => $this->preferred_name,
-            "hashedPassword" => $this->hashedPassword
+            "fname" => $this->fname,
+            "lname" => $this->lname,
+            "pname" => $this->pname,
+            "password" => $this->password
         );
     }
 
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function getComputingId()
+    {
+        return $this->computing_id;
+    }
+
+    public function getFName()
+    {
+        return $this->fname;
+    }
+
+    public function getLName()
+    {
+        return $this->lname;
+    }
+
+    public function getPName()
+    {
+        return $this->pname;
+    }
+
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+
+    
     public function toJSON() {
         return json_encode($this->toArray(), JSON_PRETTY_PRINT);
     }

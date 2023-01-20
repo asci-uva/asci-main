@@ -19,24 +19,29 @@ function Home() {
   	//This function runs on page load!
   	useEffect(() => {
 
-    	console.log("HOME: Checking if token exists");
-	    //If token is set, kick to home screen to check validity of session
-	    if (localStorage.getItem('asci-token') !== null) {
-	      //user seems to be logged in. Let's check if session is valid
-	      //first grab the items from localstorage
-	      let user = localStorage.getItem('asci-user');
-          let token = localStorage.getItem('asci-token');
+    	
+  		//need to redo this. check user set and course set first
+  		if(localStorage.getItem('asci-user') === null){
+  			navigate("/login");
+  		}
+  		else if(localStorage.getItem('asci-course') === null){
+  			navigate("/selectCourse");
+  		}
+  		else{
 
-          //setup json command
-          let request = {};
-          request.command = "sessionPing";
-          request.user = user;
-          request.token = token;
-          checkSession(request, url); 
-	    }
-	    else{
-	    	navigate("/login");
-	    }
+  			//Ok, ping the session and send the user to the proper
+  			//page based on their status
+  			let user = localStorage.getItem('asci-user');
+         	let courseId = localStorage.getItem('asci-course');
+
+         	//setup json command
+			let request = {};
+			request.command = "sessionPing";
+			request.user = user;
+			request.courseId = courseId;
+			checkSession(request, url); 
+  		}
+
   	}, []);
 
   	//This function checks the users session
@@ -53,14 +58,13 @@ function Home() {
 	        let success = data.success;
 	        if(success === "true"){
 
-	          console.log("HOME: Session is active");
-	          localStorage.setItem('asci-user', data.userid);
-	          localStorage.setItem('asci-token', data.token);
-	          routeToCorrectPage(true, data);
+	          console.log("HOME: Received session, routing to correct page");
+	          
+	          routeToCorrectPage(data);
 	        }
 	        else{
-	          console.log("HOME: Session not active");
-	          routeToCorrectPage(false);
+	          console.log("HOME: Server returned error");
+	          navigate("/error");
 	        }
 	      })
 	      .catch((error) => {
@@ -71,37 +75,42 @@ function Home() {
 	}
 
 	//This function routes them to correct page
-  	function routeToCorrectPage(result, data){
-	    if(result === true && data.role === "student"){
-          	//send to proper page
-          	console.log("HOME: Session updated. Sending to correct next page");
-          	console.log("HOME: State is ", data.state);
+  	function routeToCorrectPage(data){
+  		let role = data.usercourse.role;
+  		let status = "none";
+  		if(data.session !== null){
+  			status = data.session.status;
+  		}
+
+  		console.log("HOME: role is: " + role);
+  		console.log("HOME: status is: " + status);
+
+	    if(role === "student"){
+          	
           	//based on queuestate, send to correct page
-          	if(data.state === "none"){
+          	if(status === "none"){
+          		console.log("Navigating to join queue");
           		navigate("/joinQueue");
           	}
-          	else if(data.state === "onQueue"){
+          	else if(status === "waiting"){
           		navigate("/studentWaitingRoom");
           	}
-          	else if(data.state === "beingHelped"){
+          	else if(status === "in_progress"){
           		navigate("/studentMeeting");
           	}
           }
-          else if(result === true && data.role === "ta"){
-          	if(data.state === "none"){
+          else if(role === "ta"){
+          	if(status === "none"){
           		navigate("/ta");
           	}
-          	else if(data.state === "working"){
-          		navigate("/handleStudent");
-          	}
-          	else if(data.state === "helping"){
+          	else if(status === "in_progress"){
           		navigate("/meeting");
           	}
           }
           else{
           	//kick to login page
-          	console.log("HOME: Session not active, kicking to login page");
-          	navigate("/login");
+          	console.log("HOME: Something went wrong, role is not student or ta");
+          	navigate("/error");
           }
 	}
 

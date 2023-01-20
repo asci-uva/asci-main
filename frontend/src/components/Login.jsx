@@ -12,11 +12,11 @@ function Login() {
   
   useEffect(() => {
 
-    console.log("Checking if token exists");
+    console.log("Checking if user name already set");
     //If token is set, kick to home screen to check validity of session
-    if (localStorage.getItem('asci-token') !== null) {
+    if (localStorage.getItem('asci-user') !== null) {
       console.log("it does, sending to home page");
-      navigate("/");
+      navigate("/selectCourse");
     }
   }, []);
   
@@ -39,15 +39,15 @@ function Login() {
       body: json0,
     }).then(response => response.json())
     .then(data => {
+        console.log("Response from server");
         console.log(data);
         let success = data.success;
         if(success == "true"){
 
           console.log("LOGIN Successful");
-          localStorage.setItem('asci-user', data.userid);
-          localStorage.setItem('asci-token', data.token);
-          localStorage.setItem('asci-role', data.role);
-          navigate('/');
+          localStorage.setItem('asci-user', data.computing_id); 
+          localStorage.setItem('asci-course', null);         
+          navigate('/selectCourse');
         }
         else{
           console.log("LOGIN Failed");

@@ -40,7 +40,7 @@ class Course implements \Serializable
         $this->number = $data['number'] ?? null;
         $this->name = $data['name'] ?? null;
         $this->semester = $data['semester'] ?? null;
-        return true;
+        return $this;
     }
 
     public function toArray()

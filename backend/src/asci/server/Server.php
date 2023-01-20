@@ -119,104 +119,63 @@ class Server
                 ]);
                 break;
             case "login":
-                //$executor = new \asci\server\ServerExecutor();
-                //$result = $this->loginHandler();
-                
-                $this->setResponse([
-                    "userid" => "mrf8t",
-                    "role" => "student",
-                    "token" => "xkd143fghfldkahde",
-                    "success" => "true"
-                ]);
+                $user = $this->input["userInfo"]["user"];
+                $pass = $this->input["userInfo"]["password"];
+                $this->setResponse($executor->loginHandler($user, $pass));
+
                 break;
 
-            //given userId and token, see if this user is already logged in
-            //send failure notice if not and frontend will kick to login screen
-            //state (for students) is "none", "onQueue", or "beingHelped" (Might change)
-            //state for students can be none, working, helping (a student)
+            //given userId and courseId, 
+            //sends back info about where in the "process" this student / ta
+            //is for this particular "course"
+            //e.g., currently on queue, being helped, etc.
             case "sessionPing":
-                $this->setResponse([
-                    "userid" => "mrf8t",
-                    "role" => "student",
-                    "token" => "xkd143fghfldkahde",
-                    "success" => "true",
-                    "state" => "none"
-                ]);
+
+                $user = $this->input["user"];
+                $courseId = $this->input["courseId"];
+
+                $this->setResponse($executor->sessionPingHandler($user,$courseId));
+
                 break;
 
             //given a userId and token, make sure user is logged in and 
             //return list of active course objects that student is enrolled in.
             case "getCourses":
 
-                $this->setResponse(
-                [
-                    "userid" => "mrf8t",
-                    "role" => "student",
-                    "token" => "xkd143fghfldkahde",
-                    "success" => "true",
-                    "courses" => 
-                        [
-                            "1" => "CS2130 - Sp23",
-                            "2" => "CS3100 - Sp23"
-                        ]
-                ]
-                );
+                $user = $this->input["user"];
+                $this->setResponse($executor->getCoursesHandler($user));
+
                 break;
 
             //given student id, token, courseid. Join the queue
             //if student, token pair is valid and they can
             case "joinQueue":
-                /*$executor = new \asci\server\ServerExecutor();
-                $result = $executor->joinQueue($this->input['userid'], $this->input['courseid'], $this->input['issue'], $this->input['issue_subject']);
-                $this->setResponse(["results" => $result]);*/
-                $this->setResponse(
-                [
-                    "userid" => "mrf8t",
-                    "role" => "student",
-                    "token" => "xkd143fghfldkahde",
-                    "loggedIn" => "true",
-                    "success" => "true"
-                ]
-                );
+                
+                $computingId = $this->input["user"];
+                $courseId = $this->input["courseId"];
+                $question = $this->input["question"];
+                $this->setResponse($executor->joinQueueHandler($computingId, $courseId, $question));
+
+                
                 break;
 
             //Updates student with queue status (still on queue)
             //what position, etc. 
             case "getQueueStatus":
-                //random position so we can changes being polled
-                $position = rand(1,10);
-                $readyToHelp = "false";
-                if ($position < 2)
-                    $readyToHelp = "true";
-
-                $this->setResponse(
-                [
-                    "userid" => "mrf8t",
-                    "role" => "student",
-                    "token" => "xkd143fghfldkahde",
-                    "success" => "true",
-                    "onQueue" => "true",
-                    "courseName" => "CS2130 - Sp23",
-                    "queuePosition" => $position,
-                    "beingHelped" => $readyToHelp,
-                    "loggedIn" => "true"
-                ]
-                );
+                
+                $computingId = $this->input["user"];
+                $courseId = $this->input["courseId"];
+                
+                $this->setResponse($executor->getQueueStatus($computingId, $courseId));
                 break;
 
             case "leaveQueue":
-                //$executor = new \asci\server\ServerExecutor();
-                //$result = $executor->leaveQueue($this->input['userid']);
-                //$this->setResponse(["results" => $result]);
 
-                $this->setResponse(
-                [
-                    "userid" => "mrf8t",
-                    "role" => "student",
-                    "token" => "xkd143fghfldkahde",
-                    "success" => "true"
-                ]
-                );
+                $computingId = $this->input["user"];
+                $courseId = $this->input["courseId"];
+                
+                $this->setResponse($executor->leaveQueue($computingId, $courseId));
+                
                 break;
 
             case "meetingInfo":

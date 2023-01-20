@@ -13,15 +13,33 @@ function StudentWaitingRoom() {
 	let polling = false;
 	let timeoutId = 0;
 
-	let user = "";
-	let token = "";
+	let user = null;
+	let courseId = null;
+
 	let url = 'http://localhost:8081/index.php'; 
   
     //This function runs on page load!
     useEffect(() => {
-    	console.log("waiting room mounted, start polling");
-    	polling = true;
-    	poll();
+
+      //Make sure id and course are set
+      if(localStorage.getItem('asci-user') == null){
+        navigate("/login");
+      }
+      else if(localStorage.getItem('asci-course') == null){
+        navigate("/selectCourse");
+      }
+      else{
+
+        console.log("StudWait: Setting user and course id");
+        user = localStorage.getItem('asci-user');
+        courseId = localStorage.getItem('asci-course');
+        console.log("StudWait: User: " + user);
+        console.log("StudWait: Course: " + courseId);
+
+      	console.log("waiting room mounted, start polling");
+      	polling = true;
+      	poll();
+      }
 
     	//called when this component unmounts
     	return () => {
@@ -36,25 +54,26 @@ function StudentWaitingRoom() {
 
  	function poll(){
 
- 		console.log("waitingRoom...polling for queue position");
+    if(localStorage.getItem('asci-user') == null){
+        navigate("/login");
+    }
+    else if(localStorage.getItem('asci-course') == null){
+        navigate("/selectCourse");
+    }
+    else{
 
-	      //Make sure token is set, otherwise kick to login
-	      if (localStorage.getItem('asci-token') !== null) {
-	        
-	        //try to get the users info first
-	        user = localStorage.getItem('asci-user');
-	        token = localStorage.getItem('asci-token');
+     		console.log("waitingRoom...polling for queue position");
+        
+        //setup json command
+        let request = {};
+        request.command = "getQueueStatus";
+        request.user = user;
+        request.courseId = courseId;
+        getStatus(request, url); 
 
-	        //setup json command
-	        let request = {};
-	        request.command = "getQueueStatus";
-	        request.user = user;
-	        request.token = token;
-	        getStatus(request, url); 
-	      }
-	      else{
-	        navigate("/login");
-	      }
+    }
+	      
+	      
  	}
 
     //This function checks the users queue status and updates things
@@ -70,35 +89,35 @@ function StudentWaitingRoom() {
           console.log("Data is: ", data);
           
           if(data.success !== "true"){
-          	console.log("Waiting room: Session not active");          	
-            navigate("/");
+          	console.log("Waiting room: Something went wrong");          	
+            navigate("/error");
           }
 
-          if(data.onQueue !== "true"){
-          	console.log("Waiting room: Student not on a queue");
-          	navigate("/");
+          else if(data.session === null){
+            console.log("Student doesn't have a session");
+            navigate("/joinQueue");
           }
 
-          if(data.loggedIn !== "true"){
-          	console.log("Student isn't logged in!");
-          	navigate("/");
+          else if(data.session.status === "in_progress"){
+            console.log("Being helped now!");
+            navigate("/studentMeeting");
           }
 
-          if(data.beingHelped === "true"){
-          	console.log("Waiting room: Student is being helped now!");
-          	navigate("/studentMeeting");
+          else if(data.session.status === "waiting"){
+            console.log("WR: Displaying new queue position");
+            setCourseName(data.usercourse.name);
+            setPosition(5);
+
+            if(polling == true){
+            	console.log("WR: Setting timeout for next poll");
+            	timeoutId = setTimeout(poll, 7000);
+        	  }
           }
 
-          //whew, made it. Display the course name and queue position
-          console.log("WR: Displaying new queue position");
-          setCourseName(data.courseName);
-          setPosition(data.queuePosition);
-          console.log("Polling is: ", polling);
-
-          if(polling == true){
-          	console.log("WR: Setting timeout for next poll");
-          	timeoutId = setTimeout(poll, 7000);
-      	  }
+          else{
+            console.log("StudentWaitingRoom: Something went wrong!");
+            navigate("/error");
+          }
           
         })
         .catch((error) => {
@@ -110,15 +129,26 @@ function StudentWaitingRoom() {
 
   	const leaveQueue = (e) =>{
 	    e.preventDefault();
-	    //TODO: Add student question
-	    
+    
+      if(localStorage.getItem('asci-user') == null){
+        navigate("/login");
+      }
+      else if(localStorage.getItem('asci-course') == null){
+        navigate("/selectCourse");
+      }
+      else{
 
-	    //JOIN THE QUEUE
-	    let request = {};
-	    request.command = "leaveQueue";
-	    request.user = user;
-	    request.token = token;
-	    reqLeaveQueue(request, url); 
+        user = localStorage.getItem('asci-user');
+        courseId = localStorage.getItem('asci-course');	    
+
+  	    //JOIN THE QUEUE
+  	    let request = {};
+  	    request.command = "leaveQueue";
+        
+  	    request.user = user;
+        request.courseId = courseId;
+  	    reqLeaveQueue(request, url); 
+      }
 
   	}
 
@@ -136,7 +166,7 @@ function StudentWaitingRoom() {
           
           if(data.success === "true"){
           	console.log("Left queue");
-            navigate("/");
+            navigate("/joinQueue");
           }
           else{
           	console.log("Leaving queue failed");
@@ -154,10 +184,10 @@ function StudentWaitingRoom() {
 
   
 	return (
-		<div className="waitingRoom">
+		<div className="question">
 			<div>
 	  		<h2>Please wait for your TA. You are in position { position } for { courseName } </h2>
-	  		</div>
+	  	</div>
 		  	<div>
         		<h2>Click here to leave the queue</h2>
         		<button onClick={leaveQueue}>Leave queue</button>

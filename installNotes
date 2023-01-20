@@ -32,12 +32,10 @@ psql -U postgres -h localhost -p 5432
 
 #OPTION 2: Connect to docker container first
 ----------------------
-#Show ports / ids for running containers
-docker ps
 
 #Connect to the postgres container
-#Replace <CONTAINER_ID> with the id from previous command above
-docker exec -it <CONTAINER_ID> bash
+
+docker exec -it ASCI_db bash
 
 #Connect to the actual DB. Afterwards you can run queries and such on the command line.
 psql -U postgres
