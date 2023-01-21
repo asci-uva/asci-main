@@ -48,18 +48,29 @@ function JoinQueue() {
 
   const handleQuestion = (e) =>{
     e.preventDefault();
-    
-    console.log("User: ", user);
-    console.log("CourseId: ", courseId)
-    console.log("Question: ", details);
 
-    //JOIN THE QUEUE
-    let request = {};
-    request.command = "joinQueue";
-    request.user = user;
-    request.courseId = courseId;
-    request.question = details;
-    joinQueue(request, url); 
+    if(localStorage.getItem('asci-user') == null){
+      navigate("/login");
+    }
+    else if(localStorage.getItem('asci-course') == null){
+      navigate("/selectCourse");
+    }
+    else{
+      user = localStorage.getItem('asci-user');
+      courseId = localStorage.getItem('asci-course');
+    
+      console.log("User: ", user);
+      console.log("CourseId: ", courseId)
+      console.log("Question: ", details);
+
+      //JOIN THE QUEUE
+      let request = {};
+      request.command = "joinQueue";
+      request.user = user;
+      request.courseId = courseId;
+      request.question = details;
+      joinQueue(request, url); 
+    }
 
   }
 

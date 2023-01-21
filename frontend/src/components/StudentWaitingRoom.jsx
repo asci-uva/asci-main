@@ -63,6 +63,9 @@ function StudentWaitingRoom() {
     else{
 
      		console.log("waitingRoom...polling for queue position");
+
+        user = localStorage.getItem('asci-user');
+        courseId = localStorage.getItem('asci-course');
         
         //setup json command
         let request = {};

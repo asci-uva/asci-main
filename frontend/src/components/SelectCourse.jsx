@@ -95,7 +95,14 @@ function SelectCourse() {
 
   const handleSelectCourse = (e) =>{
     e.preventDefault();
+
+    //confirm username is set
+    if (localStorage.getItem('asci-user') === null) {
+      navigate("/login");
+    }
+
     //TODO: Add student question
+    user = localStorage.getItem('asci-user');
     console.log("Course id: ", purpose);
     console.log("Course name: ", courses[purpose])
 
