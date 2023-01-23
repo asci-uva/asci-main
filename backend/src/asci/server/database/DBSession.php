@@ -25,7 +25,10 @@ class DBSession
     }
 
     /*
-     * Fetches the most recent .
+     * Fetches the most recent "waiting" or "in-progress" session for the given
+     * userId courseId combination.
+     *
+     * RETURNS: Session object
      */
     public function getSessionsForUser($user_id, $course_id)
     {
@@ -53,7 +56,10 @@ class DBSession
     }
 
     /*
-     * Creates a new session for this user in this course. 
+     * Creates a new session for this user in this course and sets state to 
+     * "waiting". 
+     * 
+     * Returns Session object of new session or null if none created
      */
     public function createNewStudentSession($user_id, $course_id, $role, $question){
 
@@ -79,6 +85,7 @@ class DBSession
 
     /*
      * Closes all sessions associated with this user_id course combination
+     * by setting each to "completed"
      */
     public function closeAllSessions($user_id, $course_id){
 
@@ -88,6 +95,39 @@ class DBSession
         
         return true;
 
+    }
+
+
+    /*
+     * Fetches the Session for this courseId that has been in the "waiting"
+     * state the longest.
+     */
+    public function getLongestWaitingSession($course_id){
+
+        $query = 'select * from sessions where course_id=$1 order by entry_time';
+
+        $result = $this->db->query($query, array($course_id));
+        $row = $this->db->fetchrow($result);
+
+        if ($row != null){
+            $sess = new \asci\data\Session();
+            $sess->fromArray($row);
+            return $sess;
+        }
+        
+        return null;
+
+    }
+
+    /*
+     * Sets the current session to 'in-progress' and sets the fulfillment time
+     */
+    public function fulfillSession($session_id){
+        $query = 'update sessions set status=\'in_progress\', fulfillment_time=now() where id=$1';
+
+        $result = $this->db->query($query, array($session_id));
+
+        return $result;
     }
 
     

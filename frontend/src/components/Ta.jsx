@@ -21,22 +21,22 @@ function Ta() {
     //Ping the server and make sure this person is actually a TA
     console.log("TA: Checking if token exists");
     
-    //If token is set, kick to home screen to check validity of session
-    if (localStorage.getItem('asci-token') !== null) {
-      //try to get the user's courses
-      user = localStorage.getItem('asci-user');
-      token = localStorage.getItem('asci-token');
+    // //If token is set, kick to home screen to check validity of session
+    // if (localStorage.getItem('asci-token') !== null) {
+    //   //try to get the user's courses
+    //   user = localStorage.getItem('asci-user');
+    //   token = localStorage.getItem('asci-token');
 
-      //setup json command
-      let request = {};
-      request.command = "getTACourses";
-      request.user = user;
-      request.token = token;
-      getCourses(request, url); 
-    }
-    else{
-      navigate("/login");
-    }
+    //   //setup json command
+    //   let request = {};
+    //   request.command = "getTACourses";
+    //   request.user = user;
+    //   request.token = token;
+    //   getCourses(request, url); 
+    // }
+    // else{
+    //   navigate("/login");
+    // }
     
   }, []);
 

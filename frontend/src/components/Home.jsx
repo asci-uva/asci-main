@@ -101,7 +101,7 @@ function Home() {
           }
           else if(role === "ta"){
           	if(status === "none"){
-          		navigate("/ta");
+          		navigate("/handleStudent");
           	}
           	else if(status === "in_progress"){
           		navigate("/meeting");

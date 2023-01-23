@@ -35,7 +35,7 @@ CREATE TABLE courses (
 );
 
 CREATE TABLE session_users (
-  session_id SERIAL PRIMARY KEY,
+  session_id SERIAL,
   user_id INT,
   role roles
 );

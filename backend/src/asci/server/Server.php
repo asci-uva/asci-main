@@ -210,50 +210,15 @@ class Server
 
             /* TA SPECIFIC FUNCTIONS ARE BELOW THIS POINT */
 
-            //given a userId and token, make sure user is logged in and 
-            //user is TA and return list of active course objects that TA is teaching.
-            case "getTACourses":
-
-                $this->setResponse(
-                [
-                    "userid" => "mrf8t",
-                    "role" => "ta",
-                    "token" => "xkd143fghfldkahde",
-                    "success" => "true",
-                    "courses" => 
-                        [
-                            "1" => "CS2130 - Sp23",
-                            "2" => "CS3100 - Sp23"
-                        ]
-                ]
-                );
-                break;
-
-            case "startTAWorking":
-
-                $this->setResponse(
-                [
-                    "userid" => "mrf8t",
-                    "role" => "student",
-                    "token" => "xkd143fghfldkahde",
-                    "loggedIn" => "true",
-                    "success" => "true"
-                ]
-                );
-                break;
-
             case "getStudentForTA":
 
-                $this->setResponse(
-                [
-                    "userid" => "mrf8t",
-                    "role" => "student",
-                    "token" => "xkd143fghfldkahde",
-                    "loggedIn" => "true",
-                    "success" => "true",
-                ]
-                );
+                $computingId = $this->input["user"];
+                $courseId = $this->input["courseId"];
+                
+                $this->setResponse($executor->getStudentForTA($computingId, $courseId));
+                
                 break;
+
 
 
             case "getTAMeetingDetails":

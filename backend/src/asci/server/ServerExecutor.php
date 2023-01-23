@@ -215,8 +215,54 @@ class ServerExecutor{
     }
 
     
+    /*
+     * Given TA computing id and courseId, get a student for this TA to work
+     * with and setup DB to reflect this.
+     */
+    public function getStudentForTA($computing_id, $course_id){
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
 
+        //0: Grab the user
+        $user = $this->userStore->getUser($computing_id);
 
+        $result = [];
+
+        //2: Grab the next student that is waiting
+        $session = $dbsession->getLongestWaitingSession($course_id);
+
+        if($session == null){
+            $result["success"] = "false";
+            $result["error"] = "No student in queue";
+            return $result;
+        }
+
+        //Ok, we have a waiting session. Let's get the session_user
+        $sessUsr = $dbsessusr->getSessionUser($session->getId(), 'student');
+
+        if($sessUsr == null){
+            $result["success"] = "false";
+            $result["error"] = "ERROR: Session does not have any associated students";
+            return $result;
+        }
+
+        //Get the student that the TA will be helping
+        $student = $this->userStore->getUser($sessUsr->getUserId());
+
+        //Ok, we have info, let's create a user session for TA that is helping
+        $TASessUsr = new \asci\data\SessionUser();
+        $TASessUsr->fromParams($computing_d, $session->getId(), 'ta');
+        $dbsessusr->insert($TASessUsr);
+
+        //Ok, Let's update the session itself
+        $dbsession->fulfillSession($session->getId());
+
+        $result["success"] = "true";
+        $result["error"] = "none";
+
+        return $result;
+    }
 
 
 

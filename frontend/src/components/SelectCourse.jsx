@@ -100,17 +100,22 @@ function SelectCourse() {
     if (localStorage.getItem('asci-user') === null) {
       navigate("/login");
     }
+    //if user didn't select a course
+    if (purpose !== 0){
+      //TODO: Add student question
+      user = localStorage.getItem('asci-user');
+      console.log("Course id: ", purpose);
+      console.log("Course name: ", courses[purpose])
 
-    //TODO: Add student question
-    user = localStorage.getItem('asci-user');
-    console.log("Course id: ", purpose);
-    console.log("Course name: ", courses[purpose])
+      //Set the local storage item
+      localStorage.setItem('asci-course', purpose);
 
-    //Set the local storage item
-    localStorage.setItem('asci-course', purpose);
+      //navigate to the home page finally
+      navigate("/");
 
-    //navigate to the home page finally
-    navigate("/");
+    }
+
+    
 
   }
 

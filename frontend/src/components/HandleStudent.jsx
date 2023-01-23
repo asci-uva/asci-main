@@ -6,8 +6,8 @@ function HandleStudent() {
   // const [title, setTitle] = useState("question overview");
   // const [details, setDetails] = useState("question details");
   // const [purpose, setPurpose] = useState("");
-  let user = "";
-  let token = "";
+  let user = null;
+  let courseId = null;
 
   let url = 'http://localhost:8081/';
 
@@ -17,15 +17,18 @@ function HandleStudent() {
   useEffect(() => {
     //Ping the server and make sure this person is actually a TA
     console.log("TA: Checking if token exists");
-    
-    //If token is set, kick to home screen to check validity of session
-    if (localStorage.getItem('asci-token') !== null) {
-      //try to get the user's courses
-      user = localStorage.getItem('asci-user');
-      token = localStorage.getItem('asci-token');
-    }
-    else{
+
+    if(localStorage.getItem('asci-user') === null){
       navigate("/login");
+    }
+
+    else if(localStorage.getItem('asci-course') === null){
+      navigate("/selectCourse");
+    }
+
+    else{
+      user = localStorage.getItem('asci-user');
+      courseId = localStorage.getItem('asci-course');
     }
     
     
@@ -51,7 +54,7 @@ function HandleStudent() {
     let request = {};
     request.command = "getStudentForTA";
     request.user = user;
-    request.token = token;
+    request.courseId = courseId;
     getStudent(request, url); 
   }
 
@@ -67,21 +70,15 @@ function HandleStudent() {
     .then(data => {
         console.log("Data is: ", data);
 
-        /* If user is somehow not logged in, kick to home page */
-        if(data.loggedIn !== "true"){
-          navigate("/");
+        //if request succeeded
+        if(data.success === "true"){
+          navigate("/meeting");
         }
         else{
-
-          //if request succeeded
-          if(data.success === "true"){
-            navigate("/meeting");
-          }
-          else{
-            console.log("TA: getting student failed for some reason");
-            navigate("/");
-          }
+          console.log("TA: getting student failed for some reason");
+          //TODO: Let the student know somehow??
         }
+        
       })
       .catch((error) => {
         console.log("HOME: There was an error:", error);
