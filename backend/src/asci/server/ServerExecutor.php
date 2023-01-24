@@ -436,7 +436,47 @@ class ServerExecutor{
     }
 
 
+    /*
+     * Given computing id and course_id, return number of students
+     * in queue iff user is ta for that course
+     */
+    public function getNumberWaiting($computing_id, $course_id){
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
 
+        //0: Grab the user
+        $user = $this->userStore->getUser($computing_id);
+
+        $result = [];
+
+        //Get the UserCourse object
+        $userCourse = (new \asci\server\database\DBUserCourse($this->db))->getCourseForUser($user->getComputingId(), $course_id);
+
+        if($userCourse == null){
+            $result["success"] = "false";
+            $result["error"] = "ERROR: This user not associated with this course";
+            return $result;
+        }
+        else if($userCourse->getRole() != "ta"){
+            $result["success"] = "false";
+            $result["error"] = "ERROR: This user not a ta for this course";
+            return $result;
+        }
+
+        //Ok, looks good. Grab the number of waiting students
+        $numWaiting = $dbsession->getNumWaiting($course_id);
+
+        if($numWaiting == null){
+            $result["success"] = "false";
+            $result["error"] = "ERROR: Failed to fetch number of students waiting";
+            return $result;
+        }
+
+        $result["success"] = "true";
+        $result["waiting"] = $numWaiting["count"];
+        return $result;
+    }
 
 
     

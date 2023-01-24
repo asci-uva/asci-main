@@ -198,6 +198,15 @@ class Server
 
             /* TA SPECIFIC FUNCTIONS ARE BELOW THIS POINT */
 
+            case "getNumberWaiting":
+
+                $computingId = $this->input["user"];
+                $courseId = $this->input["courseId"];
+                
+                $this->setResponse($executor->getNumberWaiting($computingId, $courseId));
+                
+                break;
+
             case "getStudentForTA":
 
                 $computingId = $this->input["user"];

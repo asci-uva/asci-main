@@ -114,6 +114,24 @@ class DBSession
 
     }
 
+    /*
+     * Returns the number of students waiting in the course
+     */
+    public function getNumWaiting($course_id){
+
+        $query = 'select count(*) from sessions where course_id=$1 and status=\'waiting\'';
+
+        $result = $this->db->query($query, array($course_id));
+        $row = $this->db->fetchrow($result);
+
+        if ($row != null){
+            return $row;
+        }
+        
+        return null;
+
+    }
+
 
     /*
      * Fetches the Session for this courseId that has been in the "waiting"

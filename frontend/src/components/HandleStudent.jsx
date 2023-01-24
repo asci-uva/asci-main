@@ -11,7 +11,8 @@ function HandleStudent() {
 
   let url = 'http://localhost:8081/';
 
-  const [assign, setAssign] = useState(true)
+  const [assign, setAssign] = useState(true);
+  const [numWaiting, setNumWaiting] = useState("Loading...");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,6 +30,8 @@ function HandleStudent() {
     else{
       user = localStorage.getItem('asci-user');
       courseId = localStorage.getItem('asci-course');
+
+      pollNumWaiting();
     }
     
     
@@ -37,6 +40,47 @@ function HandleStudent() {
   let assignStudent = {
     command: assign
   }
+
+
+
+  function pollNumWaiting(){
+    //Get a student
+    let request = {};
+    request.command = "getNumberWaiting";
+    request.user = localStorage.getItem('asci-user');
+    request.courseId = localStorage.getItem('asci-course');
+    getNumWaiting(request, url); 
+  }
+
+  //This gets a student
+  const getNumWaiting = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+        console.log("Data is: ", data);
+
+        //if request succeeded
+        if(data.success === "true"){
+          setNumWaiting(data.waiting);
+        }
+        else{
+          console.log("Getting number waiting failed");
+          navigate("/error");
+        }
+        
+      })
+      .catch((error) => {
+        console.log("HOME: There was an error:", error);
+        navigate("/error");
+        
+      });
+
+    }
 
 
 
@@ -91,12 +135,14 @@ function HandleStudent() {
   return (
     <div className="question">
       <div>
-        <h2>You are now handling students</h2>
-        <button onClick={handleLogout}>logoff</button>
+        <h2>You are now handling students. There are {numWaiting} student(s) waiting.</h2>
       </div>
       <div>
         <h2>Assign me a student</h2>
         <button onClick={handleAssign}>find student</button>
+      </div>
+      <div>
+        <button onClick={handleLogout}>logoff</button>
       </div>
     </div>
   );
