@@ -178,33 +178,21 @@ class Server
                 
                 break;
 
-            case "meetingInfo":
-                //$executor = new \asci\server\ServerExecutor();
-                //$result = $executor->leaveQueue($this->input['userid']);
-                //$this->setResponse(["results" => $result]);
-
-                $this->setResponse(
-                [
-                    "userid" => "mrf8t",
-                    "role" => "student",
-                    "token" => "xkd143fghfldkahde",
-                    "success" => "true",
-                    "taId" => "abc3ta",
-                    "taName" => "Abby Teachalots"
-                ]
-                );
+            case "getMeetingDetails":
+                $computingId = $this->input["user"];
+                $courseId = $this->input["courseId"];
+                
+                $this->setResponse($executor->getMeetingDetails($computingId, $courseId));
+                
                 break;
 
             case "leaveMeeting":
 
-                $this->setResponse(
-                [
-                    "userid" => "mrf8t",
-                    "role" => "student",
-                    "token" => "xkd143fghfldkahde",
-                    "success" => "true",
-                ]
-                );
+                $computingId = $this->input["user"];
+                $sessionId = $this->input["sessionId"];
+                
+                $this->setResponse($executor->endSession($computingId, $sessionId));
+                
                 break;
 
 
@@ -223,32 +211,19 @@ class Server
 
             case "getTAMeetingDetails":
 
-                $this->setResponse(
-                [
-                    "userid" => "mrf8t",
-                    "role" => "student",
-                    "token" => "xkd143fghfldkahde",
-                    "loggedIn" => "true",
-                    "success" => "true",
-                    "student" => [
-                        "userid" => "std1ab",
-                        "name" => "Stevie Learns"
-                    ]
-                ]
-                );
+                $computingId = $this->input["user"];
+                $courseId = $this->input["courseId"];
+                
+                $this->setResponse($executor->getTAMeetingDetails($computingId, $courseId));
+                
                 break;
 
             case "TAEndMeeting":
 
-                $this->setResponse(
-                [
-                    "userid" => "mrf8t",
-                    "role" => "student",
-                    "token" => "xkd143fghfldkahde",
-                    "loggedIn" => "true",
-                    "success" => "true",
-                ]
-                );
+                $computingId = $this->input["user"];
+                $sessionId = $this->input["sessionId"];
+                
+                $this->setResponse($executor->endSession($computingId, $sessionId));
                 break;
 
 

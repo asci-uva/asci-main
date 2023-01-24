@@ -35,11 +35,24 @@ class DBSessionUser
         return $result;
     }
 
+    public function getSessionUser($user_id, $session_id){
+        $query = 'select * from session_users where user_id=$1 and session_id=$2';
+
+        $result = $this->db->query($query, array($user_id, $session_id));
+        $row = $this->db->fetchrow($result);
+
+        if($row != null){
+            return (new \asci\data\SessionUser())->fromArray($row);
+        }
+        
+        return null;
+    }
+
     /*
      * Given data/Session object, finds all student session pairs for that.
      * sessions (in version 1.0, will just be one student but could be more)
      */
-    public function getSessionUser($session_id, $role)
+    public function getSessionUserByRole($session_id, $role)
     {
         $query = 'select * from session_users where session_id=$1 and role=$2';
 
@@ -47,9 +60,7 @@ class DBSessionUser
         $row = $this->db->fetchrow($result);
 
         if($row != null && $row['user_id'] != null){
-            $sessUsr = new \asci\data\SessionUser();
-            $sessUsr->fromArray($row);
-            return $sessUsr;
+            return (new \asci\data\SessionUser())->fromArray($row);
         }
         
         return null;

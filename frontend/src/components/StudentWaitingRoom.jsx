@@ -189,10 +189,10 @@ function StudentWaitingRoom() {
 	return (
 		<div className="question">
 			<div>
-	  		<h2>Please wait for your TA. You are in position { position } for { courseName } </h2>
+	  		<h3>You are currently in the queue for { courseName }. A TA Will be with you shortly. </h3>
 	  	</div>
 		  	<div>
-        		<h2>Click here to leave the queue</h2>
+        		<h4>Click here to leave the queue</h4>
         		<button onClick={leaveQueue}>Leave queue</button>
       		</div>
 		</div>

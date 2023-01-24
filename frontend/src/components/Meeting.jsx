@@ -4,36 +4,32 @@ import { useNavigate } from 'react-router-dom';
 
 function Meeting() {
 
-  let user = "";
-  let token = "";
-
   let url = 'http://localhost:8081/';
-  
+
   const [studentName, setStudentName] = useState("LOADING");
   const [studentId, setStudentId] = useState("LOADING");
+  const [sessionId, setSessionId] = useState(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
 
-    //Ping the server and make sure this person is actually a TA
-    console.log("TA: Checking if token exists");
-    
-    //If token is set, kick to home screen to check validity of session
-    if (localStorage.getItem('asci-token') !== null) {
-      //try to get the user's courses
-      user = localStorage.getItem('asci-user');
-      token = localStorage.getItem('asci-token');
-
+    if(localStorage.getItem('asci-user') === null){
+      navigate("/login");
+    }
+    else if(localStorage.getItem('asci-course') === null){
+      navigate("/selectCourse");
+    }
+    else{
+      
       //Get meeting details
       let request = {};
       request.command = "getTAMeetingDetails";
-      request.user = user;
-      request.token = token;
+      request.user = localStorage.getItem('asci-user');
+      request.courseId = localStorage.getItem('asci-course');
       getMeetingDetails(request, url);  
-    }
-    else{
-      navigate("/login");
+      
+
     }
     
     
@@ -51,22 +47,17 @@ function Meeting() {
     .then(data => {
         console.log("Data is: ", data);
 
-        /* If user is somehow not logged in, kick to home page */
-        if(data.loggedIn !== "true"){
-          navigate("/");
+        //if request succeeded
+        if(data.success === "true"){
+          setStudentName(data.student.pname + " " + data.student.lname);
+          setStudentId(data.student.computing_id);
+          setSessionId(data.session.id);
         }
         else{
-
-          //if request succeeded
-          if(data.success === "true"){
-            setStudentName(data.student.name);
-            setStudentId(data.student.userid);
-          }
-          else{
-            console.log("Meeting details failed for some reason");
-            navigate("/");
-          }
+          console.log("Fetching meeting details failed for some reason");
+          navigate("/error");
         }
+        
       })
       .catch((error) => {
         console.log("HOME: There was an error:", error);
@@ -84,12 +75,24 @@ function Meeting() {
   }
 
   const handleEndMeeting = (e) =>{
-    //End the meeting
-    let request = {};
-    request.command = "TAEndMeeting";
-    request.user = user;
-    request.token = token;
-    endMeeting(request, url);
+    if(localStorage.getItem('asci-user') === null){
+      navigate("/login");
+    }
+    else if(localStorage.getItem('asci-course') === null){
+      navigate("/selectCourse");
+    }
+    else if(sessionId === null){
+      navigate("/error");
+    }
+    else{
+      //End the meeting
+      let request = {};
+      request.command = "TAEndMeeting";
+      request.user = localStorage.getItem('asci-user');
+      request.sessionId = sessionId;
+      
+      endMeeting(request, url);
+    }
   }
 
   //ends meeting
@@ -104,21 +107,15 @@ function Meeting() {
     .then(data => {
         console.log("Data is: ", data);
 
-        /* If user is somehow not logged in, kick to home page */
-        if(data.loggedIn !== "true"){
-          navigate("/");
+        //if request succeeded
+        if(data.success === "true"){
+          navigate("/handleStudent");
         }
         else{
-
-          //if request succeeded
-          if(data.success === "true"){
-            navigate("/handleStudent");
-          }
-          else{
-            console.log("Ending meeting failed");
-            navigate("/");
-          }
+          console.log("Ending meeting failed");
+          navigate("/error");
         }
+        
       })
       .catch((error) => {
         console.log("HOME: There was an error:", error);

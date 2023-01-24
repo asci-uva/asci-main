@@ -118,7 +118,7 @@ class ServerExecutor{
         $course = (new \asci\server\database\DBUserCourse($this->db))->getCourseForUser($user->getComputingId(), $course_id);
 
         //2: See if a session already exists for this person / course combo?
-        $session = (new \asci\server\database\DBSession($this->db))->getSessionsForUser($user->getId(), $course->getCourseId());
+        $session = (new \asci\server\database\DBSession($this->db))->getSessionForUser($user->getId(), $course->getCourseId());
 
         $response = [];
         $response["usercourse"] = $course->toArray();
@@ -140,7 +140,7 @@ class ServerExecutor{
 
         //2: See if a session already exists for this person / course combo?
         $dbsession = new \asci\server\database\DBSession($this->db);
-        $session = $dbsession->getSessionsForUser($user->getId(), $course->getCourseId());
+        $session = $dbsession->getSessionForUser($user->getId(), $course->getCourseId());
 
         $result = [];
         $result["usercourse"] = $course->toArray();
@@ -178,7 +178,7 @@ class ServerExecutor{
 
         //2: See if a session already exists for this person / course combo?
         $dbsession = new \asci\server\database\DBSession($this->db);
-        $session = $dbsession->getSessionsForUser($user->getId(), $course->getCourseId());
+        $session = $dbsession->getSessionForUser($user->getId(), $course->getCourseId());
 
         $result = [];
         $result["user"] = $user->toArray();
@@ -239,7 +239,7 @@ class ServerExecutor{
         }
 
         //Ok, we have a waiting session. Let's get the session_user
-        $sessUsr = $dbsessusr->getSessionUser($session->getId(), 'student');
+        $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), 'student');
 
         if($sessUsr == null){
             $result["success"] = "false";
@@ -252,7 +252,7 @@ class ServerExecutor{
 
         //Ok, we have info, let's create a user session for TA that is helping
         $TASessUsr = new \asci\data\SessionUser();
-        $TASessUsr->fromParams($computing_d, $session->getId(), 'ta');
+        $TASessUsr->fromParams($user->getId(), $session->getId(), 'ta');
         $dbsessusr->insert($TASessUsr);
 
         //Ok, Let's update the session itself
@@ -265,6 +265,169 @@ class ServerExecutor{
     }
 
 
+    /*
+     * Given the Student's computing Id and courseId
+     * gets the meeting details for the Student
+     */
+    public function getMeetingDetails($computing_id, $course_id){
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+
+        //0: Grab the user
+        $user = $this->userStore->getUser($computing_id);
+
+        $result = [];
+
+        //2: Grab the next student that is waiting
+        $session = $dbsession->getSessionForUser($user->getId(), $course_id);
+
+        if($session == null){
+            $result["success"] = "false";
+            $result["error"] = "No session exists for this Student Course combo";
+            return $result;
+        }
+        else if($session->getStatus() != "in_progress"){
+            $result["success"] = "false";
+            $result["error"] = "session is not in the in_progress state (and it should be)";
+            return $result;
+        }
+
+        //Ok, let's try to grab the ta's information
+        $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), 'ta');
+
+        if($sessUsr == null){
+            $result["success"] = "false";
+            $result["error"] = "ERROR: Session does not have any associated tas";
+            return $result;
+        }
+
+        //Now, grab the ta
+        $ta = $this->userStore->getUserById($sessUsr->getUserId());
+
+        if($ta == null){
+            $result["success"] = "false";
+            $result["error"] = "ERROR: Could not find ta information for session";
+            return $result;
+        }
+
+        //Done. Set up the info to return
+        $result["success"] = "true";
+        $result["session"] = $session->toArray();
+        $result["ta"] = $ta->toArray();
+        $result["error"] = "none";
+
+        return $result;
+    }
+
+
+    /*
+     * Given the TAs computing Id and courseId
+     * gets the meeting details for the TA
+     */
+    public function getTAMeetingDetails($computing_id, $course_id){
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+
+        //0: Grab the user
+        $user = $this->userStore->getUser($computing_id);
+
+        $result = [];
+
+        //2: Grab the next student that is waiting
+        $session = $dbsession->getSessionForUser($user->getId(), $course_id);
+
+        if($session == null){
+            $result["success"] = "false";
+            $result["error"] = "No session exists for this TA course combo";
+            return $result;
+        }
+        else if($session->getStatus() != "in_progress"){
+            $result["success"] = "false";
+            $result["error"] = "session is not in the in_progress state (and it should be)";
+            return $result;
+        }
+
+        //Ok, let's try to grab the student's information
+        $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), 'student');
+
+        if($sessUsr == null){
+            $result["success"] = "false";
+            $result["error"] = "ERROR: Session does not have any associated students";
+            return $result;
+        }
+
+        //Now, grab the student
+        $student = $this->userStore->getUserById($sessUsr->getUserId());
+
+        if($student == null){
+            $result["success"] = "false";
+            $result["error"] = "ERROR: Could not find student information for session";
+            return $result;
+        }
+
+        //Done. Set up the info to return
+        $result["success"] = "true";
+        $result["session"] = $session->toArray();
+        $result["student"] = $student->toArray();
+        $result["error"] = "none";
+
+        return $result;
+    }
+
+    /*
+     * Given a computing_id and session_id, end the session
+     * IF computing_id is actually part of that session
+     */
+    public function endSession($computing_id, $session_id){
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+
+        //0: Grab the user
+        $user = $this->userStore->getUser($computing_id);
+
+        $result = [];
+
+        //2: grab the session
+        $session = $dbsession->getSession($session_id);
+
+        if($session == null){
+            $result["success"] = "false";
+            $result["error"] = "No session exists with the provided session_id";
+            return $result;
+        }
+        else if($session->getStatus() != "in_progress"){
+            $result["success"] = "false";
+            $result["error"] = "session is not in the in_progress state (and it should be)";
+            return $result;
+        }
+
+        //Ok, let's grab the session_usr and make sure the user that 
+        //is trying to end this session is actually a part of that session
+        $sessUsr = $dbsessusr->getSessionUser($user->getId(), $session->getId());
+
+        if($sessUsr == null){
+            $result["success"] = "false";
+            $result["error"] = "This user is not a part of this session, so cannot end it";
+            return $result;
+        }
+
+        //Ok, go ahead and end the session
+        if($dbsession->endSession($session_id)){
+            //Done. Set up the info to return
+            $result["success"] = "true";
+            $result["session"] = $session->toArray();
+            $result["error"] = "none";
+            return $result;
+        }
+        else{
+            $result["success"] = "false";
+            $result["error"] = "Something updating session to completed status";
+            return $result;
+        }
+    }
 
 
 

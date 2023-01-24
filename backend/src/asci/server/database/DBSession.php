@@ -24,13 +24,30 @@ class DBSession
         $this->logger->pushHandler($log);
     }
 
+
+    /*
+     * Gets a session by session_id
+     */
+    public function getSession($session_id){
+        $query = 'select * from sessions where id=$1';
+
+        $result = $this->db->query($query, array($session_id));
+        $session = $this->db->fetchrow($result);
+
+        if($session == null){
+            return null;
+        }
+
+        return (new \asci\data\Session())->fromArray($session);
+    }
+
     /*
      * Fetches the most recent "waiting" or "in-progress" session for the given
      * userId courseId combination.
      *
      * RETURNS: Session object
      */
-    public function getSessionsForUser($user_id, $course_id)
+    public function getSessionForUser($user_id, $course_id)
     {
         $query = 'select * from sessions S JOIN session_users U on S.id = U.session_id where user_id=$1 and course_id=$2 and (status=\'waiting\' or status=\'in_progress\')';
 
@@ -77,7 +94,7 @@ class DBSession
             $query = 'insert into session_users (session_id, user_id, role) values ($1, $2, $3)';
             $result = $this->db->query($query, array($id, $user_id, $role));            
 
-            return $this->getSessionsForUser($user_id, $course_id);
+            return $this->getSessionForUser($user_id, $course_id);
 
         }
 
@@ -104,7 +121,7 @@ class DBSession
      */
     public function getLongestWaitingSession($course_id){
 
-        $query = 'select * from sessions where course_id=$1 order by entry_time';
+        $query = 'select * from sessions where course_id=$1 and status=\'waiting\' order by entry_time';
 
         $result = $this->db->query($query, array($course_id));
         $row = $this->db->fetchrow($result);
@@ -124,6 +141,18 @@ class DBSession
      */
     public function fulfillSession($session_id){
         $query = 'update sessions set status=\'in_progress\', fulfillment_time=now() where id=$1';
+
+        $result = $this->db->query($query, array($session_id));
+
+        return $result;
+    }
+
+
+    /*
+     * Ends Session with session_id by setting exit_time and status
+     */
+    public function endSession($session_id){
+        $query = 'update sessions set status=\'completed\', exit_time=now() where id=$1';
 
         $result = $this->db->query($query, array($session_id));
 

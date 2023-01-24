@@ -38,5 +38,18 @@ class DBUser
         return $user;
     }
 
+    public function getUserById($user_id){
+        $query = 'select * from users where id = $1';
+        $result = $this->db->query($query, array($user_id));
+
+
+        $row = $this->db->fetchrow($result);
+
+        $user = new \asci\data\User();
+        $user->fromArray($row);
+
+        return $user;
+    }
+
    
 }

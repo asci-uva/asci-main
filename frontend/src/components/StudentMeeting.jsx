@@ -8,33 +8,31 @@ function StudentMeeting() {
 
   const [taName, setTAName] = useState("TA Name");
   const [taId, setTAId] = useState("TA Id");
-
-  let user = "";
-  let token = "";
+  const [sessionId, setSessionId] = useState(null);
+  
   
   let url = 'http://localhost:8081/index.php'; 
   
     //This function runs on page load!
     useEffect(() => {
       
-      console.log("Getting meeting info");
+    if(localStorage.getItem('asci-user') === null){
+      navigate("/login");
+    }
+    else if(localStorage.getItem('asci-course') === null){
+      navigate("/selectCourse");
+    }
+    else{
 
-      //If token is set, kick to home screen to check validity of session
-      if (localStorage.getItem('asci-token') !== null) {
-        //try to get the user's courses
-        user = localStorage.getItem('asci-user');
-        token = localStorage.getItem('asci-token');
+      //Get meeting details
+      let request = {};
+      request.command = "getMeetingDetails";
+      request.user = localStorage.getItem('asci-user');
+      request.courseId = localStorage.getItem('asci-course');;
+      getMeetingInfo(request, url);  
+      
 
-        //setup json command
-        let request = {};
-        request.command = "meetingInfo";
-        request.user = user;
-        request.token = token;
-        getMeetingInfo(request, url); 
-      }
-      else{
-        navigate("/login");
-      }
+    }
       
     }, []);
 
@@ -53,12 +51,13 @@ function StudentMeeting() {
           if(data.success === "true"){
 
             console.log("Received TA info");
-            setTAName(data.taName);
-            setTAId(data.taId);
+            setTAName(data.ta.pname + " " + data.ta.lname);
+            setTAId(data.ta.computing_id);
+            setSessionId(data.session.id);
             
           }
           else{
-            console.log("Meeting: something went wrong");
+            console.log("Meeting: request failed for some reason");
             navigate("/error");
           }
         })
@@ -71,16 +70,25 @@ function StudentMeeting() {
 
   
   const leaveMeeting = (e) =>{
-      e.preventDefault();
-      //TODO: Add student question
-      
+    e.preventDefault();
 
-      //JOIN THE QUEUE
+    if(localStorage.getItem('asci-user') === null){
+      navigate("/login");
+    }
+    else if(localStorage.getItem('asci-course') === null){
+      navigate("/selectCourse");
+    }
+    else if(sessionId === null){
+      navigate("/error");
+    }
+    else{
+
       let request = {};
       request.command = "leaveMeeting";
-      request.user = user;
-      request.token = token;
+      request.user = localStorage.getItem('asci-user');
+      request.sessionId = sessionId;
       reqLeaveMeeting(request, url); 
+    }
 
     }
 
@@ -116,7 +124,7 @@ function StudentMeeting() {
   return (
     <div className="question">
       <div>
-        <h1>You are in a meeting with { taName } ( { taId } )</h1>
+        <h4>You are in a meeting with { taName } ( { taId } )</h4>
       </div>
       <div>
         <button onClick={leaveMeeting}>Leave meeting</button>
