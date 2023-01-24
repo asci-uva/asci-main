@@ -398,6 +398,12 @@ class ServerExecutor{
             $result["error"] = "No session exists with the provided session_id";
             return $result;
         }
+        else if($session->getStatus() == "completed"){
+            $result["success"] = "true";
+            $result["session"] = $session->toArray();
+            $result["error"] = "Warning: Session already completed by another party";
+            return $result;
+        }
         else if($session->getStatus() != "in_progress"){
             $result["success"] = "false";
             $result["error"] = "session is not in the in_progress state (and it should be)";
