@@ -16,7 +16,6 @@ CREATE TABLE users (
   fname TEXT,
   lname TEXT,
   pname TEXT,
-  password VARCHAR(255)
 );
 
 CREATE TABLE user_courses (

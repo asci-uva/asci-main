@@ -6,8 +6,6 @@ import { useNavigate} from 'react-router-dom';
 //https://www.youtube.com/watch?v=IkMND33x0qQ
 function Login() {
   const [username, setUsername] = useState("user name");
-  const [password, setPassword] = useState("password");
-  const [command, setCommand] = useState("unknown");
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -23,7 +21,6 @@ function Login() {
   
   let userInfo = {
     user : username,
-    password: password,
   }
 
    
@@ -85,13 +82,6 @@ function Login() {
           value = {username}
           onChange={(e)=>setUsername(e.target.value)}
         />
-        <label>Password</label>
-        <input
-          type = "text"
-          required
-          value = {password}
-          onChange={(e)=>setPassword(e.target.value)}
-          />
         <button>Submit</button>
       </form>
     </div>

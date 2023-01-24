@@ -9,7 +9,6 @@ class User implements \Serializable {
     private $fname;
     private $lname;
     private $pname;
-    private $password;
 
 
     public function __construct()
@@ -18,13 +17,12 @@ class User implements \Serializable {
         
     }
 
-    public function fromData($id, $computing_id, $fname, $lname, $pname, $password){
+    public function fromData($id, $computing_id, $fname, $lname, $pname){
         $this->id = $id;
         $this->computing_id = $computing_id;
         $this->fname = $fname;
         $this->lname = $lname;
         $this->pname = $pname;
-        $this->password = $password;
     }
 
     public function fromArray($row){
@@ -33,7 +31,6 @@ class User implements \Serializable {
         $this->fname = $row['fname'] ?? null;
         $this->lname = $row['lname'] ?? null;
         $this->pname = $row['pname'] ?? null;
-        $this->password = $row['password'] ?? null;
         return $this;
     }
 
@@ -43,8 +40,7 @@ class User implements \Serializable {
             "computing_id" => $this->computing_id,
             "fname" => $this->fname,
             "lname" => $this->lname,
-            "pname" => $this->pname,
-            "password" => $this->password
+            "pname" => $this->pname
         );
     }
 
@@ -74,10 +70,6 @@ class User implements \Serializable {
         return $this->pname;
     }
 
-    public function getPassword()
-    {
-        return $this->password;
-    }
 
 
     

@@ -74,10 +74,10 @@ class ServerExecutor{
      *
      * @return bool login success
      */
-    public function loginHandler($computing_id, $password){
+    public function loginHandler($computing_id){
         $user = $this->userStore->getUser($computing_id)->toArray();
 
-        if($user["computing_id"] == null){
+        if($user == null || $user["computing_id"] == null){
             $user = ["success" => "false"];
         }
         else{
