@@ -93,13 +93,23 @@ function HandleStudent() {
 
   const handleAssign = (e) =>{
     e.preventDefault();
+
+    if(localStorage.getItem('asci-user') === null){
+      navigate("/login");
+    }
+
+    else if(localStorage.getItem('asci-course') === null){
+      navigate("/selectCourse");
+    }
+    else{
     
-    //Get a student
-    let request = {};
-    request.command = "getStudentForTA";
-    request.user = user;
-    request.courseId = courseId;
-    getStudent(request, url); 
+      //Get a student
+      let request = {};
+      request.command = "getStudentForTA";
+      request.user = localStorage.getItem('asci-user');
+      request.courseId = localStorage.getItem('asci-course');
+      getStudent(request, url); 
+    }
   }
 
   //This gets a student
