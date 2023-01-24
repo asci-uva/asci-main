@@ -96,11 +96,14 @@ ALTER TABLE feedback ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
 #insert mark and nada,
 #make up two dummy courses. Make them student and TA in each 
 
-INSERT INTO users (id, computing_id, fname, lname , pname, password)
-VALUES (1, 'mrf8t', 'Mark', 'Floryan', 'Mark', 'DummyPassword');
+INSERT INTO users (id, computing_id, fname, lname , pname)
+VALUES (1, 'mrf8t', 'Mark', 'Floryan', 'Mark');
 
-INSERT INTO users (id, computing_id, fname, lname , pname, password)
-VALUES (2, 'nb3f', 'Nada', 'Basit', 'Nada', 'DummyPassword');
+INSERT INTO users (id, computing_id, fname, lname , pname)
+VALUES (2, 'nb3f', 'Nada', 'Basit', 'Nada');
+
+INSERT INTO users (id, computing_id, fname, lname , pname)
+VALUES (3, 'jrhott', 'John', 'Hott', 'Robbie');
 
 INSERT INTO courses (id, mnemonic, number, name, semester)
 VALUES (1, 'CS', '2130', 'CSO1', 'SP-23');
@@ -119,5 +122,8 @@ VALUES (2, 1, 'ta');
 
 INSERT INTO user_courses (user_id, course_id, role)
 VALUES (2, 2, 'student');
+
+INSERT INTO user_courses (user_id, course_id, role)
+VALUES (3, 1, 'student');
 
 
