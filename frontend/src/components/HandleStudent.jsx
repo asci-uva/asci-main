@@ -141,9 +141,7 @@ function HandleStudent() {
         <h2>Assign me a student</h2>
         <button onClick={handleAssign}>find student</button>
       </div>
-      <div>
-        <button onClick={handleLogout}>logoff</button>
-      </div>
+      
     </div>
   );
 }

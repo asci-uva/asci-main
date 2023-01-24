@@ -6,7 +6,7 @@ function JoinQueue() {
   
   const navigate = useNavigate();
   
-  let user = null;
+  const [user, setUser] = useState(null);
   let courseId = null;
   
   const [details, setDetails] = useState("question details");
@@ -30,9 +30,9 @@ function JoinQueue() {
         //Just assume they are not in a queue for now...
         //Server will catch once they hit "Join Queue" if they are in another state
         console.log("Setting user and course id");
-        user = localStorage.getItem('asci-user');
+        setUser(localStorage.getItem('asci-user'));
         courseId = localStorage.getItem('asci-course');
-        console.log("User: " + user);
+        console.log("User: " + localStorage.getItem('asci-user'));
         console.log("courseId: " + courseId);
       }
     
@@ -56,17 +56,17 @@ function JoinQueue() {
       navigate("/selectCourse");
     }
     else{
-      user = localStorage.getItem('asci-user');
+      setUser(localStorage.getItem('asci-user'));
       courseId = localStorage.getItem('asci-course');
     
-      console.log("User: ", user);
+      console.log("User: ", localStorage.getItem('asci-user'));
       console.log("CourseId: ", courseId)
       console.log("Question: ", details);
 
       //JOIN THE QUEUE
       let request = {};
       request.command = "joinQueue";
-      request.user = user;
+      request.user = localStorage.getItem('asci-user');
       request.courseId = courseId;
       request.question = details;
       joinQueue(request, url); 
@@ -108,12 +108,11 @@ function JoinQueue() {
   return (
     <div className="question">
       <div>
-      <h2>Hello Student</h2>
-        <button onClick={handleLogout}>logoff</button>
+      <h2>Hello {user}</h2>
       </div>
       <br></br>
       <form>
-        <label>What is your question?</label>
+        <label>Please explain your issue in a few sentences before joining the queue.</label>
         <textarea
           required
           value = {details}
@@ -121,7 +120,6 @@ function JoinQueue() {
         </textarea>
       </form>
       <div>
-        <h2>Join the queue</h2>
         <button onClick={handleQuestion}>Join queue</button>
       </div>
     </div>

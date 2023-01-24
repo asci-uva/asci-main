@@ -18,7 +18,8 @@ import {
   JoinQueue,
   StudentSurvey,
   Error,
-  SelectCourse
+  SelectCourse,
+  Logout
 } from "./components";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -39,6 +40,7 @@ root.render(
       <Route path="/studentSurvey" element={<StudentSurvey />} />
       <Route path="/error" element={<Error />} />
       <Route path="/selectCourse" element={<SelectCourse />} />
+      <Route path="/logout" element={<Logout />} />
     </Routes>
     <Footer/>
   </Router>,

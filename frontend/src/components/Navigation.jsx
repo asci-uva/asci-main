@@ -17,8 +17,13 @@ function Navigation() {
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className="nav-link" to="/login">
-                  Login
+                <NavLink className="nav-link" to="/selectCourse">
+                  Select Course
+                </NavLink>
+              </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/logout">
+                  Logout
                 </NavLink>
               </li>
             </ul>

@@ -8,7 +8,7 @@ function SelectCourse() {
   // const [purpose, setPurpose] = useState("");
   const navigate = useNavigate();
   
-  let user = "";
+  const [user, setUser] = useState(null);
   
   const [purpose, setPurpose] = useState(0);
   const [courses, setCourses] = useState({
@@ -25,12 +25,12 @@ function SelectCourse() {
       //If token is set, kick to home screen to check validity of session
       if (localStorage.getItem('asci-user') !== null) {
         //try to get the user's courses
-        user = localStorage.getItem('asci-user');
+        setUser(localStorage.getItem('asci-user'));
 
         //setup json command
         let request = {};
         request.command = "getCourses";
-        request.user = user;
+        request.user = localStorage.getItem('asci-user');
         getCourses(request, url); 
       }
       else{
@@ -103,7 +103,7 @@ function SelectCourse() {
     //if user didn't select a course
     if (purpose !== 0){
       //TODO: Add student question
-      user = localStorage.getItem('asci-user');
+      setUser(localStorage.getItem('asci-user'));
       console.log("Course id: ", purpose);
       console.log("Course name: ", courses[purpose])
 
@@ -122,12 +122,11 @@ function SelectCourse() {
   return (
     <div className="question">
       <div>
-      <h2>Hello Student</h2>
-        <button onClick={handleLogout}>logoff</button>
+      <h2>Welcome {user}</h2>
       </div>
       <br></br>
       <form>
-      <label>Which Class Are You Here For?</label>
+      <label>Please select your course below.</label>
         <select 
           value={purpose}
           onChange={(e)=>setPurpose(e.target.value)}>
