@@ -128,6 +128,9 @@ function StudentMeeting(props) {
         <h4>You are in a meeting with { taName } ( { taId } )</h4>
       </div>
       <div>
+        <h5>Please be ready when the TA arrives to assist you.</h5>
+      </div>
+      <div>
         <button onClick={leaveMeeting}>Leave meeting</button>
       </div>
     </div>

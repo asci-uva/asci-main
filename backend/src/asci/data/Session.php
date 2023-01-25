@@ -8,6 +8,7 @@ class Session implements \Serializable {
     private $course_id;
     private $issue;
     private $issue_subject;
+    private $location;
     private $status;
     private $entry_time;
     private $fulfillment_time;
@@ -29,6 +30,7 @@ class Session implements \Serializable {
         $this->course_id = $row['course_id'] ?? null;
         $this->issue = $row['issue'] ?? null;
         $this->issue_subject = $row['issue_subject'] ?? null;
+        $this->location = $row['location'] ?? null;
         $this->status = $row['status'] ?? null;
         $this->entry_time = $row['entry_time'] ?? null;
         $this->fulfillment_time = $row['fulfillment_time'] ?? null;
@@ -47,6 +49,7 @@ class Session implements \Serializable {
             "course_id" => $this->course_id,
             "issue" => $this->issue,
             "issue_subject" => $this->issue_subject,
+            "location" => $this->location,
             "status" => $this->status,
             "entry_time" => $this->entry_time,
             "fulfillment_time" => $this->fulfillment_time,
@@ -63,6 +66,7 @@ class Session implements \Serializable {
     public function getCourseId(){ return $this->course_id; }
     public function getIssue(){ return $this->issue; }
     public function getIssueSubject(){ return $this->issue_subject; }
+    public function getLocation(){ return $this->location; }
     public function getStatus(){ return $this->status; }
     public function getEntryTime(){ return $this->entry_time; }
     public function getFulfillmentTime(){ return $this->fulfillment_time; }

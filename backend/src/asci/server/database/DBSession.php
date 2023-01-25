@@ -78,11 +78,11 @@ class DBSession
      * 
      * Returns Session object of new session or null if none created
      */
-    public function createNewStudentSession($user_id, $course_id, $role, $question){
+    public function createNewStudentSession($user_id, $course_id, $role, $question, $subject, $location){
 
-        $query = 'insert into sessions (course_id, issue, issue_subject, status, entry_time, fulfillment_time, exit_time) values ($1, $2, $3, \'waiting\', now(), null, null) returning id';
+        $query = 'insert into sessions (course_id, issue, issue_subject, location, status, entry_time, fulfillment_time, exit_time) values ($1, $2, $3, $4, \'waiting\', now(), null, null) returning id';
 
-        $result = $this->db->query($query, array($course_id, $question, $question));
+        $result = $this->db->query($query, array($course_id, $question, $subject, $location));
         $id = $this->db->fetchrow($result)["id"];
 
         if($id == null){

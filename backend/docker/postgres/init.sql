@@ -44,6 +44,7 @@ CREATE TABLE sessions (
   course_id INT,
   issue TEXT,
   issue_subject TEXT,
+  location TEXT,
   status status_type,
   entry_time timestamp DEFAULT (now()),
   fulfillment_time timestamp,

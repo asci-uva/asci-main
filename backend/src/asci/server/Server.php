@@ -184,7 +184,9 @@ class Server
                 
                 $courseId = $this->input["courseId"];
                 $question = $this->input["question"];
-                $this->setResponse($executor->joinQueueHandler($user, $courseId, $question));
+                $subject = $this->input["subject"];
+                $location = $this->input["location"];
+                $this->setResponse($executor->joinQueueHandler($user, $courseId, $question, $subject, $location));
 
                 
                 break;

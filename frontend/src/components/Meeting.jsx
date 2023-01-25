@@ -11,6 +11,11 @@ function Meeting(props) {
   const [studentId, setStudentId] = useState("LOADING");
   const [sessionId, setSessionId] = useState(null);
 
+  /* Info regarding the student's issue (to show the TA) */
+  const [subject, setSubject] = useState("LOADING");
+  const [issue, setIssue] = useState("LOADING");
+  const [location, setLocation] = useState("LOADING");
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,6 +58,11 @@ function Meeting(props) {
           setStudentName(data.student.pname + " " + data.student.lname);
           setStudentId(data.student.computing_id);
           setSessionId(data.session.id);
+
+          /* Set up issue vars also */
+          setSubject(data.session.issue_subject);
+          setIssue(data.session.issue);
+          setLocation(data.session.location);
         }
         else{
           console.log("Fetching meeting details failed for some reason");
@@ -129,14 +139,18 @@ function Meeting(props) {
   return (
     <div className="question">
       <div>
-        <h2>You are in a meeting with a student</h2>
-        <button onClick={handleLogout}>logoff</button>
+        <h5>You are currently helping <b>{studentName}</b> (<b>{studentId}</b>)</h5>
       </div>
       <div>
-        <h5>You are currently helping {studentName} ({studentId})</h5>
+        <h5><b>Subject:</b> {subject}</h5>
       </div>
       <div>
-        <h2>Ready to end the meeting?</h2>
+        <h5><b>Description:</b> {issue}</h5>
+      </div>
+      <div>
+        <h5><b>Location:</b> {location}</h5>
+      </div>
+      <div>
         <button onClick={handleEndMeeting}>End meeting</button>
         <p style={{   
           fontSize: '15px',

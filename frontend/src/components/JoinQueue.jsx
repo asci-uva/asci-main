@@ -8,7 +8,9 @@ function JoinQueue(props) {
   
   const [user, setUser] = useState(null);
   let courseId = null;
-  
+
+  const [subject, setSubject] = useState("");
+  const [location, setLocation] = useState("");
   const [details, setDetails] = useState("");
   
 
@@ -69,7 +71,9 @@ function JoinQueue(props) {
       request.command = "joinQueue";
       request.user = localStorage.getItem('asci-user');
       request.courseId = courseId;
+      request.subject = subject;
       request.question = details;
+      request.location = location;
       joinQueue(request, url); 
     }
 
@@ -113,6 +117,15 @@ function JoinQueue(props) {
       </div>
       <br></br>
       <form>
+        <label>Issue subject</label>
+        <input
+          type = "text"
+          placeholder="Enter subject here"
+          required
+          value = {subject}
+          onChange={(e)=>setSubject(e.target.value)}
+        />
+
         <label>Please explain your issue in a few sentences before joining the queue.</label>
         <textarea
           placeholder="Enter your issue here"
@@ -120,6 +133,15 @@ function JoinQueue(props) {
           value = {details}
           onChange={(e)=>setDetails(e.target.value)}>
         </textarea>
+
+        <label>Where can the TA find you?</label>
+        <input
+          type = "text"
+          placeholder="Enter location here"
+          required
+          value = {location}
+          onChange={(e)=>setLocation(e.target.value)}
+        />
       </form>
       <div>
         <button onClick={handleQuestion}>Join queue</button>
