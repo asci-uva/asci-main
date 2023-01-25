@@ -2,15 +2,18 @@ import React from "react";
 import {useState} from "react";
 import { useNavigate } from 'react-router-dom';
 
-function StudentSurvey() {
+function StudentSurvey(props) {
   const [glitches, setTitle] = useState("");
   const [likeWeb, setDetails] = useState("");
   const [likeAi, setPurpose] = useState("");
   const navigate = useNavigate();
 
+  let url = props.url;
+  let docRoot = props.documentRoot;
+
   const handleRating = (e) =>{
     e.preventDefault();
-    navigate('/JoinQueue');
+    navigate(docRoot + '/JoinQueue');
   }
 
   return (

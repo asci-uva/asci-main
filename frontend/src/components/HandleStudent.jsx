@@ -2,14 +2,13 @@ import React from "react";
 import {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 
-function HandleStudent() {
-  // const [title, setTitle] = useState("question overview");
-  // const [details, setDetails] = useState("question details");
-  // const [purpose, setPurpose] = useState("");
+function HandleStudent(props) {
+  
   let user = null;
   let courseId = null;
 
-  let url = 'http://localhost:8081/';
+  let url = props.url; 
+  let docRoot = props.documentRoot;
 
   const [assign, setAssign] = useState(true);
   const [numWaiting, setNumWaiting] = useState("Loading...");
@@ -20,11 +19,11 @@ function HandleStudent() {
     console.log("TA: Checking if token exists");
 
     if(localStorage.getItem('asci-user') === null){
-      navigate("/login");
+      navigate(docRoot + "/login");
     }
 
     else if(localStorage.getItem('asci-course') === null){
-      navigate("/selectCourse");
+      navigate(docRoot + "/selectCourse");
     }
 
     else{
@@ -70,13 +69,13 @@ function HandleStudent() {
         }
         else{
           console.log("Getting number waiting failed");
-          navigate("/error");
+          navigate(docRoot + "/error");
         }
         
       })
       .catch((error) => {
         console.log("HOME: There was an error:", error);
-        navigate("/error");
+        navigate(docRoot + "/error");
         
       });
 
@@ -88,18 +87,18 @@ function HandleStudent() {
   const handleLogout = (e) =>{
     e.preventDefault();
     localStorage.clear();
-    navigate('/');
+    navigate(docRoot + '/');
   }
 
   const handleAssign = (e) =>{
     e.preventDefault();
 
     if(localStorage.getItem('asci-user') === null){
-      navigate("/login");
+      navigate(docRoot + "/login");
     }
 
     else if(localStorage.getItem('asci-course') === null){
-      navigate("/selectCourse");
+      navigate(docRoot + "/selectCourse");
     }
     else{
     
@@ -126,7 +125,7 @@ function HandleStudent() {
 
         //if request succeeded
         if(data.success === "true"){
-          navigate("/meeting");
+          navigate(docRoot + "/meeting");
         }
         else{
           console.log("TA: getting student failed for some reason");
@@ -136,7 +135,7 @@ function HandleStudent() {
       })
       .catch((error) => {
         console.log("HOME: There was an error:", error);
-        navigate("/error");
+        navigate(docRoot + "/error");
         
       });
 

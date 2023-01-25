@@ -2,9 +2,10 @@ import React from "react";
 import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 
-function Meeting() {
+function Meeting(props) {
 
-  let url = 'http://localhost:8081/';
+  let url = props.url;
+  let docRoot = props.documentRoot;
 
   const [studentName, setStudentName] = useState("LOADING");
   const [studentId, setStudentId] = useState("LOADING");
@@ -15,10 +16,10 @@ function Meeting() {
   useEffect(() => {
 
     if(localStorage.getItem('asci-user') === null){
-      navigate("/login");
+      navigate(docRoot + "/login");
     }
     else if(localStorage.getItem('asci-course') === null){
-      navigate("/selectCourse");
+      navigate(docRoot + "/selectCourse");
     }
     else{
       
@@ -55,13 +56,13 @@ function Meeting() {
         }
         else{
           console.log("Fetching meeting details failed for some reason");
-          navigate("/error");
+          navigate(docRoot + "/error");
         }
         
       })
       .catch((error) => {
         console.log("HOME: There was an error:", error);
-        navigate("/error");
+        navigate(docRoot + "/error");
         
       });
 
@@ -71,18 +72,18 @@ function Meeting() {
   const handleLogout = (e) =>{
     e.preventDefault();
     localStorage.clear();
-    navigate('/');
+    navigate(docRoot + '/');
   }
 
   const handleEndMeeting = (e) =>{
     if(localStorage.getItem('asci-user') === null){
-      navigate("/login");
+      navigate(docRoot + "/login");
     }
     else if(localStorage.getItem('asci-course') === null){
-      navigate("/selectCourse");
+      navigate(docRoot + "/selectCourse");
     }
     else if(sessionId === null){
-      navigate("/error");
+      navigate(docRoot + "/error");
     }
     else{
       //End the meeting
@@ -109,17 +110,17 @@ function Meeting() {
 
         //if request succeeded
         if(data.success === "true"){
-          navigate("/handleStudent");
+          navigate(docRoot + "/handleStudent");
         }
         else{
           console.log("Ending meeting failed");
-          navigate("/error");
+          navigate(docRoot + "/error");
         }
         
       })
       .catch((error) => {
         console.log("HOME: There was an error:", error);
-        navigate("/error");
+        navigate(docRoot + "/error");
         
       });
 

@@ -2,19 +2,22 @@ import React from "react";
 import {useState,useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 
-function TASurvey() {
+function TASurvey(props) {
   const [glitches, setTitle] = useState("");
   const [likeWeb, setDetails] = useState("");
   const [likeAi, setPurpose] = useState("");
   const [surveyState, setSurveyState] = useState(true)
   const navigate = useNavigate();
 
+  let url = props.url;
+  let docRoot = props.documentRoot;
+
   useEffect(() => {
     if (localStorage.getItem("authorizedTA") === null || localStorage.getItem('authorizedTA')==="false") {
-      navigate('/login');
+      navigate(docRoot + '/login');
     } else if (localStorage.getItem("been2meeting") === "true"){
     } else{
-      navigate(-1);
+      //TODO??
     }
   }, []);
 
@@ -23,10 +26,10 @@ function TASurvey() {
   }
 
   let json0;
-  let url0 = 'http://localhost:8081/';
+  
 
-  const sendJson = (json0, url0) =>{
-    fetch(url0, {
+  const sendJson = (json0, url) =>{
+    fetch(url, {
       method: 'POST', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',
@@ -39,7 +42,7 @@ function TASurvey() {
         if(surveyState === true){
           localStorage.removeItem("been2meeting");
           localStorage.removeItem("been2handle");
-          navigate('/handlestudent');
+          navigate(docRoot + '/handlestudent');
         }
       })
       .catch((error) => {
@@ -51,7 +54,7 @@ function TASurvey() {
     setSurveyState(e.target.value)
     json0 = JSON.stringify(surveyInfo);
     console.log(json0);
-    sendJson(json0,url0);
+    sendJson(json0,url);
   }
 
   return (

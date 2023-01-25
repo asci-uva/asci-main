@@ -2,7 +2,7 @@ import React from "react";
 import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 
-function StudentMeeting() {
+function StudentMeeting(props) {
   
   const navigate = useNavigate();
 
@@ -11,16 +11,17 @@ function StudentMeeting() {
   const [sessionId, setSessionId] = useState(null);
   
   
-  let url = 'http://localhost:8081/index.php'; 
+  let url = props.url;
+  let docRoot = props.documentRoot; 
   
     //This function runs on page load!
     useEffect(() => {
       
     if(localStorage.getItem('asci-user') === null){
-      navigate("/login");
+      navigate(docRoot + "/login");
     }
     else if(localStorage.getItem('asci-course') === null){
-      navigate("/selectCourse");
+      navigate(docRoot + "/selectCourse");
     }
     else{
 
@@ -58,12 +59,12 @@ function StudentMeeting() {
           }
           else{
             console.log("Meeting: request failed for some reason");
-            navigate("/error");
+            navigate(docRoot + "/error");
           }
         })
         .catch((error) => {
           console.log("JQ: There was an error:", error);
-          navigate("/error");
+          navigate(docRoot + "/error");
           
         });
   }
@@ -73,13 +74,13 @@ function StudentMeeting() {
     e.preventDefault();
 
     if(localStorage.getItem('asci-user') === null){
-      navigate("/login");
+      navigate(docRoot + "/login");
     }
     else if(localStorage.getItem('asci-course') === null){
-      navigate("/selectCourse");
+      navigate(docRoot + "/selectCourse");
     }
     else if(sessionId === null){
-      navigate("/error");
+      navigate(docRoot + "/error");
     }
     else{
 
@@ -106,17 +107,17 @@ function StudentMeeting() {
           
           if(data.success === "true"){
             console.log("Left meeting");
-            navigate("/joinQueue");
+            navigate(docRoot + "/joinQueue");
           }
           else{
             console.log("Leaving queue failed");
-            navigate("/error");
+            navigate(docRoot + "/error");
           }
 
           
         })
         .catch((error) => {
-          navigate("/error");
+          navigate(docRoot + "/error");
           
         });
     }

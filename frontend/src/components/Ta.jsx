@@ -2,7 +2,7 @@ import React from "react";
 import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 
-function Ta() {
+function Ta(props) {
   
   const navigate = useNavigate();
   
@@ -14,7 +14,8 @@ function Ta() {
       0: "Select course..."
     });
 
-  let url = 'http://localhost:8081/index.php'; 
+  let url = props.url;
+  let docRoot = props.documentRoot; 
   
 
   useEffect(() => {
@@ -67,12 +68,12 @@ function Ta() {
         }
         else{
           console.log("TA: Session not active or some other problem detected by server");
-          navigate("/");
+          navigate(docRoot + "/");
         }
       })
       .catch((error) => {
         console.log("JQ: There was an error:", error);
-        navigate("/error");
+        navigate(docRoot + "/error");
         
       });
   }
@@ -80,7 +81,7 @@ function Ta() {
   const handleLogout = (e) =>{
     e.preventDefault();
     localStorage.clear();
-    navigate('/login');
+    navigate(docRoot + '/login');
   }
 
   const handleWork = (e) =>{
@@ -111,23 +112,23 @@ function Ta() {
 
         /* If user is somehow not logged in, kick to home page */
         if(data.loggedIn !== "true"){
-          navigate("/");
+          navigate(docRoot + "/");
         }
         else{
 
           //if request succeeded
           if(data.success === "true"){
-            navigate("/handleStudent");
+            navigate(docRoot + "/handleStudent");
           }
           else{
             console.log("TA: Starting work did not succeed");
-            navigate("/");
+            navigate(docRoot + "/");
           }
         }
       })
       .catch((error) => {
         console.log("HOME: There was an error:", error);
-        navigate("/error");
+        navigate(docRoot + "/error");
         
       });
 

@@ -2,7 +2,7 @@ import React from "react";
 import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 
-function SelectCourse() {
+function SelectCourse(props) {
   // const [title, setTitle] = useState("question overview");
   // const [details, setDetails] = useState("question details");
   // const [purpose, setPurpose] = useState("");
@@ -15,7 +15,8 @@ function SelectCourse() {
       0: "Select course..."
     });
 
-  let url = 'http://localhost:8081/index.php'; 
+  let url = props.url;
+  let docRoot = props.documentRoot; 
   
     //This function runs on page load!
     useEffect(() => {
@@ -34,7 +35,7 @@ function SelectCourse() {
         getCourses(request, url); 
       }
       else{
-        navigate("/login");
+        navigate(docRoot + "/login");
       }
     }, []);
 
@@ -76,12 +77,12 @@ function SelectCourse() {
           }
           else{
             console.log("Select Course: Server returned error");
-            navigate("/error");
+            navigate(docRoot + "/error");
           }
         })
         .catch((error) => {
           console.log("Select Course: There was an error:", error);
-          navigate("/error");
+          navigate(docRoot + "/error");
           
         });
   }
@@ -90,7 +91,7 @@ function SelectCourse() {
     e.preventDefault();
     //TODO: Add logout functionality?
     localStorage.clear();
-    navigate('/');
+    navigate(docRoot + '/');
   }
 
   const handleSelectCourse = (e) =>{
@@ -98,7 +99,7 @@ function SelectCourse() {
 
     //confirm username is set
     if (localStorage.getItem('asci-user') === null) {
-      navigate("/login");
+      navigate(docRoot + "/login");
     }
     //if user didn't select a course
     if (purpose !== 0){
@@ -111,7 +112,7 @@ function SelectCourse() {
       localStorage.setItem('asci-course', purpose);
 
       //navigate to the home page finally
-      navigate("/");
+      navigate(docRoot + "/");
 
     }
 

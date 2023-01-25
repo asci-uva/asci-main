@@ -91,6 +91,33 @@ class Server
         $this->response = array_merge($this->response, $response);
     }
 
+    /*
+     * This function returns the username that should be used for this request
+     * if netbadge is in play, checks that provided username matches the one provided
+     * by the request JSON. If not, returns an error.
+     * If we are in debug mode, we just trust the username that the request provided.
+     */
+    public function validateUsername($input){
+
+        /* Grab the username from netbadge IF the server is in DEBUG mode */
+        /* Otherwise, use the user provided by request */
+        $user = null;
+        if(\asci\Config::$DEBUG_MODE){
+            $user = $input["user"];
+        }
+        else{
+            $user = $_SESSION["uid"];
+            if($user == null || $user != $this->input["user"]){
+                /* Request is invalid because username's don't match */
+                $result = ["success" => "false", "error" => "ERROR: Session userId does not match provided user id"];
+                $this->setResponse($result);
+                return;
+            }
+        }
+
+        return $user;
+    }
+
     /**
      * Run Method
      *
@@ -106,6 +133,11 @@ class Server
             return;
         }
 
+        /* Grab the username from netbadge IF the server is in DEBUG mode */
+        /* Otherwise, use the user provided by request */
+        $user = $this->validateUsername($this->input);
+        
+
         // Decide what to do based on the command given to the server
         switch ($this->input["command"]) {
             case "hello":
@@ -119,9 +151,8 @@ class Server
                 ]);
                 break;
             case "login":
-                $user = $this->input["userInfo"]["user"];
-                $pass = $this->input["userInfo"]["password"];
-                $this->setResponse($executor->loginHandler($user, $pass));
+                
+                $this->setResponse($executor->loginHandler($user));
 
                 break;
 
@@ -131,7 +162,7 @@ class Server
             //e.g., currently on queue, being helped, etc.
             case "sessionPing":
 
-                $user = $this->input["user"];
+                
                 $courseId = $this->input["courseId"];
 
                 $this->setResponse($executor->sessionPingHandler($user,$courseId));
@@ -142,7 +173,7 @@ class Server
             //return list of active course objects that student is enrolled in.
             case "getCourses":
 
-                $user = $this->input["user"];
+                
                 $this->setResponse($executor->getCoursesHandler($user));
 
                 break;
@@ -151,10 +182,9 @@ class Server
             //if student, token pair is valid and they can
             case "joinQueue":
                 
-                $computingId = $this->input["user"];
                 $courseId = $this->input["courseId"];
                 $question = $this->input["question"];
-                $this->setResponse($executor->joinQueueHandler($computingId, $courseId, $question));
+                $this->setResponse($executor->joinQueueHandler($user, $courseId, $question));
 
                 
                 break;
@@ -163,35 +193,33 @@ class Server
             //what position, etc. 
             case "getQueueStatus":
                 
-                $computingId = $this->input["user"];
                 $courseId = $this->input["courseId"];
                 
-                $this->setResponse($executor->getQueueStatus($computingId, $courseId));
+                $this->setResponse($executor->getQueueStatus($user, $courseId));
                 break;
 
             case "leaveQueue":
 
-                $computingId = $this->input["user"];
                 $courseId = $this->input["courseId"];
                 
-                $this->setResponse($executor->leaveQueue($computingId, $courseId));
+                $this->setResponse($executor->leaveQueue($user, $courseId));
                 
                 break;
 
             case "getMeetingDetails":
-                $computingId = $this->input["user"];
+                
                 $courseId = $this->input["courseId"];
                 
-                $this->setResponse($executor->getMeetingDetails($computingId, $courseId));
+                $this->setResponse($executor->getMeetingDetails($user, $courseId));
                 
                 break;
 
             case "leaveMeeting":
 
-                $computingId = $this->input["user"];
+                
                 $sessionId = $this->input["sessionId"];
                 
-                $this->setResponse($executor->endSession($computingId, $sessionId));
+                $this->setResponse($executor->endSession($user, $sessionId));
                 
                 break;
 
@@ -200,19 +228,17 @@ class Server
 
             case "getNumberWaiting":
 
-                $computingId = $this->input["user"];
                 $courseId = $this->input["courseId"];
                 
-                $this->setResponse($executor->getNumberWaiting($computingId, $courseId));
+                $this->setResponse($executor->getNumberWaiting($user, $courseId));
                 
                 break;
 
             case "getStudentForTA":
 
-                $computingId = $this->input["user"];
                 $courseId = $this->input["courseId"];
                 
-                $this->setResponse($executor->getStudentForTA($computingId, $courseId));
+                $this->setResponse($executor->getStudentForTA($user, $courseId));
                 
                 break;
 
@@ -220,19 +246,17 @@ class Server
 
             case "getTAMeetingDetails":
 
-                $computingId = $this->input["user"];
                 $courseId = $this->input["courseId"];
                 
-                $this->setResponse($executor->getTAMeetingDetails($computingId, $courseId));
+                $this->setResponse($executor->getTAMeetingDetails($user, $courseId));
                 
                 break;
 
             case "TAEndMeeting":
 
-                $computingId = $this->input["user"];
                 $sessionId = $this->input["sessionId"];
                 
-                $this->setResponse($executor->endSession($computingId, $sessionId));
+                $this->setResponse($executor->endSession($user, $sessionId));
                 break;
 
 

@@ -1,7 +1,10 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-function Navigation() {
+function Navigation(props) {
+
+  let docRoot = props.documentRoot;
+
   return (
     <div className="navigation">
       <nav className="navbar navbar-expand navbar-dark bg-dark">
@@ -12,17 +15,17 @@ function Navigation() {
           <div>
             <ul className="navbar-nav ml-auto">
               <li className="nav-item">
-                <NavLink className="nav-link" to="/">
+                <NavLink className="nav-link" to={docRoot + "/"}>
                   Home
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className="nav-link" to="/selectCourse">
+                <NavLink className="nav-link" to={docRoot + "/selectCourse"}>
                   Select Course
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className="nav-link" to="/logout">
+                <NavLink className="nav-link" to={docRoot + "/logout"}>
                   Logout
                 </NavLink>
               </li>

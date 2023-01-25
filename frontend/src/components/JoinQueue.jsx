@@ -2,17 +2,18 @@ import React from "react";
 import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 
-function JoinQueue() {
+function JoinQueue(props) {
   
   const navigate = useNavigate();
   
   const [user, setUser] = useState(null);
   let courseId = null;
   
-  const [details, setDetails] = useState("question details");
+  const [details, setDetails] = useState("");
   
 
-  let url = 'http://localhost:8081/index.php'; 
+  let url = props.url;
+  let docRoot = props.documentRoot; 
   
     //This function runs on page load!
     useEffect(() => {
@@ -20,10 +21,10 @@ function JoinQueue() {
       //Need to redo this. Check if user id and course id set already.
       //If not, back out quick!
       if(localStorage.getItem('asci-user') == null){
-        navigate("/login");
+        navigate(docRoot + "/login");
       }
       else if(localStorage.getItem('asci-course') == null){
-        navigate("/selectCourse");
+        navigate(docRoot + "/selectCourse");
       }
       else{
 
@@ -43,17 +44,17 @@ function JoinQueue() {
     e.preventDefault();
     //TODO: Add logout functionality?
     localStorage.clear();
-    navigate('/');
+    navigate(docRoot + '/');
   }
 
   const handleQuestion = (e) =>{
     e.preventDefault();
 
     if(localStorage.getItem('asci-user') == null){
-      navigate("/login");
+      navigate(docRoot + "/login");
     }
     else if(localStorage.getItem('asci-course') == null){
-      navigate("/selectCourse");
+      navigate(docRoot + "/selectCourse");
     }
     else{
       setUser(localStorage.getItem('asci-user'));
@@ -88,17 +89,17 @@ function JoinQueue() {
 
         //if request succeeded
         if(data.success === "true" && data.session != null){
-          navigate("/studentWaitingRoom");
+          navigate(docRoot + "/studentWaitingRoom");
         }
         else{
           console.log("JQ: Error, joining the queue didn't succeed");
-          navigate("/error");
+          navigate(docRoot + "/error");
         }
         
       })
       .catch((error) => {
         console.log("JQ: There was an error:", error);
-        navigate("/error");
+        navigate(docRoot + "/error");
         
       });
 
@@ -114,6 +115,7 @@ function JoinQueue() {
       <form>
         <label>Please explain your issue in a few sentences before joining the queue.</label>
         <textarea
+          placeholder="Enter your issue here"
           required
           value = {details}
           onChange={(e)=>setDetails(e.target.value)}>

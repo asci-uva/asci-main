@@ -2,7 +2,7 @@ import React from "react";
 import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 
-function StudentWaitingRoom() {
+function StudentWaitingRoom(props) {
 
 	const navigate = useNavigate();
 
@@ -16,17 +16,18 @@ function StudentWaitingRoom() {
 	let user = null;
 	let courseId = null;
 
-	let url = 'http://localhost:8081/index.php'; 
+	let url = props.url;
+  let docRoot = props.documentRoot; 
   
     //This function runs on page load!
     useEffect(() => {
 
       //Make sure id and course are set
       if(localStorage.getItem('asci-user') == null){
-        navigate("/login");
+        navigate(docRoot + "/login");
       }
       else if(localStorage.getItem('asci-course') == null){
-        navigate("/selectCourse");
+        navigate(docRoot + "/selectCourse");
       }
       else{
 
@@ -55,10 +56,10 @@ function StudentWaitingRoom() {
  	function poll(){
 
     if(localStorage.getItem('asci-user') == null){
-        navigate("/login");
+        navigate(docRoot + "/login");
     }
     else if(localStorage.getItem('asci-course') == null){
-        navigate("/selectCourse");
+        navigate(docRoot + "/selectCourse");
     }
     else{
 
@@ -93,17 +94,17 @@ function StudentWaitingRoom() {
           
           if(data.success !== "true"){
           	console.log("Waiting room: Something went wrong");          	
-            navigate("/error");
+            navigate(docRoot + "/error");
           }
 
           else if(data.session === null){
             console.log("Student doesn't have a session");
-            navigate("/joinQueue");
+            navigate(docRoot + "/joinQueue");
           }
 
           else if(data.session.status === "in_progress"){
             console.log("Being helped now!");
-            navigate("/studentMeeting");
+            navigate(docRoot + "/studentMeeting");
           }
 
           else if(data.session.status === "waiting"){
@@ -119,13 +120,13 @@ function StudentWaitingRoom() {
 
           else{
             console.log("StudentWaitingRoom: Something went wrong!");
-            navigate("/error");
+            navigate(docRoot + "/error");
           }
           
         })
         .catch((error) => {
           console.log("Waiting room: There was an error:", error);
-          navigate("/error");
+          navigate(docRoot + "/error");
           
         });
   	}
@@ -134,10 +135,10 @@ function StudentWaitingRoom() {
 	    e.preventDefault();
     
       if(localStorage.getItem('asci-user') == null){
-        navigate("/login");
+        navigate(docRoot + "/login");
       }
       else if(localStorage.getItem('asci-course') == null){
-        navigate("/selectCourse");
+        navigate(docRoot + "/selectCourse");
       }
       else{
 
@@ -169,18 +170,18 @@ function StudentWaitingRoom() {
           
           if(data.success === "true"){
           	console.log("Left queue");
-            navigate("/joinQueue");
+            navigate(docRoot + "/joinQueue");
           }
           else{
           	console.log("Leaving queue failed");
-          	navigate("/error");
+          	navigate(docRoot + "/error");
           }
 
           
         })
         .catch((error) => {
           console.log("Waiting room: There was an error leaving the queue:", error);
-          navigate("/error");
+          navigate(docRoot + "/error");
           
         });
   	}

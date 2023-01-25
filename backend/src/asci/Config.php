@@ -30,7 +30,7 @@ class Config {
     /**
      * @var boolean Whether the system is in DEBUG mode
      */
-    public static $DEBUG_MODE = false;
+    public static $DEBUG_MODE = true;
 
 
     /**

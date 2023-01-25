@@ -4,15 +4,18 @@ import { useNavigate } from 'react-router-dom';
 
 //https://www.youtube.com/watch?v=IkMND33x0qQ
 //https://bobbyhadz.com/blog/react-redirect-after-form-submit
-function Question() {
+function Question(props) {
   const [title, setTitle] = useState("question overview");
   const [details, setDetails] = useState("question details");
   const [purpose, setPurpose] = useState("");
   const navigate = useNavigate();
 
+  let url = props.url;
+  let docRoot = props.documentRoot;
+
   const handleSubmit = event => {
     event.preventDefault();
-    navigate('/studentwaitingroom');
+    navigate(docRoot + '/studentwaitingroom');
   };
   
   return ( 

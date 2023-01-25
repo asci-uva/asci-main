@@ -25,10 +25,10 @@ include ("/opt/src/vendor/autoload.php");
 /**
  * If debug is on, turn on error reporting
  */
-if (\asci\Config::$DEBUG_MODE) {
+/*if (\asci\Config::$DEBUG_MODE) {
     error_reporting(E_ALL);
     ini_set('display_errors', 0);
-}
+}*/
 
 
 // Namespace shortcuts

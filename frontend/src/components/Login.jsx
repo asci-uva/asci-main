@@ -4,17 +4,32 @@ import { useNavigate} from 'react-router-dom';
 
 
 //https://www.youtube.com/watch?v=IkMND33x0qQ
-function Login() {
+function Login(props) {
   const [username, setUsername] = useState("user name");
   const navigate = useNavigate();
+
+  let url0 = props.url; 
+  let docRoot = props.documentRoot;
+
+  let netbadgeEnabled = props.netbadge;
   
   useEffect(() => {
 
     console.log("Checking if user name already set");
-    //If token is set, kick to home screen to check validity of session
+    
+    //If username is set in browser, don't do anything and just route to selectPage
     if (localStorage.getItem('asci-user') !== null) {
       console.log("it does, sending to home page");
-      navigate("/selectCourse");
+      navigate(docRoot + "/selectCourse");
+    }
+    else{
+
+      //If netbadge enabled, ping the server to find out who this user is
+      if(netbadgeEnabled){
+        login();
+      }
+      //If netbadge not enabled, then just wait for user to type something into the box
+
     }
   }, []);
   
@@ -24,7 +39,7 @@ function Login() {
   }
 
    
-  let url0 = 'http://localhost:8081/index.php'; 
+  
   //server address
   //data will be a json file
   const sendJson = (json0, url0) =>{
@@ -44,48 +59,62 @@ function Login() {
           console.log("LOGIN Successful");
           localStorage.setItem('asci-user', data.computing_id); 
           localStorage.setItem('asci-course', null);         
-          navigate('/selectCourse');
+          navigate(docRoot + '/selectCourse');
         }
         else{
           console.log("LOGIN Failed");
-          navigate('/login');
+          navigate(docRoot + '/error');
         }
 
-        //navigate('/Login');
       })
       .catch((error) => {
         console.log("There was an error:", error);
-        navigate("/error");
+        navigate(docRoot + "/error");
         
       });
   }
   
   const handleSubmit = (e) =>{
     e.preventDefault();
+    login();
+  }
+
+  function login(){
     let json = {};
     json.command = "login";
-    json.userInfo = userInfo;
+    json.user = userInfo.user;
 
     let jsonString = JSON.stringify(json);
     console.log(jsonString);
     sendJson(jsonString,url0);
   }
 
-  return (
-    <div className="question">
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <label>Username</label>
-        <input
-          type = "text"
-          required
-          value = {username}
-          onChange={(e)=>setUsername(e.target.value)}
-        />
-        <button>Submit</button>
-      </form>
-    </div>
-  );
+
+  //RENDERING
+  if(netbadgeEnabled === false){
+    return (
+      <div className="question">
+        <h2>Login</h2>
+        <form onSubmit={handleSubmit}>
+          <label>Username</label>
+          <input
+            type = "text"
+            required
+            value = {username}
+            onChange={(e)=>setUsername(e.target.value)}
+          />
+          <button>Submit</button>
+        </form>
+      </div>
+    );
+  }
+  else{
+    return (
+      <div className="question">
+        <h2>Redirecting to netbadge login...</h2>
+      </div>
+    );
+  }
 }
 
 export default Login;

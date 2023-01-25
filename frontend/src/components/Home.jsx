@@ -11,10 +11,12 @@ import { useNavigate} from 'react-router-dom';
 		//with TA if being helped
 		//
 
-function Home() {
+function Home(props) {
 
 	const navigate = useNavigate();
-	let url = 'http://localhost:8081/index.php'; 
+
+	let docRoot = props.documentRoot;
+	let url = props.url; 
   
   	//This function runs on page load!
   	useEffect(() => {
@@ -22,10 +24,10 @@ function Home() {
     	
   		//need to redo this. check user set and course set first
   		if(localStorage.getItem('asci-user') === null){
-  			navigate("/login");
+  			navigate(docRoot + "/login");
   		}
   		else if(localStorage.getItem('asci-course') === null){
-  			navigate("/selectCourse");
+  			navigate(docRoot + "/selectCourse");
   		}
   		else{
 
@@ -64,12 +66,12 @@ function Home() {
 	        }
 	        else{
 	          console.log("HOME: Server returned error");
-	          navigate("/error");
+	          navigate(docRoot + "/error");
 	        }
 	      })
 	      .catch((error) => {
 	        console.log("HOME: There was an error:", error);
-	        navigate("/error");
+	        navigate(docRoot + "/error");
 	        
 	      });
 	}
@@ -90,27 +92,27 @@ function Home() {
           	//based on queuestate, send to correct page
           	if(status === "none"){
           		console.log("Navigating to join queue");
-          		navigate("/joinQueue");
+          		navigate(docRoot + "/joinQueue");
           	}
           	else if(status === "waiting"){
-          		navigate("/studentWaitingRoom");
+          		navigate(docRoot + "/studentWaitingRoom");
           	}
           	else if(status === "in_progress"){
-          		navigate("/studentMeeting");
+          		navigate(docRoot + "/studentMeeting");
           	}
           }
           else if(role === "ta"){
           	if(status === "none"){
-          		navigate("/handleStudent");
+          		navigate(docRoot + "/handleStudent");
           	}
           	else if(status === "in_progress"){
-          		navigate("/meeting");
+          		navigate(docRoot + "/meeting");
           	}
           }
           else{
           	//kick to login page
           	console.log("HOME: Something went wrong, role is not student or ta");
-          	navigate("/error");
+          	navigate(docRoot + "/error");
           }
 	}
 
