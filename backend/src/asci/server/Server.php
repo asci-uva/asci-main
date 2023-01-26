@@ -101,13 +101,15 @@ class Server
 
         /* Grab the username from netbadge IF the server is in DEBUG mode */
         /* Otherwise, use the user provided by request */
+        // Login is a special command that doesn't require this validation
         $user = null;
-        if(\asci\Config::$DEBUG_MODE){
+        if(\asci\Config::$DEBUG_MODE || $input["command"] == "login"){
             $user = $input["user"];
         }
         else{
             $user = $_SESSION["uid"];
-            if($user == null || $user != $this->input["user"]){
+
+            if($user == null || $user != $input["user"]){
                 /* Request is invalid because username's don't match */
                 $result = ["success" => "false", "error" => "ERROR: Session userId does not match provided user id"];
                 $this->setResponse($result);
