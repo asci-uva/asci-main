@@ -475,6 +475,7 @@ class ServerExecutor{
 
         $result["success"] = "true";
         $result["waiting"] = $numWaiting["count"];
+        $result["usercourse"] = $userCourse->toArray();
         return $result;
     }
 

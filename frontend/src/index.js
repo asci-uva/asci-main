@@ -25,15 +25,15 @@ import {
 //SOME GLOBAL CONSTANTS THAT ARE USED THROUGHOUT THE APP
 const documentRoot = "/ohq/ohq";
 const url = "http://localhost:8081/index.php";
-const netbadgeEnabled = false; //if false, login page will have you type in a userId to use
+const debugMode = true; //if false, login page will have you type in a userId to use
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <Router>
-    <Navigation documentRoot={documentRoot} />
+    <Navigation documentRoot={documentRoot} debugMode={debugMode} />
     <Routes>
       <Route path={documentRoot + "/"} element={<Home documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/login"} element={<Login documentRoot={documentRoot} url={url} netbadge={netbadgeEnabled} />} />
+      <Route path={documentRoot + "/login"} element={<Login documentRoot={documentRoot} url={url} debugMode={debugMode} />} />
       <Route path={documentRoot + "/question"} element={<Question documentRoot={documentRoot} url={url} />} />
       <Route path={documentRoot + "/ta"} element={<Ta documentRoot={documentRoot} url={url} />} />
       <Route path={documentRoot + "/studentWaitingRoom"} element={<StudentWaitingRoom documentRoot={documentRoot} url={url} />} />

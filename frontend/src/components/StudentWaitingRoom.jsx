@@ -8,6 +8,7 @@ function StudentWaitingRoom(props) {
 
 	const [position, setPosition] = useState(-1);
 	const [courseName, setCourseName] = useState("...");
+  const [minsWaiting, setMinsWaiting] = useState("...");
 	
 	//variables for managing polling the server
 	let polling = false;
@@ -23,10 +24,10 @@ function StudentWaitingRoom(props) {
     useEffect(() => {
 
       //Make sure id and course are set
-      if(localStorage.getItem('asci-user') == null){
+      if(localStorage.getItem('asci-user') == 'null'){
         navigate(docRoot + "/login");
       }
-      else if(localStorage.getItem('asci-course') == null){
+      else if(localStorage.getItem('asci-course') == 'null'){
         navigate(docRoot + "/selectCourse");
       }
       else{
@@ -55,10 +56,10 @@ function StudentWaitingRoom(props) {
 
  	function poll(){
 
-    if(localStorage.getItem('asci-user') == null){
+    if(localStorage.getItem('asci-user') == 'null'){
         navigate(docRoot + "/login");
     }
-    else if(localStorage.getItem('asci-course') == null){
+    else if(localStorage.getItem('asci-course') == 'null'){
         navigate(docRoot + "/selectCourse");
     }
     else{
@@ -111,10 +112,17 @@ function StudentWaitingRoom(props) {
             console.log("WR: Displaying new queue position");
             setCourseName(data.usercourse.name);
             setPosition(5);
+            
+            //Get the start date
+            console.log("Date now is: " + Date.now());
+            console.log("Date of entry time is: " + (new Date(data.session.entry_time).getTime()));
+            let waitTime = parseInt((Date.now() - (new Date(data.session.entry_time).getTime())) / 1000 / 60, 10);
+            setMinsWaiting(waitTime);
+            
 
             if(polling == true){
             	console.log("WR: Setting timeout for next poll");
-            	timeoutId = setTimeout(poll, 7000);
+            	timeoutId = setTimeout(poll, 10000);
         	  }
           }
 
@@ -134,10 +142,10 @@ function StudentWaitingRoom(props) {
   	const leaveQueue = (e) =>{
 	    e.preventDefault();
     
-      if(localStorage.getItem('asci-user') == null){
+      if(localStorage.getItem('asci-user') == 'null'){
         navigate(docRoot + "/login");
       }
-      else if(localStorage.getItem('asci-course') == null){
+      else if(localStorage.getItem('asci-course') == 'null'){
         navigate(docRoot + "/selectCourse");
       }
       else{
@@ -191,6 +199,7 @@ function StudentWaitingRoom(props) {
 		<div className="question">
 			<div>
 	  		<h4>You are currently in the queue for { courseName }. A TA Will be with you shortly. </h4>
+        <h6>You have been waiting for <b>{minsWaiting} minutes</b></h6>
 	  	</div>
 		  	<div>
         		<button onClick={leaveQueue}>Leave queue</button>

@@ -21,20 +21,29 @@ function Home(props) {
   	//This function runs on page load!
   	useEffect(() => {
 
+  		console.log("ENTERING HOME");
     	
   		//need to redo this. check user set and course set first
-  		if(localStorage.getItem('asci-user') === null){
+  		if(localStorage.getItem('asci-user') == 'null'){
+  			console.log("User is NOT set, navigating home");
   			navigate(docRoot + "/login");
   		}
-  		else if(localStorage.getItem('asci-course') === null){
+  		else if(localStorage.getItem('asci-course') == 'null'){
+  			console.log("Course is NOT set, navigating to selectCourse");
   			navigate(docRoot + "/selectCourse");
   		}
   		else{
+
+
 
   			//Ok, ping the session and send the user to the proper
   			//page based on their status
   			let user = localStorage.getItem('asci-user');
          	let courseId = localStorage.getItem('asci-course');
+
+         	console.log("All is fine, pinging session");
+         	console.log("user, " + user);
+         	console.log("courseId, " + localStorage.getItem('asci-course'));
 
          	//setup json command
 			let request = {};
@@ -119,8 +128,7 @@ function Home(props) {
 
 	  return (
 	    <div className="question">
-	          <h1 className="font-weight-light">Welcome to the ASCI-Queue</h1>
-	          <p>This page should redirect you soon...</p>    
+	          
 	    </div>
 	  );
 	}

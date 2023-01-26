@@ -12,6 +12,7 @@ services:
       POSTGRES_USER: asci
       POSTGRES_PASSWORD: asci
       POSTGRES_DB: asci
+      TZ: "America/New_York"
     volumes:
       - ./db:/var/lib/postgresql/data
   php:
@@ -28,13 +29,18 @@ services:
       - ./backend/log/:/opt/log/
     depends_on:
       - db
+
+    environment:
+      TZ: "America/New_York"
+
   react:
     build:
       context: ./frontend/
       dockerfile: ./docker/Dockerfile
 
     environment:
-       - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_USEPOLLING=true
+
     volumes:
       - ./frontend/build/:/app/build/
 

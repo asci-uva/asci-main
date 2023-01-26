@@ -1,3 +1,5 @@
+ALTER DATABASE asci SET timezone TO 'America/New_York';
+
 CREATE TYPE roles AS ENUM (
   'student',
   'instructor',

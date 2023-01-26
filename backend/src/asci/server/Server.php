@@ -103,7 +103,7 @@ class Server
         /* Otherwise, use the user provided by request */
         // Login is a special command that doesn't require this validation
         $user = null;
-        if(\asci\Config::$DEBUG_MODE && $input["command"] == "login"){
+        if(\asci\Config::$DEBUG_MODE){
             $user = $input["user"];
         } else { // netbadge
             $user = $_SERVER["uid"];

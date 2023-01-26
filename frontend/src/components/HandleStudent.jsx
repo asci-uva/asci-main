@@ -7,22 +7,28 @@ function HandleStudent(props) {
   let user = null;
   let courseId = null;
 
+  //variables for managing polling the server
+  let polling = false;
+  let timeoutId = 0;
+  //----------------------
+
   let url = props.url; 
   let docRoot = props.documentRoot;
 
   const [assign, setAssign] = useState(true);
   const [numWaiting, setNumWaiting] = useState("Loading...");
+  const [courseName, setCourseName] = useState("Loading...");
   const navigate = useNavigate();
 
   useEffect(() => {
     //Ping the server and make sure this person is actually a TA
     console.log("TA: Checking if token exists");
 
-    if(localStorage.getItem('asci-user') === null){
+    if(localStorage.getItem('asci-user') == 'null'){
       navigate(docRoot + "/login");
     }
 
-    else if(localStorage.getItem('asci-course') === null){
+    else if(localStorage.getItem('asci-course') == 'null'){
       navigate(docRoot + "/selectCourse");
     }
 
@@ -30,7 +36,15 @@ function HandleStudent(props) {
       user = localStorage.getItem('asci-user');
       courseId = localStorage.getItem('asci-course');
 
+      polling = true;
       pollNumWaiting();
+    }
+
+    //called when this component unmounts
+    return () => {
+      console.log("HandleStudent: Stopping polling");
+      clearTimeout(timeoutId);
+      polling = false;
     }
     
     
@@ -66,6 +80,15 @@ function HandleStudent(props) {
         //if request succeeded
         if(data.success === "true"){
           setNumWaiting(data.waiting);
+
+          setCourseName(data.usercourse.mnemonic +
+                        data.usercourse.number + "(" +
+                        data.usercourse.name + ")"
+                        );
+
+          if(polling == true){
+              timeoutId = setTimeout(pollNumWaiting, 30000);
+          }
         }
         else{
           console.log("Getting number waiting failed");
@@ -93,11 +116,11 @@ function HandleStudent(props) {
   const handleAssign = (e) =>{
     e.preventDefault();
 
-    if(localStorage.getItem('asci-user') === null){
+    if(localStorage.getItem('asci-user') == 'null'){
       navigate(docRoot + "/login");
     }
 
-    else if(localStorage.getItem('asci-course') === null){
+    else if(localStorage.getItem('asci-course') == 'null'){
       navigate(docRoot + "/selectCourse");
     }
     else{
@@ -144,11 +167,11 @@ function HandleStudent(props) {
   return (
     <div className="question">
       <div>
-        <h2>You are now handling students. There are {numWaiting} student(s) waiting.</h2>
+        <h2>You are now handling students for <b>{courseName}</b></h2>
+        <h5>There are <b>{numWaiting}</b> student(s) waiting.</h5>
       </div>
       <div>
-        <h2>Assign me a student</h2>
-        <button onClick={handleAssign}>find student</button>
+        <button onClick={handleAssign}>get next student</button>
       </div>
       
     </div>

@@ -98,7 +98,7 @@ function SelectCourse(props) {
     e.preventDefault();
 
     //confirm username is set
-    if (localStorage.getItem('asci-user') === null) {
+    if (localStorage.getItem('asci-user') == 'null') {
       navigate(docRoot + "/login");
     }
     //if user didn't select a course

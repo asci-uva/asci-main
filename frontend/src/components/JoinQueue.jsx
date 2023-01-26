@@ -12,6 +12,7 @@ function JoinQueue(props) {
   const [subject, setSubject] = useState("");
   const [location, setLocation] = useState("");
   const [details, setDetails] = useState("");
+  const [courseName, setCourseName] = useState("");
   
 
   let url = props.url;
@@ -22,24 +23,58 @@ function JoinQueue(props) {
 
       //Need to redo this. Check if user id and course id set already.
       //If not, back out quick!
-      if(localStorage.getItem('asci-user') == null){
+      if(localStorage.getItem('asci-user') == 'null'){
         navigate(docRoot + "/login");
       }
-      else if(localStorage.getItem('asci-course') == null){
+      else if(localStorage.getItem('asci-course') == 'null'){
         navigate(docRoot + "/selectCourse");
       }
       else{
 
-        //Just assume they are not in a queue for now...
-        //Server will catch once they hit "Join Queue" if they are in another state
-        console.log("Setting user and course id");
         setUser(localStorage.getItem('asci-user'));
         courseId = localStorage.getItem('asci-course');
-        console.log("User: " + localStorage.getItem('asci-user'));
-        console.log("courseId: " + courseId);
+        
+        //setup json command
+        let request = {};
+        request.command = "sessionPing";
+        request.user = localStorage.getItem('asci-user');
+        request.courseId = localStorage.getItem('asci-course');
+        checkSession(request, url); 
       }
     
     }, []);
+
+  //This function checks the users session
+  const checkSession = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+        console.log("Data is: ", data);
+        let success = data.success;
+        if(success === "true"){
+
+          setCourseName(data.usercourse.mnemonic +
+                        data.usercourse.number + "(" +
+                        data.usercourse.name + ")"
+                        );
+          
+        }
+        else{
+          console.log("HOME: Server returned error");
+          navigate(docRoot + "/error");
+        }
+      })
+      .catch((error) => {
+        console.log("HOME: There was an error:", error);
+        navigate(docRoot + "/error");
+        
+      });
+  }
 
 
   const handleLogout = (e) =>{
@@ -52,10 +87,10 @@ function JoinQueue(props) {
   const handleQuestion = (e) =>{
     e.preventDefault();
 
-    if(localStorage.getItem('asci-user') == null){
+    if(localStorage.getItem('asci-user') == 'null'){
       navigate(docRoot + "/login");
     }
-    else if(localStorage.getItem('asci-course') == null){
+    else if(localStorage.getItem('asci-course') == 'null'){
       navigate(docRoot + "/selectCourse");
     }
     else{
@@ -114,6 +149,7 @@ function JoinQueue(props) {
     <div className="question">
       <div>
       <h2>Hello {user}</h2>
+      <h6>You have selected <b>{courseName}</b>. Enter your info below to join the queue.</h6>
       </div>
       <br></br>
       <form>

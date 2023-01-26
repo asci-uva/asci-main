@@ -11,7 +11,7 @@ function Login(props) {
   let url0 = props.url; 
   let docRoot = props.documentRoot;
 
-  let netbadgeEnabled = props.netbadge;
+  let debugMode = props.debugMode;
   
   useEffect(() => {
 
@@ -24,8 +24,8 @@ function Login(props) {
     }
     else{
 
-      //If netbadge enabled, ping the server to find out who this user is
-      if(netbadgeEnabled){
+      //If debugMode enabled, ping the server to find out who this user is
+      if(!debugMode){
         login();
       }
       //If netbadge not enabled, then just wait for user to type something into the box
@@ -91,7 +91,7 @@ function Login(props) {
 
 
   //RENDERING
-  if(netbadgeEnabled === false){
+  if(debugMode){
     return (
       <div className="question">
         <h2>Login</h2>
