@@ -1,0 +1,11 @@
+
+# Enable mod_rewrite engine
+RewriteEngine on
+RewriteBase /
+
+# Store the current location in an environment variable CWD
+RewriteCond $0#%{REQUEST_URI} ([^#]*)#(.*)\1$
+RewriteRule ^.*$ - [E=CWD:%2]
+
+#RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^[a-zA-Z0-9]+$ %{ENV:CWD}/index.html [L,QSA]
