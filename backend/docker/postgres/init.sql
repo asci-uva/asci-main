@@ -15,7 +15,7 @@ CREATE TABLE users (
   computing_id VARCHAR(12),
   fname TEXT,
   lname TEXT,
-  pname TEXT,
+  pname TEXT
 );
 
 CREATE TABLE user_courses (
@@ -93,9 +93,9 @@ ALTER TABLE feedback ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
 
 
 
-#insert some dummy data
-#insert mark and nada,
-#make up two dummy courses. Make them student and TA in each 
+-- insert some dummy data
+-- insert mark and nada,
+-- make up two dummy courses. Make them student and TA in each 
 
 INSERT INTO users (id, computing_id, fname, lname , pname)
 VALUES (1, 'mrf8t', 'Mark', 'Floryan', 'Mark');
@@ -104,7 +104,7 @@ INSERT INTO users (id, computing_id, fname, lname , pname)
 VALUES (2, 'nb3f', 'Nada', 'Basit', 'Nada');
 
 INSERT INTO users (id, computing_id, fname, lname , pname)
-VALUES (3, 'jrhott', 'John', 'Hott', 'Robbie');
+VALUES (3, 'jh2jf', 'John', 'Hott', 'Robbie');
 
 INSERT INTO courses (id, mnemonic, number, name, semester)
 VALUES (1, 'CS', '2130', 'CSO1', 'SP-23');
