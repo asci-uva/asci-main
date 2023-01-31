@@ -23,10 +23,10 @@ function JoinQueue(props) {
 
       //Need to redo this. Check if user id and course id set already.
       //If not, back out quick!
-      if(localStorage.getItem('asci-user') == 'null'){
+      if(localStorage.getItem('asci-user') === null){
         navigate(docRoot + "/login");
       }
-      else if(localStorage.getItem('asci-course') == 'null'){
+      else if(localStorage.getItem('asci-course') === null){
         navigate(docRoot + "/selectCourse");
       }
       else{
@@ -87,10 +87,10 @@ function JoinQueue(props) {
   const handleQuestion = (e) =>{
     e.preventDefault();
 
-    if(localStorage.getItem('asci-user') == 'null'){
+    if(localStorage.getItem('asci-user') === null){
       navigate(docRoot + "/login");
     }
-    else if(localStorage.getItem('asci-course') == 'null'){
+    else if(localStorage.getItem('asci-course') === null){
       navigate(docRoot + "/selectCourse");
     }
     else{

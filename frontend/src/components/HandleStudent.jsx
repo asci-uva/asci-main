@@ -24,11 +24,11 @@ function HandleStudent(props) {
     //Ping the server and make sure this person is actually a TA
     console.log("TA: Checking if token exists");
 
-    if(localStorage.getItem('asci-user') == 'null'){
+    if(localStorage.getItem('asci-user') === null){
       navigate(docRoot + "/login");
     }
 
-    else if(localStorage.getItem('asci-course') == 'null'){
+    else if(localStorage.getItem('asci-course') === null){
       navigate(docRoot + "/selectCourse");
     }
 
@@ -116,11 +116,11 @@ function HandleStudent(props) {
   const handleAssign = (e) =>{
     e.preventDefault();
 
-    if(localStorage.getItem('asci-user') == 'null'){
+    if(localStorage.getItem('asci-user') === null){
       navigate(docRoot + "/login");
     }
 
-    else if(localStorage.getItem('asci-course') == 'null'){
+    else if(localStorage.getItem('asci-course') === null){
       navigate(docRoot + "/selectCourse");
     }
     else{

@@ -24,10 +24,10 @@ function StudentWaitingRoom(props) {
     useEffect(() => {
 
       //Make sure id and course are set
-      if(localStorage.getItem('asci-user') == 'null'){
+      if(localStorage.getItem('asci-user') === null){
         navigate(docRoot + "/login");
       }
-      else if(localStorage.getItem('asci-course') == 'null'){
+      else if(localStorage.getItem('asci-course') === null){
         navigate(docRoot + "/selectCourse");
       }
       else{
@@ -56,10 +56,10 @@ function StudentWaitingRoom(props) {
 
  	function poll(){
 
-    if(localStorage.getItem('asci-user') == 'null'){
+    if(localStorage.getItem('asci-user') === null){
         navigate(docRoot + "/login");
     }
-    else if(localStorage.getItem('asci-course') == 'null'){
+    else if(localStorage.getItem('asci-course') === null){
         navigate(docRoot + "/selectCourse");
     }
     else{
@@ -142,10 +142,10 @@ function StudentWaitingRoom(props) {
   	const leaveQueue = (e) =>{
 	    e.preventDefault();
     
-      if(localStorage.getItem('asci-user') == 'null'){
+      if(localStorage.getItem('asci-user') === null){
         navigate(docRoot + "/login");
       }
-      else if(localStorage.getItem('asci-course') == 'null'){
+      else if(localStorage.getItem('asci-course') === null){
         navigate(docRoot + "/selectCourse");
       }
       else{

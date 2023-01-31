@@ -58,7 +58,6 @@ function Login(props) {
 
           console.log("LOGIN Successful");
           localStorage.setItem('asci-user', data.computing_id); 
-          localStorage.setItem('asci-course', null);         
           navigate(docRoot + '/selectCourse');
         }
         else{
