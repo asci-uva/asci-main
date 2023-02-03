@@ -206,6 +206,7 @@ function Meeting(props) {
       <div>
         <button onClick={handlePutBack}>Put student back in queue!</button>
       </div>
+      <br></br>
       <div>
         <button onClick={handleEndMeeting}>Student has been helped!</button>
         <p style={{   

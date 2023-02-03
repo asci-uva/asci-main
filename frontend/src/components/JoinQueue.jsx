@@ -2,6 +2,7 @@ import React from "react";
 import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 
+
 function JoinQueue(props) {
   
   const navigate = useNavigate();
@@ -13,6 +14,9 @@ function JoinQueue(props) {
   const [location, setLocation] = useState("");
   const [details, setDetails] = useState("");
   const [courseName, setCourseName] = useState("");
+
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   
 
   let url = props.url;
@@ -93,7 +97,23 @@ function JoinQueue(props) {
     else if(localStorage.getItem('asci-course') === null){
       navigate(docRoot + "/selectCourse");
     }
+    else if(subject === ""){
+      setIsError(true);
+      setErrorMessage("Please enter an issue subject above");
+    }
+    else if(details === ""){
+      setIsError(true);
+      setErrorMessage("Please enter an issue explanation");
+    }
+    else if(location === ""){
+      setIsError(true);
+      setErrorMessage("Please enter a location above");
+    }
     else{
+
+      setIsError(false);
+      setErrorMessage("");
+
       setUser(localStorage.getItem('asci-user'));
       courseId = localStorage.getItem('asci-course');
     
@@ -145,6 +165,8 @@ function JoinQueue(props) {
     }
 
 
+
+
   return (
     <div className="question">
       <div>
@@ -179,12 +201,22 @@ function JoinQueue(props) {
           onChange={(e)=>setLocation(e.target.value)}
         />
       </form>
+      
+      {isError &&
+        <div className="error">
+        <label><b>Error:</b> { errorMessage }</label>
+        </div>
+      }
+
       <div>
         <button onClick={handleQuestion}>Join queue</button>
       </div>
     </div>
+    
   );
 }
+
+
 
 export default JoinQueue;
 

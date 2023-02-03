@@ -12,6 +12,20 @@ code {
     monospace;
 }
 
+.error {
+  padding-top: 10px;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+  padding-bottom: 10px;
+}
+
+.error label{
+  text-align: center;
+  display: block;
+  background-color: #C06572;
+}
+
 
 /*Question form*/
 .question {
