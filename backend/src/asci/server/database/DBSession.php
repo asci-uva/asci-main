@@ -90,7 +90,6 @@ class DBSession
 
 
         if($session == null){
-            $this->logger->addWarning("SESSION IS NULL", array("query" => $query));
             return null;
         }
         else{

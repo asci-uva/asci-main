@@ -127,7 +127,7 @@ class Server
     public function run()
     {
 
-        $this->logger->addDebug("Server starting to handle request", array("input" => $this->input));
+        //$this->logger->addDebug("Server starting to handle request", array("input" => $this->input));
         $executor = new \asci\server\ServerExecutor();
 
         if ($this->input == null || empty($this->input)) {
