@@ -4,18 +4,18 @@ namespace asci\data;
 
 class Session implements \Serializable {
 
-    private $id;
-    private $course_id;
-    private $issue;
-    private $issue_subject;
-    private $location;
-    private $status;
-    private $entry_time;
-    private $fulfillment_time;
-    private $exit_time;
-    private $session_id;
-    private $user_id;
-    private $role;
+    public $id;
+    public $course_id;
+    public $issue;
+    public $issue_subject;
+    public $location;
+    public $status;
+    public $entry_time;
+    public $fulfillment_time;
+    public $exit_time;
+    public $session_id;
+    public $user_id;
+    public $role;
 
 
     public function __construct()

@@ -12,6 +12,11 @@ CREATE TYPE status_type AS ENUM (
   'completed'
 );
 
+CREATE TYPE session_user_status AS ENUM (
+  'active',
+  'inactive'
+);
+
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   computing_id VARCHAR(12),
@@ -38,7 +43,8 @@ CREATE TABLE courses (
 CREATE TABLE session_users (
   session_id SERIAL,
   user_id INT,
-  role roles
+  role roles,
+  user_status session_user_status
 );
 
 CREATE TABLE sessions (

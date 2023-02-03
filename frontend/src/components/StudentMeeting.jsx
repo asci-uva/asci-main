@@ -107,7 +107,7 @@ function StudentMeeting(props) {
           
           if(data.success === "true"){
             console.log("Left meeting");
-            navigate(docRoot + "/joinQueue");
+            navigate(docRoot + "/");
           }
           else{
             console.log("Leaving queue failed");

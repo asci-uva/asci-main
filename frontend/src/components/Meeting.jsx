@@ -136,6 +136,59 @@ function Meeting(props) {
 
     }
 
+
+  const handlePutBack = (e) =>{
+    if(localStorage.getItem('asci-user') === null){
+      navigate(docRoot + "/login");
+    }
+    else if(localStorage.getItem('asci-course') === null){
+      navigate(docRoot + "/selectCourse");
+    }
+    else if(sessionId === null){
+      navigate(docRoot + "/error");
+    }
+    else{
+      //End the meeting
+      let request = {};
+      request.command = "PutStudentBackOnQueue";
+      request.user = localStorage.getItem('asci-user');
+      request.studentId = studentId;
+      request.sessionId = sessionId;
+      
+      putBack(request, url);
+    }
+  }
+
+  //ends meeting
+  const putBack = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+        console.log("Data is: ", data);
+
+        //if request succeeded
+        if(data.success === "true"){
+          navigate(docRoot + "/handleStudent");
+        }
+        else{
+          console.log("Ending meeting failed");
+          navigate(docRoot + "/error");
+        }
+        
+      })
+      .catch((error) => {
+        console.log("HOME: There was an error:", error);
+        navigate(docRoot + "/error");
+        
+      });
+
+    }
+
   return (
     <div className="question">
       <div>
@@ -151,7 +204,10 @@ function Meeting(props) {
         <h5><b>Location:</b> {location}</h5>
       </div>
       <div>
-        <button onClick={handleEndMeeting}>End meeting</button>
+        <button onClick={handlePutBack}>Put student back in queue!</button>
+      </div>
+      <div>
+        <button onClick={handleEndMeeting}>Student has been helped!</button>
         <p style={{   
           fontSize: '15px',
           padding: '20px',

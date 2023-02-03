@@ -230,7 +230,7 @@ class ServerExecutor{
         $result = [];
 
         //2: Grab the next student that is waiting
-        $session = $dbsession->getLongestWaitingSession($course_id);
+        $session = $dbsession->getLongestWaitingSession($user->getId(), $course_id);
 
         if($session == null){
             $result["success"] = "false";
@@ -252,7 +252,7 @@ class ServerExecutor{
 
         //Ok, we have info, let's create a user session for TA that is helping
         $TASessUsr = new \asci\data\SessionUser();
-        $TASessUsr->fromParams($user->getId(), $session->getId(), 'ta');
+        $TASessUsr->fromParams($user->getId(), $session->getId(), 'ta', 'active');
         $dbsessusr->insert($TASessUsr);
 
         //Ok, Let's update the session itself
@@ -379,6 +379,7 @@ class ServerExecutor{
     /*
      * Given a computing_id and session_id, end the session
      * IF computing_id is actually part of that session
+     * AND the session status is currently "in_progress"
      */
     public function endSession($computing_id, $session_id){
         //DB objects we will be using
@@ -405,8 +406,8 @@ class ServerExecutor{
             return $result;
         }
         else if($session->getStatus() != "in_progress"){
-            $result["success"] = "false";
-            $result["error"] = "session is not in the in_progress state (and it should be)";
+            $result["success"] = "true";
+            $result["error"] = "Warning: Session is not in progress. Possibly because TA put student back on queue";
             return $result;
         }
 
@@ -479,6 +480,65 @@ class ServerExecutor{
         return $result;
     }
 
+    /*
+     * Given a computing_id (ta), computing_id (student) and session_id
+     * Put the student back on the queue
+     * by closing students other sessions (make them inactive)
+     * AND resetting the fulfillment time of this session
+     * AND set session back to "waiting" state
+     */
+    public function putStudentBackOnQueue($user, $studentId, $sessionId){
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+
+        //0: Grab the user and student
+        $ta = $this->userStore->getUser($user);
+        $student = $this->userStore->getUser($studentId);
+
+        $result = [];
+
+        //2: grab the session
+        $session = $dbsession->getSession($sessionId);
+
+        if($session == null){
+            $result["success"] = "false";
+            $result["error"] = "No session exists with the provided session_id";
+            return $result;
+        }
+
+        //Ok, let's grab the session_usr for the student and ta
+        $sessUsrTA = $dbsessusr->getSessionUser($ta->getId(), $session->getId());
+        $sessUsrStudent = $dbsessusr->getSessionUser($student->getId(), $session->getId());
+
+        if($sessUsrTA == null || $sessUsrStudent == null){
+            $result["success"] = "false";
+            $result["error"] = "This TA or Student is not a part of this session, so cannot end it";
+            return $result;
+        }
+
+        //Ok, we need to end any other session the student is a part of
+        $dbsession->closeAllOtherSessions($student->getId(), $session->getCourseId(), $session->getId());
+
+        //Now set the session to 'waiting' with a new fulfillment time
+        $session->fulfillment_time = "now()";
+        $session->status = "waiting";
+        $res1 = $dbsession->update($session);
+
+        //Now set the session_user for the ta to inactive
+        $sessUsrTA->user_status = 'inactive';
+        $res2 = $dbsessusr->update($sessUsrTA);
+
+        if($res1 && $res2){
+            $result["success"] = "true";
+            return $result;
+        }
+        else{
+            $result["success"] = "false";
+            $result["error"] = "Something went wrong. Updating session users failed";
+            return $result;
+        }
+    }
 
     
 

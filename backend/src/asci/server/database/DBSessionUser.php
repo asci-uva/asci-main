@@ -25,12 +25,37 @@ class DBSessionUser
     }
 
     /*
+     * Updates the sessionUsr with the provided one
+     */
+    public function update($sessionUsr){
+        $query = 'UPDATE session_users SET
+            session_id = $1,
+            user_id = $2,
+            role = $3,
+            user_status = $4
+            WHERE session_id = $5 and user_id = $6
+        ';
+
+        $result = $this->db->query($query, array(
+            $sessionUsr->getSessionId(),
+            $sessionUsr->getUserId(),
+            $sessionUsr->getRole(),
+            $sessionUsr->getUserStatus(),
+            $sessionUsr->getSessionId(),
+            $sessionUsr->getUserId()
+        ));
+
+        if($result) return true;
+        else return false;
+    }
+
+    /*
      * inserts this session_user object into the database
      */
     public function insert($session_user){
-        $query = 'insert into session_users (user_id, session_id, role) values ($1, $2, $3);';
+        $query = 'insert into session_users (user_id, session_id, role, user_status) values ($1, $2, $3, $4);';
 
-        $result = $this->db->query($query, array($session_user->getUserId(), $session_user->getSessionId(), $session_user->getRole()));
+        $result = $this->db->query($query, array($session_user->getUserId(), $session_user->getSessionId(), $session_user->getRole(), $session_user->getUserStatus()));
 
         return $result;
     }
@@ -54,7 +79,7 @@ class DBSessionUser
      */
     public function getSessionUserByRole($session_id, $role)
     {
-        $query = 'select * from session_users where session_id=$1 and role=$2';
+        $query = 'select * from session_users where session_id=$1 and role=$2 and user_status=\'active\'';
 
         $result = $this->db->query($query, array($session_id, $role));
         $row = $this->db->fetchrow($result);
@@ -64,6 +89,25 @@ class DBSessionUser
         }
         
         return null;
+
+
+    }
+
+    /*
+     * Given a sessionUser object, have that user "leave" the session
+     * by setting the status to inactive
+     */
+    public function setInactive($session_user)
+    {
+        $query = 'update session_users set user_status=\'inactive\' where session_id=$1 and user_id=$2';
+
+        $result = $this->db->query($query, array($session_user->getSessionId(), $session_user->getUserId()));
+
+        if($result){
+            return true;
+        }
+        
+        return false;
 
 
     }

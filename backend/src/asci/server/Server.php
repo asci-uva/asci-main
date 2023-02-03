@@ -262,6 +262,14 @@ class Server
                 $this->setResponse($executor->endSession($user, $sessionId));
                 break;
 
+            case "PutStudentBackOnQueue":
+
+                $studId = $this->input["studentId"];
+                $sessionId = $this->input["sessionId"];
+                
+                $this->setResponse($executor->putStudentBackOnQueue($user, $studId, $sessionId));
+                break;            
+
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/
 

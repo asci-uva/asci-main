@@ -17,6 +17,11 @@ function Navigation(props) {
             <div>
               <ul className="navbar-nav ml-auto">
                 <li className="nav-item">
+                  <NavLink className="nav-link" to={docRoot + "/"}>
+                    Refresh Page
+                  </NavLink>
+                </li>
+                <li className="nav-item">
                   <NavLink className="nav-link" to={docRoot + "/selectCourse"}>
                     Select Course
                   </NavLink>

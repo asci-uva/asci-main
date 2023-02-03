@@ -24,6 +24,39 @@ class DBSession
         $this->logger->pushHandler($log);
     }
 
+    /*
+     * Updates the session with the provided one
+     */
+    public function update($session){
+        $query = 'UPDATE sessions SET
+            id = $1,
+            course_id = $2,
+            issue = $3,
+            issue_subject = $4,
+            location = $5,
+            status = $6,
+            entry_time = $7,
+            fulfillment_time = $8,
+            exit_time = $9
+            WHERE id = $10';
+
+        $result = $this->db->query($query, array(
+            $session->getId(),
+            $session->getCourseId(),
+            $session->getIssue(),
+            $session->getIssueSubject(),
+            $session->getLocation(),
+            $session->getStatus(),
+            $session->getEntryTime(),
+            $session->getFulfillmentTime(),
+            $session->getExitTime(),
+            $session->getId(),
+        ));
+
+        if($result) return true;
+        else return false;
+    }
+
 
     /*
      * Gets a session by session_id
@@ -49,22 +82,18 @@ class DBSession
      */
     public function getSessionForUser($user_id, $course_id)
     {
-        $query = 'select * from sessions S JOIN session_users U on S.id = U.session_id where user_id=$1 and course_id=$2 and (status=\'waiting\' or status=\'in_progress\')';
+        $query = 'select * from sessions S JOIN session_users U on S.id = U.session_id where user_id=$1 and course_id=$2 and (S.status=\'waiting\' or S.status=\'in_progress\') and U.user_status = \'active\'';
 
-        $this->logger->addWarning("getSessions", array("query" => $query));
-        $this->logger->addWarning("getSessions", array("userId" => $user_id, "course_id" => $course_id));
 
         $result = $this->db->query($query, array($user_id, $course_id));
         $session = $this->db->fetchrow($result);
 
-        $this->logger->addWarning("getSessions", array("session" => $session));
 
         if($session == null){
             $this->logger->addWarning("SESSION IS NULL", array("query" => $query));
             return null;
         }
         else{
-            $this->logger->addWarning("SESSION IS NOT NULL", array("query" => $query));
 
             return (new \asci\data\Session())->fromArray($session);
         }
@@ -91,8 +120,9 @@ class DBSession
         else{
 
             //insert a session_users row for this combo
-            $query = 'insert into session_users (session_id, user_id, role) values ($1, $2, $3)';
-            $result = $this->db->query($query, array($id, $user_id, $role));            
+            //TODO: THIS REALLY SHOULDN"T BE A PART OF THIS METHOD.
+            $query = 'insert into session_users (session_id, user_id, role, user_status) values ($1, $2, $3, $4)';
+            $result = $this->db->query($query, array($id, $user_id, $role, 'active'));            
 
             return $this->getSessionForUser($user_id, $course_id);
 
@@ -109,6 +139,20 @@ class DBSession
         $query = 'update sessions set status = \'completed\' from (select * from sessions JOIN session_users on id=session_id) S where S.id = sessions.id and sessions.course_id=$1 and S.user_id=$2';
 
         $result = $this->db->query($query, array($course_id, $user_id));
+        
+        return true;
+
+    }
+
+    /*
+     * Closes all sessions associated with this user_id course combination
+     * by setting each to "completed" EXCEPT the one provided
+     */
+    public function closeAllOtherSessions($user_id, $course_id, $session_id){
+
+        $query = 'update sessions set status = \'completed\' from (select * from sessions JOIN session_users on id=session_id) S where S.id = sessions.id and sessions.course_id=$1 and S.user_id=$2 and sessions.id != $3';
+
+        $result = $this->db->query($query, array($course_id, $user_id, $session_id));
         
         return true;
 
@@ -135,13 +179,14 @@ class DBSession
 
     /*
      * Fetches the Session for this courseId that has been in the "waiting"
-     * state the longest.
+     * state the longest that this TA has NO session for already
      */
-    public function getLongestWaitingSession($course_id){
+    public function getLongestWaitingSession($ta_id, $course_id){
 
-        $query = 'select * from sessions where course_id=$1 and status=\'waiting\' order by entry_time';
+        //Normal get not caring about session status
+        $query = 'select * from sessions where course_id=$1 and status=\'waiting\' and id not in (select distinct S.id from (sessions S join session_users U on S.id=U.session_id) where U.user_id=$2) order by entry_time';
 
-        $result = $this->db->query($query, array($course_id));
+        $result = $this->db->query($query, array($course_id, $ta_id));
         $row = $this->db->fetchrow($result);
 
         if ($row != null){
