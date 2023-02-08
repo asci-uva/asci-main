@@ -173,6 +173,11 @@ function HandleStudent(props) {
       <div>
         <button onClick={handleAssign}>get next student</button>
       </div>
+
+      <div>
+        <h6>Missed a survey from an older meeting? Click here to go back and fill it out!</h6>
+        <button onClick={() => navigate(docRoot + "/taSurvey")}>Go to survey</button>
+      </div>
       
     </div>
   );

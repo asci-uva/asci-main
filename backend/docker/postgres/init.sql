@@ -60,7 +60,7 @@ CREATE TABLE sessions (
 );
 
 CREATE TABLE survey (
-  session_id SERIAL PRIMARY KEY,
+  session_id INT,
   user_id INT,
   q1_score INT,
   q2_score INT,

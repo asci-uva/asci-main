@@ -231,7 +231,7 @@ class DBSession
      * has been submitted by the current user
      */
     public function getSessionWithNoSurvey($user_id, $course_id){
-        $query = 'SELECT * FROM (sessions S JOIN session_users U on S.id=U.session_id) where U.user_id=$1 and S.course_id=$2 and S.id not in (SELECT session_id FROM survey where user_id=$3) and S.fulfillment_time IS NOT NULL order by S.fulfillment_time';
+        $query = 'SELECT * FROM (sessions S JOIN session_users U on S.id=U.session_id) where U.user_id=$1 and S.course_id=$2 and S.id not in (SELECT session_id FROM survey where user_id=$3) and S.fulfillment_time IS NOT NULL order by S.fulfillment_time DESC';
 
         $result = $this->db->query($query, array($user_id, $course_id, $user_id));
         $session = $this->db->fetchrow($result);

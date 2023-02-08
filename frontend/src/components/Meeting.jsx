@@ -120,7 +120,7 @@ function Meeting(props) {
 
         //if request succeeded
         if(data.success === "true"){
-          navigate(docRoot + "/handleStudent");
+          navigate(docRoot + "/taSurvey");
         }
         else{
           console.log("Ending meeting failed");
@@ -173,7 +173,7 @@ function Meeting(props) {
 
         //if request succeeded
         if(data.success === "true"){
-          navigate(docRoot + "/handleStudent");
+          navigate(docRoot + "/taSurvey");
         }
         else{
           console.log("Ending meeting failed");
