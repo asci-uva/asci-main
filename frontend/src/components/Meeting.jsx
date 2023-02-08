@@ -55,7 +55,7 @@ function Meeting(props) {
 
         //if request succeeded
         if(data.success === "true"){
-          setStudentName(data.student.pname + " " + data.student.lname);
+          setStudentName(data.student.fname + " " + data.student.lname);
           setStudentId(data.student.computing_id);
           setSessionId(data.session.id);
 

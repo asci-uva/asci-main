@@ -59,4 +59,60 @@ code {
   padding: 8px;
   border-radius: 8px;
   cursor: pointer;
+  margin-top: 10px;
+  margin-bottom: 35px;
+}
+ 
+
+/*Survey form*/
+.survey {
+  padding-top: 50px;
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: center;
+  padding-bottom: 50px;
+}
+
+.survey h2 {
+  font-size: 20px;
+  color: #000000;
+  margin-bottom: 15px;
+  margin-top: 60px;
+}
+.survey textarea, .survey select {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 6px 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+  display: block;
+}
+.survey button {
+  margin-top: 20px;
+  background: #f1356d;
+  color: #fff;
+  border: 0;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+
+.survey label {
+  text-align: left;
+  width: 20%;
+  padding: 0px 1em 0px 8px;
+}
+    
+.survey input[type=radio],
+.survey input.radio {
+  padding-right: 5px;
+  width: 5%;
+  margin: 2px 0 0 2px;
+}
+
+.radio_btn_group{
+  display: block;
 }

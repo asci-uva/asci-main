@@ -67,6 +67,18 @@ class ServerExecutor{
 
 
 
+    /*
+     * General function for creating (and returning) an error
+     * used anytime a general error is found and occurs
+     */
+    public function err($errorText){
+        $result = [];
+        $result["success"] = "false";
+        $result["error"] = $errorText;
+        return $result;
+    }
+
+
     /**
      * Handle User Login
      *
@@ -540,7 +552,162 @@ class ServerExecutor{
         }
     }
 
+
+
+    /*
+     * Grabs the session info by session id for a survey. Very similar to
+     * get meeting details but with a set session id.
+     */
+    public function getSessionForSurvey($computing_id, $course_id, $session_id){
+        /* Database Objects we are going to need */
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+
+        /* Grab the user object */
+        $user = $this->userStore->getUser($computing_id);
+
+        /* This method grabs the session obj for needed survey */
+        $session = $dbsession->getSessionForUserById($user->getId(), $session_id);
+
+        if($session == null)
+            return $this->err("There is no session for this user with this session id to survey");
+
+        /* Ok, get the person with the other role (through the session user obj) */
+        $role = "student";
+        if($session->getRole() == "student") $role = "ta"; //opposite role as this user
+
+        $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), $role);
+
+        if($sessUsr == null)
+            return $this->err("ERROR: Session does not have any associated other user");
+
+        /* Now grab the other user */
+        $other = $this->userStore->getUserById($sessUsr->getUserId());
+
+        if($other == null)
+            return $this->err("ERROR: Could not find student information for session");
+
+        //Done. Set up the info to return
+        $result = [];
+        $result["success"] = "true";
+        $result["session"] = $session->toArray();
+        $result["other"] = $other->toArray();
+        $result["error"] = "none";
+
+        return $result;
+    }
+
+
+    /*
+     * For the given computing id. Get the most recent session for which
+     * this user has NOT submitted a survey yet. We are going to use
+     * fulfillment_time for recency here (possible exit_time not set yet)
+     */
+    public function getMostRecentSessionWithNoSurvey($computing_id, $course_id){
+
+        /* Database Objects we are going to need */
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+
+        /* Grab the user object */
+        $user = $this->userStore->getUser($computing_id);
+
+        /* This method grabs the session obj for needed survey */
+        $session = $dbsession->getSessionWithNoSurvey($user->getId(), $course_id);
+
+        if($session == null)
+            return $this->err("There is no session for this user course combo to survey");
+
+        /* Ok, get the person with the other role (through the session user obj) */
+        $role = "student";
+        if($session->getRole() == "student") $role = "ta"; //opposite role as this user
+
+        $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), $role);
+
+        if($sessUsr == null)
+            return $this->err("ERROR: Session does not have any associated other user");
+
+        /* Now grab the other user */
+        $other = $this->userStore->getUserById($sessUsr->getUserId());
+
+        if($other == null)
+            return $this->err("ERROR: Could not find student information for session");
+
+        //Done. Set up the info to return
+        $result = [];
+        $result["success"] = "true";
+        $result["session"] = $session->toArray();
+        $result["other"] = $other->toArray();
+        $result["error"] = "none";
+
+        return $result;
+    }
+
     
+    /*
+     * Inserts the survey into the DB
+     */
+    public function handleSubmitSurvey($computing_id, $session_id, $surveyArray){
+
+        /* Grab the user first */
+        $user = $this->userStore->getUser($computing_id);
+
+        //Create a survey object from the given array
+        $survey = new \asci\data\Survey();
+        $survey->fromArray($surveyArray);
+
+        /* Manually add user id and session id to survey object */
+        $survey->user_id = $user->getId();
+        $survey->session_id = $session_id;
+
+        //Some DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+        $dbsurvey = new \asci\server\database\DBSurvey($this->db);
+
+        //-------------------------------------------
+        //Check if this user is actually a part of this session
+        //-------------------------------------------
+        //Grab the user and session
+        $session = $dbsession->getSession($session_id);
+
+        $result = [];
+
+        if($session == null){
+            $result["success"] = "false";
+            $result["error"] = "No session exists with the provided session_id";
+            return $result;
+        }
+
+        $sessUsr = $dbsessusr->getSessionUser($user->getId(), $session->getId());
+
+        if($sessUsr == null){
+            $result["success"] = "false";
+            $result["error"] = "This TA or Student is not a part of this session, so cannot submit a survey";
+            return $result;
+        }
+        //-------------------------------------------
+        //END: User is a part of this session
+        //-------------------------------------------
+
+        //-------------------------------------------
+        //Write the survey down to the database and return results
+        //-------------------------------------------
+        $success = $dbsurvey->write($survey);
+
+        if($success){
+            $result["success"] = "true";
+            return $result;
+        }
+        else{
+            $result["success"] = "false";
+            $result["error"] = "Something went wrong writing the survey down to the database.";
+            return $result;
+        }
+
+        //-------------------------------------------
+        //-------------------------------------------
+    }
 
 
     /**

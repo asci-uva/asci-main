@@ -75,6 +75,31 @@ class DBSession
     }
 
     /*
+     * Fetches the session object (with user role and id) by a specific session id.
+     *
+     * RETURNS: Session object (with user id and role filled in)
+     */
+    public function getSessionForUserById($user_id, $session_id)
+    {
+        $query = 'select * from sessions S JOIN session_users U on S.id = U.session_id where user_id=$1 and session_id=$2';
+
+
+        $result = $this->db->query($query, array($user_id, $session_id));
+        $session = $this->db->fetchrow($result);
+
+
+        if($session == null){
+            return null;
+        }
+        else{
+
+            return (new \asci\data\Session())->fromArray($session);
+        }
+
+
+    }
+
+    /*
      * Fetches the most recent "waiting" or "in-progress" session for the given
      * userId courseId combination.
      *
@@ -99,6 +124,8 @@ class DBSession
 
 
     }
+
+
 
     /*
      * Creates a new session for this user in this course and sets state to 
@@ -196,6 +223,24 @@ class DBSession
         
         return null;
 
+    }
+
+
+    /*
+     * Gets the most recent session (fulfillment_time) for which no survey
+     * has been submitted by the current user
+     */
+    public function getSessionWithNoSurvey($user_id, $course_id){
+        $query = 'SELECT * FROM (sessions S JOIN session_users U on S.id=U.session_id) where U.user_id=$1 and S.course_id=$2 and S.id not in (SELECT session_id FROM survey where user_id=$3) and S.fulfillment_time IS NOT NULL order by S.fulfillment_time';
+
+        $result = $this->db->query($query, array($user_id, $course_id, $user_id));
+        $session = $this->db->fetchrow($result);
+
+        if($session == null){
+            return null;
+        }
+
+        return (new \asci\data\Session())->fromArray($session);
     }
 
     /*

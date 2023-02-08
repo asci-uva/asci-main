@@ -52,7 +52,7 @@ function StudentMeeting(props) {
           if(data.success === "true"){
 
             console.log("Received TA info");
-            setTAName(data.ta.pname + " " + data.ta.lname);
+            setTAName(data.ta.fname + " " + data.ta.lname);
             setTAId(data.ta.computing_id);
             setSessionId(data.session.id);
             
@@ -106,11 +106,11 @@ function StudentMeeting(props) {
           console.log("Data is: ", data);
           
           if(data.success === "true"){
-            console.log("Left meeting");
-            navigate(docRoot + "/");
+            localStorage.setItem("asci-session", sessionId); 
+            navigate(docRoot + "/studentSurvey");
           }
           else{
-            console.log("Leaving queue failed");
+            console.log("Leaving meeting failed");
             navigate(docRoot + "/error");
           }
 

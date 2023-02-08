@@ -59,11 +59,14 @@ CREATE TABLE sessions (
   exit_time timestamp
 );
 
-CREATE TABLE feedback (
+CREATE TABLE survey (
   session_id SERIAL PRIMARY KEY,
   user_id INT,
-  role roles,
-  rating INT,
+  q1_score INT,
+  q2_score INT,
+  q3_score INT,
+  q4_score INT,
+  q5_score INT,
   feedback TEXT
 );
 
@@ -87,8 +90,6 @@ ALTER TABLE user_courses ADD FOREIGN KEY (user_id) REFERENCES users (id);
 
 ALTER TABLE session_users ADD FOREIGN KEY (user_id) REFERENCES users (id);
 
-ALTER TABLE feedback ADD FOREIGN KEY (user_id) REFERENCES users (id);
-
 ALTER TABLE user_courses ADD FOREIGN KEY (course_id) REFERENCES courses (id);
 
 ALTER TABLE sessions ADD FOREIGN KEY (course_id) REFERENCES courses (id);
@@ -97,7 +98,9 @@ ALTER TABLE logs ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
 
 ALTER TABLE session_users ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
 
-ALTER TABLE feedback ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
+ALTER TABLE survey ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
+
+ALTER TABLE survey ADD FOREIGN KEY (user_id) REFERENCES users (id);
 
 
 

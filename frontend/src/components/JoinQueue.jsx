@@ -211,6 +211,11 @@ function JoinQueue(props) {
       <div>
         <button onClick={handleQuestion}>Join queue</button>
       </div>
+
+      <div>
+        <h6>Forgot to fill out the survey from last time? Click here to go back and fill it out!</h6>
+        <button onClick={() => navigate(docRoot + "/studentSurvey")}>Complete Survey</button>
+      </div>
     </div>
     
   );

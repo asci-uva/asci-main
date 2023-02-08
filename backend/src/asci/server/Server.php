@@ -268,7 +268,34 @@ class Server
                 $sessionId = $this->input["sessionId"];
                 
                 $this->setResponse($executor->putStudentBackOnQueue($user, $studId, $sessionId));
-                break;            
+                break; 
+
+
+            case "GetSessionForSurvey":
+
+                $sessionId = $this->input["sessionId"];
+                $courseId = $this->input["courseId"];
+
+                $this->setResponse($executor->getSessionForSurvey($user, $courseId, $sessionId));
+
+                break;
+
+            case "GetMostRecentSessionWithNoSurvey":
+
+                $courseId = $this->input["courseId"];
+
+                $this->setResponse($executor->getMostRecentSessionWithNoSurvey($user, $courseId));
+                break;
+
+            case "SubmitSurvey":
+                
+                $surveyData = $this->input["surveyData"];
+                $session_id = $this->input["sessionId"];
+
+                $this->setResponse($executor->handleSubmitSurvey($user, $session_id, $surveyData));
+
+                break;
+            
 
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/
