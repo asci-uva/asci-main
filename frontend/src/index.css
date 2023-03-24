@@ -53,7 +53,7 @@ code {
   display: block;
 }
 .question button {
-  background: #f1356d;
+  background: #5196d2;
   color: #fff;
   border: 0;
   padding: 8px;
@@ -91,7 +91,7 @@ code {
 }
 .survey button {
   margin-top: 20px;
-  background: #f1356d;
+  background: #5196d2;
   color: #fff;
   border: 0;
   padding: 8px;
@@ -115,4 +115,16 @@ code {
 
 .radio_btn_group{
   display: block;
+}
+
+/*Uncentered Class*/
+.uncentered button{
+  background: #5196d2;
+  color: #fff;
+  border: 0;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-block;
+  margin-inline-start: 10px;
 }

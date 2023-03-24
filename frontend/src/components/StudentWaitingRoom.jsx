@@ -10,6 +10,7 @@ function StudentWaitingRoom(props) {
 	const [courseName, setCourseName] = useState("...");
   const [minsWaiting, setMinsWaiting] = useState("...");
   const [groupOption, setGroupOption] = useState(false);
+  const [tip, setTip] = useState("This is a really good tip.");
 	
 	//variables for managing polling the server
 	let polling = false;
@@ -81,6 +82,15 @@ function StudentWaitingRoom(props) {
 	      
 	      
  	}
+    //get another tip
+    const getTip = () => {
+      
+    }
+
+    const thisHelp = () =>{
+
+    }
+
     const handleCheck = () => {
       setGroupOption(!groupOption);
     };
@@ -144,7 +154,7 @@ function StudentWaitingRoom(props) {
   	}
 
     //This function update the willing-to-be-in-a-group option
-    const updateGroupOption = (e) =>{
+    const handleUpdateGroup = (e) =>{
       e.preventDefault();
     }
     
@@ -224,7 +234,15 @@ function StudentWaitingRoom(props) {
           onChange={handleCheck}/>I'm willing to be in a group.</label>
       <label>*This might decrease your waiting time.</label>
       </form>
-      
+      <button onClick={handleUpdateGroup}>Update</button>
+      <div>
+        <label>Tips:</label>
+        <label>{tip}</label>
+        <div className="uncentered">
+          <button onClick={getTip}>Get Another Tip</button>
+          <button onClick={thisTip}>This Helped</button>
+        </div>
+      </div>
 		</div>
 	);
 }

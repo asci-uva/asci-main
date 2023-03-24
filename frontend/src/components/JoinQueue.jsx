@@ -133,6 +133,7 @@ function JoinQueue(props) {
       request.subject = subject;
       request.question = details;
       request.location = location;
+      request.groupOption = groupoption;
       joinQueue(request, url); 
     }
 
