@@ -44,7 +44,7 @@ code {
   color: #000000;
   margin-bottom: 30px;
 }
-.question input, .question textarea, .question select {
+.question input[type = "text"], .question textarea, .question select {
   width: 100%;
   padding: 6px 10px;
   margin: 10px 0;

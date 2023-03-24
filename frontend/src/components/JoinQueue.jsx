@@ -89,7 +89,7 @@ function JoinQueue(props) {
     navigate(docRoot + '/');
   }
   const handleCheck = () => {
-    setChecked(!groupoption);
+    setGroupOption(!groupoption);
   };
 
   const handleQuestion = (e) =>{

@@ -8,7 +8,6 @@ function Question(props) {
   const [title, setTitle] = useState("question overview");
   const [details, setDetails] = useState("question details");
   const [purpose, setPurpose] = useState("");
-  const [groupoption, setGroupOption] = useState(true);
   const navigate = useNavigate();
 
   let url = props.url;
@@ -43,7 +42,6 @@ function Question(props) {
           <option value="Assignment">Only Assignment Check Off</option>
           <option value="Logistic">Logistic questions</option>
         </select>
-        <p>Is "My Value" checked? {checked.toString()}</p>
         <button>Submit</button>
       </form>
     </div>
