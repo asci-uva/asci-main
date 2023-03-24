@@ -203,7 +203,7 @@ function StudentWaitingRoom(props) {
 	  	</div>
 		  	<div>
         		<button onClick={leaveQueue}>Leave queue</button>
-      		</div>
+      	</div>
 		</div>
 	);
 }

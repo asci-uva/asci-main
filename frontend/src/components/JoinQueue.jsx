@@ -14,6 +14,7 @@ function JoinQueue(props) {
   const [location, setLocation] = useState("");
   const [details, setDetails] = useState("");
   const [courseName, setCourseName] = useState("");
+  const [groupoption, setGroupOption] = useState(true);
 
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -87,6 +88,9 @@ function JoinQueue(props) {
     localStorage.clear();
     navigate(docRoot + '/');
   }
+  const handleCheck = () => {
+    setChecked(!groupoption);
+  };
 
   const handleQuestion = (e) =>{
     e.preventDefault();
@@ -200,6 +204,12 @@ function JoinQueue(props) {
           value = {location}
           onChange={(e)=>setLocation(e.target.value)}
         />
+        <label>
+        <input
+          type="checkbox"
+          checked={groupoption}
+          onChange={handleCheck}/>I'm willing to be in a group.</label>
+        <label>*This might decrease your waiting time.</label>
       </form>
       
       {isError &&
