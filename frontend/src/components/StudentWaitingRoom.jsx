@@ -45,6 +45,10 @@ function StudentWaitingRoom(props) {
       	poll();
       }
 
+      let request1 = {};
+      request1.command = "getTip";
+      getTip(request1, url);
+
     	//called when this component unmounts
     	return () => {
             console.log("Waiting room: Stopping polling");
@@ -83,9 +87,24 @@ function StudentWaitingRoom(props) {
 	      
  	}
     //get another tip
-    const getTip = () => {
-      
-    }
+   //This function checks the users queue status and updates things
+  const getTip = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+        console.log("Data is: ", data);
+        
+      })
+      .catch((error) => {
+        console.log("There was an error:", error);
+        navigate(docRoot + "/error");   
+      });
+  }
 
     const thisHelped = () =>{
 
