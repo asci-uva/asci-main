@@ -43,11 +43,9 @@ function StudentWaitingRoom(props) {
       	console.log("waiting room mounted, start polling");
       	polling = true;
       	poll();
-      }
 
-      let request1 = {};
-      request1.command = "getTip";
-      getTip(request1, url);
+        getTip();
+      }
 
     	//called when this component unmounts
     	return () => {
@@ -88,7 +86,15 @@ function StudentWaitingRoom(props) {
  	}
     //get another tip
    //This function checks the users queue status and updates things
-  const getTip = (json0, url0) =>{
+
+  const getTip = (e) => {
+    // e.preventDefault();
+
+    let request = {};
+    request.command = "getTip";
+    fetchTip(request,url);
+  }
+  const fetchTip = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
       headers: {
@@ -98,6 +104,12 @@ function StudentWaitingRoom(props) {
     }).then(response => response.json())
     .then(data => {
         console.log("Data is: ", data);
+        let max = data.tips.length;
+        let randNum =  Math.floor(Math.random() * max);
+        while (tip == data.tips[randNum]){
+          randNum = Math.floor(Math.random() * max);
+        }
+        setTip(data.tips[randNum]);
         
       })
       .catch((error) => {
