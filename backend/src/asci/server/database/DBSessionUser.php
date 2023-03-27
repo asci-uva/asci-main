@@ -32,8 +32,9 @@ class DBSessionUser
             session_id = $1,
             user_id = $2,
             role = $3,
-            user_status = $4
-            WHERE session_id = $5 and user_id = $6
+            user_status = $4,
+            group_option = $5
+            WHERE session_id = $6 and user_id = $7
         ';
 
         $result = $this->db->query($query, array(
@@ -41,6 +42,7 @@ class DBSessionUser
             $sessionUsr->getUserId(),
             $sessionUsr->getRole(),
             $sessionUsr->getUserStatus(),
+            $sessionUsr->getGroupOption(),
             $sessionUsr->getSessionId(),
             $sessionUsr->getUserId()
         ));
@@ -53,9 +55,9 @@ class DBSessionUser
      * inserts this session_user object into the database
      */
     public function insert($session_user){
-        $query = 'insert into session_users (user_id, session_id, role, user_status) values ($1, $2, $3, $4);';
+        $query = 'insert into session_users (user_id, session_id, role, user_status, group_option) values ($1, $2, $3, $4, $5);';
 
-        $result = $this->db->query($query, array($session_user->getUserId(), $session_user->getSessionId(), $session_user->getRole(), $session_user->getUserStatus()));
+        $result = $this->db->query($query, array($session_user->getUserId(), $session_user->getSessionId(), $session_user->getRole(), $session_user->getUserStatus(), $session_user->getGroupOption()));
 
         return $result;
     }

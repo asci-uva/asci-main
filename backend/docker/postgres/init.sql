@@ -44,7 +44,8 @@ CREATE TABLE session_users (
   session_id SERIAL,
   user_id INT,
   role roles,
-  user_status session_user_status
+  user_status session_user_status,
+  group_option boolean
 );
 
 CREATE TABLE sessions (

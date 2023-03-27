@@ -87,7 +87,7 @@ function StudentWaitingRoom(props) {
       
     }
 
-    const thisHelp = () =>{
+    const thisHelped = () =>{
 
     }
 
@@ -240,7 +240,7 @@ function StudentWaitingRoom(props) {
         <label>{tip}</label>
         <div className="uncentered">
           <button onClick={getTip}>Get Another Tip</button>
-          <button onClick={thisTip}>This Helped</button>
+          <button onClick={thisHelped}>This Helped!</button>
         </div>
       </div>
 		</div>
