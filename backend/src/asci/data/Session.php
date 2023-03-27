@@ -13,10 +13,6 @@ class Session implements \Serializable {
     public $entry_time;
     public $fulfillment_time;
     public $exit_time;
-    public $session_id;
-    public $user_id;
-    public $role;
-
 
     public function __construct()
     {
@@ -35,9 +31,6 @@ class Session implements \Serializable {
         $this->entry_time = $row['entry_time'] ?? null;
         $this->fulfillment_time = $row['fulfillment_time'] ?? null;
         $this->exit_time = $row['exit_time'] ?? null;
-        $this->session_id = $row['session_id'] ?? null;
-        $this->user_id = $row['user_id'] ?? null;
-        $this->role = $row['role'] ?? null;
 
         return $this;
         
@@ -54,10 +47,6 @@ class Session implements \Serializable {
             "entry_time" => $this->entry_time,
             "fulfillment_time" => $this->fulfillment_time,
             "exit_time" => $this->exit_time,
-            "session_id" => $this->session_id,
-            "user_id" => $this->user_id,
-            "role" => $this->role
-            
         );
     }
 
@@ -71,11 +60,6 @@ class Session implements \Serializable {
     public function getEntryTime(){ return $this->entry_time; }
     public function getFulfillmentTime(){ return $this->fulfillment_time; }
     public function getExitTime(){ return $this->exit_time; }
-    public function getSessionId(){ return $this->session_id; }
-    public function getUserId(){ return $this->user_id; }
-    public function getRole(){ return $this->role; }
-
-    
 
 
     

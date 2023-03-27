@@ -141,7 +141,7 @@ class ServerExecutor{
 
     }
 
-    public function joinQueueHandler($computing_id, $course_id, $question, $subject, $location){
+    public function joinQueueHandler($computing_id, $course_id, $question, $subject, $location, $groupOption){
 
         //0: Grab the user
         $user = $this->userStore->getUser($computing_id);
@@ -160,7 +160,7 @@ class ServerExecutor{
         //If no session yet, insert one and send the new one back
         if($session == null){
             //create a new one and return it back
-            $session = $dbsession->createNewStudentSession($user->getId(), $course->getCourseId(), $course->getRole(), $question, $subject, $location);
+            $session = $dbsession->createNewStudentSession($user->getId(), $course->getCourseId(), $course->getRole(), $question, $subject, $location, $groupOption);
             $result["session"] = $session->toArray();
         }
         else{
@@ -196,13 +196,17 @@ class ServerExecutor{
         $result["user"] = $user->toArray();
         $result["usercourse"] = $course->toArray();
 
-        //If no session yet, insert one and send the new one back
+        //If no session yet, just return null
         if($session == null){
             $result["session"] = null;
         }
         else{
             //session already active, just use it.
             $result["session"] = $session->toArray();
+
+            //setup the session_user too
+            $dbsessionusr = new \asci\server\database\DBSessionUser($this->db);
+            $result["session_user"] = $dbsessionusr->getSessionUser($user->getId(), $session->getId())->toArray();
         }
 
         $result["success"] = "true";
@@ -264,7 +268,7 @@ class ServerExecutor{
 
         //Ok, we have info, let's create a user session for TA that is helping
         $TASessUsr = new \asci\data\SessionUser();
-        $TASessUsr->fromParams($user->getId(), $session->getId(), 'ta', 'active');
+        $TASessUsr->fromParams($user->getId(), $session->getId(), 'ta', 'active', 'false');
         $dbsessusr->insert($TASessUsr);
 
         //Ok, Let's update the session itself
@@ -572,9 +576,14 @@ class ServerExecutor{
         if($session == null)
             return $this->err("There is no session for this user with this session id to survey");
 
+        $sessionusr = $dbsessusr->getSessionUser($user->getId(), $session->getId());
+
+        if($sessionusr == null)
+            return $this->err("There is no session user for this user session combo to survey");
+
         /* Ok, get the person with the other role (through the session user obj) */
         $role = "student";
-        if($session->getRole() == "student") $role = "ta"; //opposite role as this user
+        if($sessionusr->getRole() == "student") $role = "ta"; //opposite role as this user
 
         $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), $role);
 
@@ -618,9 +627,15 @@ class ServerExecutor{
         if($session == null)
             return $this->err("There is no session for this user course combo to survey");
 
+        /* Now get the session user */
+        $sessionusr = $dbsessusr->getSessionUser($user->getId(), $session->getId());
+
+        if($sessionusr == null)
+            return $this->err("There is no session user for this user session combo to survey");
+
         /* Ok, get the person with the other role (through the session user obj) */
         $role = "student";
-        if($session->getRole() == "student") $role = "ta"; //opposite role as this user
+        if($sessionusr->getRole() == "student") $role = "ta"; //opposite role as this user
 
         $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), $role);
 
