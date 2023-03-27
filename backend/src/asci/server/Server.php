@@ -310,14 +310,16 @@ class Server
                 $this->setResponse(["results" => $result]);
                 break;
 
-            
-
-            
+                 
             case "register":
                 $result = $executor->registerUser($this->input);
                 $this->setResponse(["results" => $result]);
                 break;
 
+            case "getTip":
+                $this->setResponse(["result" => "success", "tips" => ["The tip will go here", "second tip"]]);
+                break;
+                
             default:
                 $this->setResponse(["response" => "Hello world!"]);
 
