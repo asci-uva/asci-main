@@ -19,7 +19,8 @@ import {
   StudentSurvey,
   Error,
   SelectCourse,
-  Logout
+  Logout,
+  TACheckIn
 } from "./components";
 
 //SOME GLOBAL CONSTANTS THAT ARE USED THROUGHOUT THE APP
@@ -46,6 +47,7 @@ root.render(
       <Route path={documentRoot + "/error"} element={<Error documentRoot={documentRoot} url={url} />} />
       <Route path={documentRoot + "/selectCourse"} element={<SelectCourse documentRoot={documentRoot} url={url} />} />
       <Route path={documentRoot + "/logout"} element={<Logout documentRoot={documentRoot} url={url} />} />
+      <Route path={documentRoot + "/TACheckIn"} element={<TACheckIn documentRoot={documentRoot} url={url} />} />
     </Routes>
     <Footer/>
   </Router>,

@@ -59,4 +59,13 @@ code {
   padding: 8px;
   border-radius: 8px;
   cursor: pointer;
+  max-width: 200px;
+  margin: auto;
+}
+
+.buttonWrapper {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  gap: 15px;
 }

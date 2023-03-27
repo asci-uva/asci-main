@@ -191,7 +191,28 @@ class Server
 
                 
                 break;
+            
+            case "startShift":
 
+                $courseId = $this->input["courseId"];
+                $endTime = $this->input["endTime"];
+                $this->setResponse($executor->startShift($user, $courseId, $endTime));
+
+                break;
+            
+            case "endShift":
+
+                $courseId = $this->input["courseId"];
+                $this->setResponse($executor->endShift($user, $courseId));
+
+                break;
+                
+            case "getShift":
+                $courseId = $this->input["courseId"];
+                $this->setResponse($executor->getShift($user, $courseId));
+
+                break;
+            
             //Updates student with queue status (still on queue)
             //what position, etc. 
             case "getQueueStatus":
@@ -226,6 +247,14 @@ class Server
                 
                 break;
 
+            //Returns number of TAs for student viewing
+            case "getNumberWorking":
+
+                $courseId = $this->input["courseId"];
+
+                $this->setResponse($executor->getNumberWorking($user, $courseId));
+
+                break;
 
             /* TA SPECIFIC FUNCTIONS ARE BELOW THIS POINT */
 

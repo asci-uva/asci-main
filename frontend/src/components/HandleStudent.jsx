@@ -38,6 +38,7 @@ function HandleStudent(props) {
 
       polling = true;
       pollNumWaiting();
+      pollShift(user, courseId);
     }
 
     //called when this component unmounts
@@ -54,7 +55,47 @@ function HandleStudent(props) {
     command: assign
   }
 
+  function pollShift() {
+    let request = {};
+    request.command = "getShift";
+    request.user = localStorage.getItem('asci-user');
+    request.courseId = localStorage.getItem('asci-course');
+    getShift(request, url);
+  }
 
+  const getShift = (json0, url0) => {
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+        console.log("Data is: ", data);
+
+        //if request succeeded
+        if(data.success === "true"){
+          if(data.shift == null) {
+            navigate(docRoot);
+          }
+
+          if(polling == true){
+              timeoutId = setTimeout(pollShift, 30000);
+          }
+        }
+        else{
+          console.log("Getting number waiting failed");
+          navigate(docRoot + "/error");
+        }
+        
+      })
+      .catch((error) => {
+        console.log("HOME: There was an error:", error);
+        navigate(docRoot + "/error");
+        
+      });
+  }
 
   function pollNumWaiting(){
     //Get a student
@@ -134,6 +175,25 @@ function HandleStudent(props) {
     }
   }
 
+  const handleEnd = (e) => {
+    if(localStorage.getItem('asci-user') === null){
+      navigate(docRoot + "/login");
+    }
+
+    else if(localStorage.getItem('asci-course') === null){
+      navigate(docRoot + "/selectCourse");
+    }
+    else{
+    
+      //Get a student
+      let request = {};
+      request.command = "endShift";
+      request.user = localStorage.getItem('asci-user');
+      request.courseId = localStorage.getItem('asci-course');
+      endShift(request, url); 
+    }
+  }
+
   //This gets a student
   const getStudent = (json0, url0) =>{
     fetch(url0, {
@@ -164,14 +224,42 @@ function HandleStudent(props) {
 
     }
 
+    const endShift = (json0, url0) => {
+      fetch(url0, {
+        method: 'POST', // or 'PUT'
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(json0),
+      }).then(response => response.json())
+      .then(data => {
+          console.log("Data is: ", data);
+  
+          //if request succeeded
+          if(data.success === "true"){
+            navigate(docRoot);
+          }
+          else{
+            console.log("TA: ending shift failed for some reason");
+          }
+          
+        })
+        .catch((error) => {
+          console.log("HOME: There was an error:", error);
+          navigate(docRoot + "/error");
+          
+        });
+    }
+
   return (
     <div className="question">
       <div>
         <h2>You are now handling students for <b>{courseName}</b></h2>
         <h5>There are <b>{numWaiting}</b> student(s) waiting.</h5>
       </div>
-      <div>
+      <div className='buttonWrapper'>
         <button onClick={handleAssign}>get next student</button>
+        <button onClick={handleEnd}>end shift</button>
       </div>
       
     </div>

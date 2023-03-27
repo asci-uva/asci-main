@@ -14,7 +14,6 @@ function JoinQueue(props) {
   const [location, setLocation] = useState("");
   const [details, setDetails] = useState("");
   const [courseName, setCourseName] = useState("");
-
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   

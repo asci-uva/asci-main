@@ -161,6 +161,84 @@ class ServerExecutor{
         return $result;
     }
 
+    public function startShift($computing_id, $course_id, $endTime){
+        $user = $this->userStore->getUser($computing_id);
+
+        $course = (new \asci\server\database\DBUserCourse($this->db))->getCourseForUser($user->getComputingId(), $course_id);
+
+        $dbshift = new \asci\server\database\DBShift($this->db);
+        $shift = $dbshift->getShiftForUser($user->getId(), $course->getCourseId());
+
+        $result = [];
+        $result["usercourse"] = $course->toArray();
+
+        if($shift == null) {
+            $shift = $dbshift->createNewShift($user->getId(), $course->getCourseId(), $endTime);
+            $result["shift"] = $shift->toArray(); 
+        }
+        else{
+            $result["shift"] = $shift->toArray();
+        }
+        
+    
+        $result["success"] = "true";
+
+        return $result;
+    }
+
+    public function endShift($computing_id, $course_id) {
+        $user = $this->userStore->getUser($computing_id);
+
+        $course = (new \asci\server\database\DBUserCourse($this->db))->getCourseForUser($user->getComputingId(), $course_id);
+
+        $dbshift = new \asci\server\database\DBShift($this->db);
+        $shift = $dbshift->getShiftForUser($user->getId(), $course->getCourseId());
+
+        $result = [];
+        $result["usercourse"] = $course->toArray();
+
+        if($shift == null) {
+            $result["success"] = "false";
+            $result["error"] = "No session exists with the provided session_id";
+            return $result;
+        }
+        
+        //Ok, go ahead and end the session
+        if($dbshift->endShift($shift->getId())){
+            //Done. Set up the info to return
+            $result["success"] = "true";
+            $result["session"] = $shift->toArray();
+            $result["error"] = "none";
+            return $result;
+        }
+        else{
+            $result["success"] = "false";
+            $result["error"] = "something ending shift";
+            return $result;
+        }
+    }
+
+    public function getShift($computing_id, $course_id) {
+        $user = $this->userStore->getUser($computing_id);
+
+        $course = (new \asci\server\database\DBUserCourse($this->db))->getCourseForUser($user->getComputingId(), $course_id);
+
+        $result = [];
+        $result["usercourse"] = $course->toArray();
+
+        $dbshift = new \asci\server\database\DBShift($this->db);
+        $shift = $dbshift->getShiftForUser($user->getId(), $course->getCourseId());
+
+        if ($shift == null) {
+            $result["shift"] = null;
+        }
+        else {
+            $result["shift"] = $shift->toArray();
+        }
+        $result["success"] = "true";
+
+        return $result;
+    }
 
 
     /*
@@ -434,6 +512,42 @@ class ServerExecutor{
             $result["error"] = "Something updating session to completed status";
             return $result;
         }
+    }
+
+    /**
+     * Given course_id, return number of TAs for the student
+     */
+    public function getNumberWorking($computing_id, $course_id){
+        //DB objects we will be using
+        $dbshift = new \asci\server\database\DBShift($this->db);
+
+        //0: Grab the user
+        $user = $this->userStore->getUser($computing_id);
+
+        $result = [];
+
+        //Get the UserCourse object
+        $userCourse = (new \asci\server\database\DBUserCourse($this->db))->getCourseForUser($user->getComputingId(), $course_id);
+    
+        if($userCourse == null){
+            $result["success"] = "false";
+            $result["error"] = "ERROR: This user not associated with this course";
+            return $result;
+        }
+
+        //Ok, looks good. Grab the number of waiting students
+        $numWorking = $dbshift->getNumWorking($course_id);
+
+        if($numWorking == null){
+            $result["success"] = "false";
+            $result["error"] = "ERROR: Failed to fetch number of TAs working";
+            return $result;
+        }
+
+        $result["success"] = "true";
+        $result["working"] = $numWorking["count"];
+        $result["usercourse"] = $userCourse->toArray();
+        return $result;
     }
 
 

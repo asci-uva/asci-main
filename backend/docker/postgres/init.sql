@@ -79,6 +79,14 @@ CREATE TABLE queue (
   session_id INT
 );
 
+CREATE TABLE shifts (
+  id SERIAL PRIMARY KEY,
+  user_id INT,
+  course_id INT,
+  start_time timestamp DEFAULT (now()),
+  end_time timestamp
+);
+
 ALTER TABLE queue ADD FOREIGN KEY (user_id) REFERENCES users (id);
 
 ALTER TABLE queue ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
@@ -99,7 +107,9 @@ ALTER TABLE session_users ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
 
 ALTER TABLE feedback ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
 
+ALTER TABLE shifts ADD FOREIGN KEY (user_id) REFERENCES users (id);
 
+ALTER TABLE shifts ADD FOREIGN KEY (course_id) REFERENCES courses (id);
 
 -- insert some dummy data
 -- insert mark and nada,
@@ -113,6 +123,9 @@ VALUES (2, 'nb3f', 'Nada', 'Basit', 'Nada');
 
 INSERT INTO users (id, computing_id, fname, lname , pname)
 VALUES (3, 'jh2jf', 'John', 'Hott', 'Robbie');
+
+INSERT INTO users (id, computing_id, fname, lname, pname)
+VALUES (4, 'bqs7kc', 'Thomas', 'Lam', 'Tommy');
 
 INSERT INTO courses (id, mnemonic, number, name, semester)
 VALUES (1, 'CS', '2130', 'CSO1', 'SP-23');
@@ -135,4 +148,6 @@ VALUES (2, 2, 'student');
 INSERT INTO user_courses (user_id, course_id, role)
 VALUES (3, 1, 'student');
 
+INSERT INTO user_courses (user_id, course_id, role)
+VALUES (4, 2, 'ta');
 
