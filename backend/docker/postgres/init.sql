@@ -56,7 +56,8 @@ CREATE TABLE sessions (
   status status_type,
   entry_time timestamp DEFAULT (now()),
   fulfillment_time timestamp,
-  exit_time timestamp
+  exit_time timestamp,
+  is_group BOOLEAN
 );
 
 CREATE TABLE survey (

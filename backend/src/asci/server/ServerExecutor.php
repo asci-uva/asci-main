@@ -141,7 +141,7 @@ class ServerExecutor{
 
     }
 
-    public function joinQueueHandler($computing_id, $course_id, $question, $subject, $location){
+    public function joinQueueHandler($computing_id, $course_id, $question, $subject, $location, $is_group){
 
         //0: Grab the user
         $user = $this->userStore->getUser($computing_id);
@@ -160,7 +160,7 @@ class ServerExecutor{
         //If no session yet, insert one and send the new one back
         if($session == null){
             //create a new one and return it back
-            $session = $dbsession->createNewStudentSession($user->getId(), $course->getCourseId(), $course->getRole(), $question, $subject, $location);
+            $session = $dbsession->createNewStudentSession($user->getId(), $course->getCourseId(), $course->getRole(), $question, $subject, $location, $is_group);
             $result["session"] = $session->toArray();
         }
         else{

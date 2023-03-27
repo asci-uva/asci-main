@@ -14,7 +14,7 @@ function JoinQueue(props) {
   const [location, setLocation] = useState("");
   const [details, setDetails] = useState("");
   const [courseName, setCourseName] = useState("");
-
+  const [isGroup, setIsGroup] = useState(true);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   
@@ -129,6 +129,8 @@ function JoinQueue(props) {
       request.subject = subject;
       request.question = details;
       request.location = location;
+      request.isGroup = isGroup;
+      console.log(JSON.stringify(request));
       joinQueue(request, url); 
     }
 

@@ -187,7 +187,8 @@ class Server
                 $question = $this->input["question"];
                 $subject = $this->input["subject"];
                 $location = $this->input["location"];
-                $this->setResponse($executor->joinQueueHandler($user, $courseId, $question, $subject, $location));
+                $is_group = $this->input["isGroup"];
+                $this->setResponse($executor->joinQueueHandler($user, $courseId, $question, $subject, $location, $is_group));
 
                 
                 break;

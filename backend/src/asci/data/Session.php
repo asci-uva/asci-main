@@ -16,6 +16,7 @@ class Session implements \Serializable {
     public $session_id;
     public $user_id;
     public $role;
+    public $is_group;
 
 
     public function __construct()
@@ -38,6 +39,7 @@ class Session implements \Serializable {
         $this->session_id = $row['session_id'] ?? null;
         $this->user_id = $row['user_id'] ?? null;
         $this->role = $row['role'] ?? null;
+        $this->is_group = $row['is_group'] ?? null;
 
         return $this;
         
@@ -56,8 +58,8 @@ class Session implements \Serializable {
             "exit_time" => $this->exit_time,
             "session_id" => $this->session_id,
             "user_id" => $this->user_id,
-            "role" => $this->role
-            
+            "role" => $this->role,
+            "is_group" => $this->is_group
         );
     }
 
@@ -74,6 +76,7 @@ class Session implements \Serializable {
     public function getSessionId(){ return $this->session_id; }
     public function getUserId(){ return $this->user_id; }
     public function getRole(){ return $this->role; }
+    public function getIsGroup(){ return $this->is_group; }
 
     
 
