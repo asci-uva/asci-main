@@ -50,10 +50,6 @@ function HandleStudent(props) {
     
   }, []);
 
-  let assignStudent = {
-    command: assign
-  }
-
 
 
   function pollNumWaiting(){

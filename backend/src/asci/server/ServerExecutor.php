@@ -169,6 +169,8 @@ class ServerExecutor{
         }
 
         $result["success"] = "true";
+        //dummy frontend testing to redirect based on groupoption, wihtout performing any matching;
+        // $result["groupOption"] = $groupOption;
 
         return $result;
     }
