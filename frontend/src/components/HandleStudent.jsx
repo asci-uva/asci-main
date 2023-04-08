@@ -144,7 +144,12 @@ function HandleStudent(props) {
 
         //if request succeeded
         if(data.success === "true"){
-          navigate(docRoot + "/meeting");
+          if(data.group_option === "true"){
+            navigate(docRoot + "/meeting");
+          }
+          else{
+            navigate(docRoot + "/meeting");
+          }
         }
         else{
           console.log("TA: getting student failed for some reason");
