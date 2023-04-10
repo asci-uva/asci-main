@@ -260,6 +260,19 @@ class DatabaseConnector {
         }
     }
 
+    public function fetchAllRowsAsArray($resource) {
+        try{
+            $rows = array();
+            while ($row = \pg_fetch_assoc($resource)) {
+              $rows[] = $row;
+            }
+            return $rows;
+        } catch (\Exception $e) {
+            // Replace any exceptions with the ASCI Database Exception and re-throw back out
+            throw new \asci\exceptions\ASCIDatabaseException($e->getMessage());
+        }
+      }
+
     /**
      * Get the DB Handle
      *

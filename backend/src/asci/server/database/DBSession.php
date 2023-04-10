@@ -135,9 +135,9 @@ class DBSession
      */
     public function createNewStudentSession($user_id, $course_id, $role, $question, $subject, $location, $groupOption){
 
-        $query = 'insert into sessions (course_id, issue, issue_subject, location, status, entry_time, fulfillment_time, exit_time) values ($1, $2, $3, $4, \'waiting\', now(), null, null) returning id';
+        $query = 'insert into sessions (course_id, issue, issue_subject, location, status, group_option, entry_time, fulfillment_time, exit_time) values ($1, $2, $3, $4, \'waiting\', $5, now(), null, null) returning id';
 
-        $result = $this->db->query($query, array($course_id, $question, $subject, $location));
+        $result = $this->db->query($query, array($course_id, $question, $subject, $location,$groupOption));
         $id = $this->db->fetchrow($result)["id"];
 
         if($id == null){
@@ -219,6 +219,50 @@ class DBSession
             $sess = new \asci\data\Session();
             $sess->fromArray($row);
             return $sess;
+        }
+        
+        return null;
+
+    }
+
+    /*
+     * Fetches the Session for this courseId that has been in the "waiting"
+     * state the longest that this TA has NO session for already
+     */
+
+    public function getWaitingSessionWGroupPreference($ta_id, $course_id){
+
+        //Normal get not caring about session status
+        $query = 'select * from sessions where course_id=$1 and status=\'waiting\' and id not in (select distinct S.id from (sessions S join session_users U on S.id=U.session_id) where U.user_id=$2) order by entry_time';
+
+        $result = $this->db->query($query, array($course_id, $ta_id));
+        $row = $this->db->fetchrow($result);
+
+        // wheter the user's session with longest wait time want to be in a group
+        if ($row != null){
+            if ($row['group_option']===true){
+                // here one we know the above session of a syudent want to be in a group, we get all sessions that support grouping
+                // want to return a List of sessions 
+                $queryAllSessions = 'select * from sessions where course_id=$1 and status=\'waiting\' and group_option=true and id not in (select distinct S.id from (sessions S join session_users U on S.id=U.session_id) where U.user_id=$2) order by entry_time';
+                $result = $this->db->query($query, array($course_id, $ta_id));
+                $rows = $this->db->fetchAllRowsAsArray($result); //can also use fetchAll from DAtabaseConnector i guess i made a new func 
+                
+                $sessArray = array();
+                foreach ($rows as $row){
+                    $sess = new \asci\data\Session();
+                    $sess->fromArray($row);
+                    $sessArray[] = $sess;
+                }
+                // returns an array fo sessions
+                return $sessArray;
+            }
+            else if($row['group_option']===false){
+                // if they dont want to be in a group, then use the good old way
+                // returns a single session
+                $sess = new \asci\data\Session();
+                $sess->fromArray($row);
+                return $sess;
+            }
         }
         
         return null;
