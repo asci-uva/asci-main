@@ -145,7 +145,7 @@ function HandleStudent(props) {
         //if request succeeded
         if(data.success === "true"){
           if(data.group_option === "true"){
-            navigate(docRoot + "/meeting");
+            navigate(docRoot + "/handleGroup");
           }
           else{
             navigate(docRoot + "/meeting");

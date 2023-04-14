@@ -88,9 +88,15 @@ function JoinQueue(props) {
     localStorage.clear();
     navigate(docRoot + '/');
   }
-  const handleCheck = () => {
-    setGroupOption(!groupoption);
-  };
+  const handleCheck = (e) => {
+    if (!e.target.checked){
+      setGroupOption(false);
+    }
+    else{
+      setGroupOption(true);
+    }
+    console.log(groupoption);
+  }
 
   const handleQuestion = (e) =>{
     e.preventDefault();

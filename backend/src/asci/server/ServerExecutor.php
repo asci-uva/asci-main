@@ -169,8 +169,6 @@ class ServerExecutor{
         }
 
         $result["success"] = "true";
-        //dummy frontend testing to redirect based on groupoption, wihtout performing any matching;
-        // $result["groupOption"] = $groupOption;
 
         return $result;
     }
@@ -281,7 +279,7 @@ class ServerExecutor{
 
         //Check if the student wants to be in a group
         $groupOption = $session->getGroupOption();
-        if($groupOption == true){
+        if($groupOption === true){
             $result["group_option"] = "true";
         }
         else{
@@ -327,7 +325,7 @@ class ServerExecutor{
             $result["error"] = "ERROR: Session does not have any associated students";
             return $result;
         }
-        else if($sessUsr->getGroupOption() == "false"){
+        else if($session->getGroupOption() == "false"){
             $result["success"] = "false";
             $result["error"] = "ERROR: The primary student does not choose to be in a group (and they should)";
             return $result;
