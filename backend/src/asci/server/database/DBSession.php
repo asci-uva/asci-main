@@ -137,7 +137,7 @@ class DBSession
 
         $query = 'insert into sessions (course_id, issue, issue_subject, location, status, group_option, entry_time, fulfillment_time, exit_time) values ($1, $2, $3, $4, \'waiting\', $5, now(), null, null) returning id';
 
-        $result = $this->db->query($query, array($course_id, $question, $subject, $location,$groupOption));
+        $result = $this->db->query($query, array($course_id, $question, $subject, $location, $groupOption));
         $id = $this->db->fetchrow($result)["id"];
 
         if($id == null){
@@ -147,8 +147,8 @@ class DBSession
 
             //insert a session_users row for this combo
             //TODO: THIS REALLY SHOULDN"T BE A PART OF THIS METHOD.
-            $query = 'insert into session_users (session_id, user_id, role, user_status, group_option) values ($1, $2, $3, $4, $5)';
-            $result = $this->db->query($query, array($id, $user_id, $role, 'active', $groupOption));            
+            $query = 'insert into session_users (session_id, user_id, role, user_status) values ($1, $2, $3, $4)';
+            $result = $this->db->query($query, array($id, $user_id, $role, 'active'));            
 
             return $this->getSessionForUser($user_id, $course_id);
 

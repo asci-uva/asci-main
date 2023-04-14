@@ -9,7 +9,8 @@ CREATE TYPE roles AS ENUM (
 CREATE TYPE status_type AS ENUM (
   'waiting',
   'in_progress',
-  'completed'
+  'completed',
+  'group'
 );
 
 CREATE TYPE session_user_status AS ENUM (
@@ -44,8 +45,7 @@ CREATE TABLE session_users (
   session_id SERIAL,
   user_id INT,
   role roles,
-  user_status session_user_status,
-  group_option boolean
+  user_status session_user_status
 );
 
 CREATE TABLE sessions (
@@ -57,7 +57,8 @@ CREATE TABLE sessions (
   status status_type,
   entry_time timestamp DEFAULT (now()),
   fulfillment_time timestamp,
-  exit_time timestamp
+  exit_time timestamp,
+  group_option boolean
 );
 
 CREATE TABLE survey (
