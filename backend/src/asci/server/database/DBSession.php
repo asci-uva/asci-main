@@ -35,10 +35,11 @@ class DBSession
             issue_subject = $4,
             location = $5,
             status = $6,
-            entry_time = $7,
-            fulfillment_time = $8,
-            exit_time = $9
-            WHERE id = $10';
+            group_option = $7,
+            entry_time = $8,
+            fulfillment_time = $9,
+            exit_time = $10
+            WHERE id = $11';
 
         $result = $this->db->query($query, array(
             $session->getId(),
@@ -47,6 +48,7 @@ class DBSession
             $session->getIssueSubject(),
             $session->getLocation(),
             $session->getStatus(),
+            $session->getGroupOption(),
             $session->getEntryTime(),
             $session->getFulfillmentTime(),
             $session->getExitTime(),

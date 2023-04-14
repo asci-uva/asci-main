@@ -55,10 +55,10 @@ CREATE TABLE sessions (
   issue_subject TEXT,
   location TEXT,
   status status_type,
+  group_option boolean,
   entry_time timestamp DEFAULT (now()),
   fulfillment_time timestamp,
-  exit_time timestamp,
-  group_option boolean
+  exit_time timestamp
 );
 
 CREATE TABLE survey (

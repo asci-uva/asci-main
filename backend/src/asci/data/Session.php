@@ -29,11 +29,10 @@ class Session implements \Serializable {
         $this->issue_subject = $row['issue_subject'] ?? null;
         $this->location = $row['location'] ?? null;
         $this->status = $row['status'] ?? null;
+        $this->group_option = $row['group_option'] ?? null;
         $this->entry_time = $row['entry_time'] ?? null;
         $this->fulfillment_time = $row['fulfillment_time'] ?? null;
         $this->exit_time = $row['exit_time'] ?? null;
-        $this->exit_time = $row['group_option'] ?? null;
-
         return $this;
         
     }
@@ -46,10 +45,10 @@ class Session implements \Serializable {
             "issue_subject" => $this->issue_subject,
             "location" => $this->location,
             "status" => $this->status,
+            "group_option" => $this->group_option,
             "entry_time" => $this->entry_time,
             "fulfillment_time" => $this->fulfillment_time,
-            "exit_time" => $this->exit_time,
-            "group_option" => $this->group_option,
+            "exit_time" => $this->exit_time,            
         );
     }
 

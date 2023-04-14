@@ -280,7 +280,7 @@ class ServerExecutor{
         $result["error"] = "none";
 
         //Check if the student wants to be in a group
-        $groupOption = $sessUsr->getGroupOption();
+        $groupOption = $session->getGroupOption();
         if($groupOption == true){
             $result["group_option"] = "true";
         }
