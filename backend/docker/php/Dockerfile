@@ -13,5 +13,17 @@ WORKDIR /opt/src/
 COPY ../src/composer.json composer.json
 RUN composer install --no-interaction --no-plugins --no-scripts --no-dev --prefer-dist
 RUN composer dump-autoload --optimize --apcu --no-dev
+RUN apt-get install -y python3 python3-pip
+
+COPY ./docker/php/requirements.txt ./
+COPY ./docker/php/piazza.py ./
+COPY ./docker/php/posts.csv ./
+
+RUN pip install --no-cache-dir --upgrade pip \
+ && pip install --no-cache-dir -r requirements.txt
+
+RUN mkdir ./.cache
+
+RUN python3 piazza.py -c posts.csv
 
 RUN service apache2 restart

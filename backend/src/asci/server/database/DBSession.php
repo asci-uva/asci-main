@@ -265,7 +265,5 @@ class DBSession
 
         return $result;
     }
-
-    
    
 }

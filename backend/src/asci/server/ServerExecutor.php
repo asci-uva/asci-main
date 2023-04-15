@@ -167,7 +167,11 @@ class ServerExecutor{
             //session already active, just use it.
             $result["session"] = $session->toArray();
         }
-
+        $command = "python3 /opt/src/piazza.py -a '".$question."'";
+        $escapecommand = escapeshellcmd($command);
+        $output = exec($escapecommand);
+        $data = json_decode($output, true);
+        $result["answerbot"] = $data;
         $result["success"] = "true";
 
         return $result;
