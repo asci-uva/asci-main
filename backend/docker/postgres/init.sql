@@ -55,7 +55,7 @@ CREATE TABLE sessions (
   issue_subject TEXT,
   location TEXT,
   status status_type,
-  group_option boolean,
+  group_option TEXT,
   entry_time timestamp DEFAULT (now()),
   fulfillment_time timestamp,
   exit_time timestamp

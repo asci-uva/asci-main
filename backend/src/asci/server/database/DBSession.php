@@ -242,7 +242,7 @@ class DBSession
 
         // wheter the user's session with longest wait time want to be in a group
         if ($row != null){
-            if ($row['group_option']===true){
+            if ($row['group_option']==="true"){
                 // here one we know the above session of a syudent want to be in a group, we get all sessions that support grouping
                 // want to return a List of sessions 
                 $queryAllSessions = 'select * from sessions where course_id=$1 and status=\'waiting\' and group_option=true and id not in (select distinct S.id from (sessions S join session_users U on S.id=U.session_id) where U.user_id=$2) order by entry_time';
@@ -258,7 +258,7 @@ class DBSession
                 // returns an array fo sessions
                 return $sessArray;
             }
-            else if($row['group_option']===false){
+            else if($row['group_option']==="false"){
                 // if they dont want to be in a group, then use the good old way
                 // returns a single session
                 $sess = new \asci\data\Session();
