@@ -199,7 +199,6 @@ function StudentWaitingRoom(props) {
 		<div className="question">
 			<div>
 	  		<h4>You are currently in the queue for { courseName }. A TA Will be with you shortly. </h4>
-        <h6>You have been waiting for <b>{minsWaiting} minutes</b></h6>
 	  	</div>
 		  	<div>
         		<button onClick={leaveQueue}>Leave queue</button>
