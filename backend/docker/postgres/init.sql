@@ -45,7 +45,7 @@ CREATE TABLE session_users (
   user_id INT,
   role roles,
   user_status session_user_status,
-  group_option boolean
+  group_option BOOLEAN DEFAULT 'false'
 );
 
 CREATE TABLE sessions (
