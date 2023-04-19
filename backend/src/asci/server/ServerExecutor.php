@@ -277,6 +277,75 @@ class ServerExecutor{
         $result["success"] = "true";
         $result["error"] = "none";
 
+        //Check if the student wants to be in a group
+        $groupOption = $session->getGroupOption();
+        if($groupOption === "true"){
+            $result["group_option"] = "true";
+        }
+        else{
+            $result["group_option"] = "false";
+        }
+
+        return $result;
+    }
+
+    /*
+     * Get all the matched students' info and display it for the TA.
+     * Added by frontend on April 7
+     */
+    public function getPotentialGroupInfo($computing_id, $course_id){
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+
+        //0: Grab the user
+        $user = $this->userStore->getUser($computing_id);
+
+        $result = [];
+
+        //2: Grab the next student that is waiting
+        $session = $dbsession->getSessionForUser($user->getId(), $course_id);
+
+        if($session == null){
+            $result["success"] = "false";
+            $result["error"] = "No session exists for this TA course combo";
+            return $result;
+        }
+        else if($session->getStatus() != "in_progress"){
+            $result["success"] = "false";
+            $result["error"] = "session is not in the in_progress state (and it should be)";
+            return $result;
+        }
+
+        //Ok, let's try to grab the student's information
+        $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), 'student');
+
+        if($sessUsr == null){
+            $result["success"] = "false";
+            $result["error"] = "ERROR: Session does not have any associated students";
+            return $result;
+        }
+        else if($session->getGroupOption() == "false"){
+            $result["success"] = "false";
+            $result["error"] = "ERROR: The primary student does not choose to be in a group (and they should)";
+            return $result;
+        }
+
+        //Now, grab the student
+        $student = $this->userStore->getUserById($sessUsr->getUserId());
+
+        if($student == null){
+            $result["success"] = "false";
+            $result["error"] = "ERROR: Could not find student information for session";
+            return $result;
+        }
+
+        //Done. Set up the info to return
+        $result["success"] = "true";
+        $result["session"] = $session->toArray();
+        $result["student"] = $student->toArray();
+        $result["error"] = "none";
+
         return $result;
     }
 

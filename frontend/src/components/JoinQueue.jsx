@@ -14,7 +14,7 @@ function JoinQueue(props) {
   const [location, setLocation] = useState("");
   const [details, setDetails] = useState("");
   const [courseName, setCourseName] = useState("");
-  const [groupoption, setGroupOption] = useState(true);
+  const [groupoption, setGroupOption] = useState("true");
 
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -88,9 +88,12 @@ function JoinQueue(props) {
     localStorage.clear();
     navigate(docRoot + '/');
   }
-  const handleCheck = () => {
-    setGroupOption(!groupoption);
-  };
+  
+
+
+  const handleCheck = e => {
+    setGroupOption(e.target.value)
+  }
 
   const handleQuestion = (e) =>{
     e.preventDefault();
@@ -134,6 +137,7 @@ function JoinQueue(props) {
       request.question = details;
       request.location = location;
       request.groupOption = groupoption;
+      alert(groupoption);
       joinQueue(request, url); 
     }
 
@@ -205,12 +209,27 @@ function JoinQueue(props) {
           value = {location}
           onChange={(e)=>setLocation(e.target.value)}
         />
-        <label>
-        <input
-          type="checkbox"
-          checked={groupoption}
-          onChange={handleCheck}/>I'm willing to be in a group.</label>
-        <label>*This might decrease your waiting time.</label>
+
+        <div>         
+          <input
+            type="radio"
+            name="grouping"
+            value = "true"
+            checked={groupoption === "true"}
+            onChange={handleCheck}
+          />
+          <label>Group</label>
+
+          <input
+            type="radio"
+            name="grouping"
+            value="false"
+            checked={groupoption === "false"}
+            onChange={handleCheck}
+          />
+          <label>Solo</label>
+          <label>*This might decrease your waiting time.</label>
+        </div>
       </form>
       
       {isError &&

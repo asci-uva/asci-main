@@ -296,6 +296,14 @@ class Server
                 $this->setResponse($executor->handleSubmitSurvey($user, $session_id, $surveyData));
 
                 break;
+
+            /*FRONT END ADDED THESE FUNCTIONS FOR GROUP <OPTIONS></OPTIONS>*/
+            case "getPotentialGroupInfo":
+                $courseId = $this->input["courseId"];
+                
+                $this->setResponse($executor->getPotentialGroupInfo($user, $courseId));
+                
+                break;
             
 
 

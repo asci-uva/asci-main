@@ -9,7 +9,6 @@ function StudentWaitingRoom(props) {
 	const [position, setPosition] = useState(-1);
 	const [courseName, setCourseName] = useState("...");
   const [minsWaiting, setMinsWaiting] = useState("...");
-  const [groupOption, setGroupOption] = useState(false);
   const [tip, setTip] = useState("This is a really good tip.");
 	
 	//variables for managing polling the server
@@ -122,9 +121,6 @@ function StudentWaitingRoom(props) {
 
     }
 
-    const handleCheck = () => {
-      setGroupOption(!groupOption);
-    };
 
     //This function checks the users queue status and updates things
     const getStatus = (json0, url0) =>{
@@ -183,11 +179,6 @@ function StudentWaitingRoom(props) {
           
         });
   	}
-
-    //This function update the willing-to-be-in-a-group option
-    const handleUpdateGroup = (e) =>{
-      e.preventDefault();
-    }
     
 
   	const leaveQueue = (e) =>{
@@ -256,16 +247,6 @@ function StudentWaitingRoom(props) {
         		<button onClick={leaveQueue}>Leave queue</button>
       	</div>
         <br></br>
-
-      <form>
-      <label>
-      <input
-          type="checkbox"
-          checked={groupOption}
-          onChange={handleCheck}/>I'm willing to be in a group.</label>
-      <label>*This might decrease your waiting time.</label>
-      </form>
-      <button onClick={handleUpdateGroup}>Update</button>
       <div>
         <label>Tips:</label>
         <label>{tip}</label>
