@@ -9,6 +9,7 @@ function HandleGroup(props) {
     const [primeStuName,setPrimeStuName] = useState("LOADING");
     const [primeStutId, setPrimeStuId] = useState("LOADING");
     const [otherStudents, setOtherStudents] = useState([]);
+    const [otherSessions, setOtherSessions] = useState([]);
     const navigate = useNavigate();
 
     const [primeSubject, setPrimeSubject] = useState("LOADING");
@@ -53,11 +54,17 @@ function HandleGroup(props) {
                 setPrimeIssue(data.session.issue);
                 setPrimeLocation(data.session.location);
             }
-            // else{
-            //     console.log("Getting primary student info failed");
-            //     console.log("error",data.error);
-            //     navigate(docRoot + "/error");
-            // }
+            else{
+                console.log("Getting primary student info failed");
+                console.log("error",data.error);
+                navigate(docRoot + "/error");
+            }
+
+            if(data.have_group == "true"){
+                console.log("Have group is true");
+                setOtherStudents(data.candidates);
+                setOtherSessions(data.candi_sessions);
+            }
           }).catch((error) => {
             console.log("HOME: There was an error:", error);
             navigate(docRoot + "/error");
@@ -82,7 +89,7 @@ function HandleGroup(props) {
                     <input
                     type="checkbox"
                     checked={stuOptionOne}
-                    onChange={handleCheck}/>Student 1</label>
+                    onChange={handleCheck}/>Placeholder</label>
             </div>
         </div>
     )
