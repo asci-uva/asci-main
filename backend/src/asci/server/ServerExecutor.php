@@ -366,7 +366,7 @@ class ServerExecutor{
                 foreach($potential_group as $option){
                     $session_temp = new \asci\data\Session();
                     $session_temp->fromArray($option->toArray());
-                    $candi_sessions[] = $session_temp->toArray();
+                    $candi_sessions[$session_temp->getId()] = $session_temp->toArray();
 
                     $stu_temp = $dbsessusr->getSessionUserByRole($session_temp->getId(), 'student');
 
@@ -384,14 +384,14 @@ class ServerExecutor{
                         $result["error"] = "ERROR: Candidate session has no student in it.";
                         return result;
                     }
-                    $candidates[] = $stuOption->toArray();
+                    $candidates[$session_temp->getId()] = $stuOption->toArray();
                 }
             }
             else{
                 foreach($potential_group as $option){
                     $session_temp = new \asci\data\Session();
                     $session_temp->fromArray($option->toArray());
-                    $candi_sessions[] = $session_temp->toArray();
+                    $candi_sessions[$session_temp->getId()] = $session_temp->toArray();
 
                     $stu_temp = $dbsessusr->getSessionUserByRole($session_temp->getId(), 'student');
 
@@ -409,7 +409,7 @@ class ServerExecutor{
                         $result["error"] = "ERROR: Candidate session has no student in it.";
                         return result;
                     }
-                    $candidates[] = $stuOption->toArray();
+                    $candidates[$session_temp->getId()] = $stuOption->toArray();
                 }
             }
             $result["have_group"] = "true";
@@ -421,24 +421,10 @@ class ServerExecutor{
     }
 
     /*
-     * Given the session, gets the student info
+     * Put the chosen students into a group meeting
      */
-    public function getStudentDetails($session){
-        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+    public function startGroupMeeting($computing_id, $computing_one, $computing_two="0", $computing_three= "0",$course_id){
 
-        $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), 'student');
-
-        if($sessUsr == null){
-            return null;
-        }
-
-        //Now, grab the student
-        $student = $this->userStore->getUserById($sessUsr->getUserId());
-
-        if($student == null){
-            return null;
-        }
-        return $student;
     }
 
 
