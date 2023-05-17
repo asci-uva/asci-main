@@ -8,7 +8,8 @@ function HandleGroup(props) {
 
     const [primeStuName,setPrimeStuName] = useState("LOADING");
     const [primeStutId, setPrimeStuId] = useState("LOADING");
-    const [otherStudents, setOtherStudents] = useState([]);
+    const [otherStudents, setOtherStudents] = useState({});
+    const [otherSessions, setOtherSessions] = useState({0: "LOADING"});
     const navigate = useNavigate();
 
     const [primeSubject, setPrimeSubject] = useState("LOADING");
@@ -53,11 +54,26 @@ function HandleGroup(props) {
                 setPrimeIssue(data.session.issue);
                 setPrimeLocation(data.session.location);
             }
-            // else{
-            //     console.log("Getting primary student info failed");
-            //     console.log("error",data.error);
-            //     navigate(docRoot + "/error");
-            // }
+            else{
+                console.log("Getting primary student info failed");
+                console.log("error",data.error);
+                navigate(docRoot + "/error");
+            }
+
+            if(data.have_group == "true"){
+                console.log("Have group is true");
+                let sessions = {0: "LOADING"}
+                let session = {}
+                for(var key in data.candi_sessions){
+                    session = {}
+                    session['issue']= data.candi_sessions[key].issue
+                    session['issue_subject'] = data.candi_sessions[key].issue_subject
+                    session['name'] = data.candidates[key].fname + " " + data.candidates[key].lname
+                    session['stuid'] = data.candidates[key].computing_id
+                    sessions[key] = session
+                }
+                setOtherSessions(sessions)
+            }
           }).catch((error) => {
             console.log("HOME: There was an error:", error);
             navigate(docRoot + "/error");
@@ -78,11 +94,20 @@ function HandleGroup(props) {
 
             <div>
                 <h2>Please select from Matched Students:</h2>
-                <label>
-                    <input
-                    type="checkbox"
-                    checked={stuOptionOne}
-                    onChange={handleCheck}/>Student 1</label>
+                {Object.keys(otherSessions).map(k => {
+                    if (k!= 0){
+                        console.log(k);
+                        return (<label key ={k}>
+                        <input
+                            type="checkbox"
+                            name={k}
+                            checked={stuOptionOne}
+                            onChange={handleCheck}
+                        />
+                        {otherSessions[k]['name']}
+                        </label>
+                    );}
+                })}
             </div>
         </div>
     )

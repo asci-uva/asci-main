@@ -228,27 +228,30 @@ class DBSession
     }
 
     /*
-     * Fetches the Session for this courseId that has been in the "waiting"
-     * state the longest that this TA has NO session for already
+     * Fetches the Sessions with group_option set to true;
      */
 
-    public function getWaitingSessionWGroupPreference($ta_id, $course_id){
-
-        //Normal get not caring about session status
-        $query = 'select * from sessions where course_id=$1 and status=\'waiting\' and id not in (select distinct S.id from (sessions S join session_users U on S.id=U.session_id) where U.user_id=$2) order by entry_time';
-
-        $result = $this->db->query($query, array($course_id, $ta_id));
-        $row = $this->db->fetchrow($result);
-
-        // wheter the user's session with longest wait time want to be in a group
-        if ($row != null){
-            if ($row['group_option']==="true"){
-                // here one we know the above session of a syudent want to be in a group, we get all sessions that support grouping
-                // want to return a List of sessions 
-                $queryAllSessions = 'select * from sessions where course_id=$1 and status=\'waiting\' and group_option=true and id not in (select distinct S.id from (sessions S join session_users U on S.id=U.session_id) where U.user_id=$2) order by entry_time';
-                $result = $this->db->query($query, array($course_id, $ta_id));
-                $rows = $this->db->fetchAllRowsAsArray($result); //can also use fetchAll from DAtabaseConnector i guess i made a new func 
-                
+    public function getPotentialGroupSession($ta_id, $course_id,$stu_id){
+        $queryAllSessions = 'select * from sessions where course_id=$1 and status=\'waiting\' and group_option=\'true\' and id not in (select distinct S.id from (sessions S join session_users U on S.id=U.session_id) where U.user_id=$2) and id != $3 order by entry_time';
+        $result = $this->db->query($queryAllSessions, array($course_id, $ta_id, $stu_id));
+        $rows = $this->db->fetchAll($result); 
+        if($rows != null){
+            // if(count($rows) > 1){
+            //     $sessArray = array();
+            //     foreach ($rows as $row){
+            //         $sess = new \asci\data\Session();
+            //         $sess->fromArray($row);
+            //         $sessArray[] = $sess;
+            //     }
+            //     // returns an array fo sessions
+            //     return $sessArray;
+            // }
+            // else{
+            //     $row = $rows[0];
+            //     $sess = new \asci\data\Session();
+            //     $sess->fromArray($row);
+            //     return $sess;
+            // }
                 $sessArray = array();
                 foreach ($rows as $row){
                     $sess = new \asci\data\Session();
@@ -257,14 +260,6 @@ class DBSession
                 }
                 // returns an array fo sessions
                 return $sessArray;
-            }
-            else if($row['group_option']==="false"){
-                // if they dont want to be in a group, then use the good old way
-                // returns a single session
-                $sess = new \asci\data\Session();
-                $sess->fromArray($row);
-                return $sess;
-            }
         }
         
         return null;
@@ -294,6 +289,17 @@ class DBSession
      */
     public function fulfillSession($session_id){
         $query = 'update sessions set status=\'in_progress\', fulfillment_time=now() where id=$1';
+
+        $result = $this->db->query($query, array($session_id));
+
+        return $result;
+    }
+
+    /*
+     * Sets the current session to 'on-hold' and sets the fulfillment time
+     */
+    public function holdSession($session_id){
+        $query = 'update sessions set status=\'on_hold\', fulfillment_time=now() where id=$1';
 
         $result = $this->db->query($query, array($session_id));
 

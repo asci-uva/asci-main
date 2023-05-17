@@ -253,6 +253,16 @@ class ServerExecutor{
             $result["error"] = "No student in queue";
             return $result;
         }
+        //Check if the student wants to be in a group
+        $groupOption = $session->getGroupOption();
+        if($groupOption == "true"){
+            $result["group_option"] = "true";
+            $result["success"] = "true";
+            return $result;
+        }
+        else{
+            $result["group_option"] = "false";
+        }
 
         //Ok, we have a waiting session. Let's get the session_user
         $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), 'student');
@@ -277,15 +287,6 @@ class ServerExecutor{
         $result["success"] = "true";
         $result["error"] = "none";
 
-        //Check if the student wants to be in a group
-        $groupOption = $session->getGroupOption();
-        if($groupOption === "true"){
-            $result["group_option"] = "true";
-        }
-        else{
-            $result["group_option"] = "false";
-        }
-
         return $result;
     }
 
@@ -304,16 +305,16 @@ class ServerExecutor{
         $result = [];
 
         //2: Grab the next student that is waiting
-        $session = $dbsession->getSessionForUser($user->getId(), $course_id);
+        $session = $dbsession->getLongestWaitingSession($user->getId(), $course_id);
 
         if($session == null){
             $result["success"] = "false";
-            $result["error"] = "No session exists for this TA course combo";
+            $result["error"] = "No student in queue";
             return $result;
         }
-        else if($session->getStatus() != "in_progress"){
+        else if($session->getStatus() == "in_progress"){
             $result["success"] = "false";
-            $result["error"] = "session is not in the in_progress state (and it should be)";
+            $result["error"] = "session is in the in_progress state (and it should NOT be)";
             return $result;
         }
 
@@ -346,7 +347,84 @@ class ServerExecutor{
         $result["student"] = $student->toArray();
         $result["error"] = "none";
 
+        //$dbsession->holdSession($session->getId());
+
+        //Now, grab the potential group
+        $potential_group = $dbsession->getPotentialGroupSession($user->getId(), $course_id, $student->getId());
+        if($potential_group == null){
+            $result["have_group"] = "false";
+            return $result;
+        }
+        if(count($potential_group) == 0){
+            $result["have_group"] = "false";
+            return $result;
+        }
+        else{
+            $candidates = [];
+            $candi_sessions = [];
+            if(count($potential_group) < 4){
+                foreach($potential_group as $option){
+                    $session_temp = new \asci\data\Session();
+                    $session_temp->fromArray($option->toArray());
+                    $candi_sessions[$session_temp->getId()] = $session_temp->toArray();
+
+                    $stu_temp = $dbsessusr->getSessionUserByRole($session_temp->getId(), 'student');
+
+                    if($stu_temp == null){
+                        $result["success"] = "false";
+                        $result["error"] = "ERROR: Candidate session does not have any associated students";
+                        return result;
+                    }
+            
+                    //Now, grab the student
+                    $stuOption = $this->userStore->getUserById($stu_temp->getUserId());
+            
+                    if($student == null){
+                        $result["success"] = "false";
+                        $result["error"] = "ERROR: Candidate session has no student in it.";
+                        return result;
+                    }
+                    $candidates[$session_temp->getId()] = $stuOption->toArray();
+                }
+            }
+            else{
+                foreach($potential_group as $option){
+                    $session_temp = new \asci\data\Session();
+                    $session_temp->fromArray($option->toArray());
+                    $candi_sessions[$session_temp->getId()] = $session_temp->toArray();
+
+                    $stu_temp = $dbsessusr->getSessionUserByRole($session_temp->getId(), 'student');
+
+                    if($stu_temp == null){
+                        $result["success"] = "false";
+                        $result["error"] = "ERROR: Candidate session does not have any associated students";
+                        return result;
+                    }
+            
+                    //Now, grab the student
+                    $stuOption = $this->userStore->getUserById($stu_temp->getUserId());
+            
+                    if($student == null){
+                        $result["success"] = "false";
+                        $result["error"] = "ERROR: Candidate session has no student in it.";
+                        return result;
+                    }
+                    $candidates[$session_temp->getId()] = $stuOption->toArray();
+                }
+            }
+            $result["have_group"] = "true";
+            $result["candi_sessions"] = $candi_sessions;
+            $result["candidates"] = $candidates;
+        }
+
         return $result;
+    }
+
+    /*
+     * Put the chosen students into a group meeting
+     */
+    public function startGroupMeeting($computing_id, $computing_one, $computing_two="0", $computing_three= "0",$course_id){
+
     }
 
 

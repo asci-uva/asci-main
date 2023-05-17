@@ -149,7 +149,7 @@ function StudentWaitingRoom(props) {
             navigate(docRoot + "/studentMeeting");
           }
 
-          else if(data.session.status === "waiting"){
+          else if(data.session.status === "waiting" || data.session.status === "on-hold"){
             console.log("WR: Displaying new queue position");
             setCourseName(data.usercourse.name);
             setPosition(5);
