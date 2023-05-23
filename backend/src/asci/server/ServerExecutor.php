@@ -38,7 +38,7 @@ class ServerExecutor{
     /***
      *  index.php --> Server.run() --> ServerExecutor functions (do the work)
      *
-     *  CONTROLLER -- /server
+     *  CONTROLLER -- /serverf
      *  ServerExecutor:
      *      - db --- connection to the database
      *      - userStore --- a DBUser object (functions to handle user stuff)
@@ -257,8 +257,6 @@ class ServerExecutor{
         $groupOption = $session->getGroupOption();
         if($groupOption == "true"){
             $result["group_option"] = "true";
-            $result["success"] = "true";
-            return $result;
         }
         else{
             $result["group_option"] = "false";
@@ -282,7 +280,7 @@ class ServerExecutor{
         $dbsessusr->insert($TASessUsr);
 
         //Ok, Let's update the session itself
-        $dbsession->fulfillSession($session->getId());
+        $dbsession->fulfillSession($session->getId(), $session->getGroupOption());
 
         $result["success"] = "true";
         $result["error"] = "none";
@@ -292,203 +290,11 @@ class ServerExecutor{
 
     /*
      * Get all the matched students' info and display it for the TA.
-     * Added by frontend on April 7
      */
     public function getPotentialGroupInfo($computing_id, $course_id){
-        //DB objects we will be using
-        $dbsession = new \asci\server\database\DBSession($this->db);
-        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+        
+        /* FIRST, GRAB JUST THE MAIN USER THE TA IS INTERACTING WITH */
 
-        //0: Grab the user
-        $user = $this->userStore->getUser($computing_id);
-
-        $result = [];
-
-        //2: Grab the next student that is waiting
-        $session = $dbsession->getLongestWaitingSession($user->getId(), $course_id);
-
-        if($session == null){
-            $result["success"] = "false";
-            $result["error"] = "No student in queue";
-            return $result;
-        }
-        else if($session->getStatus() == "in_progress"){
-            $result["success"] = "false";
-            $result["error"] = "session is in the in_progress state (and it should NOT be)";
-            return $result;
-        }
-
-        //Ok, let's try to grab the student's information
-        $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), 'student');
-
-        if($sessUsr == null){
-            $result["success"] = "false";
-            $result["error"] = "ERROR: Session does not have any associated students";
-            return $result;
-        }
-        else if($session->getGroupOption() == "false"){
-            $result["success"] = "false";
-            $result["error"] = "ERROR: The primary student does not choose to be in a group (and they should)";
-            return $result;
-        }
-
-        //Now, grab the student
-        $student = $this->userStore->getUserById($sessUsr->getUserId());
-
-        if($student == null){
-            $result["success"] = "false";
-            $result["error"] = "ERROR: Could not find student information for session";
-            return $result;
-        }
-
-        //Done. Set up the info to return
-        $result["success"] = "true";
-        $result["session"] = $session->toArray();
-        $result["student"] = $student->toArray();
-        $result["error"] = "none";
-
-        //$dbsession->holdSession($session->getId());
-
-        //Now, grab the potential group
-        $potential_group = $dbsession->getPotentialGroupSession($user->getId(), $course_id, $student->getId());
-        if($potential_group == null){
-            $result["have_group"] = "false";
-            return $result;
-        }
-        if(count($potential_group) == 0){
-            $result["have_group"] = "false";
-            return $result;
-        }
-        else{
-            $candidates = [];
-            $candi_sessions = [];
-            if(count($potential_group) < 4){
-                foreach($potential_group as $option){
-                    $session_temp = new \asci\data\Session();
-                    $session_temp->fromArray($option->toArray());
-                    $candi_sessions[$session_temp->getId()] = $session_temp->toArray();
-
-                    $stu_temp = $dbsessusr->getSessionUserByRole($session_temp->getId(), 'student');
-
-                    if($stu_temp == null){
-                        $result["success"] = "false";
-                        $result["error"] = "ERROR: Candidate session does not have any associated students";
-                        return result;
-                    }
-            
-                    //Now, grab the student
-                    $stuOption = $this->userStore->getUserById($stu_temp->getUserId());
-            
-                    if($student == null){
-                        $result["success"] = "false";
-                        $result["error"] = "ERROR: Candidate session has no student in it.";
-                        return result;
-                    }
-                    $candidates[$session_temp->getId()] = $stuOption->toArray();
-                }
-            }
-            else{
-                foreach($potential_group as $option){
-                    $session_temp = new \asci\data\Session();
-                    $session_temp->fromArray($option->toArray());
-                    $candi_sessions[$session_temp->getId()] = $session_temp->toArray();
-
-                    $stu_temp = $dbsessusr->getSessionUserByRole($session_temp->getId(), 'student');
-
-                    if($stu_temp == null){
-                        $result["success"] = "false";
-                        $result["error"] = "ERROR: Candidate session does not have any associated students";
-                        return result;
-                    }
-            
-                    //Now, grab the student
-                    $stuOption = $this->userStore->getUserById($stu_temp->getUserId());
-            
-                    if($student == null){
-                        $result["success"] = "false";
-                        $result["error"] = "ERROR: Candidate session has no student in it.";
-                        return result;
-                    }
-                    $candidates[$session_temp->getId()] = $stuOption->toArray();
-                }
-            }
-            $result["have_group"] = "true";
-            $result["candi_sessions"] = $candi_sessions;
-            $result["candidates"] = $candidates;
-        }
-
-        return $result;
-    }
-
-    /*
-     * Put the chosen students into a group meeting
-     */
-    public function startGroupMeeting($computing_id, $computing_one, $computing_two="0", $computing_three= "0",$course_id){
-
-    }
-
-
-    /*
-     * Given the Student's computing Id and courseId
-     * gets the meeting details for the Student
-     */
-    public function getMeetingDetails($computing_id, $course_id){
-        //DB objects we will be using
-        $dbsession = new \asci\server\database\DBSession($this->db);
-        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
-
-        //0: Grab the user
-        $user = $this->userStore->getUser($computing_id);
-
-        $result = [];
-
-        //2: Grab the next student that is waiting
-        $session = $dbsession->getSessionForUser($user->getId(), $course_id);
-
-        if($session == null){
-            $result["success"] = "false";
-            $result["error"] = "No session exists for this Student Course combo";
-            return $result;
-        }
-        else if($session->getStatus() != "in_progress"){
-            $result["success"] = "false";
-            $result["error"] = "session is not in the in_progress state (and it should be)";
-            return $result;
-        }
-
-        //Ok, let's try to grab the ta's information
-        $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), 'ta');
-
-        if($sessUsr == null){
-            $result["success"] = "false";
-            $result["error"] = "ERROR: Session does not have any associated tas";
-            return $result;
-        }
-
-        //Now, grab the ta
-        $ta = $this->userStore->getUserById($sessUsr->getUserId());
-
-        if($ta == null){
-            $result["success"] = "false";
-            $result["error"] = "ERROR: Could not find ta information for session";
-            return $result;
-        }
-
-        //Done. Set up the info to return
-        $result["success"] = "true";
-        $result["session"] = $session->toArray();
-        $result["ta"] = $ta->toArray();
-        $result["error"] = "none";
-
-        return $result;
-    }
-
-
-    /*
-     * Given the TAs computing Id and courseId
-     * gets the meeting details for the TA
-     */
-    public function getTAMeetingDetails($computing_id, $course_id){
         //DB objects we will be using
         $dbsession = new \asci\server\database\DBSession($this->db);
         $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
@@ -506,9 +312,9 @@ class ServerExecutor{
             $result["error"] = "No session exists for this TA course combo";
             return $result;
         }
-        else if($session->getStatus() != "in_progress"){
+        else if($session->getStatus() != "grouping"){
             $result["success"] = "false";
-            $result["error"] = "session is not in the in_progress state (and it should be)";
+            $result["error"] = "session is not in the grouping state (and it should be)";
             return $result;
         }
 
@@ -536,6 +342,235 @@ class ServerExecutor{
         $result["student"] = $student->toArray();
         $result["error"] = "none";
 
+        /* SECOND, GRAB POTENTIAL GROUP MEMBERS TO ALSO SEND BACK */
+        $result["group_sessions"] = $dbsession->getPotentialGroupSessions($course_id);
+
+        return $result;
+    }
+
+    /*
+     * Put the chosen students into a group meeting
+     * $ta_computing_id is the comp. id of the TA
+     * $course_id is the id of the course
+     * $session_id is the session of the main student TA is helping
+     * $group_sessions is a list of the other sessions that should be joined with session_id
+     */
+    public function createGroup($ta_computing_id, $course_id, $session_id, $group_sessions){
+
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+        $dbgroupmap = new \asci\server\database\DBGroupMapping($this->db);
+
+        /* First, set the main session to in_progress (easy part) */
+        $mainSession = $dbsession->getSession($session_id);
+
+        if($mainSession == null)
+            return $this->err("No session exists for given sessionId");
+
+        $mainSession->status = "in_progress";
+
+        $result = $dbsession->update($mainSession);
+
+        if(!$result) return $this->err("failure to update session to in_progress state");
+
+
+        /* Then, for each group session, check if still waiting */
+        /* If so, add a group mapping row to the main session and set to in progress */
+        foreach($group_sessions as $gr_sess_id){
+            /* gr_sess_id is just the id of the session, pull the session first */
+            $gr_sess = $dbsession->getSession($gr_sess_id);
+            if($gr_sess == null) return $this->err("Group sess id does not exist");
+
+            /* If it is still waiting, change to in progress and write it */
+            if($gr_sess->status == "waiting"){
+                $gr_sess->status = "in_progress";
+                $gr_sess->fulfillment_time = "now()";
+                $result = $dbsession->update($gr_sess);
+                if(!$result) return $this->err("Error updating group session to in progress");
+
+                /* Now create the group mapping for this session */
+                $gr_map = new \asci\data\GroupMapping();
+                $gr_map->from_session = $gr_sess_id;
+                $gr_map->to_session = $session_id;
+                $gr_map->status = "active";
+
+                $result = $dbgroupmap->insert($gr_map);
+
+                if(!$result) return $this->err("Error creating group session map");
+            }
+        }
+
+        $result = [];
+        $result["success"] = "true";
+        return $result;
+
+    }
+
+
+    /*
+     * Given the Student's computing Id and courseId
+     * gets the meeting details for the Student
+     */
+    public function getMeetingDetails($computing_id, $course_id){
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+        $dbgroupmap = new \asci\server\database\DBGroupMapping($this->db);
+
+        //0: Grab the user
+        $user = $this->userStore->getUser($computing_id);
+
+        $result = [];
+
+        /* Initially, result is NOT a group, but this could be overridden later */
+        $result["is_group"] = false;
+        $result["group_session"] = null;
+
+        //2: Grab the session for this user that is active
+        $session = $dbsession->getSessionForUser($user->getId(), $course_id);
+        $group_session = null; //could be set later
+
+        if($session == null){
+            $result["success"] = "false";
+            $result["error"] = "No session exists for this Student Course combo";
+            return $result;
+        }
+        else if($session->getStatus() != "in_progress"){
+            $result["success"] = "false";
+            $result["error"] = "session is not in the in_progress state (and it should be)";
+            return $result;
+        }
+
+        //Ok, let's try to grab the ta's information
+        $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), 'ta');
+
+
+        /* Session does not have a TA, might be a group meeting though */
+        /* So, if not TA, throw error but if group set the group info up */
+        if($sessUsr == null){
+            
+            /* See if an entry in the group mapping exists */
+            $gr_map = $dbgroupmap->getMappingFromSession($session->id);
+
+            if($gr_map == null){
+                return $this->err("ERROR: Session does not have any associated tas and is not a group");
+            }
+            else{
+                /* It is a group! */
+                $result["is_group"] = true;
+
+                /* Pull the OTHER user's session that this one was joined to */
+                $group_session = $dbsession->getSession($gr_map->to_session);
+
+                if($group_session == null) return $this->err("Student session is grouped, but not mapped to a valid other session");
+
+                /* Grab the sess_usr from the group session instead */
+                $sessUsr = $dbsessusr->getSessionUserByRole($group_session->getId(), 'ta');
+
+                /* If still null, crash */
+                if($sessUsr == null) return $this->err("group session has no ta associated");
+            }
+
+        }
+        else{
+            /* This user is being helped, but let's check if anybody is grouped TO them */
+            $gr_map = $dbgroupmap->getMappingToSession($session->id);
+            if(count($gr_map) > 0) $result["is_group"] = true;
+        }
+
+        //Now, grab the ta by either the group 
+        $ta = $this->userStore->getUserById($sessUsr->getUserId());
+
+        if($ta == null){
+            $result["success"] = "false";
+            $result["error"] = "ERROR: Could not find ta information for session";
+            return $result;
+        }
+
+        //Done. Set up the info to return
+        $result["success"] = "true";
+        $result["session"] = $session->toArray();
+        $result["group_session"] = $group_session;
+        $result["ta"] = $ta->toArray();
+        $result["error"] = "none";
+
+        return $result;
+    }
+
+
+    /*
+     * Given the TAs computing Id and courseId
+     * gets the meeting details for the TA
+     */
+    public function getTAMeetingDetails($computing_id, $course_id){
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+        $dbgroupmap = new \asci\server\database\DBGroupMapping($this->db);
+
+        //0: Grab the user
+        $user = $this->userStore->getUser($computing_id);
+
+        $result = [];
+
+        /* Initially, result is NOT a group, but this could be overridden later */
+        $result["is_group"] = false;
+        $result["group_sessions"] = null;
+        $result["group_members"] = null;
+
+        //2: Grab the session that this TA is a part of
+        $session = $dbsession->getSessionForUser($user->getId(), $course_id);
+
+        if($session == null)
+            return $this->err("No session exists for this TA course combo");    
+        else if($session->getStatus() != "in_progress")
+            return $this->err("session is not in the in_progress state (and it should be)");
+
+
+        //Ok, let's try to grab the student's information
+        $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), 'student');
+
+        if($sessUsr == null)
+            return $this->err("ERROR: Session does not have any associated students");
+
+        //Now, grab the student
+        $student = $this->userStore->getUserById($sessUsr->getUserId());
+
+        if($student == null)
+            return $this->err("ERROR: Could not find student information for session");
+
+        /* See if any group members exist */
+        $gr_map = $dbgroupmap->getMappingToSession($session->id);
+        if(count($gr_map) > 0){
+            $result["is_group"] = true;
+
+            $group_sessions = [];
+            $group_members = [];
+            foreach($gr_map as $grm){
+                $gr_sess = $dbsession->getSession($grm->from_session);
+                if($gr_sess == null) return $this->err("There is a session mapped to this one that does not exist");
+
+                $gr_stud = $dbsessusr->getSessionUserByRole($gr_sess->getId(), 'student');
+                if($gr_stud == null) return $this->err("Group member does not exist");
+
+                $gr_student = $this->userStore->getUserById($gr_stud->userId);
+                if($gr_student == null) return $this->err("Group member does not exist");
+
+                $group_sessions[] = $gr_sess;
+                $group_members[] = $gr_student;
+            }
+
+            $result["group_sessions"] = $group_sessions;
+            $result["group_members"] = $group_members;
+        }
+
+        //Done. Set up the info to return
+        $result["success"] = "true";
+        $result["session"] = $session->toArray();
+        $result["student"] = $student->toArray();
+        $result["error"] = "none";
+
         return $result;
     }
 
@@ -543,11 +578,13 @@ class ServerExecutor{
      * Given a computing_id and session_id, end the session
      * IF computing_id is actually part of that session
      * AND the session status is currently "in_progress"
+     * Also ends any session that was added TO this one for group purposes
      */
     public function endSession($computing_id, $session_id){
         //DB objects we will be using
         $dbsession = new \asci\server\database\DBSession($this->db);
         $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+        $dbgroupmap = new \asci\server\database\DBGroupMapping($this->db);
 
         //0: Grab the user
         $user = $this->userStore->getUser($computing_id);
@@ -578,25 +615,36 @@ class ServerExecutor{
         //is trying to end this session is actually a part of that session
         $sessUsr = $dbsessusr->getSessionUser($user->getId(), $session->getId());
 
-        if($sessUsr == null){
-            $result["success"] = "false";
-            $result["error"] = "This user is not a part of this session, so cannot end it";
-            return $result;
-        }
+        if($sessUsr == null) return $this->err("This user is not a part of this session, so cannot end it");
 
         //Ok, go ahead and end the session
-        if($dbsession->endSession($session_id)){
-            //Done. Set up the info to return
-            $result["success"] = "true";
-            $result["session"] = $session->toArray();
-            $result["error"] = "none";
-            return $result;
+        if(!($dbsession->endSession($session_id))) return $this->err("Something went wrong when ending the session");
+
+        /* Make all group sessions FROM this one inactive */
+        if(!($dbgroupmap->endAllSessionsFrom($session_id))) return $this->err("Error ending group sessions from this one");
+
+        /* Success! Now check for group sessions that were added to this one */
+        $group_session_mappings = $dbgroupmap->getMappingToSession($session_id);
+        foreach($group_session_mappings as $grp_sess_map){
+            $from_sess_id = $grp_sess_map->from_session;
+
+            /* Need to grab sessionuser to get userId */
+            $grp_sess_usr = $dbsessusr->getSessionUserByRole($from_sess_id, 'student');
+            if($grp_sess_usr == null) return $this->err("No session user for group mapping");
+
+            $grp_user = $this->userStore->getUserById($grp_sess_usr->userId);
+            if($grp_user == null) return $this->err("No group user found!");
+
+            /* Recursively end the session that points to this one */
+            $this->endSession($grp_user->computing_id, $from_sess_id);
         }
-        else{
-            $result["success"] = "false";
-            $result["error"] = "Something updating session to completed status";
-            return $result;
-        }
+
+
+        //Done. Set up the info to return
+        $result["success"] = "true";
+        $result["session"] = $session->toArray();
+        $result["error"] = "none";
+        return $result;
     }
 
 
@@ -654,6 +702,7 @@ class ServerExecutor{
         //DB objects we will be using
         $dbsession = new \asci\server\database\DBSession($this->db);
         $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+        $dbgroupmap = new \asci\server\database\DBGroupMapping($this->db);
 
         //0: Grab the user and student
         $ta = $this->userStore->getUser($user);
@@ -664,11 +713,7 @@ class ServerExecutor{
         //2: grab the session
         $session = $dbsession->getSession($sessionId);
 
-        if($session == null){
-            $result["success"] = "false";
-            $result["error"] = "No session exists with the provided session_id";
-            return $result;
-        }
+        if($session == null) return $this->err("No session exists with the provided session_id");
 
         //Ok, let's grab the session_usr for the student and ta
         $sessUsrTA = $dbsessusr->getSessionUser($ta->getId(), $session->getId());
@@ -692,15 +737,33 @@ class ServerExecutor{
         $sessUsrTA->user_status = 'inactive';
         $res2 = $dbsessusr->update($sessUsrTA);
 
-        if($res1 && $res2){
-            $result["success"] = "true";
-            return $result;
+        if(!$res1 || !$res2) return $this->err("Error updating session or sess_user objects");
+
+        /* See if any other sessions were grouped to this one. If so, put them back too */
+        $grp_maps = $dbgroupmap->getMappingToSession($sessionId, 'active');
+        $this->logger->addDebug("Grp maps", array("maps" => $grp_maps));
+        foreach($grp_maps as $grp_map){
+            $this->logger->addDebug("Grp map", array("map" => $grp_map));
+            /* Grab the session that was grouped to this one */
+            $grp_sess = $dbsession->getSession($grp_map->from_session);
+
+            $this->logger->addDebug("Grp sess", array("sess" => $grp_sess));
+
+            if($grp_sess != null){
+                $grp_sess->fulfillment_time = "now()";
+                $grp_sess->status = "waiting";
+                if(!$dbsession->update($grp_sess))
+                    return $this->err("Error updating a group session to waiting");
+            }
+
+            $grp_map->status = 'inactive';
+            if(!$dbgroupmap->update($grp_map)) return $this->err("Error updating grp map");
         }
-        else{
-            $result["success"] = "false";
-            $result["error"] = "Something went wrong. Updating session users failed";
-            return $result;
-        }
+
+        /* Made it! Return success!! */    
+        $result["success"] = "true";
+        return $result;
+        
     }
 
 
@@ -713,6 +776,7 @@ class ServerExecutor{
         /* Database Objects we are going to need */
         $dbsession = new \asci\server\database\DBSession($this->db);
         $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+        $dbgroupmap = new \asci\server\database\DBGroupMapping($this->db);
 
         /* Grab the user object */
         $user = $this->userStore->getUser($computing_id);
@@ -734,8 +798,18 @@ class ServerExecutor{
 
         $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), $role);
 
-        if($sessUsr == null)
-            return $this->err("ERROR: Session does not have any associated other user");
+        if($sessUsr == null){
+            /* Could be a group, so check for that */
+            $grpmap = $dbgroupmap->getMappingFromSession($session_id, 'inactive');
+            if($grpmap == null) return $this->err("ERROR: Session does not have any associated other user");
+
+            /* Great! Pull the TA from the other session instead */
+            $sessUsr = $dbsessusr->getSessionUserByRole($grpmap->to_session, 'ta');
+
+            if($sessUsr==null) return $this->err("grp session does not have ta either");
+        }
+
+
 
         /* Now grab the other user */
         $other = $this->userStore->getUserById($sessUsr->getUserId());

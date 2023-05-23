@@ -6,20 +6,34 @@ function HandleGroup(props) {
     let url = props.url;
     let docRoot = props.documentRoot;
 
-    const [primeStuName,setPrimeStuName] = useState("LOADING");
-    const [primeStutId, setPrimeStuId] = useState("LOADING");
-    const [otherStudents, setOtherStudents] = useState({});
-    const [otherSessions, setOtherSessions] = useState({0: "LOADING"});
+    /* Info for the first student (from front of queue) */
+    const [otherSessions, setOtherSessions] = useState({});
     const navigate = useNavigate();
 
+    const [mainSessionId, setMainSessionId] = useState(-1);
     const [primeSubject, setPrimeSubject] = useState("LOADING");
     const [primeIssue, setPrimeIssue] = useState("LOADING");
-    const [primeLocation, setPrimeLocation] = useState("LOADING");
 
-    const [stuOptionOne, setStuOptionOne] = useState(false);
+    const [checked, setChecked] = useState({});
 
-    const handleCheck = () => {
-        setStuOptionOne(!stuOptionOne);
+    const handleCheck = (e) => {
+        console.log(e);
+        console.log(e.target.name);
+        var id = parseInt(e.target.name);
+        console.log("id is " + id);
+
+        var newChecked = {};
+        for(var oldId in checked){
+            if(oldId == id){
+                newChecked[oldId] = !checked[oldId];
+            }
+            else{
+                newChecked[oldId] = checked(oldId);
+            }
+        }
+
+        setChecked(newChecked);
+        console.log(newChecked);
       };
 
     useEffect(()=>{
@@ -45,14 +59,23 @@ function HandleGroup(props) {
           .then(data => {
             console.log("Data is: ", data);
             if(data.success === "true"){
-
-                setPrimeStuName(data.student.fname + " " + data.student.lname);
-                setPrimeStuId(data.student.computing_id);
       
                 /* Set up issue vars also */
+                setMainSessionId(data.session.id);
                 setPrimeSubject(data.session.issue_subject);
                 setPrimeIssue(data.session.issue);
-                setPrimeLocation(data.session.location);
+
+                /* SET GROUP MEMBER INFO */
+                setOtherSessions(data.group_sessions);
+
+                for(var sess in data.group_sessions){
+                    console.log("sess is " + sess);
+                    console.log(data.group_sessions[sess].id);
+                    checked[data.group_sessions[sess].id] = false;
+                    console.log(checked);
+                }
+                setChecked(checked);
+
             }
             else{
                 console.log("Getting primary student info failed");
@@ -60,20 +83,6 @@ function HandleGroup(props) {
                 navigate(docRoot + "/error");
             }
 
-            if(data.have_group == "true"){
-                console.log("Have group is true");
-                let sessions = {0: "LOADING"}
-                let session = {}
-                for(var key in data.candi_sessions){
-                    session = {}
-                    session['issue']= data.candi_sessions[key].issue
-                    session['issue_subject'] = data.candi_sessions[key].issue_subject
-                    session['name'] = data.candidates[key].fname + " " + data.candidates[key].lname
-                    session['stuid'] = data.candidates[key].computing_id
-                    sessions[key] = session
-                }
-                setOtherSessions(sessions)
-            }
           }).catch((error) => {
             console.log("HOME: There was an error:", error);
             navigate(docRoot + "/error");
@@ -81,33 +90,104 @@ function HandleGroup(props) {
           });
     }
 
+
+
+    /* HANDLE CREATING THE GROUP ONCE THE BUTTON IS PRESSED */
+    const createGroup = (e) =>{
+        e.preventDefault();
+
+        if(localStorage.getItem('asci-user') === null){
+          navigate(docRoot + "/login");
+        }
+        else if(localStorage.getItem('asci-course') === null){
+          navigate(docRoot + "/selectCourse");
+        }
+        else{
+
+          //JOIN THE QUEUE
+          let request = {};
+          request.command = "createGroup";
+
+          //set user and course so the server knows
+          request.user = localStorage.getItem('asci-user');
+          request.courseId = localStorage.getItem('asci-course');
+          request.sessionId = mainSessionId;
+
+          request.groupSessions = [];
+
+          for(var key in otherSessions){
+            var sessId = otherSessions[key]['id'];
+
+            if(checked[sessId] == true){
+                request.groupSessions.push(sessId);
+            }
+          }
+
+          console.log(request);
+          createGroupRequest(request, url); 
+        }
+
+    }
+
+  //This function group request to server
+  const createGroupRequest = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+        console.log("Data is: ", data);
+
+        //if request succeeded
+        if(data.success === "true"){
+          navigate(docRoot + "/meeting");
+        }
+        else{
+          console.log("JQ: Error, creating group failed");
+          navigate(docRoot + "/error");
+        }
+        
+      })
+      .catch((error) => {
+        console.log("JQ: There was an error:", error);
+        navigate(docRoot + "/error");
+        
+      });
+
+    }
+
+    /* END CREATING GROUP ONCE BUTTON IS PRESSED */
+
     return(
-        <div className="group">
+        <div className="question">
             <div>
-                <h2>The next student inline choose to be in a group:</h2>
-                <label>Name: <b>{primeStuName}</b></label>
-                <label>Subject: {primeSubject}</label>
-                <label>Issue: </label>
-                <label>{primeIssue}</label>
-                <label>Location: {primeLocation}</label>
+                <h2>The next student is willing to be in a group:</h2>
+                <label><b>Subject:</b> {primeSubject}</label>
+                <label><b>Issue:</b> {primeIssue} </label>
             </div>
 
             <div>
-                <h2>Please select from Matched Students:</h2>
-                {Object.keys(otherSessions).map(k => {
-                    if (k!= 0){
-                        console.log(k);
+                <h2>Please select other issues that are similar to the one above:</h2>
+                {Object.keys(otherSessions).map(k => { 
                         return (<label key ={k}>
                         <input
                             type="checkbox"
-                            name={k}
-                            checked={stuOptionOne}
+                            name={otherSessions[k]['id']}
+                            checked={checked[otherSessions[k]['id']]}
                             onChange={handleCheck}
                         />
-                        {otherSessions[k]['name']}
+                        <b>  Subject:</b> {otherSessions[k]['issue']}
                         </label>
-                    );}
+                    );
                 })}
+            </div>
+
+            <div>
+                <h6>Click here when you are ready to start the session.</h6>
+                <button onClick={createGroup}>Start Session</button>
             </div>
         </div>
     )

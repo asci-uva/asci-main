@@ -8,13 +8,13 @@ function JoinQueue(props) {
   const navigate = useNavigate();
   
   const [user, setUser] = useState(null);
-  let courseId = null;
+  const [courseId, setCourseId] = useState(null);
 
   const [subject, setSubject] = useState("");
   const [location, setLocation] = useState("");
   const [details, setDetails] = useState("");
   const [courseName, setCourseName] = useState("");
-  const [groupoption, setGroupOption] = useState("true");
+  const [groupOption, setGroupOption] = useState(true);
 
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -37,7 +37,7 @@ function JoinQueue(props) {
       else{
 
         setUser(localStorage.getItem('asci-user'));
-        courseId = localStorage.getItem('asci-course');
+        setCourseId(localStorage.getItem('asci-course'));
         
         //setup json command
         let request = {};
@@ -81,18 +81,8 @@ function JoinQueue(props) {
       });
   }
 
-
-  const handleLogout = (e) =>{
-    e.preventDefault();
-    //TODO: Add logout functionality?
-    localStorage.clear();
-    navigate(docRoot + '/');
-  }
-  
-
-
   const handleCheck = e => {
-    setGroupOption(e.target.value)
+    setGroupOption(!groupOption)
   }
 
   const handleQuestion = (e) =>{
@@ -120,23 +110,22 @@ function JoinQueue(props) {
 
       setIsError(false);
       setErrorMessage("");
-
-      setUser(localStorage.getItem('asci-user'));
-      courseId = localStorage.getItem('asci-course');
     
       console.log("User: ", localStorage.getItem('asci-user'));
-      console.log("CourseId: ", courseId)
+      console.log("CourseId: ", localStorage.getItem('asci-course'))
       console.log("Question: ", details);
 
       //JOIN THE QUEUE
       let request = {};
       request.command = "joinQueue";
       request.user = localStorage.getItem('asci-user');
-      request.courseId = courseId;
+      request.courseId = localStorage.getItem('asci-course');
       request.subject = subject;
       request.question = details;
       request.location = location;
-      request.groupOption = groupoption;
+      request.groupOption = groupOption.toString();
+
+      
       //alert(groupoption);
       joinQueue(request, url); 
     }
@@ -210,25 +199,15 @@ function JoinQueue(props) {
           onChange={(e)=>setLocation(e.target.value)}
         />
 
-        <div>         
-          <input
-            type="radio"
-            name="grouping"
-            value = "true"
-            checked={groupoption === "true"}
-            onChange={handleCheck}
-          />
-          <label>Group</label>
-
-          <input
-            type="radio"
-            name="grouping"
-            value="false"
-            checked={groupoption === "false"}
-            onChange={handleCheck}
-          />
-          <label>Solo</label>
-          <label>*This might decrease your waiting time.</label>
+        <div>
+          <label>
+            I would like to be placed in a group (this might decrease your wait time)
+            <input
+              type="checkbox"
+              checked={groupOption}
+              onChange={handleCheck}
+            />
+          </label>
         </div>
       </form>
       

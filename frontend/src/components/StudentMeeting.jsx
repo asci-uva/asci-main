@@ -10,6 +10,9 @@ function StudentMeeting(props) {
   const [taId, setTAId] = useState("TA Id");
   const [sessionId, setSessionId] = useState(null);
   
+  const [isGroup, setIsGroup] = useState(false);
+  const [groupSession, setGroupSession] = useState(null);
+  
   
   let url = props.url;
   let docRoot = props.documentRoot; 
@@ -55,6 +58,8 @@ function StudentMeeting(props) {
             setTAName(data.ta.fname + " " + data.ta.lname);
             setTAId(data.ta.computing_id);
             setSessionId(data.session.id);
+            setIsGroup(data.is_group);
+            setGroupSession(data.group_session);
             
           }
           else{
@@ -122,19 +127,50 @@ function StudentMeeting(props) {
         });
     }
 
+    function GroupPanel(props) {
+      /* If student is the main session for a group, just notify them */
+      if(isGroup && groupSession == null){
+        return (
+          <div>
+          <div>
+            <h5> This is a <b>group meeting</b>. Other students should arrive to join you soon! </h5>
+          </div>
+          <div>
+            <h5>Please be ready when the TA arrives to assist you.</h5>
+          </div>
+          </div>  );
+      }
+      else if(isGroup && groupSession != null){
+        return(
+          <div>
+            <h5> You have been added to a group (<b>Location: {groupSession.location})</b>. Please proceed to the specified location to find your group!</h5>
+          </div>
+        );
+      }
+      else{
+        return (
+          <div>
+            <h5>Please be ready when the TA arrives to assist you.</h5>
+          </div>  );
+      }
+    }
+
+
   return (
     <div className="question">
       <div>
         <h4>You are in a meeting with { taName } ( { taId } )</h4>
       </div>
-      <div>
-        <h5>Please be ready when the TA arrives to assist you.</h5>
-      </div>
+
+      <GroupPanel />
+
       <div>
         <button onClick={leaveMeeting}>Leave meeting</button>
       </div>
     </div>
   );
 }
+
+
 
 export default StudentMeeting;

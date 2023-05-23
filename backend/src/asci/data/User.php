@@ -4,11 +4,11 @@ namespace asci\data;
 
 class User implements \Serializable {
 
-    private $id;
-    private $computing_id;
-    private $fname;
-    private $lname;
-    private $pname;
+    public $id;
+    public $computing_id;
+    public $fname;
+    public $lname;
+    public $pname;
 
 
     public function __construct()

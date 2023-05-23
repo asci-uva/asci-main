@@ -297,11 +297,22 @@ class Server
 
                 break;
 
-            /*FRONT END ADDED THESE FUNCTIONS FOR GROUP <OPTIONS></OPTIONS>*/
+            /* Get a list of potential group members to add to the TAs current session */
             case "getPotentialGroupInfo":
                 $courseId = $this->input["courseId"];
                 
                 $this->setResponse($executor->getPotentialGroupInfo($user, $courseId));
+                
+                break;
+
+            /* Given a TA, main session they are helping, and other sessions */
+            /* Create a group so that the TA is helping ALL of the students at once */
+            case "createGroup":
+                $courseId = $this->input["courseId"];
+                $sessionId = $this->input["sessionId"];
+                $groupSessions = $this->input["groupSessions"];
+
+                $this->setResponse($executor->createGroup($user, $courseId, $sessionId, $groupSessions));
                 
                 break;
             

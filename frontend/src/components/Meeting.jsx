@@ -16,6 +16,11 @@ function Meeting(props) {
   const [issue, setIssue] = useState("LOADING");
   const [location, setLocation] = useState("LOADING");
 
+  /* Info regarding group (if applicable) */
+  const [isGroup, setIsGroup] = useState(false);
+  const [groupSessions, setGroupSessions] = useState(null);
+  const [groupMembers, setGroupMembers] = useState(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -63,6 +68,11 @@ function Meeting(props) {
           setSubject(data.session.issue_subject);
           setIssue(data.session.issue);
           setLocation(data.session.location);
+
+          /* Set group info */
+          setIsGroup(data.is_group);
+          setGroupSessions(data.group_sessions);
+          setGroupMembers(data.group_members);
         }
         else{
           console.log("Fetching meeting details failed for some reason");
@@ -120,6 +130,7 @@ function Meeting(props) {
 
         //if request succeeded
         if(data.success === "true"){
+          localStorage.setItem("asci-session", sessionId); 
           navigate(docRoot + "/taSurvey");
         }
         else{
@@ -134,6 +145,10 @@ function Meeting(props) {
         
       });
 
+    }
+
+    const handlePutGroupMemberBack = (e) =>{
+      console.log(e);
     }
 
 
@@ -173,6 +188,7 @@ function Meeting(props) {
 
         //if request succeeded
         if(data.success === "true"){
+          localStorage.setItem("asci-session", sessionId); 
           navigate(docRoot + "/taSurvey");
         }
         else{
@@ -189,26 +205,39 @@ function Meeting(props) {
 
     }
 
+    function GroupPanel(props) {
+      /* If student is the main session for a group, just notify them */
+      if(isGroup && groupSessions != null && groupMembers != null){
+        return(
+          <div>
+            <h2>Group Members:</h2>
+                {Object.keys(groupSessions).map(k => { 
+                        return (
+                          <h5 key={k}><b>{groupMembers[k].fname} {groupMembers[k].lname}</b>: {groupSessions[k].issue}</h5>
+                        );
+                      })
+                }
+          </div>
+        );
+      }
+      else return;
+    }
+
+
   return (
     <div className="question">
       <div>
         <h5>You are currently helping <b>{studentName}</b> (<b>{studentId}</b>)</h5>
-      </div>
-      <div>
         <h5><b>Subject:</b> {subject}</h5>
-      </div>
-      <div>
         <h5><b>Description:</b> {issue}</h5>
-      </div>
-      <div>
         <h5><b>Location:</b> {location}</h5>
       </div>
+
+      <GroupPanel />
+      
       <div>
-        <button onClick={handlePutBack}>Put student back in queue!</button>
-      </div>
-      <br></br>
-      <div>
-        <button onClick={handleEndMeeting}>Student has been helped!</button>
+        <button onClick={handlePutBack}>Put student(s) back in queue!</button>
+        <button onClick={handleEndMeeting}>End Meeting!</button>
         <p style={{   
           fontSize: '15px',
           padding: '20px',

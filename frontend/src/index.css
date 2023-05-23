@@ -61,6 +61,18 @@ code {
   cursor: pointer;
   margin-top: 10px;
   margin-bottom: 35px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.question .checkbox label {
+  margin-right: 10px;
+  float: left;
+}
+
+.question div {
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
  
 

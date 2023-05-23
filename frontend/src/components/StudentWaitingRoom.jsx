@@ -149,7 +149,7 @@ function StudentWaitingRoom(props) {
             navigate(docRoot + "/studentMeeting");
           }
 
-          else if(data.session.status === "waiting" || data.session.status === "on-hold"){
+          else if(data.session.status === "waiting" || data.session.status === "grouping"){
             console.log("WR: Displaying new queue position");
             setCourseName(data.usercourse.name);
             setPosition(5);
@@ -241,7 +241,6 @@ function StudentWaitingRoom(props) {
 		<div className="question">
 			<div>
 	  		<h4>You are currently in the queue for { courseName }. A TA Will be with you shortly. </h4>
-        <h6>You have been waiting for <b>{minsWaiting} minutes</b></h6>
 	  	</div>
 		  	<div>
         		<button onClick={leaveQueue}>Leave queue</button>

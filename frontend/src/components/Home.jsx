@@ -103,7 +103,7 @@ function Home(props) {
           		console.log("Navigating to join queue");
           		navigate(docRoot + "/joinQueue");
           	}
-          	else if(status === "waiting"){
+          	else if(status === "waiting" || status === "grouping"){
           		navigate(docRoot + "/studentWaitingRoom");
           	}
           	else if(status === "in_progress"){
@@ -117,6 +117,9 @@ function Home(props) {
           	else if(status === "in_progress"){
           		navigate(docRoot + "/meeting");
           	}
+            else if(status === "grouping"){
+              navigate(docRoot + "/handleGroup")
+            }
           }
           else{
           	//kick to login page

@@ -10,10 +10,16 @@ CREATE TYPE status_type AS ENUM (
   'waiting',
   'in_progress',
   'completed',
+  'grouping',
   'group'
 );
 
 CREATE TYPE session_user_status AS ENUM (
+  'active',
+  'inactive'
+);
+
+CREATE TYPE group_mapping_status AS ENUM (
   'active',
   'inactive'
 );
@@ -61,6 +67,12 @@ CREATE TABLE sessions (
   exit_time timestamp
 );
 
+CREATE TABLE group_mapping (
+  from_session INT,
+  to_session INT,
+  status group_mapping_status
+);
+
 CREATE TABLE survey (
   session_id INT,
   user_id INT,
@@ -104,6 +116,9 @@ ALTER TABLE survey ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
 
 ALTER TABLE survey ADD FOREIGN KEY (user_id) REFERENCES users (id);
 
+ALTER TABLE group_mapping ADD FOREIGN KEY (from_session) REFERENCES sessions (id);
+
+ALTER TABLE group_mapping ADD FOREIGN KEY (to_session) REFERENCES sessions (id);
 
 
 -- insert some dummy data

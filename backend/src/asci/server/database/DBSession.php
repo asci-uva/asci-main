@@ -109,7 +109,7 @@ class DBSession
      */
     public function getSessionForUser($user_id, $course_id)
     {
-        $query = 'select * from sessions S JOIN session_users U on S.id = U.session_id where user_id=$1 and course_id=$2 and (S.status=\'waiting\' or S.status=\'in_progress\') and U.user_status = \'active\'';
+        $query = 'select * from sessions S JOIN session_users U on S.id = U.session_id where user_id=$1 and course_id=$2 and (S.status!=\'completed\') and U.user_status = \'active\'';
 
 
         $result = $this->db->query($query, array($user_id, $course_id));
@@ -227,44 +227,6 @@ class DBSession
 
     }
 
-    /*
-     * Fetches the Sessions with group_option set to true;
-     */
-
-    public function getPotentialGroupSession($ta_id, $course_id,$stu_id){
-        $queryAllSessions = 'select * from sessions where course_id=$1 and status=\'waiting\' and group_option=\'true\' and id not in (select distinct S.id from (sessions S join session_users U on S.id=U.session_id) where U.user_id=$2) and id != $3 order by entry_time';
-        $result = $this->db->query($queryAllSessions, array($course_id, $ta_id, $stu_id));
-        $rows = $this->db->fetchAll($result); 
-        if($rows != null){
-            // if(count($rows) > 1){
-            //     $sessArray = array();
-            //     foreach ($rows as $row){
-            //         $sess = new \asci\data\Session();
-            //         $sess->fromArray($row);
-            //         $sessArray[] = $sess;
-            //     }
-            //     // returns an array fo sessions
-            //     return $sessArray;
-            // }
-            // else{
-            //     $row = $rows[0];
-            //     $sess = new \asci\data\Session();
-            //     $sess->fromArray($row);
-            //     return $sess;
-            // }
-                $sessArray = array();
-                foreach ($rows as $row){
-                    $sess = new \asci\data\Session();
-                    $sess->fromArray($row);
-                    $sessArray[] = $sess;
-                }
-                // returns an array fo sessions
-                return $sessArray;
-        }
-        
-        return null;
-
-    }
 
 
     /*
@@ -287,10 +249,16 @@ class DBSession
     /*
      * Sets the current session to 'in-progress' and sets the fulfillment time
      */
-    public function fulfillSession($session_id){
-        $query = 'update sessions set status=\'in_progress\', fulfillment_time=now() where id=$1';
+    public function fulfillSession($session_id, $group_option){
+        /* If no grouping, just set status to in progress for the one student */
+        /* If grouping, set status to the temporary "grouping" state while TA selects group */
+        $status = "in_progress";
+        if($group_option == "true"){
+            $status = "grouping";
+        }
+        $query = 'update sessions set status=$2, fulfillment_time=now() where id=$1';
 
-        $result = $this->db->query($query, array($session_id));
+        $result = $this->db->query($query, array($session_id, $status));
 
         return $result;
     }
@@ -318,6 +286,19 @@ class DBSession
         return $result;
     }
 
-    
+    public function getPotentialGroupSessions($course_id){
+        $query = 'SELECT * FROM sessions S WHERE S.status=\'waiting\' AND S.course_id=$1 ORDER BY S.entry_time LIMIT 4';
+
+        $result = $this->db->query($query, array($course_id));
+
+        $sessions = [];
+        while($row = $this->db->fetchrow($result)){
+            $sessions[] = (new \asci\data\Session())->fromArray($row);
+        }
+
+        return $sessions;
+
+
+    }
    
 }
