@@ -776,13 +776,11 @@ class ServerExecutor{
 
         /* See if any other sessions were grouped to this one. If so, put them back too */
         $grp_maps = $dbgroupmap->getMappingToSession($sessionId, 'active');
-        $this->logger->addDebug("Grp maps", array("maps" => $grp_maps));
+
         foreach($grp_maps as $grp_map){
-            $this->logger->addDebug("Grp map", array("map" => $grp_map));
+            
             /* Grab the session that was grouped to this one */
             $grp_sess = $dbsession->getSession($grp_map->from_session);
-
-            $this->logger->addDebug("Grp sess", array("sess" => $grp_sess));
 
             if($grp_sess != null){
                 $grp_sess->fulfillment_time = "now()";
@@ -833,13 +831,27 @@ class ServerExecutor{
 
         $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), $role);
 
+        /* Could be a group, so check for that */
         if($sessUsr == null){
-            /* Could be a group, so check for that */
-            $grpmap = $dbgroupmap->getMappingFromSession($session_id, 'inactive');
-            if($grpmap == null) return $this->err("ERROR: Session does not have any associated other user");
+            
+            /* Not sure which way the relationship goes so check both */
+            $grpMapStudentList = null;
+            $grpMapTA = null;
+            if($role == "student")
+                $grpMapStudentList = $dbgroupmap->getMappingToSession($session_id, 'inactive');
+            else
+                $grpMapTA = $dbgroupmap->getMappingFromSession($session_id, 'inactive');
 
-            /* Great! Pull the TA from the other session instead */
-            $sessUsr = $dbsessusr->getSessionUserByRole($grpmap->to_session, 'ta');
+            if(($grpMapStudentList == null || count($grpMapStudentList) == 0) && $grpMapTA == null)
+                return $this->err("ERROR: Cannot find other group member(s) for survey");
+
+            /* Great! Pull other person from one of the two maps */
+            $sessUsr = null;
+            if($grpMapTA != null)
+                $sessUsr = $dbsessusr->getSessionUserByRole($grpMapTA->to_session, 'ta');
+            else if(count($grpMapStudentList) > 0)
+                $sessUsr = $dbsessusr->getSessionUserByRole($grpMapStudentList[0]->from_session, 'student');
+
 
             if($sessUsr==null) return $this->err("grp session does not have ta either");
         }
@@ -873,6 +885,7 @@ class ServerExecutor{
         /* Database Objects we are going to need */
         $dbsession = new \asci\server\database\DBSession($this->db);
         $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+        $dbgroupmap = new \asci\server\database\DBGroupMapping($this->db);
 
         /* Grab the user object */
         $user = $this->userStore->getUser($computing_id);
@@ -895,8 +908,33 @@ class ServerExecutor{
 
         $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), $role);
 
-        if($sessUsr == null)
-            return $this->err("ERROR: Session does not have any associated other user");
+        /* Could be a group, so check for that */
+        if($sessUsr == null){
+            
+            /* Not sure which way the relationship goes so check both */
+            $grpMapStudentList = null;
+            $grpMapTA = null;
+            if($role == "student")
+                $grpMapStudentList = $dbgroupmap->getMappingToSession($session->id, 'inactive');
+            else
+                $grpMapTA = $dbgroupmap->getMappingFromSession($session->id, 'inactive');
+
+            if(($grpMapStudentList == null || count($grpMapStudentList) == 0) && $grpMapTA == null)
+                return $this->err("ERROR: Cannot find other group member(s) for survey");
+
+            /* Great! Pull other person from one of the two maps */
+            $sessUsr = null;
+            if($grpMapTA != null)
+                $sessUsr = $dbsessusr->getSessionUserByRole($grpMapTA->to_session, 'ta');
+            else if(count($grpMapStudentList) > 0)
+                $sessUsr = $dbsessusr->getSessionUserByRole($grpMapStudentList[0]->from_session, 'student');
+
+
+            if($sessUsr==null) return $this->err("grp session does not have ta either");
+        }
+
+
+
 
         /* Now grab the other user */
         $other = $this->userStore->getUserById($sessUsr->getUserId());
