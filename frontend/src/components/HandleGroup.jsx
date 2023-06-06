@@ -13,6 +13,9 @@ function HandleGroup(props) {
     const [mainSessionId, setMainSessionId] = useState(-1);
     const [primeSubject, setPrimeSubject] = useState("LOADING");
     const [primeIssue, setPrimeIssue] = useState("LOADING");
+    const [primeLocation, setPrimeLocation] = useState("LOADING");
+
+    const [location, setLocation] = useState("");
 
     const [checked, setChecked] = useState({});
 
@@ -64,6 +67,7 @@ function HandleGroup(props) {
                 setMainSessionId(data.session.id);
                 setPrimeSubject(data.session.issue_subject);
                 setPrimeIssue(data.session.issue);
+                setPrimeLocation(data.session.location);
 
                 /* SET GROUP MEMBER INFO */
                 setOtherSessions(data.group_sessions);
@@ -112,6 +116,7 @@ function HandleGroup(props) {
           request.user = localStorage.getItem('asci-user');
           request.courseId = localStorage.getItem('asci-course');
           request.sessionId = mainSessionId;
+          request.location = location;
 
           request.groupSessions = [];
 
@@ -167,6 +172,7 @@ function HandleGroup(props) {
                 <h2>The next student is willing to be in a group:</h2>
                 <label><b>Subject:</b> {primeSubject}</label>
                 <label><b>Issue:</b> {primeIssue} </label>
+                <label><b>Location:</b> {primeLocation} </label>
             </div>
 
             <div>
@@ -179,10 +185,21 @@ function HandleGroup(props) {
                             checked={checked[otherSessions[k]['id']]}
                             onChange={handleCheck}
                         />
-                        <b>  Subject:</b> {otherSessions[k]['issue']}
+                        <b>  Issue:</b> {otherSessions[k]['issue']} (<b>Location:</b> {otherSessions[k]['location']})
                         </label>
                     );
                 })}
+            </div>
+
+            <div>
+                <label>Where should the group meet?</label>
+                <input
+                  type = "text"
+                  placeholder="Enter location here..."
+                  required
+                  value = {location}
+                  onChange={(e)=>setLocation(e.target.value)}
+                />
             </div>
 
             <div>

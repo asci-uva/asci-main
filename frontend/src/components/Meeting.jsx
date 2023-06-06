@@ -7,14 +7,10 @@ function Meeting(props) {
   let url = props.url;
   let docRoot = props.documentRoot;
 
-  const [studentName, setStudentName] = useState("LOADING");
-  const [studentId, setStudentId] = useState("LOADING");
+  const [student, setStudent] = useState(null);
+  const [session, setSession] = useState(null);
   const [sessionId, setSessionId] = useState(null);
 
-  /* Info regarding the student's issue (to show the TA) */
-  const [subject, setSubject] = useState("LOADING");
-  const [issue, setIssue] = useState("LOADING");
-  const [location, setLocation] = useState("LOADING");
 
   /* Info regarding group (if applicable) */
   const [isGroup, setIsGroup] = useState(false);
@@ -60,16 +56,11 @@ function Meeting(props) {
 
         //if request succeeded
         if(data.success === "true"){
-          setStudentName(data.student.fname + " " + data.student.lname);
-          setStudentId(data.student.computing_id);
+          setStudent(data.student);
+          setSession(data.session);
           setSessionId(data.session.id);
 
-          /* Set up issue vars also */
-          setSubject(data.session.issue_subject);
-          setIssue(data.session.issue);
-          setLocation(data.session.location);
-
-          /* Set group info */
+          /* Set group info (could be null) */
           setIsGroup(data.is_group);
           setGroupSessions(data.group_sessions);
           setGroupMembers(data.group_members);
@@ -167,7 +158,7 @@ function Meeting(props) {
       let request = {};
       request.command = "PutStudentBackOnQueue";
       request.user = localStorage.getItem('asci-user');
-      request.studentId = studentId;
+      request.studentId = student.computing_id;
       request.sessionId = sessionId;
       
       putBack(request, url);
@@ -205,47 +196,68 @@ function Meeting(props) {
 
     }
 
+
+    function SinglePanel(props){
+      return(
+        <div className="question">
+          <div>
+            <h5>You are currently helping <b>{student.fname} {student.lname}</b> (<b>{student.computing_id}</b>)</h5>
+            <h5><b>Subject:</b> {session.issue_subject}</h5>
+            <h5><b>Description:</b> {session.issue}</h5>
+            <h5><b>Location:</b> {session.location}</h5>
+          </div>
+      
+          <div>
+            <button onClick={handlePutBack}>Put student(s) back in queue!</button>
+            <button onClick={handleEndMeeting}>End Meeting!</button>
+            <p style={{   
+              fontSize: '15px',
+              padding: '20px',
+              color: 'red',
+            }} id="warning"></p>
+          </div>
+        </div>
+      );
+    }
+
     function GroupPanel(props) {
       /* If student is the main session for a group, just notify them */
-      if(isGroup && groupSessions != null && groupMembers != null){
+      
+      if(groupSessions != null){
         return(
-          <div>
-            <h2>Group Members:</h2>
-                {Object.keys(groupSessions).map(k => { 
-                        return (
-                          <h5 key={k}><b>{groupMembers[k].fname} {groupMembers[k].lname}</b>: {groupSessions[k].issue}</h5>
-                        );
-                      })
-                }
+          <div className="question">
+            <h3>You are in a group meeting!</h3>
+            <h4>Location: {session.location}</h4>
+            <div>
+              <h2>Group Members:</h2>
+                  {Object.keys(groupSessions).map(k => { 
+                          if(groupMembers[k] != null){
+                          return (
+                            <h5 key={k}><b>{groupMembers[k].fname} {groupMembers[k].lname}</b>: {groupSessions[k].issue}</h5>
+                          );
+                          } 
+                        })
+                  }
+            </div>
+
+            <div>
+            <button onClick={handleEndMeeting}>End Meeting for all!</button>
+            </div>
           </div>
         );
       }
-      else return;
     }
 
 
-  return (
-    <div className="question">
-      <div>
-        <h5>You are currently helping <b>{studentName}</b> (<b>{studentId}</b>)</h5>
-        <h5><b>Subject:</b> {subject}</h5>
-        <h5><b>Description:</b> {issue}</h5>
-        <h5><b>Location:</b> {location}</h5>
-      </div>
+    if(student != null)
+      return (
+        <SinglePanel />
+      );
+    else
+      return (
+        <GroupPanel />
+      );
 
-      <GroupPanel />
-      
-      <div>
-        <button onClick={handlePutBack}>Put student(s) back in queue!</button>
-        <button onClick={handleEndMeeting}>End Meeting!</button>
-        <p style={{   
-          fontSize: '15px',
-          padding: '20px',
-          color: 'red',
-        }} id="warning"></p>
-      </div>
-    </div>
-  );
 }
 
 export default Meeting;

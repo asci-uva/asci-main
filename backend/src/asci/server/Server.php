@@ -311,8 +311,9 @@ class Server
                 $courseId = $this->input["courseId"];
                 $sessionId = $this->input["sessionId"];
                 $groupSessions = $this->input["groupSessions"];
+                $location = $this->input["location"];
 
-                $this->setResponse($executor->createGroup($user, $courseId, $sessionId, $groupSessions));
+                $this->setResponse($executor->createGroup($user, $courseId, $sessionId, $groupSessions, $location));
                 
                 break;
             

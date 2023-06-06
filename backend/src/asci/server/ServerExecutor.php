@@ -160,7 +160,7 @@ class ServerExecutor{
         //If no session yet, insert one and send the new one back
         if($session == null){
             //create a new one and return it back
-            $session = $dbsession->createNewStudentSession($user->getId(), $course->getCourseId(), $course->getRole(), $question, $subject, $location, $groupOption);
+            $session = $dbsession->createNewSession($user->getId(), $course->getCourseId(), $course->getRole(), $question, $subject, $location, "waiting", $groupOption);
             $result["session"] = $session->toArray();
         }
         else{
@@ -304,7 +304,7 @@ class ServerExecutor{
 
         $result = [];
 
-        //2: Grab the next student that is waiting
+        //2: Grab session for the given user (TA must be in the stud session at this point)
         $session = $dbsession->getSessionForUser($user->getId(), $course_id);
 
         if($session == null){
@@ -355,49 +355,87 @@ class ServerExecutor{
      * $session_id is the session of the main student TA is helping
      * $group_sessions is a list of the other sessions that should be joined with session_id
      */
-    public function createGroup($ta_computing_id, $course_id, $session_id, $group_sessions){
+    public function createGroup($ta_computing_id, $course_id, $session_id, $group_sessions, $location){
 
         //DB objects we will be using
         $dbsession = new \asci\server\database\DBSession($this->db);
         $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
         $dbgroupmap = new \asci\server\database\DBGroupMapping($this->db);
 
+        /* Grab the TA */
+        $taUser = $this->userStore->getUser($ta_computing_id);
+
         /* First, set the main session to in_progress (easy part) */
         $mainSession = $dbsession->getSession($session_id);
 
-        if($mainSession == null)
-            return $this->err("No session exists for given sessionId");
+        if($mainSession == null) return $this->err("No session exists for given sessionId");
 
         $mainSession->status = "in_progress";
-
         $result = $dbsession->update($mainSession);
-
         if(!$result) return $this->err("failure to update session to in_progress state");
 
+        /* if group_sessions has any actual sessions to group in, then remove TA from mains session and create a TA session to mash all users into */
+        if(count($group_sessions) > 0){
 
-        /* Then, for each group session, check if still waiting */
-        /* If so, add a group mapping row to the main session and set to in progress */
-        foreach($group_sessions as $gr_sess_id){
-            /* gr_sess_id is just the id of the session, pull the session first */
-            $gr_sess = $dbsession->getSession($gr_sess_id);
-            if($gr_sess == null) return $this->err("Group sess id does not exist");
+            /* Remove the TA from the main session first!! */
+            $taMainSessUsr = $dbsessusr->getSessionUser($taUser->id, $mainSession->id);
+            if(!($dbsessusr->delete($taMainSessUsr))) return $this->err("Error deleting TA from main session");
 
-            /* If it is still waiting, change to in progress and write it */
-            if($gr_sess->status == "waiting"){
-                $gr_sess->status = "in_progress";
-                $gr_sess->fulfillment_time = "now()";
-                $result = $dbsession->update($gr_sess);
-                if(!$result) return $this->err("Error updating group session to in progress");
+            /* Now, create a new session for the TA to run for this group */
+            $newTASess = $dbsession->createNewSession($taUser->id, $course_id, "ta", "Group session", "Group session", $location, "in_progress", "true");
 
-                /* Now create the group mapping for this session */
-                $gr_map = new \asci\data\GroupMapping();
-                $gr_map->from_session = $gr_sess_id;
-                $gr_map->to_session = $session_id;
-                $gr_map->status = "active";
+            /* Link in the main session manually */
+            $gr_map = new \asci\data\GroupMapping();
+            $gr_map->from_session = $mainSession->id;
+            $gr_map->to_session = $newTASess->id;
+            $gr_map->status = "active";
+            $result = $dbgroupmap->insert($gr_map);
+            if(!$result) return $this->err("Error creating group session map");
 
-                $result = $dbgroupmap->insert($gr_map);
+            /* Insert a session user for the main student */
+            // $sessUsrMainStud = new \asci\data\SessionUser();
+            // $sessUsrMainStud->sessionId = $newTASess->id;
+            // $sessUsrMainStud->userId = $dbsessusr->getSessionUserByRole($mainSession->id, 'student')->userId;
+            // $sessUsrMainStud->role = 'student';
+            // $sessUsrMainStud->user_status = 'active';
+            // if(!$dbsessusr->insert($sessUsrMainStud))
+            //     return $this->err("Error inserting main student into new session user for group");
 
-                if(!$result) return $this->err("Error creating group session map");
+            /* Then, for each group session, check if still waiting */
+            /* If so, add a group mapping row to the main session and set to in progress */
+            foreach($group_sessions as $gr_sess_id){
+                /* gr_sess_id is just the id of the session, pull the session first */
+                $gr_sess = $dbsession->getSession($gr_sess_id);
+                if($gr_sess == null) return $this->err("Group sess id does not exist");
+
+                /* If it is still waiting, change to in progress and write it */
+                if($gr_sess->status == "waiting"){
+                    $gr_sess->status = "in_progress";
+                    $gr_sess->fulfillment_time = "now()";
+                    $result = $dbsession->update($gr_sess);
+                    if(!$result) return $this->err("Error updating group session to in progress");
+
+                    /* Now create the group mapping for this session */
+                    $gr_map = new \asci\data\GroupMapping();
+                    $gr_map->from_session = $gr_sess_id;
+                    $gr_map->to_session = $newTASess->id;
+                    $gr_map->status = "active";
+
+                    $result = $dbgroupmap->insert($gr_map);
+
+                    if(!$result) return $this->err("Error creating group session map");
+
+                    /* Insert a session user for this student */
+                    // $sessUsrMainStud = new \asci\data\SessionUser();
+                    // $sessUsrMainStud->sessionId = $newTASess->id;
+                    // $sessUsrMainStud->userId = $dbsessusr->getSessionUserByRole($gr_sess_id, 'student')->userId;
+                    // $sessUsrMainStud->role = 'student';
+                    // $sessUsrMainStud->user_status = 'active';
+                    // if(!$dbsessusr->insert($sessUsrMainStud))
+                    //     return $this->err("Error inserting main student into new session user for group");
+                    //     }
+                    // }
+                }
             }
         }
 
@@ -530,15 +568,12 @@ class ServerExecutor{
 
         //Ok, let's try to grab the student's information
         $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), 'student');
+        $student = null;
+        
+        //Now, grab the student if feasible
+        if($sessUsr != null)
+            $student = $this->userStore->getUserById($sessUsr->getUserId());
 
-        if($sessUsr == null)
-            return $this->err("ERROR: Session does not have any associated students");
-
-        //Now, grab the student
-        $student = $this->userStore->getUserById($sessUsr->getUserId());
-
-        if($student == null)
-            return $this->err("ERROR: Could not find student information for session");
 
         /* See if any group members exist */
         $gr_map = $dbgroupmap->getMappingToSession($session->id);
@@ -567,8 +602,8 @@ class ServerExecutor{
 
         //Done. Set up the info to return
         $result["success"] = "true";
-        $result["session"] = $session->toArray();
-        $result["student"] = $student->toArray();
+        $result["session"] = $session;
+        $result["student"] = $student;
         $result["error"] = "none";
 
         return $result;

@@ -60,6 +60,14 @@ class DBSessionUser
         return $result;
     }
 
+    public function delete($session_user){
+        $query = 'delete from session_users where user_id=$1 and session_id=$2;';
+
+        $result = $this->db->query($query, array($session_user->getUserId(), $session_user->getSessionId()));
+
+        return $result;
+    }
+
     public function getSessionUser($user_id, $session_id){
         $query = 'select * from session_users where user_id=$1 and session_id=$2';
 
