@@ -343,7 +343,57 @@ class ServerExecutor{
         $result["error"] = "none";
 
         /* SECOND, GRAB POTENTIAL GROUP MEMBERS TO ALSO SEND BACK */
-        $result["group_sessions"] = $dbsession->getPotentialGroupSessions($course_id);
+        /* Limit is 30 but we will trim that down to max group size */
+        $group_sessions = $dbsession->getPotentialGroupSessions($course_id, 30);
+        $max_group_options = 8;
+
+        /* TWO CASES: We want to group or we just take the top available (else clause) */
+        if(count($group_sessions) > $max_group_options && \asci\Config::$SMART_GROUP_MATCHING){
+            
+            /* initialize cosine simulator class */
+            $cosSim = new \asci\util\CosineSim();
+
+            /* Construct the list of issues (first one is main student's issue) */
+            $all_issues = [$session->issue_subject . " " . $session->issue];
+            foreach($group_sessions as $grpsess){
+                $all_issues[] = $grpsess->issue_subject . " " . $grpsess->issue;
+            }
+
+            /* Get the matches among everything */
+            $buffer = $cosSim->findMatches($all_issues);
+
+            $this->logger->addDebug("Cos Sim Buffer", array("buffer" => $buffer));
+
+            /* If the cos. sim. call failed, report that to frontend */
+            if($buffer == null || $buffer[0] != 0) return $this->err("Cosine similarity call failed");
+
+            /* We made it, return the sessions (up to max) that we care about */
+            $group_sessions_ret = [];
+            $match_indices = explode("##", $buffer[1]);
+
+            /* Special case, matches are nothing but "" */
+            if(count($match_indices)==1 && $match_indices[0] == ""){
+                $result["group_sessions"] = [];
+            }
+            else{
+                $i=0;
+                $this->logger->addDebug("Stuff", array("match ind" => $match_indices));
+                while($i<$max_group_options && $i<count($match_indices)){
+                    $group_sessions_ret[] = $group_sessions[$match_indices[$i]];
+                    $i=$i+1;
+                }
+                $result["group_sessions"] = $group_sessions_ret;
+            }
+            
+        }
+        else{
+
+            /* Trim down to max option size */
+            if(count($group_sessions) > $max_group_options)
+                $group_sessions = array_slice($group_sessions, 0, $max_group_options);
+            $result["group_sessions"] = $group_sessions;
+        }
+
 
         return $result;
     }

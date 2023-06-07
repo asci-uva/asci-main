@@ -7,13 +7,14 @@ function HandleGroup(props) {
     let docRoot = props.documentRoot;
 
     /* Info for the first student (from front of queue) */
+    const [loading, setLoading] = useState(true);
     const [otherSessions, setOtherSessions] = useState({});
     const navigate = useNavigate();
 
     const [mainSessionId, setMainSessionId] = useState(-1);
-    const [primeSubject, setPrimeSubject] = useState("LOADING");
-    const [primeIssue, setPrimeIssue] = useState("LOADING");
-    const [primeLocation, setPrimeLocation] = useState("LOADING");
+    const [primeSubject, setPrimeSubject] = useState("");
+    const [primeIssue, setPrimeIssue] = useState("");
+    const [primeLocation, setPrimeLocation] = useState("");
 
     const [location, setLocation] = useState("");
 
@@ -73,12 +74,11 @@ function HandleGroup(props) {
                 setOtherSessions(data.group_sessions);
 
                 for(var sess in data.group_sessions){
-                    console.log("sess is " + sess);
-                    console.log(data.group_sessions[sess].id);
                     checked[data.group_sessions[sess].id] = false;
-                    console.log(checked);
                 }
                 setChecked(checked);
+
+                setLoading(false);
 
             }
             else{
@@ -164,18 +164,18 @@ function HandleGroup(props) {
 
     }
 
-    /* END CREATING GROUP ONCE BUTTON IS PRESSED */
-
-    return(
-        <div className="question">
+    function GroupPanel(props){
+      if(otherSessions == null || otherSessions.length == 0){
+        return(
             <div>
-                <h2>The next student is willing to be in a group:</h2>
-                <label><b>Subject:</b> {primeSubject}</label>
-                <label><b>Issue:</b> {primeIssue} </label>
-                <label><b>Location:</b> {primeLocation} </label>
+                <h2>There are no potential group members right now. Please click Start Session to continue.</h2>
             </div>
-
-            <div>
+        );
+      }
+      else{
+            return(
+                <div>
+                <div>
                 <h2>Please select other issues that are similar to the one above:</h2>
                 {Object.keys(otherSessions).map(k => { 
                         return (<label key ={k}>
@@ -189,25 +189,59 @@ function HandleGroup(props) {
                         </label>
                     );
                 })}
-            </div>
+                </div>
 
-            <div>
-                <label>Where should the group meet?</label>
-                <input
-                  type = "text"
-                  placeholder="Enter location here..."
-                  required
-                  value = {location}
-                  onChange={(e)=>setLocation(e.target.value)}
-                />
-            </div>
+                <div>
+                    <label>Where should the group meet?</label>
+                    <input
+                      type = "text"
+                      placeholder="Enter location here..."
+                      required
+                      value = {location}
+                      onChange={(e)=>setLocation(e.target.value)}
+                    />
+                </div>
+                </div>
+            );
+        }
+    }
 
-            <div>
-                <h6>Click here when you are ready to start the session.</h6>
-                <button onClick={createGroup}>Start Session</button>
+
+
+
+    /* END CREATING GROUP ONCE BUTTON IS PRESSED */
+
+    if(!loading){
+        return(
+            <div className="question">
+                <div>
+                    <h2>The next student is willing to be in a group:</h2>
+                    <label><b>Subject:</b> {primeSubject}</label>
+                    <label><b>Issue:</b> {primeIssue} </label>
+                    <label><b>Location:</b> {primeLocation} </label>
+                </div>
+
+                <div>
+                    <GroupPanel />
+                </div>
+                
+
+                <div>
+                    <h6>Click here when you are ready to start the session.</h6>
+                    <button onClick={createGroup}>Start Session</button>
+                </div>
             </div>
-        </div>
-    )
+        );
+    }
+    else{
+        return(
+            <div className="question">
+                <div>
+                    <h2>Finding potential group members. This might take a few seconds.:</h2>
+                </div>
+            </div>
+        );
+    }
 
 
 }

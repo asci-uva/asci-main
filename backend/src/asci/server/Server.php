@@ -359,7 +359,6 @@ class Server
      */
     public function getResponseHeaders()
     {
-
         return $this->responseHeaders;
     }
 

@@ -23,9 +23,6 @@ namespace asci\util;
  * @author Mark Floryan
  */
 
-
-echo "Hello there from Cosine Sim<br>";
-
 class CosineSim
 {
 

@@ -286,10 +286,10 @@ class DBSession
         return $result;
     }
 
-    public function getPotentialGroupSessions($course_id){
-        $query = 'SELECT * FROM sessions S WHERE S.status=\'waiting\' AND S.course_id=$1 ORDER BY S.entry_time LIMIT 4';
+    public function getPotentialGroupSessions($course_id, $limit=6){
+        $query = 'SELECT * FROM sessions S WHERE S.status=\'waiting\' AND S.course_id=$1 ORDER BY S.entry_time LIMIT $2';
 
-        $result = $this->db->query($query, array($course_id));
+        $result = $this->db->query($query, array($course_id, $limit));
 
         $sessions = [];
         while($row = $this->db->fetchrow($result)){

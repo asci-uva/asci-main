@@ -40,11 +40,12 @@ for x in range(1,X.shape[0]):
       matches.append(x)
 
 ret = ""
-for i in range(0, len(matches)-1):
-    ret += str(matches[i]) + "##"
-ret += str(matches[len(matches)-1])
+if len(matches) > 0:
+    for i in range(0, len(matches)-1):
+        ret += str(matches[i]) + "##"
+    ret += str(matches[len(matches)-1])
 
-print(ret)
+print(ret, end="")
 
 
 
