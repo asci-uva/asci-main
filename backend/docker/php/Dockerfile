@@ -14,4 +14,10 @@ COPY ../src/composer.json composer.json
 RUN composer install --no-interaction --no-plugins --no-scripts --no-dev --prefer-dist
 RUN composer dump-autoload --optimize --apcu --no-dev
 
+RUN apt update
+RUN echo "Y" | apt install python3-pip
+RUN pip install pandas
+RUN pip install numpy
+RUN pip install -U scikit-learn
+
 RUN service apache2 restart
