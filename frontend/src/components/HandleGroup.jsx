@@ -25,19 +25,19 @@ function HandleGroup(props) {
         console.log(e.target.name);
         var id = parseInt(e.target.name);
         console.log("id is " + id);
-
+        
         var newChecked = {};
         for(var oldId in checked){
             if(oldId == id){
                 newChecked[oldId] = !checked[oldId];
             }
             else{
-                newChecked[oldId] = checked(oldId);
+                newChecked[oldId] = checked[oldId];
             }
         }
 
         setChecked(newChecked);
-        console.log(newChecked);
+
       };
 
     useEffect(()=>{
@@ -76,6 +76,7 @@ function HandleGroup(props) {
                 for(var sess in data.group_sessions){
                     checked[data.group_sessions[sess].id] = false;
                 }
+                
                 setChecked(checked);
 
                 setLoading(false);
@@ -175,6 +176,7 @@ function HandleGroup(props) {
       else{
             return(
                 <div>
+                <form>
                 <div>
                 <h2>Please select other issues that are similar to the one above:</h2>
                 {Object.keys(otherSessions).map(k => { 
@@ -201,6 +203,7 @@ function HandleGroup(props) {
                       onChange={(e)=>setLocation(e.target.value)}
                     />
                 </div>
+                </form>
                 </div>
             );
         }
@@ -222,7 +225,7 @@ function HandleGroup(props) {
                 </div>
 
                 <div>
-                    <GroupPanel />
+                    {GroupPanel(null)}
                 </div>
                 
 

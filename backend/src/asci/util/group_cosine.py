@@ -30,7 +30,7 @@ corpus = list(df["DESCRIPTION"].values)
 vectorizer = TfidfVectorizer()
 X = vectorizer.fit_transform(corpus)
 
-threshold = 0.2
+threshold = 0.4
 
 
 matches = []
