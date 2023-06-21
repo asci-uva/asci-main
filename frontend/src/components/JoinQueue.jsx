@@ -22,6 +22,7 @@ function JoinQueue(props) {
 
   let url = props.url;
   let docRoot = props.documentRoot; 
+  let groupingEnabled = props.groupingEnabled;
   
     //This function runs on page load!
     useEffect(() => {
@@ -67,6 +68,7 @@ function JoinQueue(props) {
                         data.usercourse.number + "(" +
                         data.usercourse.name + ")"
                         );
+
           
         }
         else{
@@ -125,7 +127,7 @@ function JoinQueue(props) {
       request.location = location;
       request.groupOption = groupOption.toString();
 
-      
+
       //alert(groupoption);
       joinQueue(request, url); 
     }
@@ -162,6 +164,26 @@ function JoinQueue(props) {
 
     }
 
+  function GroupCheckBox(props){
+    if(groupingEnabled){
+      return (
+        <div>
+          <label>
+            I would like to be placed in a group (this might decrease your wait time)
+            <input
+              type="checkbox"
+              checked={groupOption}
+              onChange={handleCheck}
+            />
+          </label>
+        </div>
+      );
+    }
+    else{
+      setGroupOption(false);
+      return "";
+    }
+  }
 
 
 
@@ -199,16 +221,7 @@ function JoinQueue(props) {
           onChange={(e)=>setLocation(e.target.value)}
         />
 
-        <div>
-          <label>
-            I would like to be placed in a group (this might decrease your wait time)
-            <input
-              type="checkbox"
-              checked={groupOption}
-              onChange={handleCheck}
-            />
-          </label>
-        </div>
+        <GroupCheckBox />
       </form>
       
       {isError &&

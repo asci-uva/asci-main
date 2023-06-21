@@ -187,7 +187,9 @@ function HandleGroup(props) {
                             checked={checked[otherSessions[k]['id']]}
                             onChange={handleCheck}
                         />
-                        <b>  Issue:</b> {otherSessions[k]['issue']} (<b>Location:</b> {otherSessions[k]['location']})
+                        <b>  Issue:</b> {otherSessions[k]['issue']}
+                        <br />
+                        <b>Location:</b> {otherSessions[k]['location']}
                         </label>
                     );
                 })}

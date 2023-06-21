@@ -19,28 +19,40 @@ function Meeting(props) {
 
   const navigate = useNavigate();
 
+  //variables for managing polling the server
+  let polling = false;
+  let timeoutId = 0;
+
   useEffect(() => {
+    poll();
+
+    return () => {
+        console.log("Meeting room: Stopping polling");
+        clearTimeout(timeoutId);
+        polling = false;
+    }
+    
+  }, []);
+
+  function poll(){
 
     if(localStorage.getItem('asci-user') === null){
-      navigate(docRoot + "/login");
+        navigate(docRoot + "/login");
     }
     else if(localStorage.getItem('asci-course') === null){
-      navigate(docRoot + "/selectCourse");
+        navigate(docRoot + "/selectCourse");
     }
     else{
-      
+
       //Get meeting details
       let request = {};
       request.command = "getTAMeetingDetails";
       request.user = localStorage.getItem('asci-user');
       request.courseId = localStorage.getItem('asci-course');
       getMeetingDetails(request, url);  
-      
 
     }
-    
-    
-  }, []);
+  }
 
   //This gets the meeting details and displays them
   const getMeetingDetails = (json0, url0) =>{
@@ -64,6 +76,12 @@ function Meeting(props) {
           setIsGroup(data.is_group);
           setGroupSessions(data.group_sessions);
           setGroupMembers(data.group_members);
+
+          if(data.is_group && data.group_sessions.length > 1){
+            polling = true;
+            console.log("TA Meeting: Setting timeout for next group poll");
+            timeoutId = setTimeout(poll, 10000);
+          }
         }
         else{
           console.log("Fetching meeting details failed for some reason");
@@ -233,7 +251,10 @@ function Meeting(props) {
                   {Object.keys(groupSessions).map(k => { 
                           if(groupMembers[k] != null){
                           return (
-                            <h5 key={k}><b>{groupMembers[k].fname} {groupMembers[k].lname}</b>: {groupSessions[k].issue}</h5>
+                            <div key={'div_' + k}>
+                            <h5 key={'memberInfo_' + k}><b>{groupMembers[k].fname} {groupMembers[k].lname}</b>: {groupSessions[k].issue}</h5>                            
+                            <h5 key={'location_' + k}>(<b>Location</b>: {groupSessions[k].location})</h5>
+                            </div>
                           );
                           } 
                         })

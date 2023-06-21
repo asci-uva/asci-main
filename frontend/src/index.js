@@ -26,7 +26,10 @@ import {
 //SOME GLOBAL CONSTANTS THAT ARE USED THROUGHOUT THE APP
 const documentRoot = "/ohq/ohq";
 const url = "http://localhost:8081/index.php";
-const debugMode = true; //if false, login page will have you type in a userId to use
+const debugMode = true; //if true, login page will have you type in a userId to use
+
+//Some other functions we can turn on and off
+const groupingEnabled = true;
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -41,7 +44,7 @@ root.render(
       <Route path={documentRoot + "/handleStudent"} element={<HandleStudent documentRoot={documentRoot} url={url} />} />
       <Route path={documentRoot + "/meeting"} element={<Meeting documentRoot={documentRoot} url={url} />} />
       <Route path={documentRoot + "/taSurvey"} element={<TASurvey documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/joinQueue"} element={<JoinQueue documentRoot={documentRoot} url={url} />} />
+      <Route path={documentRoot + "/joinQueue"} element={<JoinQueue documentRoot={documentRoot} url={url} groupingEnabled={groupingEnabled} />} />
       <Route path={documentRoot + "/studentMeeting"} element={<StudentMeeting documentRoot={documentRoot} url={url} />} />
       <Route path={documentRoot + "/studentSurvey"} element={<StudentSurvey documentRoot={documentRoot} url={url} />} />
       <Route path={documentRoot + "/error"} element={<Error documentRoot={documentRoot} url={url} />} />
