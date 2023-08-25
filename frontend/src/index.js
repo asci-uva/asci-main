@@ -24,7 +24,7 @@ import {
 } from "./components";
 
 //SOME GLOBAL CONSTANTS THAT ARE USED THROUGHOUT THE APP
-const documentRoot = "/ohq/ohq";
+const documentRoot = "/asci";
 const url = "https://kytos02.cs.virginia.edu/asci-server/index.php";
 const netbadgeEnabled = true; //if false, login page will have you type in a userId to use
 const debugMode = false; //if false, login page will have you type in a userId to use
