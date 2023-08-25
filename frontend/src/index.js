@@ -25,8 +25,9 @@ import {
 
 //SOME GLOBAL CONSTANTS THAT ARE USED THROUGHOUT THE APP
 const documentRoot = "/ohq/ohq";
-const url = "http://localhost:8081/index.php";
-const debugMode = true; //if true, login page will have you type in a userId to use
+const url = "https://kytos02.cs.virginia.edu/asci-server/index.php";
+const netbadgeEnabled = true; //if false, login page will have you type in a userId to use
+const debugMode = false; //if false, login page will have you type in a userId to use
 
 //Some other functions we can turn on and off
 const groupingEnabled = true;
