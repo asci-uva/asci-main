@@ -74,6 +74,24 @@ code {
   margin-top: 30px;
   margin-bottom: 30px;
 }
+
+/* Queue waiting list table */
+.waitlist div {
+  padding-top: 5px;
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: center;
+  padding-bottom: 5px;
+}
+
+.waitlist table {
+  width: 80%;
+  margin: 10px auto;
+}
+
+.waitlist table button{
+  margin: 0px;
+}
  
 
 /*Survey form*/

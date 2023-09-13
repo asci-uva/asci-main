@@ -169,12 +169,13 @@ function JoinQueue(props) {
       return (
         <div>
           <label>
-            I would like to be placed in a group (this might decrease your wait time)
-            <input
+          <input
               type="checkbox"
               checked={groupOption}
               onChange={handleCheck}
             />
+            &nbsp;&nbsp; I would like to be placed in a group (this might decrease your wait time)
+            
           </label>
         </div>
       );

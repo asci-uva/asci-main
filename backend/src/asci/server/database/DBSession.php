@@ -189,18 +189,18 @@ class DBSession
     /*
      * Returns the number of students waiting in the course
      */
-    public function getNumWaiting($course_id){
+    public function getWaitingSessions($course_id){
 
-        $query = 'select count(*) from sessions where course_id=$1 and status=\'waiting\'';
+        $query = 'select * from sessions where course_id=$1 and status=\'waiting\' limit 50';
 
         $result = $this->db->query($query, array($course_id));
-        $row = $this->db->fetchrow($result);
 
-        if ($row != null){
-            return $row;
+        $sessions = [];
+        while($row = $this->db->fetchrow($result)){
+            $sessions[] = (new \asci\data\Session())->fromArray($row);
         }
         
-        return null;
+        return $sessions;
 
     }
 
