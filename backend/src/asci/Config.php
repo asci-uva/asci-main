@@ -38,6 +38,7 @@ class Config {
      */
     public static $SMART_GROUP_MATCHING = true;
 
+    public static $COSINE_SIMILARITY_SCRIPT = '/opt/asci-queue/asci-main/backend/src/asci/util/group_cosine.py';
 
     /**
      * Full database connection information
