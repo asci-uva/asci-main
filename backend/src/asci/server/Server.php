@@ -325,6 +325,13 @@ class Server
                 $this->setResponse($executor->createGroup($user, $courseId, $sessionId, $groupSessions, $location));
                 
                 break;
+
+            case "clearQueue":
+                $courseId = $this->input["courseId"];
+
+                $this->setResponse($executor->clearQueue($user, $courseId));
+                
+                break;
             
 
 

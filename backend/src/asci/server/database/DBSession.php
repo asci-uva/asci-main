@@ -173,6 +173,20 @@ class DBSession
     }
 
     /*
+     * Closes all sessions associated with this course
+     * by setting each to "completed"
+     */
+    public function closeAllSessionsForCourse($course_id){
+
+        $query = 'update sessions set status = \'completed\' from (select * from sessions JOIN session_users on id=session_id) S where S.id = sessions.id and sessions.course_id=$1';
+
+        $result = $this->db->query($query, array($course_id));
+        
+        return true;
+
+    }
+
+    /*
      * Closes all sessions associated with this user_id course combination
      * by setting each to "completed" EXCEPT the one provided
      */

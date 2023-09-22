@@ -20,16 +20,17 @@ import {
   Error,
   SelectCourse,
   Logout,
-  HandleGroup,
+  HandleGroup
 } from "./components";
 
 //SOME GLOBAL CONSTANTS THAT ARE USED THROUGHOUT THE APP
-const documentRoot = "/asci";
-const url = "https://kytos02.cs.virginia.edu/asci-server/index.php";
-//const documentRoot = "/ohq/ohq";
-//const url = "http://localhost:8081/index.php";
-const netbadgeEnabled = true; //if false, login page will have you type in a userId to use
-const debugMode = false; //if true, login page will have you type in a userId to use
+//const documentRoot = "/asci";
+//const url = "https://kytos02.cs.virginia.edu/asci-server/index.php";
+const documentRoot = "/ohq/ohq";
+const url = "http://localhost:8081/index.php";
+
+const netbadgeEnabled = false; //if false, login page will have you type in a userId to use
+const debugMode = true; //if true, login page will have you type in a userId to use
 
 //Some other functions we can turn on and off
 const groupingEnabled = true;

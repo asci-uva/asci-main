@@ -78,14 +78,14 @@ code {
 /* Queue waiting list table */
 .waitlist div {
   padding-top: 5px;
-  max-width: 1000px;
   margin: 0 auto;
   text-align: center;
   padding-bottom: 5px;
 }
 
 .waitlist table {
-  width: 80%;
+  max-width: 1800px;
+  width: 100%;
   margin: 10px auto;
 }
 

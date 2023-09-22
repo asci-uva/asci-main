@@ -1125,6 +1125,37 @@ class ServerExecutor{
         //-------------------------------------------
     }
 
+    /*
+     * Inserts the survey into the DB
+     */
+    public function clearQueue($computing_id, $course_id){
+
+        /* Grab the user first */
+        $user = $this->userStore->getUser($computing_id);
+
+        //Some DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+
+        /* Make sure user is TA for this course */
+        //Get the UserCourse object
+        $userCourse = (new \asci\server\database\DBUserCourse($this->db))->getCourseForUser($user->getComputingId(), $course_id);
+
+        if($userCourse == null) return err("ERROR: This user not associated with this course");
+        else if($userCourse->getRole() != "ta") return err("ERROR: This user not a ta for this course");
+        
+
+        $result = [];
+
+        $dbsession->closeAllSessionsForCourse($course_id);
+        
+        $result["success"] = "true";
+        return $result;
+        
+
+        //-------------------------------------------
+        //-------------------------------------------
+    }
+
 
     /**
      * Creates a new User in the database

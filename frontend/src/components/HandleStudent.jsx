@@ -2,10 +2,12 @@ import React from "react";
 import {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 
+import ClearQueue from "./ClearQueue";
+
 function HandleStudent(props) {
   
-  let user = null;
-  let courseId = null;
+  let [user, setUser] = useState(null);
+  let [courseId, setCourseId] = useState(null);
 
   //variables for managing polling the server
   let polling = false;
@@ -35,8 +37,8 @@ function HandleStudent(props) {
     }
 
     else{
-      user = localStorage.getItem('asci-user');
-      courseId = localStorage.getItem('asci-course');
+      setUser(localStorage.getItem('asci-user'));
+      setCourseId(courseId = localStorage.getItem('asci-course'));
 
       polling = true;
       pollNumWaiting();
@@ -198,6 +200,11 @@ function HandleStudent(props) {
 
     }
 
+    const handleClearQueueCallback = () => {
+      console.log("Received callback. Refreshing queue page");
+      pollNumWaiting();
+    }
+
 
     const WaitTableHeaderRow = () => {
       return <tr><th>Pos</th><th>Subject</th><th>Issue</th><th>Take</th></tr>;
@@ -233,6 +240,10 @@ function HandleStudent(props) {
       </div>
       <div>
         <button onClick={handleAssign}>get next student</button>
+      </div>
+
+      <div>
+        <ClearQueue callback={handleClearQueueCallback} url={url} documentRoot={docRoot} user={user} courseId={courseId} />
       </div>
 
       <div>
