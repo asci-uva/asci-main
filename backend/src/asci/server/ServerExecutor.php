@@ -305,13 +305,13 @@ class ServerExecutor{
         $session = $dbsession->getSession($session_id);
 
         if($session == null){
-            return err("Could not find the given session");
+            return $this->err("Could not find the given session");
         }
         if($session->status != 'waiting'){
-            return err("Session is not in the waiting status");
+            return $this->err("Session is not in the waiting status");
         }
         if($session->course_id != $course_id){
-            return err("Session is not in the given course!");
+            return $this->err("Session is not in the given course!");
         }
         
         //Check if the student wants to be in a group
@@ -485,7 +485,7 @@ class ServerExecutor{
         $result = $dbsession->update($mainSession);
         if(!$result) return $this->err("failure to update session to in_progress state");
 
-        /* if group_sessions has any actual sessions to group in, then remove TA from mains session and create a TA session to mash all users into */
+        /* if group_sessions has any actual sessions to group in, then remove TA from main session and create a TA session to mash all users into */
         if(count($group_sessions) > 0){
 
             /* Remove the TA from the main session first!! */
@@ -1140,8 +1140,8 @@ class ServerExecutor{
         //Get the UserCourse object
         $userCourse = (new \asci\server\database\DBUserCourse($this->db))->getCourseForUser($user->getComputingId(), $course_id);
 
-        if($userCourse == null) return err("ERROR: This user not associated with this course");
-        else if($userCourse->getRole() != "ta") return err("ERROR: This user not a ta for this course");
+        if($userCourse == null) return $this->err("ERROR: This user not associated with this course");
+        else if($userCourse->getRole() != "ta") return $this->err("ERROR: This user not a ta for this course");
         
 
         $result = [];

@@ -160,11 +160,11 @@ class DBSession
 
     /*
      * Closes all sessions associated with this user_id course combination
-     * by setting each to "completed"
+     * by setting each to "completed" (except for sessions that are currently in_progress as those students are in meetings)
      */
     public function closeAllSessions($user_id, $course_id){
 
-        $query = 'update sessions set status = \'completed\' from (select * from sessions JOIN session_users on id=session_id) S where S.id = sessions.id and sessions.course_id=$1 and S.user_id=$2';
+        $query = 'update sessions set status = \'completed\' from (select * from sessions JOIN session_users on id=session_id) S where S.id = sessions.id and sessions.course_id=$1 and S.user_id=$2 and status!=\'in_progress\'';
 
         $result = $this->db->query($query, array($course_id, $user_id));
         

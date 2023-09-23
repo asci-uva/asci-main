@@ -82,6 +82,12 @@ function Meeting(props) {
             console.log("TA Meeting: Setting timeout for next group poll");
             timeoutId = setTimeout(poll, 10000);
           }
+
+          /* Special case: If group but no group members, just end meeting */
+          if(data.is_group && data.group_sessions.length == 0){
+            endMeeting();
+          }
+
         }
         else{
           console.log("Fetching meeting details failed for some reason");
