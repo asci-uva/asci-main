@@ -503,15 +503,6 @@ class ServerExecutor{
             $result = $dbgroupmap->insert($gr_map);
             if(!$result) return $this->err("Error creating group session map");
 
-            /* Insert a session user for the main student */
-            // $sessUsrMainStud = new \asci\data\SessionUser();
-            // $sessUsrMainStud->sessionId = $newTASess->id;
-            // $sessUsrMainStud->userId = $dbsessusr->getSessionUserByRole($mainSession->id, 'student')->userId;
-            // $sessUsrMainStud->role = 'student';
-            // $sessUsrMainStud->user_status = 'active';
-            // if(!$dbsessusr->insert($sessUsrMainStud))
-            //     return $this->err("Error inserting main student into new session user for group");
-
             /* Then, for each group session, check if still waiting */
             /* If so, add a group mapping row to the main session and set to in progress */
             foreach($group_sessions as $gr_sess_id){
@@ -536,16 +527,6 @@ class ServerExecutor{
 
                     if(!$result) return $this->err("Error creating group session map");
 
-                    /* Insert a session user for this student */
-                    // $sessUsrMainStud = new \asci\data\SessionUser();
-                    // $sessUsrMainStud->sessionId = $newTASess->id;
-                    // $sessUsrMainStud->userId = $dbsessusr->getSessionUserByRole($gr_sess_id, 'student')->userId;
-                    // $sessUsrMainStud->role = 'student';
-                    // $sessUsrMainStud->user_status = 'active';
-                    // if(!$dbsessusr->insert($sessUsrMainStud))
-                    //     return $this->err("Error inserting main student into new session user for group");
-                    //     }
-                    // }
                 }
             }
         }
