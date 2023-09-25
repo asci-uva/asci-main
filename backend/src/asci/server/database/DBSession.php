@@ -178,7 +178,7 @@ class DBSession
      */
     public function closeAllSessionsForCourse($course_id){
 
-        $query = 'update sessions set status = \'completed\' from (select * from sessions JOIN session_users on id=session_id) S where S.id = sessions.id and sessions.course_id=$1 and status!=\'in_progress\'';
+        $query = 'update sessions set status = \'completed\' from (select * from sessions JOIN session_users on id=session_id) S where S.id = sessions.id and sessions.course_id=$1 and sessions.status!=\'in_progress\'';
 
         $result = $this->db->query($query, array($course_id));
         
