@@ -54,7 +54,7 @@ class ExclusiveLock
         if( !flock($this->file, LOCK_EX | LOCK_NB)) 
         { //failed
             $key = $this->key;
-            error_log("ExclusiveLock::acquire_lock FAILED to acquire lock [$key]");
+            //error_log("ExclusiveLock::acquire_lock FAILED to acquire lock [$key]");
             return FALSE;
         }
         ftruncate($this->file, 0); // truncate file
@@ -72,20 +72,22 @@ class ExclusiveLock
         $key = $this->key;
         if( $this->own == TRUE ) 
         {
-            if( !flock($this->file, LOCK_UN) )
-            { //failed
-                error_log("ExclusiveLock::lock FAILED to release lock [$key]");
-                return FALSE;
-            }
+            
             ftruncate($this->file, 0); // truncate file
             //write something to just help debugging
             fwrite( $this->file, "Unlocked\n");
             fflush( $this->file );
             $this->own = FALSE;
+            if( !flock($this->file, LOCK_UN) )
+            { //failed
+                //error_log("ExclusiveLock::lock FAILED to release lock [$key]");
+                return FALSE;
+            }
+            fclose($this->file)
         }
         else
         {
-            error_log("ExclusiveLock::unlock called on [$key] but its not acquired by caller");
+            //error_log("ExclusiveLock::unlock called on [$key] but its not acquired by caller");
         }
         return TRUE; // success
     }

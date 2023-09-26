@@ -12,6 +12,8 @@
  */
 namespace asci\server;
 
+use asci\server\util\ExclusiveLock as ExclusiveLock;
+
 /**
  * Server Class
  *
@@ -138,6 +140,21 @@ class Server
         /* Otherwise, use the user provided by request */
         $user = $this->validateUsername($this->input);
         
+
+        /* This section acquires a lock for the given course IF a courseId was provided */
+        /* ------------------------------------------------------------------ */
+        $course_id = $this->input["courseId"] ?? null;
+        $lock_key = "course-" + $course_id;
+        $lock = null;
+        if($course_id != null){
+            /* acquire the lock */
+            $lock = new ExclusiveLock("course-" + $course_id);
+            while($lock->lock() == False) usleep(250000); // sleep for a quarter of a second
+        }
+
+        /* Lock acquired OR not necessary */
+
+        /* ------------------------------------------------------------------ */
 
         // Decide what to do based on the command given to the server
         switch ($this->input["command"]) {
@@ -361,6 +378,17 @@ class Server
                 $this->setResponse(["response" => "Hello world!"]);
 
         }
+
+        /* Release the lock if we had one... */
+        /* ------------------------------------------------------------------ */
+        
+        if($lock != null){
+            $lock->unlock();
+        }
+
+        /* Lock acquired OR not necessary */
+        
+        /* ------------------------------------------------------------------ */
 
         return;
     }
