@@ -12,7 +12,7 @@
  */
 namespace asci\server;
 
-use asci\server\util\ExclusiveLock as ExclusiveLock;
+use asci\util\ExclusiveLock as ExclusiveLock;
 
 /**
  * Server Class
@@ -101,7 +101,7 @@ class Server
      */
     public function validateUsername($input){
 
-        /* Grab the username from netbadge IF the server is in DEBUG mode */
+        /* Grab the username from netbadge IF the server is not in DEBUG mode */
         /* Otherwise, use the user provided by request */
         // Login is a special command that doesn't require this validation
         $user = null;
@@ -144,12 +144,24 @@ class Server
         /* This section acquires a lock for the given course IF a courseId was provided */
         /* ------------------------------------------------------------------ */
         $course_id = $this->input["courseId"] ?? null;
-        $lock_key = "course-" + $course_id;
         $lock = null;
+        $attempt_max = 10; //try to get the lock at most 10 times.
         if($course_id != null){
             /* acquire the lock */
-            $lock = new ExclusiveLock("course-" + $course_id);
-            while($lock->lock() == False) usleep(250000); // sleep for a quarter of a second
+            $lock_key = "course-" . $course_id;
+            $lock = new ExclusiveLock($lock_key);
+            $attempt = 0;
+            while($lock->lock() == False && $attempt<$attempt_max){
+                $attempt = $attempt + 1;
+                usleep(250000); // sleep for a quarter of a second
+            }
+
+            if($attempt >= $attempt_max){
+                $this->setResponse([
+                    "error" => "Could not acquire lock after multiple attempts. Try again later."
+                ]);
+                //break;
+            }
         }
 
         /* Lock acquired OR not necessary */

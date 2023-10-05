@@ -90,6 +90,7 @@ function StudentWaitingRoom(props) {
     // e.preventDefault();
 
     let request = {};
+    request.user = user;
     request.command = "getTip";
     fetchTip(request,url);
   }

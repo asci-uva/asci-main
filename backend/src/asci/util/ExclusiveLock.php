@@ -28,17 +28,26 @@ if( $lock->lock( ) == FALSE )
 $lock->unlock();
 ===================================================================
 */
+
+namespace asci\util;
+
+
 class ExclusiveLock
 {
     protected $key   = null;  //user given value
     protected $file  = null;  //resource to lock
     protected $own   = FALSE; //have we locked resource
+    protected $dir   = null;
 
     function __construct( $key ) 
     {
-        $this->key = $key;
+        
+        $this->dir = "./tmp/lock/";
+        $this->key = $this->dir . $key;
+
+        $filename = $this->key . ".lockfile";
         //create a new resource or get exisitng with same key
-        $this->file = fopen("$key.lockfile", 'w+');
+        $this->file = fopen($filename, 'w+');
     }
 
 
@@ -83,12 +92,9 @@ class ExclusiveLock
                 //error_log("ExclusiveLock::lock FAILED to release lock [$key]");
                 return FALSE;
             }
-            fclose($this->file)
+            fclose($this->file);
         }
-        else
-        {
-            //error_log("ExclusiveLock::unlock called on [$key] but its not acquired by caller");
-        }
+        
         return TRUE; // success
     }
 };
