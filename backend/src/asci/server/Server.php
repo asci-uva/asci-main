@@ -326,6 +326,14 @@ class Server
                 
                 break;
 
+            case "cancelGroup":
+                $courseId = $this->input["courseId"];
+                $sessionId = $this->input["sessionId"];
+
+                $this->setResponse($executor->cancelGroup($user, $courseId, $sessionId));
+                
+                break;
+
             case "clearQueue":
                 $courseId = $this->input["courseId"];
 

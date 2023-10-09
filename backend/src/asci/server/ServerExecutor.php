@@ -537,6 +537,37 @@ class ServerExecutor{
 
     }
 
+    public function cancelGroup($ta_computing_id, $course_id, $session_id){
+
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+
+        /* Grab the TA */
+        $taUser = $this->userStore->getUser($ta_computing_id);
+
+        /* First, set the main session to in_progress (easy part) */
+        $mainSession = $dbsession->getSession($session_id);
+
+        if($mainSession == null) return $this->err("No session exists for given sessionId");
+
+        //set session back to waiting
+        $mainSession->status = "waiting";
+        $result = $dbsession->update($mainSession);
+        if(!$result) return $this->err("failure to update session to in_progress state");
+
+        /* Grab the TA session user */
+        $sessUsr = $dbsessusr->getSessionUser($taUser->id, $session_id);
+        if($sessUsr==null) return err("No session user for this TA in this session");
+
+        $dbsessusr->setInactive($sessUsr);
+
+        $result = [];
+        $result["success"] = "true";
+        return $result;
+
+    }
+
 
     /*
      * Given the Student's computing Id and courseId
