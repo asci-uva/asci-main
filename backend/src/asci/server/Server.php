@@ -316,7 +316,18 @@ class Server
                 $this->setResponse($executor->createGroup($user, $courseId, $sessionId, $groupSessions, $location));
                 
                 break;
+
+            case "getCourseSettings":
+                $courseId = $this->input["courseId"];
+
+                $this->setResponse($executor->getCourseSettings($courseId));
+                
+                break;
             
+
+
+
+
 
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/

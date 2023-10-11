@@ -28,9 +28,6 @@ const documentRoot = "/ohq/ohq";
 const url = "http://localhost:8081/index.php";
 const debugMode = true; //if true, login page will have you type in a userId to use
 
-//Some other functions we can turn on and off
-const groupingEnabled = true;
-
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <Router>

@@ -1002,6 +1002,24 @@ class ServerExecutor{
         return $result;
     }
 
+    public function getCourseSettings($course_id){
+
+        /* Database Object we are going to need */
+        $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
+
+        $settings = $dbcrsset->getCourseSettings($course_id);
+        
+        if($settings == null) return err("This course id does not have any associated course settings");
+
+        //Done. Set up the info to return
+        $result = [];
+        $result["success"] = "true";
+        $result["settings"] = $settings->toArray();
+        $result["error"] = "none";
+
+        return $result;
+    }
+
     
     /*
      * Inserts the survey into the DB

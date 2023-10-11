@@ -84,6 +84,14 @@ CREATE TABLE survey (
   feedback TEXT
 );
 
+CREATE TABLE course_settings (
+  course_id INT,
+  show_queue_list BOOL DEFAULT (true),
+  grouping_enabled BOOL DEFAULT (true),
+  smart_grouping BOOL DEFAULT (true),
+  self_grouping BOOL DEFAULT (true)
+);
+
 CREATE TABLE logs (
   session_id SERIAL PRIMARY KEY,
   action TEXT,

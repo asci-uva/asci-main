@@ -14,10 +14,12 @@ function JoinQueue(props) {
   const [location, setLocation] = useState("");
   const [details, setDetails] = useState("");
   const [courseName, setCourseName] = useState("");
-  const [groupOption, setGroupOption] = useState(true);
+  const [groupOption, setGroupOption] = useState(false);
 
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [settings, setSettings] = useState(null);
   
 
   let url = props.url;
@@ -46,9 +48,49 @@ function JoinQueue(props) {
         request.user = localStorage.getItem('asci-user');
         request.courseId = localStorage.getItem('asci-course');
         checkSession(request, url); 
+
+
+        /* Also get course settings */
+        let request2 = {};
+        request2.command = "getCourseSettings";
+        request2.user = localStorage.getItem('asci-user');
+        request2.courseId = localStorage.getItem('asci-course');
+        getSettings(request2, url);
       }
     
     }, []);
+
+    
+  const getSettings = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+        console.log("Data is: ", data);
+        let success = data.success;
+        if(success === "true"){
+
+          setSettings(data.settings);
+          if(data.settings.grouping_enabled == "t"){
+            setGroupOption(true);
+          }
+          
+        }
+        else{
+          console.log("HOME: Server returned error");
+          navigate(docRoot + "/error");
+        }
+      })
+      .catch((error) => {
+        console.log("HOME: There was an error:", error);
+        navigate(docRoot + "/error");
+        
+      });
+  }
 
   //This function checks the users session
   const checkSession = (json0, url0) =>{
@@ -165,22 +207,23 @@ function JoinQueue(props) {
     }
 
   function GroupCheckBox(props){
-    if(groupingEnabled){
+
+    if(settings != null && settings.grouping_enabled == "t"){
       return (
         <div>
           <label>
-            I would like to be placed in a group (this might decrease your wait time)
             <input
               type="checkbox"
               checked={groupOption}
               onChange={handleCheck}
             />
+            I would like to be placed in a group (this might decrease your wait time)
           </label>
         </div>
       );
     }
     else{
-      setGroupOption(false);
+      
       return "";
     }
   }
