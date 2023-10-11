@@ -217,7 +217,8 @@ function JoinQueue(props) {
               checked={groupOption}
               onChange={handleCheck}
             />
-            I would like to be placed in a group (this might decrease your wait time)
+            &nbsp;&nbsp; I would like to be placed in a group (this might decrease your wait time)
+            
           </label>
         </div>
       );

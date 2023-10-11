@@ -289,6 +289,67 @@ class ServerExecutor{
     }
 
     /*
+     * Used when TA has asked to take a specific student off the queue
+     */
+    public function takeSpecificStudentForTA($computing_id, $course_id, $session_id){
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+
+        //0: Grab the user
+        $user = $this->userStore->getUser($computing_id);
+
+        $result = [];
+
+        //2: Grab the session
+        $session = $dbsession->getSession($session_id);
+
+        if($session == null){
+            return $this->err("Could not find the given session");
+        }
+        if($session->status != 'waiting'){
+            return $this->err("Session is not in the waiting status");
+        }
+        if($session->course_id != $course_id){
+            return $this->err("Session is not in the given course!");
+        }
+        
+        //Check if the student wants to be in a group
+        $groupOption = $session->getGroupOption();
+        if($groupOption == "true"){
+            $result["group_option"] = "true";
+        }
+        else{
+            $result["group_option"] = "false";
+        }
+
+        //Ok, we have a waiting session. Let's get the session_user
+        $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), 'student');
+
+        if($sessUsr == null){
+            $result["success"] = "false";
+            $result["error"] = "ERROR: Session does not have any associated students";
+            return $result;
+        }
+
+        //Get the student that the TA will be helping
+        $student = $this->userStore->getUser($sessUsr->getUserId());
+
+        //Ok, we have info, let's create a user session for TA that is helping
+        $TASessUsr = new \asci\data\SessionUser();
+        $TASessUsr->fromParams($user->getId(), $session->getId(), 'ta', 'active', 'false');
+        $dbsessusr->insert($TASessUsr);
+
+        //Ok, Let's update the session itself
+        $dbsession->fulfillSession($session->getId(), $session->getGroupOption());
+
+        $result["success"] = "true";
+        $result["error"] = "none";
+
+        return $result;
+    }
+
+    /*
      * Get all the matched students' info and display it for the TA.
      */
     public function getPotentialGroupInfo($computing_id, $course_id){
@@ -424,7 +485,7 @@ class ServerExecutor{
         $result = $dbsession->update($mainSession);
         if(!$result) return $this->err("failure to update session to in_progress state");
 
-        /* if group_sessions has any actual sessions to group in, then remove TA from mains session and create a TA session to mash all users into */
+        /* if group_sessions has any actual sessions to group in, then remove TA from main session and create a TA session to mash all users into */
         if(count($group_sessions) > 0){
 
             /* Remove the TA from the main session first!! */
@@ -441,15 +502,6 @@ class ServerExecutor{
             $gr_map->status = "active";
             $result = $dbgroupmap->insert($gr_map);
             if(!$result) return $this->err("Error creating group session map");
-
-            /* Insert a session user for the main student */
-            // $sessUsrMainStud = new \asci\data\SessionUser();
-            // $sessUsrMainStud->sessionId = $newTASess->id;
-            // $sessUsrMainStud->userId = $dbsessusr->getSessionUserByRole($mainSession->id, 'student')->userId;
-            // $sessUsrMainStud->role = 'student';
-            // $sessUsrMainStud->user_status = 'active';
-            // if(!$dbsessusr->insert($sessUsrMainStud))
-            //     return $this->err("Error inserting main student into new session user for group");
 
             /* Then, for each group session, check if still waiting */
             /* If so, add a group mapping row to the main session and set to in progress */
@@ -475,19 +527,40 @@ class ServerExecutor{
 
                     if(!$result) return $this->err("Error creating group session map");
 
-                    /* Insert a session user for this student */
-                    // $sessUsrMainStud = new \asci\data\SessionUser();
-                    // $sessUsrMainStud->sessionId = $newTASess->id;
-                    // $sessUsrMainStud->userId = $dbsessusr->getSessionUserByRole($gr_sess_id, 'student')->userId;
-                    // $sessUsrMainStud->role = 'student';
-                    // $sessUsrMainStud->user_status = 'active';
-                    // if(!$dbsessusr->insert($sessUsrMainStud))
-                    //     return $this->err("Error inserting main student into new session user for group");
-                    //     }
-                    // }
                 }
             }
         }
+
+        $result = [];
+        $result["success"] = "true";
+        return $result;
+
+    }
+
+    public function cancelGroup($ta_computing_id, $course_id, $session_id){
+
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+
+        /* Grab the TA */
+        $taUser = $this->userStore->getUser($ta_computing_id);
+
+        /* First, set the main session to in_progress (easy part) */
+        $mainSession = $dbsession->getSession($session_id);
+
+        if($mainSession == null) return $this->err("No session exists for given sessionId");
+
+        //set session back to waiting
+        $mainSession->status = "waiting";
+        $result = $dbsession->update($mainSession);
+        if(!$result) return $this->err("failure to update session to in_progress state");
+
+        /* Grab the TA session user */
+        $sessUsr = $dbsessusr->getSessionUser($taUser->id, $session_id);
+        if($sessUsr==null) return err("No session user for this TA in this session");
+
+        $dbsessusr->setInactive($sessUsr);
 
         $result = [];
         $result["success"] = "true";
@@ -737,7 +810,7 @@ class ServerExecutor{
      * Given computing id and course_id, return number of students
      * in queue iff user is ta for that course
      */
-    public function getNumberWaiting($computing_id, $course_id){
+    public function getWaitingSessions($computing_id, $course_id){
         //DB objects we will be using
         $dbsession = new \asci\server\database\DBSession($this->db);
         $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
@@ -762,16 +835,12 @@ class ServerExecutor{
         }
 
         //Ok, looks good. Grab the number of waiting students
-        $numWaiting = $dbsession->getNumWaiting($course_id);
+        $waitingSessions = $dbsession->getWaitingSessions($course_id);
 
-        if($numWaiting == null){
-            $result["success"] = "false";
-            $result["error"] = "ERROR: Failed to fetch number of students waiting";
-            return $result;
-        }
 
         $result["success"] = "true";
-        $result["waiting"] = $numWaiting["count"];
+        $result["waiting"] = count($waitingSessions);
+        $result["sessions"] = $waitingSessions;
         $result["usercourse"] = $userCourse->toArray();
         return $result;
     }
@@ -1081,6 +1150,37 @@ class ServerExecutor{
             $result["error"] = "Something went wrong writing the survey down to the database.";
             return $result;
         }
+
+        //-------------------------------------------
+        //-------------------------------------------
+    }
+
+    /*
+     * Inserts the survey into the DB
+     */
+    public function clearQueue($computing_id, $course_id){
+
+        /* Grab the user first */
+        $user = $this->userStore->getUser($computing_id);
+
+        //Some DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+
+        /* Make sure user is TA for this course */
+        //Get the UserCourse object
+        $userCourse = (new \asci\server\database\DBUserCourse($this->db))->getCourseForUser($user->getComputingId(), $course_id);
+
+        if($userCourse == null) return $this->err("ERROR: This user not associated with this course");
+        else if($userCourse->getRole() != "ta") return $this->err("ERROR: This user not a ta for this course");
+        
+
+        $result = [];
+
+        $dbsession->closeAllSessionsForCourse($course_id);
+        
+        $result["success"] = "true";
+        return $result;
+        
 
         //-------------------------------------------
         //-------------------------------------------

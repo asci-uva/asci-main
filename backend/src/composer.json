@@ -1,7 +1,7 @@
 
 {
     "require": {
-        "php": "~7.0",
+        "php": ">=7.0",
         "twig/twig": "^2.0",
         "monolog/monolog": "^1.18",
         "twig/string-extra": "^3.0"

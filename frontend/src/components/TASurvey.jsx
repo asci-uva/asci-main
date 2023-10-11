@@ -185,6 +185,10 @@ function TASurvey(props) {
             <h4>This meeting occured on {new Date(meetingDate).toLocaleString()}</h4>
             </div>
 
+            <div>
+              <button onClick={() => navigate(docRoot + "/")}>Skip Survey</button>
+            </div>
+
             
             <div>
             <h2> Were you able to address the concerns of {studFirstName}? </h2>

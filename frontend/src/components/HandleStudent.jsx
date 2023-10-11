@@ -2,10 +2,12 @@ import React from "react";
 import {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 
+import ClearQueue from "./ClearQueue";
+
 function HandleStudent(props) {
   
-  let user = null;
-  let courseId = null;
+  let [user, setUser] = useState(null);
+  let [courseId, setCourseId] = useState(null);
 
   //variables for managing polling the server
   let polling = false;
@@ -18,6 +20,8 @@ function HandleStudent(props) {
   const [assign, setAssign] = useState(true);
   const [numWaiting, setNumWaiting] = useState("Loading...");
   const [courseName, setCourseName] = useState("Loading...");
+  const [waitingSessions, setWaitingSessions] = useState([]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,8 +37,8 @@ function HandleStudent(props) {
     }
 
     else{
-      user = localStorage.getItem('asci-user');
-      courseId = localStorage.getItem('asci-course');
+      setUser(localStorage.getItem('asci-user'));
+      setCourseId(courseId = localStorage.getItem('asci-course'));
 
       polling = true;
       pollNumWaiting();
@@ -55,14 +59,14 @@ function HandleStudent(props) {
   function pollNumWaiting(){
     //Get a student
     let request = {};
-    request.command = "getNumberWaiting";
+    request.command = "getWaitingSessions";
     request.user = localStorage.getItem('asci-user');
     request.courseId = localStorage.getItem('asci-course');
-    getNumWaiting(request, url); 
+    getWaitingSessions(request, url); 
   }
 
   //This gets a student
-  const getNumWaiting = (json0, url0) =>{
+  const getWaitingSessions = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
       headers: {
@@ -71,11 +75,13 @@ function HandleStudent(props) {
       body: JSON.stringify(json0),
     }).then(response => response.json())
     .then(data => {
-        console.log("Data is: ", data);
+        console.log("Waiting sessions is: ", data);
 
         //if request succeeded
         if(data.success === "true"){
           setNumWaiting(data.waiting);
+
+          setWaitingSessions(data.sessions);
 
           setCourseName(data.usercourse.mnemonic +
                         data.usercourse.number + "(" +
@@ -130,6 +136,35 @@ function HandleStudent(props) {
     }
   }
 
+  const handleTake = (e) =>{
+    e.preventDefault();
+
+    console.log("Handling specific student?");
+    console.log("e is: " + e);
+    console.log("value is: " + e.target.value);
+
+    /* Need to send sessionId also... */
+
+    if(localStorage.getItem('asci-user') === null){
+      navigate(docRoot + "/login");
+    }
+
+    else if(localStorage.getItem('asci-course') === null){
+      navigate(docRoot + "/selectCourse");
+    }
+    else{
+    
+      //Get a student
+      let request = {};
+      request.command = "takeSpecificStudentForTA";
+      request.user = localStorage.getItem('asci-user');
+      request.courseId = localStorage.getItem('asci-course');
+      request.sessionId = waitingSessions[e.target.value].id;
+      getStudent(request, url); 
+    }
+
+  }
+
   //This gets a student
   const getStudent = (json0, url0) =>{
     fetch(url0, {
@@ -165,14 +200,54 @@ function HandleStudent(props) {
 
     }
 
+    const handleClearQueueCallback = () => {
+      console.log("Received callback. Refreshing queue page");
+      pollNumWaiting();
+    }
+
+
+    const WaitTableHeaderRow = () => {
+      return <tr><th>Pos</th><th>Subject</th><th>Issue</th><th>Take</th></tr>;
+    }
+
+
+    const WaitTableRow = ({data}) => {
+      return Object.keys(data).map(k =>
+        <tr key={k}>
+          <td>{k}</td><td>{data[k].issue_subject}</td><td>{data[k].issue}</td>
+          <td><button value={k} onClick={handleTake}>Take</button></td>
+        </tr>
+      );
+    }
+
+    const WaitTable = ({data}) => {
+      if(data.length > 0){
+        return (
+          <table>
+            <WaitTableHeaderRow />
+            <WaitTableRow data={data} />
+          </table>
+        );
+      }
+      else return;
+    }
+
   return (
-    <div className="question">
+    <div className="question waitlist">
       <div>
         <h2>You are now handling students for <b>{courseName}</b></h2>
         <h5>There are <b>{numWaiting}</b> student(s) waiting.</h5>
       </div>
       <div>
         <button onClick={handleAssign}>get next student</button>
+      </div>
+
+      <div>
+        <ClearQueue callback={handleClearQueueCallback} url={url} documentRoot={docRoot} user={user} courseId={courseId} />
+      </div>
+
+      <div>
+        <WaitTable data={waitingSessions} />
       </div>
 
       <div>

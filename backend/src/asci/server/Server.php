@@ -230,11 +230,11 @@ class Server
 
             /* TA SPECIFIC FUNCTIONS ARE BELOW THIS POINT */
 
-            case "getNumberWaiting":
+            case "getWaitingSessions":
 
                 $courseId = $this->input["courseId"];
                 
-                $this->setResponse($executor->getNumberWaiting($user, $courseId));
+                $this->setResponse($executor->getWaitingSessions($user, $courseId));
                 
                 break;
 
@@ -243,6 +243,15 @@ class Server
                 $courseId = $this->input["courseId"];
                 
                 $this->setResponse($executor->getStudentForTA($user, $courseId));
+                
+                break;
+
+            case "takeSpecificStudentForTA":
+
+                $courseId = $this->input["courseId"];
+                $sessionId = $this->input["sessionId"];
+                
+                $this->setResponse($executor->takeSpecificStudentForTA($user, $courseId, $sessionId));
                 
                 break;
 
@@ -321,12 +330,23 @@ class Server
                 $courseId = $this->input["courseId"];
 
                 $this->setResponse($executor->getCourseSettings($courseId));
+                break;
+
+            case "cancelGroup":
+                $courseId = $this->input["courseId"];
+                $sessionId = $this->input["sessionId"];
+
+                $this->setResponse($executor->cancelGroup($user, $courseId, $sessionId));
                 
                 break;
-            
 
+            case "clearQueue":
+                $courseId = $this->input["courseId"];
 
-
+                $this->setResponse($executor->clearQueue($user, $courseId));
+                
+                break;
+        
 
 
 

@@ -74,7 +74,7 @@ function HandleGroup(props) {
                 setOtherSessions(data.group_sessions);
 
                 for(var sess in data.group_sessions){
-                    checked[data.group_sessions[sess].id] = false;
+                    checked[data.group_sessions[sess].id] = true;
                 }
                 
                 setChecked(checked);
@@ -165,6 +165,63 @@ function HandleGroup(props) {
 
     }
 
+    /* Handle canceling the group creation */
+    const cancelGroup = (e) =>{
+        e.preventDefault();
+
+        if(localStorage.getItem('asci-user') === null){
+          navigate(docRoot + "/login");
+        }
+        else if(localStorage.getItem('asci-course') === null){
+          navigate(docRoot + "/selectCourse");
+        }
+        else{
+
+          //JOIN THE QUEUE
+          let request = {};
+          request.command = "cancelGroup";
+
+          //set user and course so the server knows
+          request.user = localStorage.getItem('asci-user');
+          request.courseId = localStorage.getItem('asci-course');
+          request.sessionId = mainSessionId;
+
+          console.log(request);
+          cancelGroupRequest(request, url); 
+        }
+
+    }
+
+  //This function cancels group request to server
+  const cancelGroupRequest = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+        console.log("Data is: ", data);
+
+        //if request succeeded
+        if(data.success === "true"){
+          navigate(docRoot + "/");
+        }
+        else{
+          console.log("JQ: Error, creating group failed");
+          navigate(docRoot + "/error");
+        }
+        
+      })
+      .catch((error) => {
+        console.log("JQ: There was an error:", error);
+        navigate(docRoot + "/error");
+        
+      });
+
+    }
+
     function GroupPanel(props){
       if(otherSessions == null || otherSessions.length == 0){
         return(
@@ -233,6 +290,7 @@ function HandleGroup(props) {
 
                 <div>
                     <h6>Click here when you are ready to start the session.</h6>
+                    <button onClick={cancelGroup}>Cancel</button>
                     <button onClick={createGroup}>Start Session</button>
                 </div>
             </div>

@@ -246,14 +246,7 @@ function StudentWaitingRoom(props) {
         		<button onClick={leaveQueue}>Leave queue</button>
       	</div>
         <br></br>
-      <div>
-        <label>Tips:</label>
-        <label>{tip}</label>
-        <div className="uncentered">
-          <button onClick={getTip}>Get Another Tip</button>
-          <button onClick={thisHelped}>This Helped!</button>
-        </div>
-      </div>
+      
 		</div>
 	);
 }

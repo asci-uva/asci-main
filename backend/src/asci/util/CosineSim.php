@@ -78,7 +78,7 @@ class CosineSim
         );
 
         /* Hardcoding the call to the python script for now */
-        $command = "python3 /opt/src/asci/util/group_cosine.py";
+        $command = "python3 " . \asci\Config::$COSINE_SIMILARITY_SCRIPT;
         
         $pipes = array();
         $process = proc_open($command, $descriptorspec, $pipes);

@@ -160,13 +160,27 @@ class DBSession
 
     /*
      * Closes all sessions associated with this user_id course combination
-     * by setting each to "completed"
+     * by setting each to "completed" (except for sessions that are currently in_progress as those students are in meetings)
      */
     public function closeAllSessions($user_id, $course_id){
 
         $query = 'update sessions set status = \'completed\' from (select * from sessions JOIN session_users on id=session_id) S where S.id = sessions.id and sessions.course_id=$1 and S.user_id=$2';
 
         $result = $this->db->query($query, array($course_id, $user_id));
+        
+        return true;
+
+    }
+
+    /*
+     * Closes all sessions associated with this course
+     * by setting each to "completed"
+     */
+    public function closeAllSessionsForCourse($course_id){
+
+        $query = 'update sessions set status = \'completed\' from (select * from sessions JOIN session_users on id=session_id) S where S.id = sessions.id and sessions.course_id=$1 and sessions.status!=\'in_progress\'';
+
+        $result = $this->db->query($query, array($course_id));
         
         return true;
 
@@ -189,18 +203,18 @@ class DBSession
     /*
      * Returns the number of students waiting in the course
      */
-    public function getNumWaiting($course_id){
+    public function getWaitingSessions($course_id){
 
-        $query = 'select count(*) from sessions where course_id=$1 and status=\'waiting\'';
+        $query = 'select * from sessions where course_id=$1 and status=\'waiting\' limit 50';
 
         $result = $this->db->query($query, array($course_id));
-        $row = $this->db->fetchrow($result);
 
-        if ($row != null){
-            return $row;
+        $sessions = [];
+        while($row = $this->db->fetchrow($result)){
+            $sessions[] = (new \asci\data\Session())->fromArray($row);
         }
         
-        return null;
+        return $sessions;
 
     }
 
