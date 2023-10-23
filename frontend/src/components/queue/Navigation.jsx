@@ -2,11 +2,11 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 
 function Navigation(props) {
-
   let docRoot = props.documentRoot;
   let debugMode = props.debugMode;
+  let root = "/ohq/ohq";
 
-  if(debugMode){
+  if (debugMode) {
     return (
       <div className="navigation">
         <nav className="navbar navbar-expand navbar-dark bg-dark">
@@ -17,8 +17,8 @@ function Navigation(props) {
             <div>
               <ul className="navbar-nav ml-auto">
                 <li className="nav-item">
-                  <NavLink className="nav-link" to={docRoot + "/"}>
-                    Refresh Page
+                  <NavLink className="nav-link" to={root + "/"}>
+                    BACK TO HOME
                   </NavLink>
                 </li>
                 <li className="nav-item">
@@ -27,7 +27,7 @@ function Navigation(props) {
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" to={docRoot + "/logout"}>
+                  <NavLink className="nav-link" to={root + "/logout"}>
                     Logout
                   </NavLink>
                 </li>
@@ -37,8 +37,7 @@ function Navigation(props) {
         </nav>
       </div>
     );
-  }
-  else{
+  } else {
     return (
       <div className="navigation">
         <nav className="navbar navbar-expand navbar-dark bg-dark">

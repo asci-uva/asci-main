@@ -1,0 +1,67 @@
+import React, { createContext, useContext, useState, useEffect } from "react";
+
+const UserContext = createContext();
+
+const url = "http://localhost:8081/index.php";
+
+export const useUser = () => {
+  return useContext(UserContext);
+};
+
+export const UserProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // update the username for each render
+    if (localStorage.getItem("asci-user") !== null) {
+      setUser(localStorage.getItem("asci-user"));
+    }
+  }, []);
+
+  const login = (userInfo, callback) => {
+    let json = {};
+    json.command = "login";
+    json.user = userInfo.user;
+
+    let jsonString = JSON.stringify(json);
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonString,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success === "true") {
+          // successfully login
+          console.log("Login Success");
+          localStorage.setItem("asci-user", data.computing_id);
+          setUser(data.computing_id);
+          callback(true);
+        } else {
+          // fail to login
+          console.log("login failed");
+          callback(false);
+        }
+      })
+      .catch((error) => {
+        console.error("Error during login:", error);
+        callback(false); // Call the callback with failure status
+      });
+  };
+
+  const logout = () => {
+    setUser(null);
+    // Clear LocalStorage
+    localStorage.clear();
+    console.log("logout successfully, go back to login page");
+  };
+
+  return (
+    <UserContext.Provider value={{ user, login, logout }}>
+      {children}
+    </UserContext.Provider>
+  );
+};

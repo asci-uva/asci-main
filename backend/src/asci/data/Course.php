@@ -34,6 +34,7 @@ class Course implements \Serializable
         return $this->semester;
     }
 
+
     public function fromArray($data)
     {
         $this->mnemonic = $data['mnemonic'] ?? null;
@@ -49,7 +50,7 @@ class Course implements \Serializable
             "mnemonic" => $this->mnemonic,
             "number" => $this->number,
             "name" => $this->name,
-            "semester" => $this->semester
+            "semester" => $this->semester,
         );
     }
 
@@ -71,4 +72,9 @@ class Course implements \Serializable
     public function unserialize($data) {
         $this->fromJSON($data);
     }
+
+    // check if there is a valid course found
+    // public function isValid() {
+    //     return isset($this->courseId) && !empty($this->courseId);
+    // }    
 }

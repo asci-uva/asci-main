@@ -179,6 +179,15 @@ class Server
 
                 break;
 
+            //given a userId and token, make sure user is logged in and 
+            //return list of active course objects that student is enrolled in.
+            case "getCoursesByRole":
+                $role = $this->input["role"];
+                
+                $this->setResponse($executor->getCoursesByRoleHandler($user, $role));
+
+                break;
+
             //given student id, token, courseid. Join the queue
             //if student, token pair is valid and they can
             case "joinQueue":
@@ -332,6 +341,25 @@ class Server
                 $this->setResponse($executor->clearQueue($user, $courseId));
                 
                 break;
+
+            case "createCourse":
+                $mnemonic = $this->input["mnemonic"];
+                $number = $this->input["number"];
+                $name = $this->input["name"];
+                $semester = $this->input["semester"];
+
+                $this->setResponse($executor->createCourse($user, $mnemonic, $number, $name, $semester));
+                break;
+    
+            case "updateCourseInfo":
+                $course_id = $this->input["course_id"];
+                $mnemonic = $this->input["mnemonic"];
+                $number = $this->input["number"];
+                $name = $this->input["name"];
+                $semester = $this->input["semester"];
+    
+                $this->setResponse($executor->updateCourseInfoHandler($course_id, $mnemonic, $number, $name, $semester));
+                break;
             
 
 
@@ -342,12 +370,7 @@ class Server
                 $this->setResponse(["results" => $result]);
                 break;
             
-            case "createCourse":
-                $result = $executor->createCourse($this->input);
-                $this->setResponse(["results" => $result]);
-                break;
 
-                 
             case "register":
                 $result = $executor->registerUser($this->input);
                 $this->setResponse(["results" => $result]);

@@ -59,7 +59,7 @@ class Config {
         "host" => "db",
         "port" => 5432,
         "user" => "asci",
-        "password" => "password"
+        "password" => "asci"
     );
 
     /**

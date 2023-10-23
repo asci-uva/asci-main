@@ -119,6 +119,25 @@ class ServerExecutor{
     }
 
     /*
+     * Given a user and a role, gets all the courses that user is associated with that role
+     * in the system. See UserCourse for object structure
+    */
+    public function getCoursesByRoleHandler($computing_id, $role){
+        $result = [];
+        
+        $courses = (new \asci\server\database\DBUserCourse($this->db))->getCoursesForUserByRole($computing_id, $role);
+
+        $result["courses"] = [];
+        foreach ($courses as $course){
+            $result["courses"][$course->getCourseId()] = $course->toArray();
+        }
+
+        $result["success"] = "true";
+
+        return $result;
+    }
+
+    /*
      * Given comp_id and course_id, gets the current state the user is in
      * 
      */
@@ -1152,14 +1171,53 @@ class ServerExecutor{
         return $this->userStore->createUser($user);
     }
 
-    public function createCourse($data) {
-        $course = new \asci\data\Course($data);
-        return $this->userStore->createCourse($course);
+    public function createCourse($user, $mnemonic, $number, $name, $semester) {
+        // $course = new \asci\data\Course($data);
+        // return $this->userStore->createCourse($course);
+
+        $success = (new \asci\server\database\DBCourse($this->db))->createCourse($user, $mnemonic, $number, $name, $semester);
+        $result = [];
+        if ($success) {
+            $result["success"] = true;
+        } else {
+            $result["success"] = false;
+        }
+    
+        return $result;
     }
 
     public function registerUser($data) {
         return $this->userStore->register($data["userid"],$data["password"]);
     }
+
+    public function updateCourseInfoHandler($course_id, $mnemonic, $number, $name, $semester) {
+        // Retrieve the original course data using the getCourseById method
+        $originalCourse = (new \asci\server\database\DBCourse($this->db))->getCourseById($course_id);
+
+        if (!$originalCourse) {
+            // Handle the error if no course found
+            return ["success" => false, "message" => "Original course not found"];
+        }
+    
+        // If any attribute is empty, use the original value
+        $mnemonic = empty($mnemonic) ? $originalCourse->getMnemonic() : $mnemonic;
+        $number = empty($number) ? $originalCourse->getNumber() : $number;
+        $name = empty($name) ? $originalCourse->getName() : $name;
+        $semester = empty($semester) ? $originalCourse->getSemester() : $semester;
+    
+        // Now update the course with the potentially updated attributes
+        $success = (new \asci\server\database\DBCourse($this->db))->updateCourse($course_id, $mnemonic, $number, $name, $semester);
+    
+        $result = [];
+        if ($success) {
+            $result["success"] = true;
+        } else {
+            $result["success"] = false;
+        }
+    
+        return $result;
+    }
+    
 
     
 }
