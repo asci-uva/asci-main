@@ -360,14 +360,34 @@ class Server
     
                 $this->setResponse($executor->updateCourseInfoHandler($course_id, $mnemonic, $number, $name, $semester));
                 break;
-            
 
+            case "uploadRoster":
+                $roster = $this->input["roster"];
+                $course_id = $this->input["course_id"];
+    
+                $this->setResponse($executor->uploadRosterHandler($roster, $course_id));
+                break;
+
+            case "manuallyAddStudent":
+                $fname = $this->input["fname"];
+                $lname = $this->input["lname"];
+                $pname = $this->input["pname"];
+                $computing_id = $this->input["computingId"];
+                $role = $this->input["role"];
+                $course_id = $this->input["course_id"];
+
+                $this->setResponse($executor->manuallyAddStudentHandler($fname, $lname, $pname, $computing_id, $role, $course_id));
+                break;
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/
 
             case "createUser":
-                $result = $executor->createUser($this->input);
-                $this->setResponse(["results" => $result]);
+                $computing_id = $this->input["computing_id"];
+                $fname = $this->input["fname"];
+                $lname = $this->input["lname"];
+                $pname = $this->input["pname"];
+
+                $this->setResponse($executor->createUser($computing_id, $fname, $lname, $pname));
                 break;
             
 

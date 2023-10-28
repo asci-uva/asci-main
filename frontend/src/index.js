@@ -9,6 +9,7 @@ import QueueController from "./components/QueueController";
 import AdminController from "./components/AdminController";
 import HomeController from "./components/HomeController";
 import { UserProvider } from "./components/context/UserContext";
+import { ToastContainer } from "react-toastify";
 
 //SOME GLOBAL CONSTANTS THAT ARE USED THROUGHOUT THE APP
 //const documentRoot = "/asci";
@@ -25,6 +26,7 @@ const groupingEnabled = true;
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <UserProvider>
+    <ToastContainer />
     <Router>
       <Routes>
         <Route

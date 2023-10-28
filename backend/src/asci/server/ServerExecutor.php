@@ -1156,6 +1156,52 @@ class ServerExecutor{
         //-------------------------------------------
     }
 
+    // manually add student/ta to the course
+    public function manuallyAddStudentHandler($fname, $lname, $pname, $computing_id, $role, $course_id) {
+        $user = [
+            'fname' => $fname,
+            'lname' => $lname,
+            'pname' => $pname,
+            'computing_id' => $computing_id,
+            'role' => $role
+        ];
+        
+        $users = [$user];  // Wrap the single user in an outer array
+
+        // Now, we can pass $users and $course_id to manuallyAddStudentsHandler        
+        $results = (new \asci\server\database\DBUser($this->db))->ManuallyAddUsersForCourse($users, $course_id);
+
+        // Here, $results is an associative array with computing_id as key and true/false as value indicating success/failure.
+        $response = [];
+        foreach ($results as $computing_id => $success) {
+            if ($success) {
+                $response[$computing_id] = ["success" => true];
+            } else {
+                $response[$computing_id] = ["success" => false];
+            }
+        }
+        return $response;
+    }
+
+    // upload roster
+    public function uploadRosterHandler($users, $course_id) {
+        // Note: $users should be an array of associative arrays, where each associative array represents a user with keys 'fname', 'lname', 'pname', 'computing_id', and 'role'.        
+        $results = (new \asci\server\database\DBUser($this->db))->ManuallyAddUsersForCourse($users, $course_id);
+
+        // Here, $results is an associative array with computing_id as key and true/false as value indicating success/failure.
+        $response = [];
+        foreach ($results as $computing_id => $success) {
+            if ($success) {
+                $response[$computing_id] = ["success" => true];
+            } else {
+                $response[$computing_id] = ["success" => false];
+            }
+        }
+
+        return $response;
+    }
+
+
 
     /**
      * Creates a new User in the database
@@ -1164,17 +1210,19 @@ class ServerExecutor{
      *
      * @return bool login success
      */
-    public function createUser($data) {
-        $data["password"] = password_hash($data["password"], PASSWORD_DEFAULT);
-        $user = new \asci\data\User($data);
+    public function createUser($computing_id, $fname, $lname, $pname) {
+        $success = (new \asci\server\database\DBUser($this->db))->createUser($computing_id, $fname, $lname, $pname);
+        $result = [];
+        if ($success) {
+            $result["success"] = true;
+        } else {
+            $result["success"] = false;
+        }
 
-        return $this->userStore->createUser($user);
+        return $result;
     }
 
     public function createCourse($user, $mnemonic, $number, $name, $semester) {
-        // $course = new \asci\data\Course($data);
-        // return $this->userStore->createCourse($course);
-
         $success = (new \asci\server\database\DBCourse($this->db))->createCourse($user, $mnemonic, $number, $name, $semester);
         $result = [];
         if ($success) {

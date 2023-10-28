@@ -45,7 +45,7 @@ const AdminController = (props) => {
           path="courseManagement"
           element={<CourseManagement {...props} />}
         /> */}
-        <Route path="uploadRoster" element={<UploadRoster {...props} />} />
+        {/* <Route path="uploadRoster" element={<UploadRoster {...props} />} /> */}
         <Route path="error" element={<Error {...props} />} />
         <Route
           path="editCourse/:courseId"

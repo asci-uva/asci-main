@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function CreateNewCourse(props) {
   const [mnemonic, setMnemonic] = useState("");
@@ -36,15 +38,15 @@ function CreateNewCourse(props) {
       .then((data) => {
         console.log(data);
         if (data.success) {
-          console.log("Course created successfully!");
+          toast.success("Course created successfully!");
           navigate(docRoot); // back to the course management if success
         } else {
-          console.error("Error creating the course");
+          toast.error("Error creating the course");
           navigate(docRoot + "/error");
         }
       })
       .catch((error) => {
-        console.error("There was an error:", error);
+        toast.error("Error creating the course");
         navigate(docRoot + "/error");
       });
   };

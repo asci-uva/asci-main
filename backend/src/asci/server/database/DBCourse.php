@@ -62,6 +62,17 @@ class DBCourse
     }
 
     public function createCourse($user, $mnemonic, $number, $name, $semester) {
+        // check if the course has already in the database or not
+        $checkCourseQuery = 'SELECT id FROM courses WHERE mnemonic = $1 AND number = $2 AND name = $3 AND semester = $4';
+        $result = $this->db->query($checkCourseQuery, array($mnemonic, $number, $name, $semester));
+
+        // if the course has been created, do not create it twice!
+        $row = $this->db->fetchrow($result);
+        if ($row) {
+            $this->logger->error("Course already exists with ID: " . $row['id']);
+            return false;
+        }
+
         // Insert the new course into the 'courses' table
         $insertCourseQuery = 'INSERT INTO courses (mnemonic, number, name, semester) VALUES ($1, $2, $3, $4) RETURNING id';
         $params = array($mnemonic, $number, $name, $semester);
@@ -70,7 +81,7 @@ class DBCourse
     
         if (!$result) {
             $this->logger->error("Failed to create course");
-            return ["success" => false, "message" => "Failed to create course"];
+            return false;
         }
         
         // Get the ID of the newly created course
@@ -84,7 +95,7 @@ class DBCourse
         $row = $this->db->fetchrow($result);
         if (!$row) {
             // Handle the error if no user found
-            throw new \Exception("User with computing_id $user not found.");
+            return false;
         }
         $userId = $row['id'];
         
@@ -96,10 +107,10 @@ class DBCourse
     
         if (!$result) {
             $this->logger->error("Failed to create user-course relation");
-            return ["success" => false, "message" => "Failed to create user-course relation"];
+            return false;
         }
     
-        return ["success" => true, "message" => "Course created and user-course relation established"];
+        return true;
     }
     
 }
