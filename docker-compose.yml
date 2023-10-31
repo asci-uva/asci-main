@@ -14,7 +14,7 @@ services:
       POSTGRES_DB: asci
       TZ: "America/New_York"
     volumes:
-      - ./db:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
   php:
     build:
       context: ./backend/
@@ -47,3 +47,5 @@ services:
     container_name: 'ASCI_react'
     ports:
       - 3000:3000
+volumes:
+    db-data:
