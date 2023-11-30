@@ -11,6 +11,8 @@ import {
   EditCourse,
 } from "./admin";
 
+import CoursePanel from "./admin/CoursePanel";
+
 import { useUser } from "./context/UserContext";
 
 const AdminController = (props) => {
@@ -50,6 +52,10 @@ const AdminController = (props) => {
         <Route
           path="editCourse/:courseId"
           element={<EditCourse {...props} />}
+        />
+        <Route
+          path="/coursePanel/:courseId"
+          element={<CoursePanel {...props} />}
         />
       </Routes>
     </>

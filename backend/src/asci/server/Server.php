@@ -399,6 +399,11 @@ class Server
             case "getTip":
                 $this->setResponse(["result" => "success", "tips" => ["The tip will go here", "second tip"]]);
                 break;
+
+            case "getAssignmentByCourse":
+                $course_id = $this->input["course_id"];
+                $this->setResponse($executor->getAssignmentsHandler($course_id));
+                break;
                 
             default:
                 $this->setResponse(["response" => "Hello world!"]);

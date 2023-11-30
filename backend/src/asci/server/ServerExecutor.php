@@ -1266,6 +1266,22 @@ class ServerExecutor{
         return $result;
     }
     
+    /*
+     * Given a course, gets all the assignments that course is associated with 
+    */
+    public function getAssignmentsHandler($course_id){
+        $result = [];
 
+        $assignments = (new \asci\server\database\DBAssignment($this->db))->getAssignmentsByCourseId($course_id);
+
+        $result["assignments"] = [];
+        foreach ($assignments as $assignment){
+            $result["assignments"][$assignment->getId()] = $assignment->toArray();
+        }
+
+        $result["success"] = "true";
+
+        return $result;
+    }
     
 }

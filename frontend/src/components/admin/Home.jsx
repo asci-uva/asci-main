@@ -16,7 +16,6 @@ function Home(props) {
 
   //This function runs on page load!
   useEffect(() => {
-    console.log("Courses is:", courses);
     //setup json command
     let request = {};
     request.command = "getCoursesByRole";
@@ -77,19 +76,37 @@ function Home(props) {
     navigate(docRoot + `/editCourse/${courseId}`);
   };
 
+  const handleNavigateToCoursePanel = (courseId) => {
+    navigate(`${docRoot}/coursePanel/${courseId}`);
+  };
+
   return (
     <>
       <div>
         <h2>Welcome {user}</h2>
         {Object.keys(courses).map((courseId) => {
-          // Skip the "Select course..." placeholder
           if (courseId !== "0") {
             return (
-              <div key={courseId}>
-                <span style={{ flex: 1, marginRight: "10px" }}>
+              <div
+                key={courseId}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  marginBottom: "10px",
+                }}
+              >
+                <span
+                  style={{ marginRight: "10px", cursor: "pointer" }}
+                  onClick={() => handleNavigateToCoursePanel(courseId)}
+                >
                   {courses[courseId]}
                 </span>
-                <button onClick={() => handleEditCourse(courseId)}>Edit</button>
+                <button
+                  style={{ padding: "0 10px" }}
+                  onClick={() => handleEditCourse(courseId)}
+                >
+                  Edit
+                </button>
               </div>
             );
           }
