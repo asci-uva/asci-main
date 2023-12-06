@@ -58,8 +58,8 @@ class Config {
         "database" => "asci",
         "host" => "db",
         "port" => 5432,
-        "user" => "postgres",
-        "password" => "samplePassword"
+        "user" => "asci",
+        "password" => "asci"
     );
 
     /**
