@@ -355,13 +355,28 @@ class Server
                 
                 break;
 
+            case "getCourseSettings":
+                $courseId = $this->input["courseId"];
+
+                $this->setResponse($executor->getCourseSettings($courseId));
+                break;
+
+            case "cancelGroup":
+                $courseId = $this->input["courseId"];
+                $sessionId = $this->input["sessionId"];
+
+                $this->setResponse($executor->cancelGroup($user, $courseId, $sessionId));
+                
+                break;
+
             case "clearQueue":
                 $courseId = $this->input["courseId"];
 
                 $this->setResponse($executor->clearQueue($user, $courseId));
                 
                 break;
-            
+        
+
 
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/
