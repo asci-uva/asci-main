@@ -260,7 +260,7 @@ class ServerExecutor{
         }
         //Check if the student wants to be in a group
         $groupOption = $session->getGroupOption();
-        if($groupOption == "true" && $settings->grouping_enabled){
+        if($groupOption == "true" && $settings->grouping_enabled=="t"){
             $result["group_option"] = "true";
         }
         else{
@@ -326,7 +326,7 @@ class ServerExecutor{
         
         //Check if the student wants to be in a group
         $groupOption = $session->getGroupOption();
-        if($groupOption == "true" && $settings->grouping_enabled){
+        if($groupOption == "true" && $settings->grouping_enabled == "t"){
             $result["group_option"] = "true";
         }
         else{
