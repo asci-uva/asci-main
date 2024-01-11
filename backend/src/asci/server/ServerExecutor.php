@@ -245,6 +245,11 @@ class ServerExecutor{
 
         $result = [];
 
+        //Grab the settings for this course
+        $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
+        $settings = $dbcrsset->getCourseSettings($course_id);
+        if($settings == null) return $this->err("This course id does not have any associated course settings");
+
         //2: Grab the next student that is waiting
         $session = $dbsession->getLongestWaitingSession($user->getId(), $course_id);
 
@@ -255,7 +260,7 @@ class ServerExecutor{
         }
         //Check if the student wants to be in a group
         $groupOption = $session->getGroupOption();
-        if($groupOption == "true"){
+        if($groupOption == "true" && $settings->grouping_enabled){
             $result["group_option"] = "true";
         }
         else{
@@ -301,6 +306,11 @@ class ServerExecutor{
 
         $result = [];
 
+        //Grab the settings for this course
+        $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
+        $settings = $dbcrsset->getCourseSettings($course_id);
+        if($settings == null) return $this->err("This course id does not have any associated course settings");
+
         //2: Grab the session
         $session = $dbsession->getSession($session_id);
 
@@ -316,7 +326,7 @@ class ServerExecutor{
         
         //Check if the student wants to be in a group
         $groupOption = $session->getGroupOption();
-        if($groupOption == "true"){
+        if($groupOption == "true" && $settings->grouping_enabled){
             $result["group_option"] = "true";
         }
         else{
