@@ -24,7 +24,6 @@ function JoinQueue(props) {
 
   let url = props.url;
   let docRoot = props.documentRoot; 
-  let groupingEnabled = props.groupingEnabled;
   
     //This function runs on page load!
     useEffect(() => {

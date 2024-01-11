@@ -1078,7 +1078,7 @@ class ServerExecutor{
 
         $settings = $dbcrsset->getCourseSettings($course_id);
         
-        if($settings == null) return err("This course id does not have any associated course settings");
+        if($settings == null) return $this->err("This course id does not have any associated course settings");
 
         //Done. Set up the info to return
         $result = [];

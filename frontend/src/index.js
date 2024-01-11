@@ -45,7 +45,7 @@ root.render(
       <Route path={documentRoot + "/handleStudent"} element={<HandleStudent documentRoot={documentRoot} url={url} />} />
       <Route path={documentRoot + "/meeting"} element={<Meeting documentRoot={documentRoot} url={url} />} />
       <Route path={documentRoot + "/taSurvey"} element={<TASurvey documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/joinQueue"} element={<JoinQueue documentRoot={documentRoot} url={url} groupingEnabled={groupingEnabled} />} />
+      <Route path={documentRoot + "/joinQueue"} element={<JoinQueue documentRoot={documentRoot} url={url} />} />
       <Route path={documentRoot + "/studentMeeting"} element={<StudentMeeting documentRoot={documentRoot} url={url} />} />
       <Route path={documentRoot + "/studentSurvey"} element={<StudentSurvey documentRoot={documentRoot} url={url} />} />
       <Route path={documentRoot + "/error"} element={<Error documentRoot={documentRoot} url={url} />} />
