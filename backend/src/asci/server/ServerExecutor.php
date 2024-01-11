@@ -285,7 +285,7 @@ class ServerExecutor{
         $dbsessusr->insert($TASessUsr);
 
         //Ok, Let's update the session itself
-        $dbsession->fulfillSession($session->getId(), $session->getGroupOption());
+        $dbsession->fulfillSession($session->getId(), $result["group_option"]);
 
         $result["success"] = "true";
         $result["error"] = "none";
@@ -351,7 +351,7 @@ class ServerExecutor{
         $dbsessusr->insert($TASessUsr);
 
         //Ok, Let's update the session itself
-        $dbsession->fulfillSession($session->getId(), $session->getGroupOption());
+        $dbsession->fulfillSession($session->getId(), $result["group_option"]);
 
         $result["success"] = "true";
         $result["error"] = "none";
