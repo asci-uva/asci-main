@@ -1,6 +1,7 @@
 import React from "react";
 import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
+import SelfGroup from './selfgroup/SelfGroup';
 
 function StudentWaitingRoom(props) {
 
@@ -15,8 +16,9 @@ function StudentWaitingRoom(props) {
 	let polling = false;
 	let timeoutId = 0;
 
-	let user = null;
-	let courseId = null;
+	let [user, setUser] = useState(localStorage.getItem('asci-user'));
+	let [courseId, setCourseId] = useState(localStorage.getItem('asci-course'));
+  const [session, setSession] = useState(null);
 
 	let url = props.url;
   let docRoot = props.documentRoot; 
@@ -34,8 +36,8 @@ function StudentWaitingRoom(props) {
       else{
 
         console.log("StudWait: Setting user and course id");
-        user = localStorage.getItem('asci-user');
-        courseId = localStorage.getItem('asci-course');
+        setUser(localStorage.getItem('asci-user'));
+        setCourseId(localStorage.getItem('asci-course'));
         console.log("StudWait: User: " + user);
         console.log("StudWait: Course: " + courseId);
 
@@ -68,15 +70,12 @@ function StudentWaitingRoom(props) {
     else{
 
      		console.log("waitingRoom...polling for queue position");
-
-        user = localStorage.getItem('asci-user');
-        courseId = localStorage.getItem('asci-course');
         
         //setup json command
         let request = {};
         request.command = "getQueueStatus";
-        request.user = user;
-        request.courseId = courseId;
+        request.user = localStorage.getItem('asci-user');;
+        request.courseId = localStorage.getItem('asci-course');;
         getStatus(request, url); 
 
     }
@@ -151,6 +150,7 @@ function StudentWaitingRoom(props) {
 
           else if(data.session.status === "waiting" || data.session.status === "grouping"){
             console.log("WR: Displaying new queue position");
+            setSession(data.session);
             setCourseName(data.usercourse.name);
             setPosition(5);
             
@@ -246,6 +246,9 @@ function StudentWaitingRoom(props) {
         		<button onClick={leaveQueue}>Leave queue</button>
       	</div>
         <br></br>
+        <div>
+          <SelfGroup session={session} user={user} courseId={courseId} documentRoot={docRoot} url={url} />
+        </div>
       
 		</div>
 	);

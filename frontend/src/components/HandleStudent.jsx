@@ -22,6 +22,8 @@ function HandleStudent(props) {
   const [courseName, setCourseName] = useState("Loading...");
   const [waitingSessions, setWaitingSessions] = useState([]);
 
+  const [settings, setSettings] = useState(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,6 +42,8 @@ function HandleStudent(props) {
       setUser(localStorage.getItem('asci-user'));
       setCourseId(courseId = localStorage.getItem('asci-course'));
 
+      getSettings();
+
       polling = true;
       pollNumWaiting();
     }
@@ -53,6 +57,45 @@ function HandleStudent(props) {
     
     
   }, []);
+
+  function getSettings(){
+    /* Also get course settings */
+    let request2 = {};
+    request2.command = "getCourseSettings";
+    request2.user = localStorage.getItem('asci-user');
+    request2.courseId = localStorage.getItem('asci-course');
+    fetchSettings(request2, url);
+  }
+    
+
+    
+  const fetchSettings = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+        console.log("Data is: ", data);
+        let success = data.success;
+        if(success === "true"){
+
+          setSettings(data.settings);
+          
+        }
+        else{
+          console.log("HOME: Server returned error");
+          navigate(docRoot + "/error");
+        }
+      })
+      .catch((error) => {
+        console.log("HOME: There was an error:", error);
+        navigate(docRoot + "/error");
+        
+      });
+  }
 
 
 
@@ -221,7 +264,7 @@ function HandleStudent(props) {
     }
 
     const WaitTable = ({data}) => {
-      if(data.length > 0){
+      if(data.length > 0 && settings != null && settings.show_queue_list=="t"){
         return (
           <table>
             <WaitTableHeaderRow />

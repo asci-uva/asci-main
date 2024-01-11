@@ -32,11 +32,7 @@ class Config {
      */
     public static $DEBUG_MODE = true;
 
-    /**
-     * @var boolean if false, pull next waiting on queue as potential group members
-     * if true, use cosine similarity checking to pick potential group members
-     */
-    public static $SMART_GROUP_MATCHING = false;
+    
 
     public static $COSINE_SIMILARITY_SCRIPT = '/opt/asci-queue/asci-main/backend/src/asci/util/group_cosine.py';
 

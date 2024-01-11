@@ -4,7 +4,7 @@ services:
   db:
     build:
       dockerfile: ./backend/docker/postgres/Dockerfile
-    container_name: 'ASCI_db'
+    container_name: 'Apsql
     restart: on-failure
     ports:
       - 15432:5432

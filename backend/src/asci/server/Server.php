@@ -346,6 +346,31 @@ class Server
                 $this->setResponse($executor->clearQueue($user, $courseId));
                 
                 break;
+
+            case "createSelfGroup":
+                $courseId = $this->input["courseId"];
+                $sessionId = $this->input["sessionId"];
+                $location = $this->input["location"];
+
+                $this->setResponse($executor->createSelfGroup($user, $courseId, $sessionId, $location));
+                
+                break;
+
+            case "getSelfMadeGroup":
+                $courseId = $this->input["courseId"];
+                $sessionId = $this->input["sessionId"];
+
+                $this->setResponse($executor->getSelfMadeGroup($user, $courseId, $sessionId));
+                
+                break;
+
+            case "joinSelfMadeGroup":
+                $groupId = $this->input["groupId"];
+                $sessionId = $this->input["sessionId"];
+
+                $this->setResponse($executor->joinSelfMadeGroup($user, $sessionId, $groupId));
+                
+                break;
         
 
 

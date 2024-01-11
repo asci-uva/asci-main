@@ -40,7 +40,7 @@ class DBGroupMapping
 
     public function getMappingToSession($to_session, $status='active')
     {
-        $query = 'select * from group_mapping where to_session=$1 and status=$2';
+        $query = 'SELECT * from group_mapping where to_session=$1 and status=$2';
         $result = $this->db->query($query, array($to_session, $status));
 
         $sessions = [];

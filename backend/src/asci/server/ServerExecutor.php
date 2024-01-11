@@ -359,6 +359,10 @@ class ServerExecutor{
         //DB objects we will be using
         $dbsession = new \asci\server\database\DBSession($this->db);
         $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+        $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
+
+        /* Pull the settings for the course */
+        $settings = $dbcrsset->getCourseSettings($course_id);
 
         //0: Grab the user
         $user = $this->userStore->getUser($computing_id);
@@ -409,7 +413,7 @@ class ServerExecutor{
         $max_group_options = 8;
 
         /* TWO CASES: We want to group or we just take the top available (else clause) */
-        if(count($group_sessions) > $max_group_options && \asci\Config::$SMART_GROUP_MATCHING){
+        if(count($group_sessions) > $max_group_options && $settings->smart_grouping){
             
             /* initialize cosine simulator class */
             $cosSim = new \asci\util\CosineSim();
@@ -558,7 +562,7 @@ class ServerExecutor{
 
         /* Grab the TA session user */
         $sessUsr = $dbsessusr->getSessionUser($taUser->id, $session_id);
-        if($sessUsr==null) return err("No session user for this TA in this session");
+        if($sessUsr==null) return $this->err("No session user for this TA in this session");
 
         $dbsessusr->setInactive($sessUsr);
 
@@ -1078,7 +1082,7 @@ class ServerExecutor{
 
         $settings = $dbcrsset->getCourseSettings($course_id);
         
-        if($settings == null) return err("This course id does not have any associated course settings");
+        if($settings == null) return $this->err("This course id does not have any associated course settings");
 
         //Done. Set up the info to return
         $result = [];
@@ -1153,6 +1157,161 @@ class ServerExecutor{
 
         //-------------------------------------------
         //-------------------------------------------
+    }
+
+    public function createSelfGroup($computing_id, $course_id, $session_id, $location){
+
+        /* Grab the user first */
+        $user = $this->userStore->getUser($computing_id);
+
+        //Some DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessionuser = new \asci\server\database\DBSessionUser($this->db);
+        $dbselfmadegroup = new \asci\server\database\DBSelfMadeGroup($this->db);
+
+        /* First, grab the the session/sessionUser and course.  */
+        $session = $dbsession->getSessionForUser($user->id, $course_id);
+        $sessionUser = $dbsessionuser->getSessionUser($user->id, $session->id);
+
+        if($session == null) return $this->err("Error: No session for this user!");
+        if($sessionUser == null) return $this->err("Error: No session user was found!");
+
+        $result = [];
+
+
+
+        /* Make sure a self group doesn't already exist for this session */
+        $group = $dbselfmadegroup->getSelfMadeGroup($session->id);
+
+        if($group == null){
+            /* Good, no group yet, let's make one */
+            $newGroup = new \asci\data\SelfMadeGroup();
+            $newGroup->id = $session->id;
+            $newGroup->issue = $session->issue;
+            $newGroup->location = $location;
+            $newGroup->creationTime = "now()";
+            $newGroup->status = "active";
+
+            /* Add a mapping for this student! */
+            $studMap = new \asci\data\SelfGroupMapping();
+            $studMap->session_id = $session->id;
+            $studMap->group_id = $session->id;
+            $studMap->status = 'active';
+
+            if(!$dbselfmadegroup->insert($newGroup)) return $this->err("Could not insert new self group");
+            if(!$dbselfmadegroup->insertMapping($studMap)) return $this->err("Could not insert new self group mapping");
+
+            $result["group"] = $newGroup;
+
+        } 
+        else if($group->status == 'inactive'){
+            /* Create the group by deactivating old mappings and reactivating the old group */
+            $dbselfmadegroup->clearGroupMembers($group->id);
+
+            $group->status='active';
+            
+
+            /* Add a mapping for this student! */
+            $studMap = new \asci\data\SelfGroupMapping();
+            $studMap->session_id = $session->id;
+            $studMap->group_id = $group->id;
+            $studMap->status = 'active';
+
+            if(!$dbselfmadegroup->update($group)) return $this->err("Could not update group mappings");
+            if(!$dbselfmadegroup->insertMapping($studMap)) return $this->err("Could not insert new self group mapping");
+
+            $result["group"] = $group;
+        }
+        else{
+            /* Group already exists and is active so do nothing */
+            /* Possible bug if mapping doesn't exist either?? */
+            $result["group"] = $group;
+        }
+
+        $result["success"] = "true";
+        return $result;
+
+
+    }
+
+    /* Gets the self made group this user / session are linked to if exists */
+    function getSelfMadeGroup($computing_id, $course_id, $session_id){
+
+        /* Grab the user first */
+        $user = $this->userStore->getUser($computing_id);
+
+        //Some DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbselfmadegroup = new \asci\server\database\DBSelfMadeGroup($this->db);
+
+        /* First, grab the the session/sessionUser and course.  */
+        $session = $dbsession->getSessionForUser($user->id, $course_id);
+
+        if($session == null) return $this->err("Error: No session for this user!");
+        if($session->id != $session_id) return $this->err("Session ids do not match!");
+
+        $result = [];
+
+        /* Try to find a group if there is one by the session id */
+        $group = $dbselfmadegroup->getSelfMadeGroupByMember($session->id);
+
+        /* If there is a group, get all the members */
+        if($group != null){
+            $members = $dbselfmadegroup->getSelfMadeGroupMembers($group->id);
+
+            /* Only send back the first and last name of the members */
+            foreach ($members as $member){
+                $member->id = -1;
+                $member->computing_id='n/a';
+            }
+
+            $result["members"] = $members;
+        }
+        else{
+            $result["members"] = null;
+        }
+
+        /* Let's also get all available groups to join! */
+        $availableGroups = $dbselfmadegroup->getAvailableGroups($course_id);
+
+        $result["success"] = "true";
+        $result["group"] = $group;
+        $result["availableGroups"] = $availableGroups;
+        return $result;
+    }
+
+    /* The given student wants to join the group with the given group_id */
+    function joinSelfMadeGroup($computing_id, $session_id, $group_id){
+
+        /* Grab the user first */
+        $user = $this->userStore->getUser($computing_id);
+
+        /* Some DB objects we will be using */
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbselfmadegroup = new \asci\server\database\DBSelfMadeGroup($this->db);
+
+        /* Pull the two sessions */
+        $usrSess = $dbsession->getSession($session_id);
+        $grpSess = $dbsession->getSession($group_id);
+        $grp = $dbselfmadegroup->getSelfMadeGroup($group_id);
+
+        /* Error checking */
+        if($usrSess == null) return $this->err("No session for given session id");
+        if($grpSess == null) return $this->err("No session for given group id");
+        if($grp == null) return $this->err("No group for given group id");
+        if($grp->status == 'inactive') return $this->err("Cannot join inactive group");
+        if($usrSess->course_id != $grpSess->course_id) return $this->err("Cannot join self made group for different course.");
+
+
+        $result = [];
+
+        /* Try to find a group if there is one by the session id */
+        $join = $dbselfmadegroup->joinSelfMadeGroup($session_id, $group_id);
+
+    
+        $result["success"] = "true";
+        
+        return $result;
     }
 
     /*

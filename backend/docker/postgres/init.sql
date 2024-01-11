@@ -19,6 +19,11 @@ CREATE TYPE session_user_status AS ENUM (
   'inactive'
 );
 
+CREATE TYPE self_group_status AS ENUM (
+  'active',
+  'inactive'
+);
+
 CREATE TYPE group_mapping_status AS ENUM (
   'active',
   'inactive'
@@ -67,11 +72,28 @@ CREATE TABLE sessions (
   exit_time timestamp
 );
 
+  SELECT U.* FROM (session_users S JOIN users U ON S.user_id = U.id) WHERE S.session_id IN (SELECT from_session FROM self_group_mapping WHERE group_id=$id);
+
 CREATE TABLE group_mapping (
   from_session INT,
   to_session INT,
   status group_mapping_status
 );
+
+CREATE TABLE self_made_groups (
+  id SERIAL PRIMARY KEY,
+  issue TEXT,
+  location TEXT,
+  creationTime timestamp DEFAULT (now()),
+  status self_group_status DEFAULT 'active'
+);
+
+CREATE TABLE self_group_mapping (
+  session_id INT,
+  group_id INT,
+  status self_group_status DEFAULT 'active'
+);
+
 
 CREATE TABLE survey (
   session_id INT,
@@ -85,7 +107,7 @@ CREATE TABLE survey (
 );
 
 CREATE TABLE course_settings (
-  course_id INT,
+  course_id INT PRIMARY KEY,
   show_queue_list BOOL DEFAULT (true),
   grouping_enabled BOOL DEFAULT (true),
   smart_grouping BOOL DEFAULT (true),
@@ -127,6 +149,12 @@ ALTER TABLE survey ADD FOREIGN KEY (user_id) REFERENCES users (id);
 ALTER TABLE group_mapping ADD FOREIGN KEY (from_session) REFERENCES sessions (id);
 
 ALTER TABLE group_mapping ADD FOREIGN KEY (to_session) REFERENCES sessions (id);
+
+ALTER TABLE self_group_mapping ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
+
+ALTER TABLE self_group_mapping ADD FOREIGN KEY (group_id) REFERENCES self_made_groups (id);
+
+ALTER TABLE self_made_groups ADD FOREIGN KEY (id) REFERENCES sessions (id);
 
 
 -- insert some dummy data
