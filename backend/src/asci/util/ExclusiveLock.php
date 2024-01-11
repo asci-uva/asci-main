@@ -42,7 +42,7 @@ class ExclusiveLock
     function __construct( $key ) 
     {
         
-        $this->dir = "./tmp/lock/";
+        $this->dir = \asci\Config::$LOCKING_FILE_DIR;
         $this->key = $this->dir . $key;
 
         $filename = $this->key . ".lockfile";

@@ -145,8 +145,8 @@ class Server
         /* ------------------------------------------------------------------ */
         $course_id = $this->input["courseId"] ?? null;
         $lock = null;
-        $attempt_max = 10; //try to get the lock at most 10 times.
-        if($course_id != null){
+        $attempt_max = 40; //try to get the lock at most 10 times.
+        if($course_id != null && \asci\Config::$LOCKING_ENABLED){
             /* acquire the lock */
             $lock_key = "course-" . $course_id;
             $lock = new ExclusiveLock($lock_key);
@@ -409,7 +409,7 @@ class Server
         /* Release the lock if we had one... */
         /* ------------------------------------------------------------------ */
         
-        if($lock != null){
+        if($lock != null && \asci\Config::$LOCKING_ENABLED){
             $lock->unlock();
         }
 
