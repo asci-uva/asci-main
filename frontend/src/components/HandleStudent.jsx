@@ -250,14 +250,14 @@ function HandleStudent(props) {
 
 
     const WaitTableHeaderRow = () => {
-      return <tr><th>Pos</th><th>Subject</th><th>Issue</th><th>Take</th></tr>;
+      return <tr><th>Pos</th><th>Subject</th><th>Issue</th><th>Location</th><th>Take</th></tr>;
     }
 
 
     const WaitTableRow = ({data}) => {
       return Object.keys(data).map(k =>
         <tr key={k}>
-          <td>{k}</td><td>{data[k].issue_subject}</td><td>{data[k].issue}</td>
+          <td>{k}</td><td>{data[k].issue_subject}</td><td>{data[k].issue}</td><td>{data[k].location}</td>
           <td><button value={k} onClick={handleTake}>Take</button></td>
         </tr>
       );
