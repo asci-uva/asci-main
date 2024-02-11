@@ -12,6 +12,7 @@ function HandleStudent(props) {
   //variables for managing polling the server
   let polling = false;
   let timeoutId = 0;
+  let pollTime = 3000;
   //----------------------
 
   let url = props.url; 
@@ -132,7 +133,7 @@ function HandleStudent(props) {
                         );
 
           if(polling == true){
-              timeoutId = setTimeout(pollNumWaiting, 30000);
+              timeoutId = setTimeout(pollNumWaiting, pollTime);
           }
         }
         else{
