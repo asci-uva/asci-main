@@ -1284,4 +1284,20 @@ class ServerExecutor{
         return $result;
     }
     
+    public function updateSubmissionHandler($course_id, $filePath) {
+        $result = [];
+
+        $assignment_names = (new \asci\server\database\DBSynchronization($this->db))->updateSubmissionByCourseId($course_id, $filePath);
+
+        if($assignment_names){
+            $result["assignment_names"] = $assignment_names;
+            $result["success"] = "true";
+        }
+        else{
+            $result["assignment_names"] = [];
+            $result["success"] = "false";
+        }
+        return $result;
+    }
+
 }

@@ -404,6 +404,12 @@ class Server
                 $course_id = $this->input["course_id"];
                 $this->setResponse($executor->getAssignmentsHandler($course_id));
                 break;
+
+            case "updateSubmissionByCourse":
+                $course_id = $this->input["course_id"];
+                $csv_file_path = $this->input["csvFilePath"];
+                $this->setResponse($executor->updateSubmissionHandler($course_id, $csv_file_path));
+                break;
                 
             default:
                 $this->setResponse(["response" => "Hello world!"]);
