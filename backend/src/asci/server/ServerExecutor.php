@@ -816,7 +816,7 @@ class ServerExecutor{
             $result["error"] = "ERROR: This user not associated with this course";
             return $result;
         }
-        else if($userCourse->getRole() != "ta"){
+        else if($userCourse->getRole() != "ta" && $userCourse->getRole() != "instructor"){
             $result["success"] = "false";
             $result["error"] = "ERROR: This user not a ta for this course";
             return $result;
