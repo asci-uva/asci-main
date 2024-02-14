@@ -82,29 +82,15 @@ function Home(props) {
 
   return (
     <>
-      <div>
-        <h2>Welcome {user}</h2>
+      <div className="question">
+        <h3>Welcome {user}</h3>
+        <h4>The courses you instruct are below. Click on the edit button to change the settings for that course</h4>
         {Object.keys(courses).map((courseId) => {
           if (courseId !== "0") {
             return (
-              <div
-                key={courseId}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  marginBottom: "10px",
-                }}
-              >
-                <span
-                  style={{ marginRight: "10px", cursor: "pointer" }}
-                  onClick={() => handleNavigateToCoursePanel(courseId)}
-                >
+              <div key={courseId}>
                   {courses[courseId]}
-                </span>
-                <button
-                  style={{ padding: "0 10px" }}
-                  onClick={() => handleEditCourse(courseId)}
-                >
+                <button onClick={() => handleEditCourse(courseId)}>
                   Edit
                 </button>
               </div>

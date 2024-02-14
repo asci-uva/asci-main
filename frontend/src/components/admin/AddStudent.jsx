@@ -48,10 +48,10 @@ function AddStudent(props) {
   };
 
   return (
-    <div>
+    <div className="question">
       <h2>Manually Add Student/TA</h2>
 
-      <div>
+      
         <label>First Name:</label>
         <input
           type="text"
@@ -59,9 +59,9 @@ function AddStudent(props) {
           onChange={(e) => setFname(e.target.value)}
           required
         />
-      </div>
+      
 
-      <div>
+      
         <label>Last Name:</label>
         <input
           type="text"
@@ -69,9 +69,9 @@ function AddStudent(props) {
           onChange={(e) => setLname(e.target.value)}
           required
         />
-      </div>
+      
 
-      <div>
+      
         <label>Prefer Name:</label>
         <input
           type="text"
@@ -79,9 +79,9 @@ function AddStudent(props) {
           onChange={(e) => setPname(e.target.value)}
           required
         />
-      </div>
+      
 
-      <div>
+      
         <label>Computing ID:</label>
         <input
           type="text"
@@ -89,15 +89,15 @@ function AddStudent(props) {
           onChange={(e) => setComputingId(e.target.value)}
           required
         />
-      </div>
+      
 
-      <div>
+      
         <label>Role:</label>
         <select value={role} onChange={(e) => setRole(e.target.value)}>
           <option value="student">Student</option>
           <option value="ta">TA</option>
         </select>
-      </div>
+      
 
       <button onClick={handleAdd}>Add</button>
     </div>

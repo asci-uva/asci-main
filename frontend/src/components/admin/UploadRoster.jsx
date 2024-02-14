@@ -83,7 +83,7 @@ function UploadRoster(props) {
   };
 
   return (
-    <div>
+    <div className="question">
       <h2>Upload Roster</h2>
       <input type="file" onChange={handleFileChange} accept=".csv" />
       <button onClick={uploadRoster}>Upload</button>

@@ -58,7 +58,7 @@ function EditCourse(props) {
 
   return (
     <>
-      <div>
+      <div className="question">
         <h2>Edit Course</h2>
         <input
           value={mnemonic}
@@ -82,8 +82,12 @@ function EditCourse(props) {
         />
         <button onClick={handleSubmit}>Update Course</button>
       </div>
+      
+
       <UploadRoster course_id={courseId} {...props} />
       <AddStudent course_id={courseId} {...props} />
+      
+
     </>
   );
 }

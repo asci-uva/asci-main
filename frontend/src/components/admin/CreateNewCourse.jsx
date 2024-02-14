@@ -52,10 +52,10 @@ function CreateNewCourse(props) {
   };
 
   return (
-    <div>
+    <div className="question">
       <h2>Create New Course</h2>
 
-      <div>
+
         <label>Mnemonic:</label>
         <input
           type="text"
@@ -63,8 +63,7 @@ function CreateNewCourse(props) {
           onChange={(e) => setMnemonic(e.target.value)}
           required
         />
-      </div>
-      <div>
+
         <label>Number:</label>
         <input
           type="text"
@@ -72,8 +71,7 @@ function CreateNewCourse(props) {
           onChange={(e) => setNumber(e.target.value)}
           required
         />
-      </div>
-      <div>
+
         <label>Name:</label>
         <input
           type="text"
@@ -81,8 +79,7 @@ function CreateNewCourse(props) {
           onChange={(e) => setName(e.target.value)}
           required
         />
-      </div>
-      <div>
+
         <label>Semester:</label>
         <input
           type="text"
@@ -90,7 +87,7 @@ function CreateNewCourse(props) {
           onChange={(e) => setSemester(e.target.value)}
           required
         />
-      </div>
+
       <button onClick={handleCreateCourse}>Create Course</button>
     </div>
   );
