@@ -84,15 +84,24 @@ function Home(props) {
     <>
       <div className="question">
         <h3>Welcome {user}</h3>
-        <h4>The courses you instruct are below. Click on the edit button to change the settings for that course</h4>
+        <h4>
+          The courses you instruct are below. Click on the edit button to change
+          the settings for that course
+        </h4>
         {Object.keys(courses).map((courseId) => {
           if (courseId !== "0") {
             return (
               <div key={courseId}>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigateToCoursePanel(courseId);
+                  }}
+                >
                   {courses[courseId]}
-                <button onClick={() => handleEditCourse(courseId)}>
-                  Edit
-                </button>
+                </a>
+                <button onClick={() => handleEditCourse(courseId)}>Edit</button>
               </div>
             );
           }

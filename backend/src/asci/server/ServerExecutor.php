@@ -1283,6 +1283,67 @@ class ServerExecutor{
 
         return $result;
     }
+
+    public function runGradescopeSynchronization($email, $password, $courseNumber)
+    {
+        $result = [];
+
+        $relativePathToPythonScript = \asci\Config::$GRADESCOPE_SYNC_SCRIPT; 
+        $scriptPath = realpath(dirname(__FILE__) . '/' . $relativePathToPythonScript);
+        if (!file_exists($scriptPath)) {
+            $this->logger->error("Python script does not exist at $scriptPath");
+            return ["success" => false, "message" => "Python script not found"];
+        }
+
+        $chromedriverPath = \asci\Config::$CHROME_DRIVER_PATH; 
+        
+        // Construct an absolute path for the download directory
+        $downloadPath = realpath(dirname(__FILE__)) . '/' . \asci\Config::$GRADESCOPE_DOWNLOAD_PATH;
+
+
+        $pythonPath = '/usr/bin/python3';
+
+        // Escaping arguments to ensure safe command execution
+        $cmd = sprintf(
+            'python3 %s %s %s %s %s %s 2>&1',      
+            escapeshellarg($scriptPath),
+            escapeshellarg($email),
+            escapeshellarg($password),
+            escapeshellarg($downloadPath),
+            escapeshellarg($chromedriverPath),
+            escapeshellarg($courseNumber)
+        );
+        
+        putenv("PATH=/Users/zhaohanzhang/.pyenv/shims:" . getenv("PATH"));
+
+        // Execute the Python script with the provided arguments
+        exec($cmd, $output, $returnVar);
+        echo "Command: " . $cmd . PHP_EOL; // Shows the exact command being run
+        
+        if ($returnVar === 0) {
+            // Success
+            echo "Output:" . PHP_EOL;
+            foreach ($output as $line) {
+                echo $line . PHP_EOL;
+            }
+        } else {
+            // Error
+            echo "Error executing Python script. Output:" . PHP_EOL;
+            foreach ($output as $line) {
+                echo $line . PHP_EOL; // This now includes stderr
+            }
+        }
+
+
+        // Handle the output and return value here...
+        if($output && $returnVar){
+            $result["success"] = "true";
+        }else{
+            $result["success"] = null;
+        }
+        return $result;
+    }
+
     
     public function updateSubmissionHandler($course_id, $filePath) {
         $result = [];

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import UploadRoster from "./UploadRoster";
 import AddStudent from "./AddStudent";
+import GradescopeSync from "./GradescopeSync";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -82,12 +83,10 @@ function EditCourse(props) {
         />
         <button onClick={handleSubmit}>Update Course</button>
       </div>
-      
 
       <UploadRoster course_id={courseId} {...props} />
       <AddStudent course_id={courseId} {...props} />
-      
-
+      <GradescopeSync course_id={courseId} {...props} />
     </>
   );
 }

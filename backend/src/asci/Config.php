@@ -40,6 +40,13 @@ class Config {
 
     public static $COSINE_SIMILARITY_SCRIPT = '/opt/asci-queue/asci-main/backend/src/asci/util/group_cosine.py';
 
+    public static $GRADESCOPE_SYNC_SCRIPT = '../util/data_syn/gradescope_download.py';
+
+    public static $CHROME_DRIVER_PATH = '/opt/chromedriver/chromedriver-linux64/chromedriver';
+
+    public static $GRADESCOPE_DOWNLOAD_PATH = 'database/data';
+
+
     /**
      * Full database connection information
      *
