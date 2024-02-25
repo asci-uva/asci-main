@@ -42,7 +42,9 @@ class Config {
 
     public static $GRADESCOPE_SYNC_SCRIPT = '../util/data_syn/gradescope_download.py';
 
-    public static $CHROME_DRIVER_PATH = '/opt/chromedriver/chromedriver-linux64/chromedriver';
+    public static $CHROME_DRIVER_PATH = '/usr/bin/chromedriver';
+
+    public static $CHROMIUM_PATH = "/usr/bin/chromium";
 
     public static $GRADESCOPE_DOWNLOAD_PATH = 'database/data';
 

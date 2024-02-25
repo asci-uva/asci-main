@@ -24,32 +24,10 @@ class DBSynchronization
         $this->logger->pushHandler($log);
     }
 
-    public function updateSubmissionByCourseID($course_id, $filePath){
-        // $filePath = '/Users/zhaohanzhang/Desktop/research_docs/asci-main/gradescope/CS_3120_Fall_2023_grades.csv';
-
-        // // Open the file for reading
-        // ini_set('memory_limit', '512M'); // Increase PHP memory limit to 512MB
-
-        // $handle = fopen($filePath, "r");
-
-        // if ($handle !== FALSE) {
-        //     // Optionally, skip the header line if your CSV file has one
-        //     // $header = fgetcsv($handle);
-
-        //     while (($line = fgetcsv($handle, 1000, ",")) !== FALSE) {
-        //         // Process each line here
-        //         // For example, $line is an array of columns for the current row
-
-        //         // Your database insertion logic here
-        //     }
-        //     fclose($handle);
-        // } else {
-        //     echo "Cannot open file or file does not exist.";
-        // }
-        $filename = 'CS_3120_Fall_2023_grades.csv';
+    public function updateGradescopeAssignmentSubmissionByCourseId($course_id, $download_file_name){
+        $filename = $download_file_name;
         $filePath = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "{$filename}";
 
-        // $filePath = '/Users/zhaohanzhang/Desktop/research_docs/asci-main/gradescope/CS_3120_Fall_2023_grades.csv';
         if (file_exists($filePath)) {
             echo "File exists.\n";
         } else {

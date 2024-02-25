@@ -1284,71 +1284,79 @@ class ServerExecutor{
         return $result;
     }
 
-    public function runGradescopeSynchronization($email, $password, $courseNumber)
+    public function runGradescopeDataDownload($email, $password, $courseNumber)
     {
         $result = [];
-
+        // check the gradescope_download python script path
         $relativePathToPythonScript = \asci\Config::$GRADESCOPE_SYNC_SCRIPT; 
         $scriptPath = realpath(dirname(__FILE__) . '/' . $relativePathToPythonScript);
         if (!file_exists($scriptPath)) {
             $this->logger->error("Python script does not exist at $scriptPath");
-            return ["success" => false, "message" => "Python script not found"];
+            $result["success"]="false";
+            $result["message"]="Download Gradescope data Python script not found";
+            return $result;
         }
 
+        // setup the chromium and chrome-driver path in Docker
         $chromedriverPath = \asci\Config::$CHROME_DRIVER_PATH; 
+        $chromiumPath = \asci\Config::$CHROMIUM_PATH;
         
         // Construct an absolute path for the download directory
         $downloadPath = realpath(dirname(__FILE__)) . '/' . \asci\Config::$GRADESCOPE_DOWNLOAD_PATH;
 
-
-        $pythonPath = '/usr/bin/python3';
-
         // Escaping arguments to ensure safe command execution
         $cmd = sprintf(
-            'python3 %s %s %s %s %s %s 2>&1',      
+            'python3 %s %s %s %s %s %s %s 2>&1',      
             escapeshellarg($scriptPath),
             escapeshellarg($email),
             escapeshellarg($password),
             escapeshellarg($downloadPath),
             escapeshellarg($chromedriverPath),
+            escapeshellarg($chromiumPath),
             escapeshellarg($courseNumber)
         );
-        
-        putenv("PATH=/Users/zhaohanzhang/.pyenv/shims:" . getenv("PATH"));
 
         // Execute the Python script with the provided arguments
         exec($cmd, $output, $returnVar);
-        echo "Command: " . $cmd . PHP_EOL; // Shows the exact command being run
-        
-        if ($returnVar === 0) {
-            // Success
-            echo "Output:" . PHP_EOL;
-            foreach ($output as $line) {
-                echo $line . PHP_EOL;
+
+        $downloadedFileName = '';
+        foreach ($output as $line) {
+            // Look for the line that contains the filename
+            if (strpos($line, "Latest downloaded file:") !== false) {
+                // Extract the filename from the line
+                $downloadedFileName = trim(str_replace("Latest downloaded file:", "", $line));
+                break;
             }
+        }
+
+        // if the download failed, return success as null. Else return success as true
+        if ($returnVar !== 0) {
+            // Handle the error case
+            // echo "Error: Download Gradescope data Python script returned an error.\n";
+            // foreach ($output as $line) {
+            //     echo $line . "\n";
+            // }
+            $result["success"]="false";
+            $result["message"]="Download Gradescope data Python script returned an error.";
+            return $result;
         } else {
-            // Error
-            echo "Error executing Python script. Output:" . PHP_EOL;
-            foreach ($output as $line) {
-                echo $line . PHP_EOL; // This now includes stderr
-            }
+            // Handle the success case
+            // echo "Success: Download Gradescope data Python script executed without errors.\n";
+            // foreach ($output as $line) {
+            //     echo $line . "\n";
+            // }
+            $result["success"]="true";
+            $result["message"]="Python script run and successfully download Gradescope data.";
+            $result["filename"] = $downloadedFileName;
+            return $result;
         }
-
-
-        // Handle the output and return value here...
-        if($output && $returnVar){
-            $result["success"] = "true";
-        }else{
-            $result["success"] = null;
-        }
-        return $result;
     }
 
     
-    public function updateSubmissionHandler($course_id, $filePath) {
+    public function updateGradescopeDataByCourseHandler($course_id, $download_file_name) {
         $result = [];
 
-        $assignment_names = (new \asci\server\database\DBSynchronization($this->db))->updateSubmissionByCourseId($course_id, $filePath);
+        $assignment_names = (new \asci\server\database\DBSynchronization($this->db))->updateGradescopeAssignmentSubmissionByCourseId($course_id, $download_file_name);
 
         if($assignment_names){
             $result["assignment_names"] = $assignment_names;

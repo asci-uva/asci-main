@@ -405,19 +405,18 @@ class Server
                 $this->setResponse($executor->getAssignmentsHandler($course_id));
                 break;
 
-            case "synchronizeGradescopeData":
+            case "downloadGradescopeData":
                 $gradescope_username = $this->input["email"];
                 $gradescope_password = $this->input["password"];
                 $gradescope_courseNumber = $this->input["courseNumber"];
-                $course_id = $this->input["course_id"];
-                $this->setResponse($executor->runGradescopeSynchronization($gradescope_username, $gradescope_password, $gradescope_courseNumber));
+                $this->setResponse($executor->runGradescopeDataDownload($gradescope_username, $gradescope_password, $gradescope_courseNumber));
                 break;
             
 
-            case "updateSubmissionByCourse":
+            case "updateGradescopeDataByCourse":
                 $course_id = $this->input["course_id"];
-                $csv_file_path = $this->input["csvFilePath"];
-                $this->setResponse($executor->updateSubmissionHandler($course_id, $csv_file_path));
+                $download_file_name = $this->input["download_file_name"];
+                $this->setResponse($executor->updateGradescopeDataByCourseHandler($course_id, $download_file_name));
                 break;
                 
             default:

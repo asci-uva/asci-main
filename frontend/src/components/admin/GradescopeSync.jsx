@@ -12,13 +12,12 @@ function GradescopeSync(props) {
   const navigate = useNavigate();
 
   const handleSynchronize = () => {
-    // const pythonEndpoint = "http://127.0.0.1:5000/run-python-script";
     const payload = {
       email: username,
       password: passcode,
       courseNumber: courseNumber,
       course_id: courseId,
-      command: "synchronizeGradescopeData",
+      command: "downloadGradescopeData",
       user: localStorage.getItem("asci-user"),
     };
 
@@ -34,41 +33,41 @@ function GradescopeSync(props) {
           // If the HTTP status code is not 200-299, throw an error
           throw new Error("Network response was not ok");
         }
-        console.log(response);
-        return response.json(); // Parse JSON response body
+        return response.json(); // Parse the JSON of the response
       })
       .then((data) => {
-        if (data.success) {
-          console.log("Python script execution success");
-
+        if (data.success === "true") {
+          toast.success(data.message);
+          console.log(data.message);
+          console.log(data.filename);
           // After the Python script has successfully downloaded the CSV, trigger the PHP function to parse the download csv and store the data to the db
-          // fetch(props.url, {
-          //   method: "POST",
-          //   headers: {
-          //     "Content-Type": "application/json",
-          //   },
-          //   body: JSON.stringify({
-          //     command: "updateSubmissionByCourse",
-          //     user: localStorage.getItem("asci-user"),
-          //     course_id: courseNumber,
-          //     // pass the path of the CSV file that stored locally
-          //     csvFilePath:
-          //       "/Users/zhaohanzhang/Desktop/research_docs/asci-main/gradescope/CS_3120_Fall_2023_grades.csv",
-          //   }),
-          // })
-          //   .then((response) => response.json())
-          //   .then((data) => {
-          //     console.log("PHP backend function execution result:", data);
-          //   })
-          //   .catch((error) => {
-          //     console.error("Error calling PHP backend:", error);
-          //   });
+          fetch(props.url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              command: "updateGradescopeDataByCourse",
+              user: localStorage.getItem("asci-user"),
+              course_id: courseNumber,
+              download_file_name: data.filename,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("PHP backend function execution result:", data);
+            })
+            .catch((error) => {
+              console.error("Error calling PHP backend:", error);
+            });
         } else {
-          console.log("Python script execution failed:", data.message);
+          console.log(data.message);
+          toast.error(data.message || "Failed to download Gradescope data.");
         }
       })
       .catch((error) => {
         console.error("Error during synchronization:", error);
+        toast.error("Error during synchronization.");
       });
   };
 
