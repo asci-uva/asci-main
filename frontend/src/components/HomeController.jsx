@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import { Home, Login, Error, Navigation, Logout } from "./home";
+import { Home, Login, Error, Navigation, Logout, Cards } from "./home";
 
 const HomeController = (props) => {
   return (
@@ -15,6 +15,10 @@ const HomeController = (props) => {
         <Route path="error" element={<Error {...props} />} />
         <Route path="logout" element={<Logout {...props} />} />
       </Routes>
+      <Cards
+        documentRoot={props.documentRoot}
+        debugMode={props.debugMode}
+      />
     </>
   );
 };

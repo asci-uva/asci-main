@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 function Navigation(props) {
   let docRoot = props.documentRoot;
   let debugMode = props.debugMode;
-  let root = "/ohq/ohq";
+  let root = "/asci";
 
   if (debugMode) {
     return (

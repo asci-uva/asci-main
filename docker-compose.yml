@@ -4,6 +4,7 @@ services:
   db:
     build:
       dockerfile: ./backend/docker/postgres/Dockerfile
+      context: ./
     container_name: 'ASCI_db'
     restart: on-failure
     ports:

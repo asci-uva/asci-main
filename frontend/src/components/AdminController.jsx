@@ -17,7 +17,7 @@ import { useUser } from "./context/UserContext";
 
 const AdminController = (props) => {
   // const { user, login } = useUser();
-  const root = "/ohq/ohq";
+  const root = "/asci";
   const navigate = useNavigate();
   // If the user is not logged in, redirect to the login page
 
