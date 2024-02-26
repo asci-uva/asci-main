@@ -264,6 +264,11 @@ class ServerExecutor{
 
         $result = [];
 
+        //Grab the settings for this course
+        $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
+        $settings = $dbcrsset->getCourseSettings($course_id);
+        if($settings == null) return $this->err("This course id does not have any associated course settings");
+
         //2: Grab the next student that is waiting
         $session = $dbsession->getLongestWaitingSession($user->getId(), $course_id);
 
@@ -274,7 +279,7 @@ class ServerExecutor{
         }
         //Check if the student wants to be in a group
         $groupOption = $session->getGroupOption();
-        if($groupOption == "true"){
+        if($groupOption == "true" && $settings->grouping_enabled=="t"){
             $result["group_option"] = "true";
         }
         else{
@@ -299,7 +304,7 @@ class ServerExecutor{
         $dbsessusr->insert($TASessUsr);
 
         //Ok, Let's update the session itself
-        $dbsession->fulfillSession($session->getId(), $session->getGroupOption());
+        $dbsession->fulfillSession($session->getId(), $result["group_option"]);
 
         $result["success"] = "true";
         $result["error"] = "none";
@@ -320,6 +325,11 @@ class ServerExecutor{
 
         $result = [];
 
+        //Grab the settings for this course
+        $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
+        $settings = $dbcrsset->getCourseSettings($course_id);
+        if($settings == null) return $this->err("This course id does not have any associated course settings");
+
         //2: Grab the session
         $session = $dbsession->getSession($session_id);
 
@@ -335,7 +345,7 @@ class ServerExecutor{
         
         //Check if the student wants to be in a group
         $groupOption = $session->getGroupOption();
-        if($groupOption == "true"){
+        if($groupOption == "true" && $settings->grouping_enabled == "t"){
             $result["group_option"] = "true";
         }
         else{
@@ -360,7 +370,7 @@ class ServerExecutor{
         $dbsessusr->insert($TASessUsr);
 
         //Ok, Let's update the session itself
-        $dbsession->fulfillSession($session->getId(), $session->getGroupOption());
+        $dbsession->fulfillSession($session->getId(), $result["group_option"]);
 
         $result["success"] = "true";
         $result["error"] = "none";
@@ -549,6 +559,37 @@ class ServerExecutor{
                 }
             }
         }
+
+        $result = [];
+        $result["success"] = "true";
+        return $result;
+
+    }
+
+    public function cancelGroup($ta_computing_id, $course_id, $session_id){
+
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+
+        /* Grab the TA */
+        $taUser = $this->userStore->getUser($ta_computing_id);
+
+        /* First, set the main session to in_progress (easy part) */
+        $mainSession = $dbsession->getSession($session_id);
+
+        if($mainSession == null) return $this->err("No session exists for given sessionId");
+
+        //set session back to waiting
+        $mainSession->status = "waiting";
+        $result = $dbsession->update($mainSession);
+        if(!$result) return $this->err("failure to update session to in_progress state");
+
+        /* Grab the TA session user */
+        $sessUsr = $dbsessusr->getSessionUser($taUser->id, $session_id);
+        if($sessUsr==null) return err("No session user for this TA in this session");
+
+        $dbsessusr->setInactive($sessUsr);
 
         $result = [];
         $result["success"] = "true";
@@ -1054,6 +1095,24 @@ class ServerExecutor{
         $result["success"] = "true";
         $result["session"] = $session->toArray();
         $result["other"] = $other->toArray();
+        $result["error"] = "none";
+
+        return $result;
+    }
+
+    public function getCourseSettings($course_id){
+
+        /* Database Object we are going to need */
+        $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
+
+        $settings = $dbcrsset->getCourseSettings($course_id);
+        
+        if($settings == null) return $this->err("This course id does not have any associated course settings");
+
+        //Done. Set up the info to return
+        $result = [];
+        $result["success"] = "true";
+        $result["settings"] = $settings->toArray();
         $result["error"] = "none";
 
         return $result;

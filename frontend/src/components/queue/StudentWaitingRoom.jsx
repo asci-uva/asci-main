@@ -14,6 +14,7 @@ function StudentWaitingRoom(props) {
 	//variables for managing polling the server
 	let polling = false;
 	let timeoutId = 0;
+  let pollTime = 3000;
 
 	let user = null;
 	let courseId = null;
@@ -90,6 +91,7 @@ function StudentWaitingRoom(props) {
     // e.preventDefault();
 
     let request = {};
+    request.user = user;
     request.command = "getTip";
     fetchTip(request,url);
   }
@@ -163,7 +165,7 @@ function StudentWaitingRoom(props) {
 
             if(polling == true){
             	console.log("WR: Setting timeout for next poll");
-            	timeoutId = setTimeout(poll, 10000);
+            	timeoutId = setTimeout(poll, pollTime);
         	  }
           }
 

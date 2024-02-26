@@ -12,6 +12,7 @@ function HandleStudent(props) {
   //variables for managing polling the server
   let polling = false;
   let timeoutId = 0;
+  let pollTime = 3000;
   //----------------------
 
   let url = props.url; 
@@ -21,6 +22,8 @@ function HandleStudent(props) {
   const [numWaiting, setNumWaiting] = useState("Loading...");
   const [courseName, setCourseName] = useState("Loading...");
   const [waitingSessions, setWaitingSessions] = useState([]);
+
+  const [settings, setSettings] = useState(null);
 
   const navigate = useNavigate();
 
@@ -40,6 +43,8 @@ function HandleStudent(props) {
       setUser(localStorage.getItem('asci-user'));
       setCourseId(courseId = localStorage.getItem('asci-course'));
 
+      getSettings();
+
       polling = true;
       pollNumWaiting();
     }
@@ -53,6 +58,45 @@ function HandleStudent(props) {
     
     
   }, []);
+
+  function getSettings(){
+    /* Also get course settings */
+    let request2 = {};
+    request2.command = "getCourseSettings";
+    request2.user = localStorage.getItem('asci-user');
+    request2.courseId = localStorage.getItem('asci-course');
+    fetchSettings(request2, url);
+  }
+    
+
+    
+  const fetchSettings = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+        console.log("Data is: ", data);
+        let success = data.success;
+        if(success === "true"){
+
+          setSettings(data.settings);
+          
+        }
+        else{
+          console.log("HOME: Server returned error");
+          navigate(docRoot + "/error");
+        }
+      })
+      .catch((error) => {
+        console.log("HOME: There was an error:", error);
+        navigate(docRoot + "/error");
+        
+      });
+  }
 
 
 
@@ -89,7 +133,7 @@ function HandleStudent(props) {
                         );
 
           if(polling == true){
-              timeoutId = setTimeout(pollNumWaiting, 30000);
+              timeoutId = setTimeout(pollNumWaiting, pollTime);
           }
         }
         else{
@@ -207,21 +251,21 @@ function HandleStudent(props) {
 
 
     const WaitTableHeaderRow = () => {
-      return <tr><th>Pos</th><th>Subject</th><th>Issue</th><th>Take</th></tr>;
+      return <tr><th>Pos</th><th>Subject</th><th>Issue</th><th>Location</th><th>Take</th></tr>;
     }
 
 
     const WaitTableRow = ({data}) => {
       return Object.keys(data).map(k =>
         <tr key={k}>
-          <td>{k}</td><td>{data[k].issue_subject}</td><td>{data[k].issue}</td>
+          <td>{k}</td><td>{data[k].issue_subject}</td><td>{data[k].issue}</td><td>{data[k].location}</td>
           <td><button value={k} onClick={handleTake}>Take</button></td>
         </tr>
       );
     }
 
     const WaitTable = ({data}) => {
-      if(data.length > 0){
+      if(data.length > 0 && settings != null && settings.show_queue_list=="t"){
         return (
           <table>
             <WaitTableHeaderRow />

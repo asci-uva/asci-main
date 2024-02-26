@@ -205,7 +205,7 @@ class DBSession
      */
     public function getWaitingSessions($course_id){
 
-        $query = 'select * from sessions where course_id=$1 and status=\'waiting\' limit 50';
+        $query = 'select * from sessions where course_id=$1 and status=\'waiting\' order by entry_time limit 50';
 
         $result = $this->db->query($query, array($course_id));
 

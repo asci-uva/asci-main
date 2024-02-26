@@ -12,6 +12,8 @@
  */
 namespace asci\server;
 
+use asci\util\ExclusiveLock as ExclusiveLock;
+
 /**
  * Server Class
  *
@@ -99,7 +101,7 @@ class Server
      */
     public function validateUsername($input){
 
-        /* Grab the username from netbadge IF the server is in DEBUG mode */
+        /* Grab the username from netbadge IF the server is not in DEBUG mode */
         /* Otherwise, use the user provided by request */
         // Login is a special command that doesn't require this validation
         $user = null;
@@ -138,6 +140,33 @@ class Server
         /* Otherwise, use the user provided by request */
         $user = $this->validateUsername($this->input);
         
+
+        /* This section acquires a lock for the given course IF a courseId was provided */
+        /* ------------------------------------------------------------------ */
+        $course_id = $this->input["courseId"] ?? null;
+        $lock = null;
+        $attempt_max = 40; //try to get the lock at most 10 times.
+        if($course_id != null && \asci\Config::$LOCKING_ENABLED){
+            /* acquire the lock */
+            $lock_key = "course-" . $course_id;
+            $lock = new ExclusiveLock($lock_key);
+            $attempt = 0;
+            while($lock->lock() == False && $attempt<$attempt_max){
+                $attempt = $attempt + 1;
+                usleep(250000); // sleep for a quarter of a second
+            }
+
+            if($attempt >= $attempt_max){
+                $this->setResponse([
+                    "error" => "Could not acquire lock after multiple attempts. Try again later."
+                ]);
+                //break;
+            }
+        }
+
+        /* Lock acquired OR not necessary */
+
+        /* ------------------------------------------------------------------ */
 
         // Decide what to do based on the command given to the server
         switch ($this->input["command"]) {
@@ -335,6 +364,20 @@ class Server
                 
                 break;
 
+            case "getCourseSettings":
+                $courseId = $this->input["courseId"];
+
+                $this->setResponse($executor->getCourseSettings($courseId));
+                break;
+
+            case "cancelGroup":
+                $courseId = $this->input["courseId"];
+                $sessionId = $this->input["sessionId"];
+
+                $this->setResponse($executor->cancelGroup($user, $courseId, $sessionId));
+                
+                break;
+
             case "clearQueue":
                 $courseId = $this->input["courseId"];
 
@@ -409,6 +452,17 @@ class Server
                 $this->setResponse(["response" => "Hello world!"]);
 
         }
+
+        /* Release the lock if we had one... */
+        /* ------------------------------------------------------------------ */
+        
+        if($lock != null && \asci\Config::$LOCKING_ENABLED){
+            $lock->unlock();
+        }
+
+        /* Lock acquired OR not necessary */
+        
+        /* ------------------------------------------------------------------ */
 
         return;
     }

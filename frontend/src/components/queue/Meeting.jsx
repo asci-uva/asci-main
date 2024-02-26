@@ -22,6 +22,7 @@ function Meeting(props) {
   //variables for managing polling the server
   let polling = false;
   let timeoutId = 0;
+  let pollTime = 3000;
 
   useEffect(() => {
     poll();
@@ -80,7 +81,7 @@ function Meeting(props) {
           if(data.is_group && data.group_sessions.length > 1){
             polling = true;
             console.log("TA Meeting: Setting timeout for next group poll");
-            timeoutId = setTimeout(poll, 10000);
+            timeoutId = setTimeout(poll, pollTime);
           }
 
           /* Special cases: If group but no group members, just end meeting */

@@ -41,6 +41,13 @@ class Config {
     public static $COSINE_SIMILARITY_SCRIPT = '/opt/asci-queue/asci-main/backend/src/asci/util/group_cosine.py';
 
     /**
+      * This is the relative location of the temporary locking files for all requests (see util/ExclusiveLock.php for details)
+      * You can also enable/disable locking here
+      */
+    public static $LOCKING_ENABLED = true;
+    public static $LOCKING_FILE_DIR = "./tmp/lock/";
+
+    /**
      * Full database connection information
      *
      * Connection information for the POSTGRES database
