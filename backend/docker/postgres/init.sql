@@ -110,8 +110,7 @@ CREATE TABLE assignments (
   course_id INT,
   name TEXT,
   description TEXT,
-  due_date TIMESTAMP,
-  max_score INT,
+  max_score FLOAT,
   type assignment_type,
   FOREIGN KEY (course_id) REFERENCES courses (id)
 );
@@ -125,11 +124,10 @@ CREATE TABLE submissions (
   id SERIAL PRIMARY KEY,
   assignment_id INT,
   user_id INT,
-  total_score INT,
-  max_score INT,
+  score FLOAT,
+  max_score FLOAT,
   status submission_status,
-  submission_time TIMESTAMP,
-  lateness INTERVAL,
+  lateness TEXT,
   view_count INT,
   submission_count INT,
   FOREIGN KEY (assignment_id) REFERENCES assignments (id),
@@ -211,17 +209,17 @@ VALUES (2, 3, 'student');
 INSERT INTO user_courses (user_id, course_id, role)
 VALUES (3, 3, 'student');
 
-INSERT INTO assignments (course_id, name, description, type, due_date, max_score)
+INSERT INTO assignments (course_id, name, description, type, max_score)
 VALUES 
-(3, 'Assignment 1', 'First assignment for CSO1', 'quiz', '2023-12-01 23:59:59', 100),
-(3, 'Assignment 2', 'Second assignment for CSO1', 'programming_assignment', '2023-12-15 23:59:59', 100);
+(3, 'Assignment 1', 'First assignment for CSO1', 'quiz', 100),
+(3, 'Assignment 2', 'Second assignment for CSO1', 'programming_assignment', 100);
 
-INSERT INTO submissions (assignment_id, user_id, total_score, max_score, status, submission_time, lateness, view_count, submission_count)
+INSERT INTO submissions (assignment_id, user_id, score, max_score, status, lateness, view_count, submission_count)
 VALUES 
-(1, 2, 90, 100, 'graded', '2023-11-30 20:00:00', '00:00:00', 3, 1),
-(1, 3, 80, 100, 'graded', '2023-11-29 20:00:00', '00:00:00', 2, 1),
-(2, 2, 50, 100, 'graded', '2023-12-03 18:00:00', '00:00:00', 8, 5),
-(2, 3, NULL, 100, 'missing', NULL, NULL, 0, 0);
+(1, 2, 90, 100, 'graded', '00:00:00', 3, 1),
+(1, 3, 80, 100, 'graded', '00:00:00', 2, 1),
+(2, 2, 50, 100, 'graded', '00:00:00', 8, 5),
+(2, 3, NULL, 100, 'missing', NULL, 0, 0);
 
 
 

@@ -11,7 +11,7 @@ const CoursePanel = (props) => {
     0: "Select assignment...",
   });
 
-  //This function runs on page load!
+  //This function runs on page load to load all assignments to the corresponding course
   useEffect(() => {
     const assignments = {
       command: "getAssignmentByCourse",
@@ -42,9 +42,7 @@ const CoursePanel = (props) => {
               " type: " +
               data.assignments[key]["type"] +
               " max_score: " +
-              data.assignments[key]["max_score"] +
-              " due_date: " +
-              data.assignments[key]["due_date"];
+              data.assignments[key]["max_score"];
             let assignmentId = data.assignments[key]["id"];
             c[assignmentId] = assignmentName;
           }
@@ -143,7 +141,7 @@ const CoursePanel = (props) => {
   return (
     <div>
       <h1>Course Panel</h1>
-      <button onClick={handleSync}>Sync</button>
+      {/* <button onClick={handleSync}>Sync</button> */}
       <div>
         <h2>Assignments</h2>
         {Object.keys(assignments).map((assignmentId) => {

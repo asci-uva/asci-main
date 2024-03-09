@@ -60,10 +60,10 @@ class DBAssignment
     }
 
 
-    public function updateAssignment($assignment_id, $course_id, $name, $description, $due_date, $max_score, $type)
+    public function updateAssignment($assignment_id, $course_id, $name, $description, $max_score, $type)
     {
-        $query = 'UPDATE assignments SET course_id = $2, name = $3, description = $4, due_date = $5, max_score = $6, type = $7 WHERE id = $1';
-        $params = array($assignment_id, $course_id, $name, $description, $due_date, $max_score, $type);
+        $query = 'UPDATE assignments SET course_id = $2, name = $3, description = $4, max_score = $5, type = $6 WHERE id = $1';
+        $params = array($assignment_id, $course_id, $name, $description, $max_score, $type);
 
         try {
             $result = $this->db->query($query, $params);
@@ -79,10 +79,10 @@ class DBAssignment
         }
     }
 
-    public function createAssignment($course_id, $name, $description, $due_date, $max_score, $type) {
+    public function createAssignment($course_id, $name, $description, $max_score, $type) {
         // Insert the new assignment into the 'assignments' table
-        $insertAssignmentQuery = 'INSERT INTO assignments (course_id, name, description, due_date, max_score, type) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id';
-        $params = array($course_id, $name, $description, $due_date, $max_score, $type);
+        $insertAssignmentQuery = 'INSERT INTO assignments (course_id, name, description, max_score, type) VALUES ($1, $2, $3, $4, $5) RETURNING id';
+        $params = array($course_id, $name, $description, $max_score, $type);
     
         $result = $this->db->query($insertAssignmentQuery, $params);
     

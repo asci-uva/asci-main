@@ -1356,14 +1356,16 @@ class ServerExecutor{
     public function updateGradescopeDataByCourseHandler($course_id, $download_file_name) {
         $result = [];
 
-        $assignment_names = (new \asci\server\database\DBSynchronization($this->db))->updateGradescopeAssignmentSubmissionByCourseId($course_id, $download_file_name);
+        $missingStudents = (new \asci\server\database\DBSynchronization($this->db))->updateGradescopeAssignmentSubmissionByCourseId($course_id, $download_file_name);
 
-        if($assignment_names){
-            $result["assignment_names"] = $assignment_names;
+        if($missingStudents){
+            $result["missingStudents"] = $missingStudents;
+            $result["message"]="GradeScope downloaded data successfully inserted into the database.";
             $result["success"] = "true";
         }
         else{
-            $result["assignment_names"] = [];
+            $result["missingStudents"] = [];
+            $result["message"]="GradeScope downloaded data failed to be inserted into the database.";
             $result["success"] = "false";
         }
         return $result;
