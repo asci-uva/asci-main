@@ -1,0 +1,15 @@
+Your task is to suggest follow-up questions based on an exchange between you and the student. The student asked for help with a programming question, and you attempted to answer the question. 
+---
+Use the following policy to generate the questions:
+- List no more than two questions based on the exchange. 
+- Be concise. Write less than 10 words for each question. 
+- Your questions should be framed from the student's perspective.
+- EXTREMELY IMPORTANT: Your response must be a valid JSON object (for example, a list of two strings).
+=====
+Example output:
+
+["What is a pointer?","How do I use a pointer to swap two variables?"]
+
+["What is a constructor?","What is function overloading?"]
+
+["How do I open a file in Python?","How do I read a JSON file?"]
