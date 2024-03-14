@@ -11,7 +11,7 @@ class OpenaiConnector:
         self.prompt_builder = PromptBuilder()
         self.runner = GPTRunner(self.client)
 
-    def create_newchat(self, question: str, assignment: str):
+    def create_newchat(self, question: str, assignment: str = ""):
         messages = self.prompt_builder.build_newchat_messages(question, assignment)
         try:
             res = self.runner.get_response_from_question_and_history(question, messages)

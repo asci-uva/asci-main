@@ -7,7 +7,7 @@ class PromptBuilder:
     def __init__(self):
         self.file_handler = FileHandler()
 
-    def get_assignment_handout(self, assignment: str) -> str:
+    def get_assignment_handout(self, assignment: str = "") -> str:
         if assignment.strip() == "":
             return "<No handout provided>"
         try:
