@@ -20,4 +20,9 @@ RUN pip install pandas
 RUN pip install numpy
 RUN pip install -U scikit-learn
 
+
+RUN pip install -U openai
+RUN pip install -U python-dotenv 
+RUN pip install -U llama-index-core
+
 RUN service apache2 restart

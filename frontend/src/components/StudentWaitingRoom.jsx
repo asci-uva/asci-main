@@ -248,7 +248,9 @@ function StudentWaitingRoom(props) {
         		<button onClick={leaveQueue}>Leave queue</button>
       	</div>
         <br></br>
-      
+      <div>
+        <h4>Question? Send a message to UVa TA bot</h4>
+      </div>
 		</div>
 	);
 }
