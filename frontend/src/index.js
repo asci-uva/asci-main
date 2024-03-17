@@ -8,6 +8,7 @@ import { Footer } from "./components/queue";
 import QueueController from "./components/QueueController";
 import AdminController from "./components/AdminController";
 import HomeController from "./components/HomeController";
+import PointsController from "./components/PointsController";
 import { UserProvider } from "./components/context/UserContext";
 import { ToastContainer } from "react-toastify";
 
@@ -53,6 +54,17 @@ root.render(
           element={
             <AdminController
               documentRoot={documentRoot + "/admin"}
+              url={url}
+              debugMode={debugMode}
+            />
+          }
+        />
+        {/* Use PointsController for all points related routes */}
+        <Route
+          path={documentRoot + "/points/*"}
+          element={
+            <PointsController
+              documentRoot={documentRoot + "/points"}
               url={url}
               debugMode={debugMode}
             />
