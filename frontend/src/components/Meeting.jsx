@@ -86,10 +86,10 @@ function Meeting(props) {
 
           /* Special cases: If group but no group members, just end meeting */
           if(data.is_group && data.group_sessions.length == 0){
-            endMeeting(); //supposed to be a group but no group members here
+            handleEndMeeting(); //supposed to be a group but no group members here
           }
           else if(!data.is_group && data.student == null){
-            endMeeting(); //no student to meet with somehow...
+            handleEndMeeting(); //no student to meet with somehow...
           }
 
         }
