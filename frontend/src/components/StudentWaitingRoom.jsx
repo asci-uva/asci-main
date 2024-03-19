@@ -1,6 +1,7 @@
 import React from "react";
 import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
+import Chat from "./Chat";
 
 function StudentWaitingRoom(props) {
 
@@ -250,6 +251,7 @@ function StudentWaitingRoom(props) {
         <br></br>
       <div>
         <h4>Question? Send a message to UVa TA bot</h4>
+        <Chat />
       </div>
 		</div>
 	);
