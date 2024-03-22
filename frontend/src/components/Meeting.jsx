@@ -68,7 +68,9 @@ function Meeting(props) {
         console.log("Data is: ", data);
 
         //if request succeeded
+        console.log("Checking if successful");
         if(data.success === "true"){
+          console.log("Success is true");
           setStudent(data.student);
           setSession(data.session);
           setSessionId(data.session.id);
@@ -84,14 +86,7 @@ function Meeting(props) {
             timeoutId = setTimeout(poll, pollTime);
           }
 
-          /* Special cases: If group but no group members, just end meeting */
-          if(data.is_group && data.group_sessions.length == 0){
-            handleEndMeeting(); //supposed to be a group but no group members here
-          }
-          else if(!data.is_group && data.student == null){
-            handleEndMeeting(); //no student to meet with somehow...
-          }
-
+          
         }
         else{
           console.log("Fetching meeting details failed for some reason");
@@ -100,7 +95,7 @@ function Meeting(props) {
         
       })
       .catch((error) => {
-        console.log("HOME: There was an error:", error);
+        console.log("Meeting: There was an error:", error);
         navigate(docRoot + "/error");
         
       });
@@ -122,6 +117,7 @@ function Meeting(props) {
       navigate(docRoot + "/selectCourse");
     }
     else if(sessionId === null){
+      console.log("Session id is null");
       navigate(docRoot + "/error");
     }
     else{
@@ -224,6 +220,20 @@ function Meeting(props) {
 
     }
 
+    function EmptyMeetingPanel(props){
+      return(
+        <div className="question">
+          <div>
+            <h5>Woops, this meeting looks empty. Click below to end the meeting.</h5>            
+          </div>
+      
+          <div>
+            <button onClick={handleEndMeeting}>End Meeting!</button>
+          </div>
+        </div>
+      );
+    }
+
 
     function SinglePanel(props){
       return(
@@ -280,6 +290,11 @@ function Meeting(props) {
     }
 
 
+    if(student == null && isGroup == false){
+      return (
+        <EmptyMeetingPanel />
+      );
+    }
     if(student != null)
       return (
         <SinglePanel />
