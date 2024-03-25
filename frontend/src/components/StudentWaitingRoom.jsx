@@ -250,7 +250,6 @@ function StudentWaitingRoom(props) {
       	</div>
         <br></br>
       <div>
-        <h4>Question? Send a message to UVa TA bot</h4>
         <Chat />
       </div>
 		</div>

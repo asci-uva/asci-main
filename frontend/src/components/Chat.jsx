@@ -11,7 +11,6 @@ import SimpleDialog from "./utils/SimpleDialog";
 // import NotFoundPage from "./NotFoundPage";
 // import { errorToast } from "../components/accountServices";
 
-
 const Chat = () => {
     const navigate = useNavigate();
 
@@ -126,7 +125,7 @@ const Chat = () => {
             <div
                 id={index}
                 key={index}
-                className="bg-slate-700 text-slate-50 py-2 px-3 rounded-full text-sm inline-flex items-center hover:cursor-pointer hover:bg-slate-600 shadow"
+                className="py-2 px-3 rounded-full text-sm inline-flex items-center hover:cursor-pointer shadow"
                 onClick={handleFollowupChipSubmit}
             >
                 {el}
@@ -153,10 +152,10 @@ const Chat = () => {
                     key={index}
                     className="flex flex-col space-y-1 mb-6 mx-1"
                 >
-                    <p className="text-base font-bold text-slate-900 dark:text-white">
+                    <p className="text-base font-bold dark:text-white">
                         TA Bot
                     </p>
-                    <div className="relative bg-slate-200 p-4 rounded-3xl w-4/5 min-h-48 mr-auto dark:bg-slate-600">
+                    <div className="relative bg-slate-200 p-4 rounded-3xl w-4/5 min-h-20 mr-auto">
                         <Markdown
                             remarkPlugins={[remarkGfm]}
                             rehypePlugins={[rehypeRaw]}
@@ -177,7 +176,7 @@ const Chat = () => {
                     key={index}
                     className="flex flex-col space-y-1 mb-6 mx-1"
                 >
-                    <div className="bg-slate-700 p-4 rounded-3xl max-w-4/5 min-h-48 ml-auto">
+                    <div className="bg-slate-700 px-4 rounded-3xl max-w-4/5 min-h-20 ml-auto">
                         <Markdown
                             remarkPlugins={[remarkGfm]}
                             rehypePlugins={[rehypeRaw]}
@@ -198,7 +197,7 @@ const Chat = () => {
                         displayChatHistoryRecord(el, i)
                     )}
                     <div className="flex flex-1 flex-col mb-2 mx-8">
-                        <p className="text-base font-bold text-slate-900 dark:text-white">
+                        <p className="text-base font-bold dark:text-white">
                             TA Bot
                         </p>
                         <TypingAnimation />
@@ -218,7 +217,7 @@ const Chat = () => {
 
     const displayChatHistory = (chatHistoryRecords) => {
         return (
-            <div className="flex flex-1 px-36 flex-col space-y-2 bg-slate-50 dark:bg-slate-800">
+            <div className="flex flex-1 px-36 flex-col space-y-2 m-4">
                 {displayChatContext()}
                 {displayChatHistoryRecords(chatHistoryRecords)}
             </div>
@@ -228,10 +227,10 @@ const Chat = () => {
     const displayChatInterface = () => {
         if (!conversationStarted) {
             return (
-                <div className="flex flex-1 items-center justify-center dark:bg-slate-800">
-                    <h1 className="text-2xl tracking-tight font-bold text-slate-900 dark:text-white">
-                        How can I help you today?
-                    </h1>
+                <div className="flex flex-1 items-center justify-center m-0">
+                    <h4 className="tracking-tight font-bold dark:text-white">
+                        Ask the TA bot for help
+                    </h4>
                 </div>
             );
         }
@@ -250,7 +249,7 @@ const Chat = () => {
 
     const displayChatContext = () => {
         return (
-            <div className="sticky top-15 bg-slate-50 z-10 py-2 dark:bg-slate-800">
+            <div className="sticky top-15 z-10 py-2">
                 <div className="flex flex-col space-y-2 py-2">
                     {displayNewChatQuestions(true)}
                 </div>
@@ -271,14 +270,12 @@ const Chat = () => {
             <form
                 onSubmit={handleNewChatSubmit}
                 onKeyDown={handleNewChatKeyDown}
-                className="flex flex-col space-y-2"
+                className="flex flex-col"
             >
-                <label className="flex flex-row items-start w-full max-h-48 flex-grow">
-                    <div className="w-56 font-bold dark:text-white">
-                        Question
-                    </div>
+                <label className="flex flex-row items-center w-full max-h-20 flex-grow">
+                    <div className="w-32 font-bold my-0">Question</div>
                     <textarea
-                        className="ml-4 input-base resize-none"
+                        className="ml-4 input-base resize-none w-5/6"
                         placeholder={questionPlaceholder}
                         type="text"
                         rows={2}
@@ -288,12 +285,12 @@ const Chat = () => {
                         onChange={handleNewChatInputChange}
                     />
                 </label>
-                <label className="flex flex-row items-start w-full max-h-48 flex-grow">
-                    <div className="w-56 font-bold dark:text-white">
+                <label className="flex flex-row items-center w-full max-h-20 flex-grow">
+                    <div className="w-32 font-bold my-0">
                         Assignment (Optional)
                     </div>
                     <textarea
-                        className="ml-4 input-base resize-none"
+                        className="ml-4 input-base resize-none w-5/6"
                         placeholder={assignmentPlaceholder}
                         type="text"
                         name="assignmentName"
@@ -305,10 +302,10 @@ const Chat = () => {
                 </label>
 
                 {disabled ? null : (
-                    <div className="flex flex-row justify-end">
+                    <div className="flex flex-row justify-end m-0">
                         <button
                             type="submit"
-                            className="text-button"
+                            className="text-button m-0"
                             disabled={newChatQuestion.studentQuestion === ""}
                         >
                             <ArrowUpIcon
@@ -327,7 +324,7 @@ const Chat = () => {
         return (
             <form
                 onSubmit={handleFollowupChatSubmit}
-                className="flex flex-row space-x-4 bg-slate-50 pt-1 dark:bg-slate-800"
+                className="flex flex-row space-x-4 pt-1"
             >
                 <input
                     className="input-base"
@@ -349,14 +346,10 @@ const Chat = () => {
         );
     };
 
-    // if (notFoundError) {
-    //     return <NotFoundPage />;
-    // }
-
     return (
         <div className="flex flex-1 flex-col">
             {displayChatInterface()}
-            <div className="sticky bottom-0 flex justify-center pt-0 pb-6 px-36 flex-col w-full bg-slate-50 dark:bg-slate-800">
+            <div className="sticky bottom-0 flex justify-center flex-col w-full m-0">
                 {conversationStarted
                     ? displayFollowUpChatInput()
                     : displayNewChatInput()}
