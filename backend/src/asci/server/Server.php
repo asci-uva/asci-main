@@ -377,9 +377,8 @@ class Server
                 break;
 
             case "newLlmChat":
-                // $result = $executor->newllmChat($this->input);
-                // $this->setResponse($result);
-                $this->setResponse(["response" => "Hello world from newLlmChat!"]);
+                $result = $executor->newLlmChat($this->input);
+                $this->setResponse($result);
                 break;
 
 

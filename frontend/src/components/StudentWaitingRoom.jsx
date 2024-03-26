@@ -231,7 +231,7 @@ function StudentWaitingRoom(props) {
             </div>
             <br></br>
             <div>
-                <Chat url={url} />
+                <Chat url={url} docRoot={docRoot} />
             </div>
         </div>
     );

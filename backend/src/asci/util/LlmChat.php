@@ -55,13 +55,13 @@ class LlmChat
     }
 
     public function testGetLlmResponse(){
-        $question = "How to find the professor's contact info?";
+        $input_str = "{'command': 'newLlmChat', 'assignmentName': '', 'studentQuestion': 'hi'}";
 
-        return $this->getLlmResponse($question);
+        return $this->getLlmResponse($input_str);
     }
 
     
-    public function getLlmResponse($question){
+    public function getLlmResponse($input_command, $input){
 
         /* Testing opening up pipes and just sending some simple data */
         $descriptorspec = array(
@@ -72,6 +72,9 @@ class LlmChat
 
         /* Hardcoding the call to the python script for now */
         $command = "python3 " . \asci\Config::$LLM_CHAT_SCRIPT;
+
+        // print out the command
+        $this->logger->info("Command: " . $command);
         
         $pipes = array();
         $process = proc_open($command, $descriptorspec, $pipes);
@@ -81,9 +84,10 @@ class LlmChat
             // 0 => writeable handle connected to child stdin
             // 1 => readable handle connected to child stdout
 
-            foreach($question as $nextStr){
-                fwrite($pipes[0], $nextStr . "\n");    
-            }
+            $json_data = json_encode($input);
+
+
+            fwrite($pipes[0], $json_data . "\n");  
             fwrite($pipes[0], "-1");
             
             fclose($pipes[0]);
@@ -95,6 +99,7 @@ class LlmChat
             // It is important that you close any pipes before calling
             // proc_close in order to avoid a deadlock
             $return_value = proc_close($process);
+
             return [$return_value, $output, $error];
         }
 

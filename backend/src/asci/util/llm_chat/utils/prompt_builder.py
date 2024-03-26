@@ -1,4 +1,3 @@
-from api.models import Assignment
 from .file_handler import FileHandler
 from ..constants import prompt_paths
 
@@ -8,13 +7,7 @@ class PromptBuilder:
         self.file_handler = FileHandler()
 
     def get_assignment_handout(self, assignment: str = "") -> str:
-        if assignment.strip() == "":
-            return "<No handout provided>"
-        try:
-            response = Assignment.objects.get(title=assignment)
-            return response.handout
-        except Assignment.DoesNotExist:
-            raise ValueError("Invalid assignment name")
+        return "<No handout provided>"
 
     def build_newchat_user_prompt(self, question: str, assignment: str) -> str:
         handout = self.get_assignment_handout(assignment)

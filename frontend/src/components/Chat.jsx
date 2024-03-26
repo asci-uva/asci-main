@@ -8,11 +8,22 @@ import rehypeRaw from "rehype-raw";
 import { useSpring, animated, config } from "react-spring";
 import TypingAnimation from "./utils/TypingMessageAnimation";
 import SimpleDialog from "./utils/SimpleDialog";
-// import NotFoundPage from "./NotFoundPage";
-// import { errorToast } from "../components/accountServices";
 
 const Chat = (props) => {
     const url = props.url;
+    const docRoot = props.docRoot;
+
+    const getUserAndCourseID = () => {
+        if (localStorage.getItem("asci-user") === null) {
+            navigate(docRoot + "/login");
+        } else if (localStorage.getItem("asci-course") === null) {
+            navigate(docRoot + "/selectCourse");
+        } else {
+            const user = localStorage.getItem("asci-user");
+            const courseId = localStorage.getItem("asci-course");
+            return { user: user, courseId: courseId };
+        }
+    };
 
     const navigate = useNavigate();
 
@@ -59,6 +70,10 @@ const Chat = (props) => {
 
     const getLlmResponse = async (question, apiEndpoint) => {
         setLlmProcessing(true);
+        const userInfo = getUserAndCourseID();
+
+        question.user = userInfo.user;
+
         const response = await fetch(apiEndpoint, {
             method: "POST",
             headers: {
@@ -217,7 +232,7 @@ const Chat = (props) => {
 
     const displayChatHistory = (chatHistoryRecords) => {
         return (
-            <div className="flex flex-1 px-36 flex-col space-y-2 m-4">
+            <div className="flex flex-1 flex-col space-y-2 m-4">
                 {displayNewChatQuestions(true)}
                 {displayChatHistoryRecords(chatHistoryRecords)}
             </div>

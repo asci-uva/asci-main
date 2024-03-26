@@ -1,3 +1,4 @@
+import json
 from llm_chat.openai_connector import OpenaiConnector
 from llm_chat.constants import LLAMAFILE_KEY_PLACEHOLDER
 
@@ -53,6 +54,7 @@ def get_llm_response(input_object: dict[str, str]):
 dataIn = []
 
 while len(dataIn) <= 2:
+    print(dataIn)
     input_line = input()
     # quit when we see a -1
     if input_line == "-1":
@@ -60,7 +62,8 @@ while len(dataIn) <= 2:
 
     dataIn.append(input_line)
 
-if dataIn[-1] == "-1":
-    input_object = dict(dataIn[0])
+
+if dataIn:
+    input_object = json.loads(dataIn[0])
     ret = get_llm_response(input_object)
     print(ret, end="")
