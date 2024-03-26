@@ -375,7 +375,12 @@ class Server
                 $this->setResponse($executor->clearQueue($user, $courseId));
                 
                 break;
-        
+
+            case "newLlmChat":
+                // $result = $executor->newllmChat($this->input);
+                // $this->setResponse($result);
+                $this->setResponse(["response" => "Hello world from newLlmChat!"]);
+                break;
 
 
 

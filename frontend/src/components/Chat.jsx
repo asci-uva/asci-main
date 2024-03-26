@@ -11,7 +11,9 @@ import SimpleDialog from "./utils/SimpleDialog";
 // import NotFoundPage from "./NotFoundPage";
 // import { errorToast } from "../components/accountServices";
 
-const Chat = () => {
+const Chat = (props) => {
+    const url = props.url;
+
     const navigate = useNavigate();
 
     const [isVisible, setIsVisible] = useState(false);
@@ -61,7 +63,6 @@ const Chat = () => {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer no-key`,
             },
             body: JSON.stringify(question),
         });
@@ -82,11 +83,11 @@ const Chat = () => {
         appendToChatHistory({ role: "user", content: followupQuestion });
 
         const apiInput = {
+            command: "followupLlmChat",
             studentQuestion: followupQuestion,
             chatHistory: chatHistory,
         };
-        const apiEndpoint = "http://localhost:8000/follow-up/";
-        return getLlmResponse(apiInput, apiEndpoint);
+        return getLlmResponse(apiInput, url);
     };
 
     const handleFollowupChatSubmit = (e) => {
@@ -101,9 +102,8 @@ const Chat = () => {
     };
 
     const getNewChatResponse = () => {
-        const apiInput = newChatQuestion;
-        const apiEndpoint = "http://localhost:8000/new-chat/";
-        return getLlmResponse(apiInput, apiEndpoint);
+        const apiInput = { command: "newLlmChat", ...newChatQuestion };
+        return getLlmResponse(apiInput, url);
     };
 
     const handleNewChatSubmit = (e) => {
@@ -218,7 +218,7 @@ const Chat = () => {
     const displayChatHistory = (chatHistoryRecords) => {
         return (
             <div className="flex flex-1 px-36 flex-col space-y-2 m-4">
-                {displayChatContext()}
+                {displayNewChatQuestions(true)}
                 {displayChatHistoryRecords(chatHistoryRecords)}
             </div>
         );
@@ -244,16 +244,6 @@ const Chat = () => {
             <animated.div style={slideIn}>
                 {displayNewChatQuestions(false)}
             </animated.div>
-        );
-    };
-
-    const displayChatContext = () => {
-        return (
-            <div className="sticky top-15 z-10 py-2">
-                <div className="flex flex-col space-y-2 py-2">
-                    {displayNewChatQuestions(true)}
-                </div>
-            </div>
         );
     };
 
@@ -347,7 +337,7 @@ const Chat = () => {
     };
 
     return (
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col m-0">
             {displayChatInterface()}
             <div className="sticky bottom-0 flex justify-center flex-col w-full m-0">
                 {conversationStarted

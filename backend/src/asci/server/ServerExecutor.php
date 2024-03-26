@@ -1220,5 +1220,42 @@ class ServerExecutor{
         return $this->userStore->register($data["userid"],$data["password"]);
     }
 
+    public function newllmChat($data) {
+        // similar to cosine
+        $cosSim = new \asci\util\LlmChat();
+
+        /* Construct the list of issues (first one is main student's issue) */
+        $all_issues = [$session->issue_subject . " " . $session->issue];
+        foreach($group_sessions as $grpsess){
+            $all_issues[] = $grpsess->issue_subject . " " . $grpsess->issue;
+        }
+
+        /* Get the matches among everything */
+        $buffer = $cosSim->getLlmResponse($all_issues);
+
+        $this->logger->addDebug("Cos Sim Buffer", array("buffer" => $buffer));
+
+        /* If the cos. sim. call failed, report that to frontend */
+        if($buffer == null || $buffer[0] != 0) return $this->err("Cosine similarity call failed");
+
+        /* We made it, return the sessions (up to max) that we care about */
+        $group_sessions_ret = [];
+        $match_indices = explode("##", $buffer[1]);
+
+        /* Special case, matches are nothing but "" */
+        if(count($match_indices)==1 && $match_indices[0] == ""){
+            $result["group_sessions"] = [];
+        }
+        else{
+            $i=0;
+            $this->logger->addDebug("Stuff", array("match ind" => $match_indices));
+            while($i<$max_group_options && $i<count($match_indices)){
+                $group_sessions_ret[] = $group_sessions[$match_indices[$i]];
+                $i=$i+1;
+            }
+            $result["group_sessions"] = $group_sessions_ret;
+        }
+    }
+
     
 }

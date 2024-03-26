@@ -81,7 +81,7 @@ class LlmChat
             // 0 => writeable handle connected to child stdin
             // 1 => readable handle connected to child stdout
 
-            foreach($listOfStrings as $nextStr){
+            foreach($question as $nextStr){
                 fwrite($pipes[0], $nextStr . "\n");    
             }
             fwrite($pipes[0], "-1");
