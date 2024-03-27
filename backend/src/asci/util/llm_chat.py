@@ -36,7 +36,7 @@ def get_followup_response(input_object: dict[str, str]):
     if MOCKING_LLM_RESPONSE:
         return MOCK_FOLLOWUP_RESPONSE
     else:
-        question = input_object["question"]
+        question = input_object["studentQuestion"]
         chat_history = input_object["chatHistory"]
         connector = OpenaiConnector(LLAMAFILE_KEY_PLACEHOLDER)
         response = connector.create_followup(question, chat_history)
