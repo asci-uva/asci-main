@@ -2,7 +2,7 @@ import json
 from llm_chat.openai_connector import OpenaiConnector
 from llm_chat.constants import LLAMAFILE_KEY_PLACEHOLDER
 
-MOCKING_LLM_RESPONSE = True
+MOCKING_LLM_RESPONSE = False
 
 MOCK_NEWCHAT_RESPONSE = {
     "role": "assistant",
@@ -23,8 +23,11 @@ def get_newchat_response(input_object: dict[str, str]):
     if MOCKING_LLM_RESPONSE:
         return MOCK_NEWCHAT_RESPONSE
     else:
-        question = input_object["question"]
-        connector = OpenaiConnector(LLAMAFILE_KEY_PLACEHOLDER)
+        question = input_object["studentQuestion"]
+
+        connector = OpenaiConnector(
+            "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"
+        )
         response = connector.create_newchat(question)
         return response
 
@@ -41,8 +44,10 @@ def get_followup_response(input_object: dict[str, str]):
 
 
 def get_llm_response(input_object: dict[str, str]):
-    is_newchat = "studentQuestion" in input_object and "assignmentName" in input_object
-    is_followup = "studentQuestion" in input_object and "chatHistory" in input_object
+    command = input_object["command"]
+
+    is_newchat = command == "newLlmChat"
+    is_followup = command == "followupLlmChat"
 
     if is_newchat:
         return get_newchat_response(input_object)
@@ -54,7 +59,6 @@ def get_llm_response(input_object: dict[str, str]):
 dataIn = []
 
 while len(dataIn) <= 2:
-    print(dataIn)
     input_line = input()
     # quit when we see a -1
     if input_line == "-1":
@@ -65,5 +69,6 @@ while len(dataIn) <= 2:
 
 if dataIn:
     input_object = json.loads(dataIn[0])
-    ret = get_llm_response(input_object)
-    print(ret, end="")
+    res = get_llm_response(input_object)
+    json_res = json.dumps(res)
+    print(json_res, end="")

@@ -7,6 +7,10 @@ import { Tooltip } from "react-tooltip";
 const SimpleDialog = (props) => {
     const [isOpen, setIsOpen] = useState(false);
 
+    if (!props.contexts || props.contexts.length === 0) {
+        return null;
+    }
+
     function openDialog() {
         console.log("open dialog");
         console.log(props.contexts);

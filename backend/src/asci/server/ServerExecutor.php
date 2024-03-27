@@ -1239,12 +1239,11 @@ class ServerExecutor{
         if($buffer == null || $buffer[0] != 0) return $this->err("LLM Chat call failed");
 
         /* We made it, return the sessions (up to max) that we care about */
-        $responseParts = explode("\n", $buffer[1]);
-        $jsonResponse = $responseParts[2];
+        $jsonResponse = $buffer[1];
 
         $result = [];
         
-        $result["data"] = $jsonResponse;
+        $result["response"] = $jsonResponse;
         return $result;
     }
     

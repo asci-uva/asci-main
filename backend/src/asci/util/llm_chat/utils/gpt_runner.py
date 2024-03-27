@@ -15,8 +15,8 @@ from ..constants import (
     RAG_DISABLED,
 )
 from llama_index.core.chat_engine.types import AgentChatResponse
-from ..rag import load_rag_index
-from ..data_structures import OpenAIResponse
+from .rag import load_rag_index
+from .data_structures import OpenAIResponse
 
 
 class GPTRunner:
@@ -86,7 +86,7 @@ class GPTRunner:
             retriever=retriever,
             condense_question_prompt=custom_prompt,
             chat_history=custom_chat_history,
-            verbose=True,
+            verbose=False,
         )
         response = chat_engine.chat(message=message)
 
@@ -146,6 +146,7 @@ class GPTRunner:
             raise ValueError(f"Error requesting question starter response: {str(e)}")
 
     def get_response_from_question_and_history(self, question: str, history: list):
+        contexts = None
         if RAG_DISABLED:
             response = self.get_gpt_response(history)
             response = self.remove_code_in_response(question, response)
@@ -157,8 +158,10 @@ class GPTRunner:
 
         questions = self.get_question_starter(question, response)
 
-        response = OpenAIResponse(
-            "assistant", response, questions["questions"], contexts
-        )
-
-        return vars(response)
+        try:
+            response = OpenAIResponse(
+                "assistant", response, questions["questions"], contexts
+            )
+            return vars(response)
+        except Exception as e:
+            print(f"Error creating OpenAIResponse: {str(e)}")

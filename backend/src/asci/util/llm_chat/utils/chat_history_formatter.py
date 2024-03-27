@@ -1,5 +1,5 @@
 from llama_index.core.llms import ChatMessage
-from ..data_structures import OpenAIInput
+from .data_structures import OpenAIInput
 
 
 class ChatHistoryFormatter:

@@ -1,7 +1,9 @@
+import os
 from openai import OpenAI
 from .utils.chat_history_formatter import ChatHistoryFormatter
 from .utils.gpt_runner import GPTRunner
 from .utils.prompt_builder import PromptBuilder
+import traceback
 
 
 class OpenaiConnector:
@@ -17,7 +19,9 @@ class OpenaiConnector:
             res = self.runner.get_response_from_question_and_history(question, messages)
             return res
         except Exception as e:
-            raise ValueError(f"Error requesting GPT response: {str(e)}")
+            traceback.print_exc()
+            print(f"Error requesting GPT response (OpenAI connector): {str(e)}")
+            # raise ValueError(f"Error requesting GPT response: {str(e)}")
 
     def create_followup(self, question: str, messages: list):
         try:

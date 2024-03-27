@@ -82,9 +82,11 @@ const Chat = (props) => {
             body: JSON.stringify(question),
         });
         const data = await response.json();
+        const chatbotResponse = JSON.parse(data.response);
+
         if (response.ok) {
-            console.log(data);
-            appendToChatHistory(data);
+            console.log(chatbotResponse);
+            appendToChatHistory(chatbotResponse);
             setLlmProcessing(false);
         } else if (response.status === 401) {
             navigate(`/`);
