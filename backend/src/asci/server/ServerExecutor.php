@@ -1220,12 +1220,10 @@ class ServerExecutor{
         return $this->userStore->register($data["userid"],$data["password"]);
     }
 
-    public function newLlmChat($data) {
+    public function startLlmChat($command, $data) {
         
         // similar to $cosSim
         $chat = new \asci\util\LlmChat();
-
-        $command = "newLlmChat";
 
         // always print "received data" in all situations
         // echo "=======\n";   

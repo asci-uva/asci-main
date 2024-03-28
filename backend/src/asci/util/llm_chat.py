@@ -25,9 +25,7 @@ def get_newchat_response(input_object: dict[str, str]):
     else:
         question = input_object["studentQuestion"]
 
-        connector = OpenaiConnector(
-            "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"
-        )
+        connector = OpenaiConnector(LLAMAFILE_KEY_PLACEHOLDER)
         response = connector.create_newchat(question)
         return response
 
