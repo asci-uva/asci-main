@@ -61,7 +61,7 @@ class LlmChat
     }
 
     
-    public function getLlmResponse($input_command, $input){
+    public function getLlmResponse($input){
 
         /* Testing opening up pipes and just sending some simple data */
         $descriptorspec = array(

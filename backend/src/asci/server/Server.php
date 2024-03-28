@@ -377,12 +377,12 @@ class Server
                 break;
 
             case "newLlmChat":
-                $result = $executor->startLlmChat("newLlmChat", $this->input);
+                $result = $executor->startLlmChat($this->input);
                 $this->setResponse($result);
                 break;
 
             case "followupLlmChat":
-                $result = $executor->startLlmChat("followupLlmChat", $this->input);
+                $result = $executor->startLlmChat($this->input);
                 $this->setResponse($result);
                 break;
 

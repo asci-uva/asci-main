@@ -1220,7 +1220,7 @@ class ServerExecutor{
         return $this->userStore->register($data["userid"],$data["password"]);
     }
 
-    public function startLlmChat($command, $data) {
+    public function startLlmChat($data) {
         
         // similar to $cosSim
         $chat = new \asci\util\LlmChat();
@@ -1229,7 +1229,7 @@ class ServerExecutor{
         // echo "=======\n";   
 
         /* Get the matches among everything */
-        $buffer = $chat->getLlmResponse($command, $data);
+        $buffer = $chat->getLlmResponse($data);
 
         $this->logger->info("LLM Chat Buffer", array("buffer" => $buffer));
 
