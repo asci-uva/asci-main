@@ -195,3 +195,34 @@ code {
   margin-bottom: 15px;
   margin-top: 30px;
 }
+
+
+
+
+.dot {
+  height: 14px;
+  width: 14px;
+  border-radius: 100%;
+  display: inline-block;
+  background-color: #B4B5B9;
+  animation: 1.2s typing-dot ease-in-out infinite;
+}
+
+.dot:nth-of-type(2) {
+  animation-delay: 0.15s;
+}
+
+.dot:nth-of-type(3) {
+  animation-delay: 0.25s;
+}
+
+@keyframes typing-dot {
+  15% {
+    transform: translateY(-35%);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}

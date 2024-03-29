@@ -229,7 +229,6 @@ function StudentWaitingRoom(props) {
             <div>
                 <button onClick={leaveQueue}>Leave queue</button>
             </div>
-            <br></br>
             <Chat url={url} docRoot={docRoot} />
         </div>
     );

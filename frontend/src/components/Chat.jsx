@@ -142,7 +142,7 @@ const Chat = (props) => {
             <div
                 id={index}
                 key={index}
-                className="py-2 px-3 rounded-full text-sm inline-flex items-center hover:cursor-pointer shadow"
+                className="py-2 px-3 rounded-full text-sm inline-flex items-center hover:cursor-pointer shadow my-0"
                 onClick={handleFollowupChipSubmit}
             >
                 {el}
@@ -167,17 +167,15 @@ const Chat = (props) => {
                 <div
                     id={index}
                     key={index}
-                    className="flex flex-col space-y-1 mb-6 mx-1"
+                    className="flex flex-col space-y-1 mb-6 my-1"
                 >
-                    <p className="text-base font-bold dark:text-white">
-                        TA Bot
-                    </p>
-                    <div className="relative bg-slate-200 p-4 rounded-3xl w-4/5 min-h-20 mr-auto">
+                    <p className="text-base font-bold text-left">TA Bot</p>
+                    <div className="relative bg-slate-200 p-4 pb-6 rounded-3xl w-4/5 min-h-12 mr-auto">
                         <Markdown
                             remarkPlugins={[remarkGfm]}
                             rehypePlugins={[rehypeRaw]}
                             children={chatHistoryRecord.content}
-                            className="prose text-sm max-w-none font-medium dark:text-white"
+                            className="prose text-sm max-w-none font-medium my-0 text-left"
                         />
                         <SimpleDialog contexts={chatHistoryRecord.context} />
                     </div>
@@ -191,14 +189,14 @@ const Chat = (props) => {
                 <div
                     id={index}
                     key={index}
-                    className="flex flex-col space-y-1 mb-6 mx-1"
+                    className="flex flex-col space-y-1 mb-4 my-1"
                 >
-                    <div className="bg-slate-700 px-4 rounded-3xl max-w-4/5 min-h-20 ml-auto">
+                    <div className="bg-slate-700 p-4 rounded-3xl max-w-4/5 min-h-12 ml-auto">
                         <Markdown
                             remarkPlugins={[remarkGfm]}
                             rehypePlugins={[rehypeRaw]}
                             children={chatHistoryRecord.content}
-                            className="prose text-sm max-w-none font-medium text-slate-50 prose-code:text-slate-50"
+                            className="prose text-sm max-w-none font-medium my-0 text-slate-50 prose-code:text-slate-50"
                         />
                     </div>
                 </div>
@@ -213,11 +211,11 @@ const Chat = (props) => {
                     {chatHistoryRecords.map((el, i) =>
                         displayChatHistoryRecord(el, i)
                     )}
-                    <div className="flex flex-1 flex-col mb-2 mx-8">
-                        <p className="text-base font-bold dark:text-white">
-                            TA Bot
-                        </p>
-                        <TypingAnimation />
+                    <div className="flex flex-1 flex-col m-0 items-start">
+                        <p className="text-base font-bold">TA Bot</p>
+                        <div className="my-0 mr-auto">
+                            <TypingAnimation />
+                        </div>
                     </div>
                 </div>
             );
@@ -245,7 +243,7 @@ const Chat = (props) => {
         if (!conversationStarted) {
             return (
                 <div className="flex flex-1 items-center justify-center m-0">
-                    <h4 className="tracking-tight font-bold dark:text-white">
+                    <h4 className="tracking-tight font-bold">
                         Ask the TA bot for help
                     </h4>
                 </div>
@@ -288,21 +286,6 @@ const Chat = (props) => {
                         rows={2}
                         name="studentQuestion"
                         value={newChatQuestion.studentQuestion}
-                        disabled={disabled}
-                        onChange={handleNewChatInputChange}
-                    />
-                </label>
-                <label className="flex flex-row items-center w-full max-h-20 flex-grow">
-                    <div className="w-32 font-bold my-0">
-                        Assignment (Optional)
-                    </div>
-                    <textarea
-                        className="ml-4 input-base resize-none w-5/6"
-                        placeholder={assignmentPlaceholder}
-                        type="text"
-                        name="assignmentName"
-                        rows={1}
-                        value={newChatQuestion.assignmentName}
                         disabled={disabled}
                         onChange={handleNewChatInputChange}
                     />
@@ -354,7 +337,7 @@ const Chat = (props) => {
     };
 
     return (
-        <div className="flex flex-1 flex-col m-0">
+        <div className="flex flex-1 flex-col m-0 max-h-120">
             {displayChatInterface()}
             <div className="sticky bottom-0 flex justify-center flex-col w-full m-0">
                 {conversationStarted

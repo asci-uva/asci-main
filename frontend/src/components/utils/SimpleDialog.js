@@ -35,7 +35,7 @@ const SimpleDialog = (props) => {
                 </h2>
 
                 <Markdown
-                    className="prose font-semibold max-h-60 overflow-auto bg-gray-200 p-4 rounded-lg my-4"
+                    className="prose font-semibold max-h-60 overflow-auto bg-gray-200 p-4 rounded-lg m-0"
                     children={`${context.text} ...`}
                 />
             </div>
@@ -44,9 +44,9 @@ const SimpleDialog = (props) => {
 
     return (
         <>
-            <button className="absolute bottom-3 right-3" id="chat-context">
+            <button className="absolute bottom-3 right-3 m-0" id="chat-context">
                 <BookOpenIcon
-                    className="w-6 h-6 hover:text-gray-500 cursor-pointer dark:text-gray-50"
+                    className="w-4 h-4 hover:text-gray-500 cursor-pointer dark:text-gray-50"
                     alt="icon"
                     type="button"
                     onClick={openDialog}
@@ -56,9 +56,7 @@ const SimpleDialog = (props) => {
                     place="top"
                     className="bg-gray-800 text-white p-2 rounded-lg shadow-md text-sm font-medium"
                 >
-                    <div>
-                        <span>View context</span>
-                    </div>
+                    <span>View context</span>
                 </Tooltip>
             </button>
             <Transition appear show={isOpen} as={Fragment}>
