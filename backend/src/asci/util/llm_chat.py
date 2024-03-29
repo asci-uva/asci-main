@@ -1,6 +1,6 @@
 import json
 from llm_chat.openai_connector import OpenaiConnector
-from llm_chat.constants import LLAMAFILE_KEY_PLACEHOLDER
+from llm_chat.constants import LLAMAFILE_KEY_PLACEHOLDER, LLAMAFILE_BASE_URL
 
 MOCKING_LLM_RESPONSE = False
 
@@ -25,7 +25,7 @@ def get_newchat_response(input_object: dict[str, str]):
     else:
         question = input_object["studentQuestion"]
 
-        connector = OpenaiConnector(LLAMAFILE_KEY_PLACEHOLDER)
+        connector = OpenaiConnector(LLAMAFILE_BASE_URL, LLAMAFILE_KEY_PLACEHOLDER)
         response = connector.create_newchat(question)
         return response
 
@@ -36,7 +36,7 @@ def get_followup_response(input_object: dict[str, str]):
     else:
         question = input_object["studentQuestion"]
         chat_history = input_object["chatHistory"]
-        connector = OpenaiConnector(LLAMAFILE_KEY_PLACEHOLDER)
+        connector = OpenaiConnector(LLAMAFILE_BASE_URL, LLAMAFILE_KEY_PLACEHOLDER)
         response = connector.create_followup(question, chat_history)
         return response
 

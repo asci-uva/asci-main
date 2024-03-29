@@ -28,4 +28,4 @@ SHOWING_ONLY_ONE_CONTEXT = True
 RAG_DISABLED = False
 
 LLAMAFILE_KEY_PLACEHOLDER = "sk-no-key-required"
-LLAMAFILE_BASE_URL = "https://llamafile.com"  # TODO: Change this to the actual URL
+LLAMAFILE_BASE_URL = "http://titanx01.cs.virginia.edu:8080/v1"

@@ -1,4 +1,3 @@
-import os
 from openai import OpenAI
 from .utils.chat_history_formatter import ChatHistoryFormatter
 from .utils.gpt_runner import GPTRunner
@@ -7,8 +6,8 @@ import traceback
 
 
 class OpenaiConnector:
-    def __init__(self, openai_api_key):
-        self.client = OpenAI(api_key=openai_api_key)
+    def __init__(self, base_url, openai_api_key):
+        self.client = OpenAI(base_url=base_url, api_key=openai_api_key)
         self.formatter = ChatHistoryFormatter()
         self.prompt_builder = PromptBuilder()
         self.runner = GPTRunner(self.client)
