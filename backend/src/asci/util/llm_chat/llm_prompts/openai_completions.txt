@@ -1,0 +1,10 @@
+## Programming exercise handout
+{}
+
+## My code
+{}
+
+## Question
+I am in an introductory programming course where we use the Python programming language. I have been given a programming exercise with the above handout. I have written code given above. My code does not work as expected, however. Please provide suggestions on how I could fix my code so that it fulfills the requirements in the handout. Do not include a model solution, the corrected code, or automated tests in the response.
+
+## Answer

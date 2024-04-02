@@ -14,3 +14,12 @@ build
 
 .DS_Store
 */.DS_Store
+
+*.pyc
+
+# Ignore the data folder and vector DB in the llm_chat package
+backend/src/asci/util/llm_chat/data/
+backend/src/asci/util/llm_chat/storage/
+
+# Ignore the .env file in the llm_chat package
+backend/src/asci/util/llm_chat/.env
