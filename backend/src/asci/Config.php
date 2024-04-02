@@ -43,6 +43,7 @@ class Config {
     // The path of the LLM chat script
     // May need to be set as '/opt/asci-queue/asci-main/backend/src/asci/util/llm_chat.py' in other environments
     public static $LLM_CHAT_SCRIPT = '/opt/src/asci/util/llm_chat.py';
+    //public static $LLM_CHAT_SCRIPT = '/opt/asci-queue/asci-main/backend/src/asci/util/llm_chat.py';
 
     /**
       * This is the relative location of the temporary locking files for all requests (see util/ExclusiveLock.php for details)

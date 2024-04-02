@@ -93,10 +93,13 @@ CREATE TABLE course_settings (
 );
 
 CREATE TABLE logs (
-  session_id SERIAL PRIMARY KEY,
+  user_id SERIAL PRIMARY KEY,
+  log_type TEXT,
   action TEXT,
   timestamp timestamp DEFAULT (now())
 );
+
+
 
 CREATE TABLE queue (
   id SERIAL PRIMARY KEY,
@@ -116,7 +119,7 @@ ALTER TABLE user_courses ADD FOREIGN KEY (course_id) REFERENCES courses (id);
 
 ALTER TABLE sessions ADD FOREIGN KEY (course_id) REFERENCES courses (id);
 
-ALTER TABLE logs ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
+ALTER TABLE logs ADD FOREIGN KEY (user_id) REFERENCES users (id);
 
 ALTER TABLE session_users ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
 
