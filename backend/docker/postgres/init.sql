@@ -145,6 +145,34 @@ CREATE TABLE submissions (
 );
 
 
+CREATE TABLE quests (
+  id SERIAL PRIMARY KEY,
+  name TEXT,
+  description TEXT,
+  total_points INT
+);
+
+CREATE TABLE user_quests (
+  quest_id INT,
+  user_id INT,
+  status quest_completion_status,
+  PRIMARY KEY (user_id, quest_id)
+);
+
+CREATE TABLE course_quests (
+  quest_id INT,
+  course_id INT,
+  PRIMARY KEY (course_id, quest_id)
+  FOREIGN KEY (course_id) REFERENCES courses (id)
+);
+
+CREATE TYPE quest_completion_status AS ENUM (
+  'Locked',
+  'Not started',
+  'In progress',
+  'Completed'
+);
+
 ALTER TABLE queue ADD FOREIGN KEY (user_id) REFERENCES users (id);
 
 ALTER TABLE queue ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
@@ -232,4 +260,20 @@ VALUES
 (2, 3, NULL, 100, 'missing', NULL, NULL, 0, 0);
 
 
+-- Quest data
+INSERT INTO quests (id, name, description , total_points)
+VALUES (1, 'Attend Office Hours Once', 'Go to office hours for the first time', 10);
+
+INSERT INTO quests (id, name, description , total_points)
+VALUES (2, 'Attend Office Hours Twice', 'Go to office hours for the second time', 10);
+
+ALTER TABLE user_quests ADD FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE user_quests ADD FOREIGN KEY (quest_id) REFERENCES quests (id);
+
+INSERT INTO user_quests (quest_id, user_id, status)
+VALUES (1, 1, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, status)
+VALUES (2, 1, 'Not started');
 

@@ -9,32 +9,32 @@ function Cards(props) {
   let debugMode = props.debugMode;
   let root = "/asci";
   return (
-    <div class="row">
-      <div class="column">
-        <div class="card">
-          <img class="card-img-top" src={img} />
-          <div class="card-body">
-            <p class="card-text">Office Hours Queue</p>
-            <a href={docRoot + "/queue"} class="btn btn-primary">Join Queue</a>
+    <div className="row">
+      <div className="column">
+        <div className="card">
+          <img className="card-img-top" src={img} />
+          <div className="card-body">
+            <p className="card-text">Office Hours Queue</p>
+            <a href={docRoot + "/queue"} className="btn btn-primary">Join Queue</a>
           </div>
         </div>
       </div>
-      <div class="column">
-        <div class="card">
-        <img class="card-img-top" src={img2} />
-          <div class="card-body">
-            <p class="card-text">Admin</p>
-            <a href={docRoot + "/admin"} class="btn btn-primary">Visit Admin Page</a>
+      <div className="column">
+        <div className="card">
+        <img className="card-img-top" src={img2} />
+          <div className="card-body">
+            <p className="card-text">Admin</p>
+            <a href={docRoot + "/admin"} className="btn btn-primary">Visit Admin Page</a>
           </div>
         </div>
       </div>
-      <div class="column">
-        <div class="card">
-        <img class="card-img-top" src={img3} />
-          <div class="card-body">
-            <p class="card-text">Earn Points</p>
+      <div className="column">
+        <div className="card">
+        <img className="card-img-top" src={img3} />
+          <div className="card-body">
+            <p className="card-text">Earn Points</p>
             {/* change link later */}
-            <a href="#" class="btn btn-primary">Earn Points</a>
+            <a href={docRoot + "/points"}  className="btn btn-primary">Earn Points</a>
           </div>
         </div>
       </div>

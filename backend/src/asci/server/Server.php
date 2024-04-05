@@ -12,6 +12,9 @@
  */
 namespace asci\server;
 
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+
 use asci\util\ExclusiveLock as ExclusiveLock;
 
 /**
@@ -421,6 +424,12 @@ class Server
 
                 $this->setResponse($executor->manuallyAddStudentHandler($fname, $lname, $pname, $computing_id, $role, $course_id));
                 break;
+
+            // Points system method 
+            case "getQuestsForUser":
+                $this->setResponse($executor->getQuestsForUserHandler($user));
+                break;
+            
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/
 

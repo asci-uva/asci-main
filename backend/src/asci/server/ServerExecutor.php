@@ -11,6 +11,10 @@
  *            the Regents of the University of California
  */
 namespace asci\server;
+
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+
 //todo: we might want seperate classes around certain functionality 
 use asci\server\database\DatabaseConnector as DatabaseConnector;
 
@@ -1343,4 +1347,21 @@ class ServerExecutor{
         return $result;
     }
     
+
+    public function getQuestsForUserHandler($computing_id){
+        $result = [];
+
+        $quests = (new \asci\server\database\DBUserQuest($this->db))->getQuestsForUser($computing_id);
+
+        $result["quests"] = [];
+        foreach ($quests as $quest){
+            $result["quests"][$quest->getQuestId()] = $quest->toArray();
+        }
+
+        $this->logger->addDebug("Quest result", array("quests" => $quests[0]));
+
+        $result["success"] = "true";
+
+        return $result;
+    }
 }
