@@ -93,11 +93,13 @@ CREATE TABLE course_settings (
 );
 
 CREATE TABLE logs (
-  user_id SERIAL PRIMARY KEY,
+  log_id SERIAL PRIMARY KEY,
+  user_id SERIAL,
   log_type TEXT,
   action TEXT,
-  timestamp timestamp DEFAULT (now())
+  timestamp TIMESTAMP DEFAULT (now())
 );
+
 
 
 

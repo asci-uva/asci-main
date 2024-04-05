@@ -1239,8 +1239,20 @@ class ServerExecutor{
         /* We made it, return the sessions (up to max) that we care about */
         $jsonResponse = $buffer[1];
 
+
+        // Log the response into the database
+        $computing_id = $data["user"];
+        $user = $this->userStore->getUser($computing_id)->toArray();
+        $user_id = $user["id"];
+
+        $dbLogger = new \asci\server\database\DBLogs($this->db);
+        $type = $data["command"];
+        $studentString = json_encode(["role" => "user", "content" => $data["studentQuestion"]]);
+        $logString = $studentString . ":" . $jsonResponse;
+
+        $dbLogger->log($user_id, $type, $logString);
+
         $result = [];
-        
         $result["response"] = $jsonResponse;
         return $result;
     }
