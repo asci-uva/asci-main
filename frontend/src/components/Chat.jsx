@@ -243,7 +243,9 @@ const Chat = (props) => {
         return (
             <div className="flex flex-1 flex-col space-y-2 m-4 max-h-80 overflow-auto">
                 {displayNewChatQuestions(true)}
-                {displayChatHistoryRecords(chatHistoryRecords)}
+                <div className="max-h-64 overflow-auto">
+                    {displayChatHistoryRecords(chatHistoryRecords)}
+                </div>
             </div>
         );
     };
