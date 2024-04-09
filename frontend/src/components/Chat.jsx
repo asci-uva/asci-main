@@ -96,13 +96,22 @@ const Chat = (props) => {
         }
     };
 
+    const formatChatHistory = (chatHistory) => {
+        return chatHistory.map((el) => {
+            return {
+                role: el.role,
+                content: el.content,
+            };
+        });
+    };
+
     const getFollowupChatResponse = (followupQuestion) => {
         appendToChatHistory({ role: "user", content: followupQuestion });
 
         const apiInput = {
             command: "followupLlmChat",
             studentQuestion: followupQuestion,
-            chatHistory: chatHistory,
+            chatHistory: formatChatHistory(chatHistory),
         };
         return getLlmResponse(apiInput, url);
     };
@@ -232,7 +241,7 @@ const Chat = (props) => {
 
     const displayChatHistory = (chatHistoryRecords) => {
         return (
-            <div className="flex flex-1 flex-col space-y-2 m-4">
+            <div className="flex flex-1 flex-col space-y-2 m-4 max-h-80 overflow-auto">
                 {displayNewChatQuestions(true)}
                 {displayChatHistoryRecords(chatHistoryRecords)}
             </div>
@@ -337,7 +346,7 @@ const Chat = (props) => {
     };
 
     return (
-        <div className="flex flex-1 flex-col m-0 max-h-120">
+        <div className="flex flex-1 flex-col m-0">
             {displayChatInterface()}
             <div className="sticky bottom-0 flex justify-center flex-col w-full m-0">
                 {conversationStarted
