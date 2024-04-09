@@ -57,7 +57,6 @@ const Chat = (props) => {
     const [chatHistory, setChatHistory] = useState([]);
 
     React.useEffect(() => {
-        console.log("useEffect run; issueSubject: ", issueSubject);
         if (isValidIssueSubject(issueSubject)) {
             const autofilledQuestion = {
                 assignmentName: "",
@@ -65,12 +64,8 @@ const Chat = (props) => {
             };
             setNewChatQuestion(autofilledQuestion);
             const apiInput = { command: "newLlmChat", ...autofilledQuestion };
-            console.log(apiInput);
-            console.log("autofilling chat with issueSubject");
             getLlmResponse(apiInput, url);
             setConversationStarted(true);
-            console.log("chat autofilled with issueSubject");
-            console.log("newChatQuestion: ", newChatQuestion);
         }
     }, [issueSubject]);
 
@@ -235,7 +230,7 @@ const Chat = (props) => {
     const displayChatHistoryRecords = (chatHistoryRecords) => {
         if (llmProcessing) {
             return (
-                <div>
+                <div className="m-0">
                     {chatHistoryRecords.map((el, i) =>
                         displayChatHistoryRecord(el, i)
                     )}
@@ -260,9 +255,9 @@ const Chat = (props) => {
 
     const displayChatHistory = (chatHistoryRecords) => {
         return (
-            <div className="flex flex-1 flex-col space-y-2 m-4 max-h-80 overflow-auto">
+            <div className="flex flex-1 flex-col space-y-2 m-4 max-h-94 overflow-auto">
                 {displayNewChatQuestions(true)}
-                <div className="max-h-64 overflow-auto">
+                <div className="max-h-78 overflow-auto">
                     {displayChatHistoryRecords(chatHistoryRecords)}
                 </div>
             </div>

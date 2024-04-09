@@ -237,8 +237,10 @@ function StudentWaitingRoom(props) {
                     be with you shortly.{" "}
                 </h4>
             </div>
-            <div>
-                <button onClick={leaveQueue}>Leave queue</button>
+            <div style={{ marginBottom: "0px" }}>
+                <button style={{ marginBottom: "15px" }} onClick={leaveQueue}>
+                    Leave queue
+                </button>
             </div>
             <Chat url={url} docRoot={docRoot} issueSubject={issueSubject} />
         </div>
