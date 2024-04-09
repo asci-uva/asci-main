@@ -11,6 +11,8 @@ function StudentWaitingRoom(props) {
     const [minsWaiting, setMinsWaiting] = useState("...");
     const [tip, setTip] = useState("This is a really good tip.");
 
+    const [issueSubject, setIssueSubject] = useState("");
+
     //variables for managing polling the server
     let polling = false;
     let timeoutId = 0;
@@ -91,7 +93,7 @@ function StudentWaitingRoom(props) {
         })
             .then((response) => response.json())
             .then((data) => {
-                console.log("Data is: ", data);
+                console.log("Tip data is: ", data);
                 let max = data.tips.length;
                 let randNum = Math.floor(Math.random() * max);
                 while (tip == data.tips[randNum]) {
@@ -118,7 +120,16 @@ function StudentWaitingRoom(props) {
         })
             .then((response) => response.json())
             .then((data) => {
-                console.log("Data is: ", data);
+                console.log("Status data is: ", data);
+                const validData = Boolean(
+                    data && data.session && data.session.issue
+                );
+                console.log("validData is: ", validData);
+                if (validData) {
+                    const text = `${data["session"]["issue_subject"]}: ${data["session"]["issue"]}`;
+                    console.log("text is: ", text);
+                    setIssueSubject(text);
+                }
 
                 if (data.success !== "true") {
                     console.log("Waiting room: Something went wrong");
@@ -199,7 +210,7 @@ function StudentWaitingRoom(props) {
         })
             .then((response) => response.json())
             .then((data) => {
-                console.log("Data is: ", data);
+                console.log("Req leave queue data is: ", data);
 
                 if (data.success === "true") {
                     console.log("Left queue");
@@ -229,7 +240,7 @@ function StudentWaitingRoom(props) {
             <div>
                 <button onClick={leaveQueue}>Leave queue</button>
             </div>
-            <Chat url={url} docRoot={docRoot} />
+            <Chat url={url} docRoot={docRoot} issueSubject={issueSubject} />
         </div>
     );
 }

@@ -12,6 +12,15 @@ import SimpleDialog from "./utils/SimpleDialog";
 const Chat = (props) => {
     const url = props.url;
     const docRoot = props.docRoot;
+    const issueSubject = props.issueSubject;
+
+    const isValidIssueSubject = (issueSubject) => {
+        return (
+            issueSubject &&
+            typeof issueSubject === "string" &&
+            issueSubject.trim() !== ""
+        );
+    };
 
     const getUserAndCourseID = () => {
         if (localStorage.getItem("asci-user") === null) {
@@ -36,17 +45,9 @@ const Chat = (props) => {
         config: config.slow,
     });
 
-    // Trigger the animation when the component mounts
-    React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsVisible(true);
-        }, 200);
-        return () => clearTimeout(timer); // Clear the timer if the component unmounts
-    }, []);
-
     const [newChatQuestion, setNewChatQuestion] = useState({
         assignmentName: "",
-        studentQuestion: "",
+        studentQuestion: isValidIssueSubject(issueSubject) ? issueSubject : "",
     });
 
     const [followupQuestion, setFollowupQuestion] = useState("");
@@ -54,6 +55,22 @@ const Chat = (props) => {
     const [conversationStarted, setConversationStarted] = useState(false);
     const [llmProcessing, setLlmProcessing] = useState(false);
     const [chatHistory, setChatHistory] = useState([]);
+
+    React.useEffect(() => {
+        console.log("useEffect run; issueSubject: ", issueSubject);
+        if (isValidIssueSubject(issueSubject)) {
+            const autofilledQuestion = {
+                assignmentName: "",
+                studentQuestion: issueSubject,
+            };
+            const apiInput = { command: "newLlmChat", ...autofilledQuestion };
+            console.log(apiInput);
+            console.log("autofilling chat with issueSubject");
+            getLlmResponse(apiInput, url);
+            setConversationStarted(true);
+            console.log("chat autofilled with issueSubject");
+        }
+    }, [issueSubject]);
 
     const handleNewChatInputChange = (e) => {
         const { name, value } = e.target;
