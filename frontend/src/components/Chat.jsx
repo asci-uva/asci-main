@@ -63,12 +63,14 @@ const Chat = (props) => {
                 assignmentName: "",
                 studentQuestion: issueSubject,
             };
+            setNewChatQuestion(autofilledQuestion);
             const apiInput = { command: "newLlmChat", ...autofilledQuestion };
             console.log(apiInput);
             console.log("autofilling chat with issueSubject");
             getLlmResponse(apiInput, url);
             setConversationStarted(true);
             console.log("chat autofilled with issueSubject");
+            console.log("newChatQuestion: ", newChatQuestion);
         }
     }, [issueSubject]);
 
