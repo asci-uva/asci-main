@@ -1364,4 +1364,19 @@ class ServerExecutor{
 
         return $result;
     }
+
+    public function getPointsForUserHandler($computing_id){
+        $result = [];
+
+        $points = (new \asci\server\database\DBUserQuest($this->db))->getPointsForUser($computing_id);
+
+        if ($points === null) {
+            $result["points"] = 0;
+        }
+        else {  
+            $result["points"] = $points;
+        }
+        $result["success"] = "true";
+        return $result;
+    }
 }

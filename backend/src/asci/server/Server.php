@@ -429,7 +429,10 @@ class Server
             case "getQuestsForUser":
                 $this->setResponse($executor->getQuestsForUserHandler($user));
                 break;
-            
+
+            case "getPointsForUser":
+                $this->setResponse($executor->getPointsForUserHandler($user));
+                break;            
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/
 

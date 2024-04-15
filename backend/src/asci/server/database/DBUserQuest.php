@@ -49,4 +49,14 @@ class DBUserQuest
 
         return $toReturn;
     }
+
+    public function getPointsForUser($computing_id)
+    {
+        $query = 'select sum(total_points) from (quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id where computing_id=$1 and status=\'Completed\'';
+
+        $result = $this->db->query($query, array($computing_id));
+        $row = $this->db->fetchrow($result);
+
+        return $row["sum"];
+    }
 }

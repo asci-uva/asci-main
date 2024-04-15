@@ -77,7 +77,6 @@ function QuestList(props) {
         <div>
             <h1>All Quests for {user}</h1>
             <div>
-                {console.log("card list")}
                 {Object.keys(quests).map((questId) => {
                     return <QuestCard currentQuest={quests[questId]} key={questId} />
                 })}

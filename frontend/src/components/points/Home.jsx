@@ -2,6 +2,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import QuestList from "./QuestList";
+import StudentPoints from "./StudentPoints";
 
 //This page needs to:
 //See if student is logged in and kick to login page if not
@@ -28,6 +29,11 @@ function Home(props) {
   
   return (
     <div className="question">
+      <StudentPoints
+        documentRoot={props.documentRoot}
+        debugMode={props.debugMode}
+        url={props.url}
+      />
       <QuestList
         documentRoot={props.documentRoot}
         debugMode={props.debugMode}
