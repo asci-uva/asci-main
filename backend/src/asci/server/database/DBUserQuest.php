@@ -31,11 +31,11 @@ class DBUserQuest
      * Fetches all the quests for a given computing_id and loads them into
      * UserQuest objects. Returns the array of UserQuest objects.
      */
-    public function getQuestsForUser($computing_id)
+    public function getQuestsForUser($computing_id, $course_id)
     {
-        $query = 'select quest_id,user_id,status,name,description,total_points from (quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id where computing_id=$1';
+        $query = 'select quest_id,user_id,status,mnemonic,name,description,total_points from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) Qs NATURAL JOIN course_quests CQ where computing_id=$1 and course_id=$2';
 
-        $result = $this->db->query($query, array($computing_id));
+        $result = $this->db->query($query, array($computing_id, $course_id));
 
         $quests = $this->db->fetchAll($result);
 
@@ -50,13 +50,32 @@ class DBUserQuest
         return $toReturn;
     }
 
-    public function getPointsForUser($computing_id)
+    public function getPointsForUser($computing_id, $course_id)
     {
-        $query = 'select sum(total_points) from (quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id where computing_id=$1 and status=\'Completed\'';
+        $query = 'select sum(total_points) from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) Qs NATURAL JOIN course_quests CQ where computing_id=$1 and course_id=$2 and status=\'Completed\'';
 
-        $result = $this->db->query($query, array($computing_id));
+        $result = $this->db->query($query, array($computing_id, $course_id));
         $row = $this->db->fetchrow($result);
 
         return $row["sum"];
+    }
+
+    public function updateQuestStatus($quest_id, $user_id, $status)
+    {
+        $query = 'update user_quests set status = $3 where quest_id = $1 and user_id = $2';
+        $params = array($quest_id, $user_id, $status);
+
+        try {
+            $result = $this->db->query($query, $params);
+            if ($result) {
+                return true;
+            } else {
+                $this->logger->error("Failed to update status for user: $user_id , quest with ID: $quest_id");
+                return false; 
+            }
+        } catch (\Exception $e) {
+            $this->logger->error("Error updating quest status: " . $e->getMessage());
+            return false;
+        }
     }
 }

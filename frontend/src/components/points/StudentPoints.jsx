@@ -21,14 +21,15 @@ function StudentPoints(props) {
             let request = {};
             request.command = "getPointsForUser";
             request.user = localStorage.getItem('asci-user');
-            getQuests(request, url);
+            request.courseId = localStorage.getItem('asci-course');
+            getPoints(request, url);
         }
         else {
             navigate(docRoot + "/login");
         }
     }, []);
 
-    const getQuests = (json0, url0) => {
+    const getPoints = (json0, url0) => {
         fetch(url0, {
             method: 'POST', // or 'PUT'
             headers: {

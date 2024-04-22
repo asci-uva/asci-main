@@ -2,12 +2,10 @@
 
 namespace asci\data;
 
-class UserQuest implements \Serializable {
+class CourseQuest implements \Serializable {
 
     private $quest_id;
-    private $user_id;
-    private $status;
-    private $mnemonic;
+    private $course_id;
     private $name;
     private $description;
     private $total_points;
@@ -24,19 +22,12 @@ class UserQuest implements \Serializable {
         return $this->quest_id;
     }
 
-    public function getUserId()
+    public function getCourseId()
     {
-        return $this->user_id;
+        return $this->course_id;
     }
 
-    public function getQuestCompletionStatus()
-    {
-        return $this->status;
-    }
-    public function getMnemonic()
-    {
-        return $this->mnemonic;
-    }
+    
     public function getName()
     {
         return $this->name;
@@ -52,18 +43,11 @@ class UserQuest implements \Serializable {
         return $this->total_points;
     }
 
-    public function setQuestCompletionStatus($status)
-    {
-        $this->status = $status;
-    }
-
     // Populate properties from an array
     public function fromArray($data)
     {
         $this->quest_id = $data['quest_id'] ?? null;
-        $this->user_id = $data['user_id'] ?? null;
-        $this->status = $data['status'] ?? null;
-        $this->mnemonic = $data['mnemonic'] ?? null;
+        $this->course_id = $data['course_id'] ?? null;
         $this->name = $data['name'] ?? null;
         $this->description = $data['description'] ?? null;
         $this->total_points = $data['total_points'] ?? null;
@@ -75,9 +59,7 @@ class UserQuest implements \Serializable {
     {
         return array(
             "quest_id" => $this->quest_id,
-            "user_id" => $this->user_id,
-            "status" => $this->status,
-            "mnemonic" => $this->mnemonic,
+            "course_id" => $this->course_id,
             "name" => $this->name,
             "description" => $this->description,
             "total_points" => $this->total_points,

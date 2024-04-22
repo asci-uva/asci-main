@@ -144,9 +144,10 @@ CREATE TABLE submissions (
   FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-
+-- Quest Tables
 CREATE TABLE quests (
   id SERIAL PRIMARY KEY,
+  mnemonic VARCHAR(10),
   name TEXT,
   description TEXT,
   total_points INT
@@ -163,7 +164,6 @@ CREATE TABLE course_quests (
   quest_id INT,
   course_id INT,
   PRIMARY KEY (course_id, quest_id)
-  FOREIGN KEY (course_id) REFERENCES courses (id)
 );
 
 CREATE TYPE quest_completion_status AS ENUM (
@@ -261,11 +261,11 @@ VALUES
 
 
 -- Quest data
-INSERT INTO quests (id, name, description , total_points)
-VALUES (1, 'Attend Office Hours Once', 'Go to office hours for the first time', 10);
+INSERT INTO quests (id, mnemonic, name, description , total_points)
+VALUES (1, 'OH1', 'Attend Office Hours Once', 'Get help at office hours for the one time, minimum 5 minutes', 10);
 
-INSERT INTO quests (id, name, description , total_points)
-VALUES (2, 'Attend Office Hours Twice', 'Go to office hours for the second time', 10);
+INSERT INTO quests (id, mnemonic, name, description , total_points)
+VALUES (2, 'OH2', 'Attend Office Hours Twice', 'Get help at office hours for the two times, minimum 5 minutes', 10);
 
 ALTER TABLE user_quests ADD FOREIGN KEY (user_id) REFERENCES users (id);
 
@@ -277,3 +277,15 @@ VALUES (1, 1, 'Not started');
 INSERT INTO user_quests (quest_id, user_id, status)
 VALUES (2, 1, 'Not started');
 
+
+INSERT INTO course_quests (quest_id, course_id)
+VALUES (1, 1);
+
+INSERT INTO course_quests (quest_id, course_id)
+VALUES (2, 1);
+
+INSERT INTO sessions (id, course_id, fulfillment_time, exit_time)
+VALUES (1, 1, '2024-01-08 04:05:00', '2024-01-08 04:10:00');
+
+INSERT INTO session_users (session_id, user_id)
+VALUES (1, 1);

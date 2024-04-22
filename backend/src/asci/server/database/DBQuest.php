@@ -45,30 +45,10 @@ class DBQuest
         return $quest;
     }
 
-    // public function getAssignmentsByCourseId($course_id)
-    // {
-    //     $query = 'select * from quests where course_id = $1';
-        
-    //     $result = $this->db->query($query, array($course_id));
-
-    //     if (!$result) {
-    //         $this->logger->error("Failed to retrieve quests for course ID: $course_id");
-    //         return false;
-    //     }
-
-    //     $quests = [];
-    //     while ($row = $this->db->fetchrow($result)) {
-    //         $quests[] = new \asci\data\Quest($row);
-    //     }
-
-    //     return $quests;
-    // }
-
-
-    public function updateQuest($quest_id, $course_id, $name, $description, $total_points)
+    public function updateQuest($quest_id, $mnemonic, $name, $description, $total_points)
     {
-        $query = 'update quests set course_id = $2, name = $3, description = $4, total_points = $5, where id = $1';
-        $params = array($quest_id, $course_id, $name, $description, $total_points);
+        $query = 'update quests set mnemonic = $2, name = $3, description = $4, total_points = $5, where id = $1';
+        $params = array($quest_id, $mnemonic, $name, $description, $total_points);
 
         try {
             $result = $this->db->query($query, $params);
@@ -84,10 +64,10 @@ class DBQuest
         }
     }
 
-    public function createQuest($quest_id, $course_id, $name, $description, $total_points) {
-        // Insert the new assignment into the 'assignments' table
-        $insertQuestQuery = 'insert into quests (course_id, name, description, total_points) value ($1, $2, $3, $4) returning id';
-        $params = array($course_id, $name, $description, $total_points);
+    public function createQuest($quest_id, $mnemonic, $name, $description, $total_points) {
+        // Insert the new quest into the 'quests' table
+        $insertQuestQuery = 'insert into quests (mnemonic, name, description, total_points) value ($1, $2, $3, $4, $5) returning id';
+        $params = array($mnemonic, $name, $description, $total_points);
     
         $result = $this->db->query($insertQuestQuery, $params);
     
@@ -101,5 +81,4 @@ class DBQuest
 
         return $questId;
     }
-
 }

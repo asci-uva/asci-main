@@ -5,6 +5,7 @@ namespace asci\data;
 class Quest implements \Serializable
 {
     private $id;
+    private $mnemonic;
     private $name;
     private $description;
     private $total_points;
@@ -19,6 +20,12 @@ class Quest implements \Serializable
     {
         return $this->id;
     }
+
+    public function getMnemonic()
+    {
+        return $this->mnemonic;
+    }
+
 
     public function getName()
     {
@@ -39,9 +46,10 @@ class Quest implements \Serializable
     public function fromArray($data)
     {
         $this->id = $data['id'] ?? null;
+        $this->id = $data['mnemonic'] ?? null;
         $this->name = $data['name'] ?? null;
         $this->description = $data['description'] ?? null;
-        $this->max_score = $data['total_points'] ?? null;
+        $this->total_point = $data['total_points'] ?? null;
         return $this;
     }
 
@@ -50,6 +58,7 @@ class Quest implements \Serializable
     {
         return array(
             "id" => $this->id,
+            "mnemonic" => $this->id,
             "name" => $this->name,
             "description" => $this->description,
             "total_points" => $this->total_points,

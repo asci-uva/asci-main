@@ -427,11 +427,15 @@ class Server
 
             // Points system method 
             case "getQuestsForUser":
-                $this->setResponse($executor->getQuestsForUserHandler($user));
+                $courseId = $this->input["courseId"];
+
+                $this->setResponse($executor->getQuestsForUserHandler($user, $courseId));
                 break;
 
             case "getPointsForUser":
-                $this->setResponse($executor->getPointsForUserHandler($user));
+                $courseId = $this->input["courseId"];
+                
+                $this->setResponse($executor->getPointsForUserHandler($user, $courseId));
                 break;            
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/

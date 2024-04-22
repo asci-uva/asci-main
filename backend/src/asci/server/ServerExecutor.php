@@ -1348,13 +1348,17 @@ class ServerExecutor{
     }
     
 
-    public function getQuestsForUserHandler($computing_id){
+    public function getQuestsForUserHandler($computing_id, $course_id){
         $result = [];
 
-        $quests = (new \asci\server\database\DBUserQuest($this->db))->getQuestsForUser($computing_id);
-
+        $quests = (new \asci\server\database\DBUserQuest($this->db))->getQuestsForUser($computing_id, $course_id);
         $result["quests"] = [];
+
+        $status = new  \asci\data\QuestInfo\QuestStatus($this->db, $course_id);
+
         foreach ($quests as $quest){
+            // modify the quest status
+            $status -> changeStatus($quest);
             $result["quests"][$quest->getQuestId()] = $quest->toArray();
         }
 
@@ -1365,10 +1369,10 @@ class ServerExecutor{
         return $result;
     }
 
-    public function getPointsForUserHandler($computing_id){
+    public function getPointsForUserHandler($computing_id, $course_id){
         $result = [];
 
-        $points = (new \asci\server\database\DBUserQuest($this->db))->getPointsForUser($computing_id);
+        $points = (new \asci\server\database\DBUserQuest($this->db))->getPointsForUser($computing_id, $course_id);
 
         if ($points === null) {
             $result["points"] = 0;

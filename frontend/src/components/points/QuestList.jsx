@@ -24,6 +24,7 @@ function QuestList(props) {
             let request = {};
             request.command = "getQuestsForUser";
             request.user = localStorage.getItem('asci-user');
+            request.courseId = localStorage.getItem('asci-course');
             getQuests(request, url);
         }
         else {
