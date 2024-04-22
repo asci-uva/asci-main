@@ -15,6 +15,8 @@ const Chat = (props) => {
     const issueSubject = props.issueSubject;
     const courseName = props.courseName;
 
+    console.log("courseName in Chat: ", courseName);
+
     const isValidIssueSubject = (issueSubject) => {
         return (
             issueSubject &&
@@ -362,12 +364,11 @@ const Chat = (props) => {
         );
     };
 
-    const noDisplay =
-        !courseName ||
-        !courseName.includes("DSA") ||
-        !courseName.includes("CSO1");
+    const display =
+        courseName &&
+        (courseName.includes("DSA") || courseName.includes("CSO"));
 
-    if (noDisplay) {
+    if (!display) {
         return null;
     }
 
