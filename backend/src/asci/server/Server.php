@@ -375,8 +375,16 @@ class Server
                 $this->setResponse($executor->clearQueue($user, $courseId));
                 
                 break;
-        
 
+            case "newLlmChat":
+                $result = $executor->startLlmChat($this->input);
+                $this->setResponse($result);
+                break;
+
+            case "followupLlmChat":
+                $result = $executor->startLlmChat($this->input);
+                $this->setResponse($result);
+                break;
 
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/

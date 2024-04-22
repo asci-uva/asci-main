@@ -1,0 +1,9 @@
+Student question:
+```
+{student_question}
+```
+
+Your answer:
+```
+{llm_response}
+```

@@ -1220,5 +1220,41 @@ class ServerExecutor{
         return $this->userStore->register($data["userid"],$data["password"]);
     }
 
+    public function startLlmChat($data) {
+        
+        // similar to $cosSim
+        $chat = new \asci\util\LlmChat();
+
+        // always print "received data" in all situations
+        // echo "=======\n";   
+
+        /* Get the matches among everything */
+        $buffer = $chat->getLlmResponse($data);
+
+        $this->logger->info("LLM Chat Buffer", array("buffer" => $buffer));
+
+        /* If the LLM Chat call failed, report that to frontend */
+        if($buffer == null || $buffer[0] != 0) return $this->err("LLM Chat call failed");
+
+        /* We made it, return the sessions (up to max) that we care about */
+        $jsonResponse = $buffer[1];
+
+
+        // Log the response into the database
+        $computing_id = $data["user"];
+        $user = $this->userStore->getUser($computing_id)->toArray();
+        $user_id = $user["id"];
+
+        $dbLogger = new \asci\server\database\DBLogs($this->db);
+        $type = $data["command"];
+        $studentString = json_encode(["role" => "user", "content" => $data["studentQuestion"]]);
+        $logString = $studentString . ":" . $jsonResponse;
+
+        $dbLogger->log($user_id, $type, $logString);
+
+        $result = [];
+        $result["response"] = $jsonResponse;
+        return $result;
+    }
     
 }

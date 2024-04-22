@@ -20,4 +20,13 @@ RUN pip install pandas
 RUN pip install numpy
 RUN pip install -U scikit-learn
 
+
+RUN pip install -U openai
+RUN pip install -U python-dotenv 
+RUN pip install -U llama-index-core
+RUN pip install -U llama-index-readers-file
+RUN pip install -U llama-index-embeddings-openai
+RUN pip install -U pip install llama-index-llms-openai
+RUN pip install -U pip install llama-index-embeddings-huggingface
+
 RUN service apache2 restart

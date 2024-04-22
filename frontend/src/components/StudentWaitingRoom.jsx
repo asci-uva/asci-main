@@ -1,256 +1,255 @@
 import React from "react";
-import {useState, useEffect} from "react";
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Chat from "./Chat";
 
 function StudentWaitingRoom(props) {
+    const navigate = useNavigate();
 
-	const navigate = useNavigate();
+    const [position, setPosition] = useState(-1);
+    const [courseName, setCourseName] = useState("...");
+    const [minsWaiting, setMinsWaiting] = useState("...");
+    const [tip, setTip] = useState("This is a really good tip.");
 
-	const [position, setPosition] = useState(-1);
-	const [courseName, setCourseName] = useState("...");
-  const [minsWaiting, setMinsWaiting] = useState("...");
-  const [tip, setTip] = useState("This is a really good tip.");
-	
-	//variables for managing polling the server
-	let polling = false;
-	let timeoutId = 0;
-  let pollTime = 3000;
+    const [issueSubject, setIssueSubject] = useState("");
 
-	let user = null;
-	let courseId = null;
+    //variables for managing polling the server
+    let polling = false;
+    let timeoutId = 0;
+    let pollTime = 3000;
 
-	let url = props.url;
-  let docRoot = props.documentRoot; 
-  
+    let user = null;
+    let courseId = null;
+
+    let url = props.url;
+    let docRoot = props.documentRoot;
+
     //This function runs on page load!
     useEffect(() => {
+        //Make sure id and course are set
+        if (localStorage.getItem("asci-user") === null) {
+            navigate(docRoot + "/login");
+        } else if (localStorage.getItem("asci-course") === null) {
+            navigate(docRoot + "/selectCourse");
+        } else {
+            console.log("StudWait: Setting user and course id");
+            user = localStorage.getItem("asci-user");
+            courseId = localStorage.getItem("asci-course");
+            console.log("StudWait: User: " + user);
+            console.log("StudWait: Course: " + courseId);
 
-      //Make sure id and course are set
-      if(localStorage.getItem('asci-user') === null){
-        navigate(docRoot + "/login");
-      }
-      else if(localStorage.getItem('asci-course') === null){
-        navigate(docRoot + "/selectCourse");
-      }
-      else{
+            console.log("waiting room mounted, start polling");
+            polling = true;
+            poll();
 
-        console.log("StudWait: Setting user and course id");
-        user = localStorage.getItem('asci-user');
-        courseId = localStorage.getItem('asci-course');
-        console.log("StudWait: User: " + user);
-        console.log("StudWait: Course: " + courseId);
+            getTip();
+        }
 
-      	console.log("waiting room mounted, start polling");
-      	polling = true;
-      	poll();
-
-        getTip();
-      }
-
-    	//called when this component unmounts
-    	return () => {
+        //called when this component unmounts
+        return () => {
             console.log("Waiting room: Stopping polling");
             clearTimeout(timeoutId);
             polling = false;
-        }
-      
+        };
     }, []);
 
-    
+    function poll() {
+        if (localStorage.getItem("asci-user") === null) {
+            navigate(docRoot + "/login");
+        } else if (localStorage.getItem("asci-course") === null) {
+            navigate(docRoot + "/selectCourse");
+        } else {
+            console.log("waitingRoom...polling for queue position");
 
- 	function poll(){
+            user = localStorage.getItem("asci-user");
+            courseId = localStorage.getItem("asci-course");
 
-    if(localStorage.getItem('asci-user') === null){
-        navigate(docRoot + "/login");
-    }
-    else if(localStorage.getItem('asci-course') === null){
-        navigate(docRoot + "/selectCourse");
-    }
-    else{
-
-     		console.log("waitingRoom...polling for queue position");
-
-        user = localStorage.getItem('asci-user');
-        courseId = localStorage.getItem('asci-course');
-        
-        //setup json command
-        let request = {};
-        request.command = "getQueueStatus";
-        request.user = user;
-        request.courseId = courseId;
-        getStatus(request, url); 
-
-    }
-	      
-	      
- 	}
-    //get another tip
-   //This function checks the users queue status and updates things
-
-  const getTip = (e) => {
-    // e.preventDefault();
-
-    let request = {};
-    request.user = user;
-    request.command = "getTip";
-    fetchTip(request,url);
-  }
-  const fetchTip = (json0, url0) =>{
-    fetch(url0, {
-      method: 'POST', // or 'PUT'
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(json0),
-    }).then(response => response.json())
-    .then(data => {
-        console.log("Data is: ", data);
-        let max = data.tips.length;
-        let randNum =  Math.floor(Math.random() * max);
-        while (tip == data.tips[randNum]){
-          randNum = Math.floor(Math.random() * max);
+            //setup json command
+            let request = {};
+            request.command = "getQueueStatus";
+            request.user = user;
+            request.courseId = courseId;
+            getStatus(request, url);
         }
-        setTip(data.tips[randNum]);
-        
-      })
-      .catch((error) => {
-        console.log("There was an error:", error);
-        navigate(docRoot + "/error");   
-      });
-  }
-
-    const thisHelped = () =>{
-
     }
+    //get another tip
+    //This function checks the users queue status and updates things
 
+    const getTip = (e) => {
+        // e.preventDefault();
+
+        let request = {};
+        request.user = user;
+        request.command = "getTip";
+        fetchTip(request, url);
+    };
+    const fetchTip = (json0, url0) => {
+        fetch(url0, {
+            method: "POST", // or 'PUT'
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(json0),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log("Tip data is: ", data);
+                let max = data.tips.length;
+                let randNum = Math.floor(Math.random() * max);
+                while (tip == data.tips[randNum]) {
+                    randNum = Math.floor(Math.random() * max);
+                }
+                setTip(data.tips[randNum]);
+            })
+            .catch((error) => {
+                console.log("There was an error:", error);
+                navigate(docRoot + "/error");
+            });
+    };
+
+    const thisHelped = () => {};
 
     //This function checks the users queue status and updates things
-    const getStatus = (json0, url0) =>{
-      fetch(url0, {
-        method: 'POST', // or 'PUT'
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(json0),
-      }).then(response => response.json())
-      .then(data => {
-          console.log("Data is: ", data);
-          
-          if(data.success !== "true"){
-          	console.log("Waiting room: Something went wrong");          	
-            navigate(docRoot + "/error");
-          }
-
-          else if(data.session === null){
-            console.log("Student doesn't have a session");
-            navigate(docRoot + "/joinQueue");
-          }
-
-          else if(data.session.status === "in_progress"){
-            console.log("Being helped now!");
-            navigate(docRoot + "/studentMeeting");
-          }
-
-          else if(data.session.status === "waiting" || data.session.status === "grouping"){
-            console.log("WR: Displaying new queue position");
-            setCourseName(data.usercourse.name);
-            setPosition(5);
-            
-            //Get the start date
-            console.log("Date now is: " + Date.now());
-            console.log("Date of entry time is: " + (new Date(data.session.entry_time).getTime()));
-            let waitTime = parseInt((Date.now() - (new Date(data.session.entry_time).getTime())) / 1000 / 60, 10);
-            setMinsWaiting(waitTime);
-            
-
-            if(polling == true){
-            	console.log("WR: Setting timeout for next poll");
-            	timeoutId = setTimeout(poll, pollTime);
-        	  }
-          }
-
-          else{
-            console.log("StudentWaitingRoom: Something went wrong!");
-            navigate(docRoot + "/error");
-          }
-          
+    const getStatus = (json0, url0) => {
+        fetch(url0, {
+            method: "POST", // or 'PUT'
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(json0),
         })
-        .catch((error) => {
-          console.log("Waiting room: There was an error:", error);
-          navigate(docRoot + "/error");
-          
-        });
-  	}
-    
+            .then((response) => response.json())
+            .then((data) => {
+                console.log("Status data is: ", data);
+                const validData = Boolean(
+                    data && data.session && data.session.issue
+                );
+                console.log("validData is: ", validData);
+                if (validData) {
+                    const text = `${data["session"]["issue_subject"]}: ${data["session"]["issue"]}`;
+                    console.log("text is: ", text);
+                    setIssueSubject(text);
+                }
 
-  	const leaveQueue = (e) =>{
-	    e.preventDefault();
-    
-      if(localStorage.getItem('asci-user') === null){
-        navigate(docRoot + "/login");
-      }
-      else if(localStorage.getItem('asci-course') === null){
-        navigate(docRoot + "/selectCourse");
-      }
-      else{
+                if (data.success !== "true") {
+                    console.log("Waiting room: Something went wrong");
+                    navigate(docRoot + "/error");
+                } else if (data.session === null) {
+                    console.log("Student doesn't have a session");
+                    navigate(docRoot + "/joinQueue");
+                } else if (data.session.status === "in_progress") {
+                    console.log("Being helped now!");
+                    navigate(docRoot + "/studentMeeting");
+                } else if (
+                    data.session.status === "waiting" ||
+                    data.session.status === "grouping"
+                ) {
+                    console.log("WR: Displaying new queue position");
+                    setCourseName(data.usercourse.name);
+                    setPosition(5);
 
-        user = localStorage.getItem('asci-user');
-        courseId = localStorage.getItem('asci-course');	    
+                    //Get the start date
+                    console.log("Date now is: " + Date.now());
+                    console.log(
+                        "Date of entry time is: " +
+                            new Date(data.session.entry_time).getTime()
+                    );
+                    let waitTime = parseInt(
+                        (Date.now() -
+                            new Date(data.session.entry_time).getTime()) /
+                            1000 /
+                            60,
+                        10
+                    );
+                    setMinsWaiting(waitTime);
 
-  	    //JOIN THE QUEUE
-  	    let request = {};
-  	    request.command = "leaveQueue";
-        
-  	    request.user = user;
-        request.courseId = courseId;
-  	    reqLeaveQueue(request, url); 
-      }
+                    if (polling == true) {
+                        console.log("WR: Setting timeout for next poll");
+                        timeoutId = setTimeout(poll, pollTime);
+                    }
+                } else {
+                    console.log("StudentWaitingRoom: Something went wrong!");
+                    navigate(docRoot + "/error");
+                }
+            })
+            .catch((error) => {
+                console.log("Waiting room: There was an error:", error);
+                navigate(docRoot + "/error");
+            });
+    };
 
-  	}
+    const leaveQueue = (e) => {
+        e.preventDefault();
 
-  	//This function attempts to leave the queue
-    const reqLeaveQueue = (json0, url0) =>{
-      fetch(url0, {
-        method: 'POST', // or 'PUT'
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(json0),
-      }).then(response => response.json())
-      .then(data => {
-          console.log("Data is: ", data);
-          
-          if(data.success === "true"){
-          	console.log("Left queue");
-            navigate(docRoot + "/joinQueue");
-          }
-          else{
-          	console.log("Leaving queue failed");
-          	navigate(docRoot + "/error");
-          }
+        if (localStorage.getItem("asci-user") === null) {
+            navigate(docRoot + "/login");
+        } else if (localStorage.getItem("asci-course") === null) {
+            navigate(docRoot + "/selectCourse");
+        } else {
+            user = localStorage.getItem("asci-user");
+            courseId = localStorage.getItem("asci-course");
 
-          
+            //JOIN THE QUEUE
+            let request = {};
+            request.command = "leaveQueue";
+
+            request.user = user;
+            request.courseId = courseId;
+            reqLeaveQueue(request, url);
+        }
+    };
+
+    //This function attempts to leave the queue
+    const reqLeaveQueue = (json0, url0) => {
+        fetch(url0, {
+            method: "POST", // or 'PUT'
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(json0),
         })
-        .catch((error) => {
-          console.log("Waiting room: There was an error leaving the queue:", error);
-          navigate(docRoot + "/error");
-          
-        });
-  	}
+            .then((response) => response.json())
+            .then((data) => {
+                console.log("Req leave queue data is: ", data);
 
-  
-	return (
-		<div className="question">
-			<div>
-	  		<h4>You are currently in the queue for { courseName }. A TA Will be with you shortly. </h4>
-	  	</div>
-		  	<div>
-        		<button onClick={leaveQueue}>Leave queue</button>
-      	</div>
-        <br></br>
-      
-		</div>
-	);
+                if (data.success === "true") {
+                    console.log("Left queue");
+                    navigate(docRoot + "/joinQueue");
+                } else {
+                    console.log("Leaving queue failed");
+                    navigate(docRoot + "/error");
+                }
+            })
+            .catch((error) => {
+                console.log(
+                    "Waiting room: There was an error leaving the queue:",
+                    error
+                );
+                navigate(docRoot + "/error");
+            });
+    };
+
+    return (
+        <div className="question">
+            <div>
+                <h4>
+                    You are currently in the queue for {courseName}. A TA Will
+                    be with you shortly.{" "}
+                </h4>
+            </div>
+            <div style={{ marginBottom: "0px" }}>
+                <button style={{ marginBottom: "15px" }} onClick={leaveQueue}>
+                    Leave queue
+                </button>
+            </div>
+            <Chat
+                url={url}
+                docRoot={docRoot}
+                issueSubject={issueSubject}
+                courseName={courseName}
+            />
+        </div>
+    );
 }
 
 export default StudentWaitingRoom;
