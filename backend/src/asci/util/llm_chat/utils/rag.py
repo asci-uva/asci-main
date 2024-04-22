@@ -5,14 +5,16 @@ from llama_index.core import (
     StorageContext,
     load_index_from_storage,
 )
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.core import Settings
 import sys
 import os
 import traceback
+from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
 
-openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # Get the directory of the current script
 script_directory = os.path.abspath(os.path.dirname(__file__))
@@ -28,10 +30,15 @@ DEV_MODE = False
 PERSIST_DIR = "./storage" if DEV_MODE else "/opt/src/asci/util/llm_chat/storage"
 DATA_DIR = "./data" if DEV_MODE else "/opt/src/asci/util/llm_chat/data"
 
+Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+
 
 def load_rag_index():
-    if not os.path.exists(PERSIST_DIR):
+    dir = Path(PERSIST_DIR)
+    dir_exists = os.path.exists(dir)
+    doc_file_exists = os.path.exists(dir / "docstore.json")
 
+    if not (dir_exists and doc_file_exists):
         # load the documents and create the index
         documents = SimpleDirectoryReader(DATA_DIR, recursive=True).load_data()
 
