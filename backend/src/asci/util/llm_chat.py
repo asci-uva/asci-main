@@ -4,6 +4,8 @@ from llm_chat.constants import LLAMAFILE_KEY_PLACEHOLDER, LLAMAFILE_BASE_URL
 
 MOCKING_LLM_RESPONSE = False
 
+RUN_MAIN = False
+
 MOCK_NEWCHAT_RESPONSE = {
     "role": "assistant",
     "content": "Hello from LLM chat! You started a new chat.",
@@ -70,3 +72,16 @@ if dataIn:
     res = get_llm_response(input_object)
     json_res = json.dumps(res)
     print(json_res, end="")
+
+if RUN_MAIN:
+
+    print("run main")
+    dataIn = [
+        '{"command":"newLlmChat","assignmentName":"","studentQuestion":"hw2: homework help","user":"mrf8t"}',
+        "-1",
+    ]
+    if dataIn:
+        input_object = json.loads(dataIn[0])
+        res = get_llm_response(input_object)
+        json_res = json.dumps(res)
+        print(json_res, end="")

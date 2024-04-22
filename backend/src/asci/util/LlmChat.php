@@ -100,6 +100,11 @@ class LlmChat
             // proc_close in order to avoid a deadlock
             $return_value = proc_close($process);
 
+            if ($return_value == 1) {
+                $this->logger->error("Process ended with an error: " . $error);
+                echo "Detailed Error: " . $error . "\n";
+            }
+
             return [$return_value, $output, $error];
         }
 
