@@ -242,7 +242,12 @@ function StudentWaitingRoom(props) {
                     Leave queue
                 </button>
             </div>
-            <Chat url={url} docRoot={docRoot} issueSubject={issueSubject} />
+            <Chat
+                url={url}
+                docRoot={docRoot}
+                issueSubject={issueSubject}
+                courseName={courseName}
+            />
         </div>
     );
 }

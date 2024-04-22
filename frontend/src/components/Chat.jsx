@@ -13,6 +13,7 @@ const Chat = (props) => {
     const url = props.url;
     const docRoot = props.docRoot;
     const issueSubject = props.issueSubject;
+    const courseName = props.courseName;
 
     const isValidIssueSubject = (issueSubject) => {
         return (
@@ -360,6 +361,15 @@ const Chat = (props) => {
             </form>
         );
     };
+
+    const noDisplay =
+        !courseName ||
+        !courseName.includes("DSA") ||
+        !courseName.includes("CSO1");
+
+    if (noDisplay) {
+        return null;
+    }
 
     return (
         <div className="flex flex-1 flex-col m-0">
