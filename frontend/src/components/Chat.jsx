@@ -365,8 +365,7 @@ const Chat = (props) => {
     };
 
     const display =
-        courseName &&
-        (courseName.includes("DSA") || courseName.includes("CSO"));
+        courseName && courseName.includes("Data Structures and Algorithms");
 
     if (!display) {
         return null;
