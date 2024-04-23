@@ -3,6 +3,7 @@ import json
 from llama_index.core.chat_engine import (
     CondensePlusContextChatEngine,
 )
+from llama_index.core import Settings
 from llama_index.core import PromptTemplate
 from .file_handler import FileHandler
 from .chat_history_formatter import ChatHistoryFormatter
@@ -13,10 +14,14 @@ from ..constants import (
     OPENAI_MAX_TOKENS,
     SHOWING_ONLY_ONE_CONTEXT,
     RAG_DISABLED,
+    LLAMAFILE_BASE_URL_HOME,
 )
+from llama_index.llms.llamafile import Llamafile
 from llama_index.core.chat_engine.types import AgentChatResponse
 from .rag import load_rag_index
 from .data_structures import OpenAIResponse
+
+Settings.llm = Llamafile(base_url=LLAMAFILE_BASE_URL_HOME)
 
 
 class GPTRunner:

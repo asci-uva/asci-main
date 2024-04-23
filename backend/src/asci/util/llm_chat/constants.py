@@ -29,3 +29,4 @@ RAG_DISABLED = False
 
 LLAMAFILE_KEY_PLACEHOLDER = "sk-no-key-required"
 LLAMAFILE_BASE_URL = "http://titanx01.cs.virginia.edu:8080/v1"
+LLAMAFILE_BASE_URL_HOME = "http://titanx01.cs.virginia.edu:8080"
