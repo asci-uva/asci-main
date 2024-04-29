@@ -4,6 +4,7 @@ import { Routes, Route, useNavigate } from "react-router-dom";
 import {
   Home,
   CreateNewCourse,
+  CreateNewQuest,
   Navigation,
   CourseManagement,
   UploadRoster,

@@ -34,6 +34,14 @@ function Navigation(props) {
                     Course Management
                   </NavLink>
                 </li>
+                <li className="nav-item">
+                  <NavLink
+                    className="nav-link"
+                    to={docRoot + "/createNewQuest"}
+                  >
+                    Create New Quest
+                  </NavLink>
+                </li>
                 {/* <li className="nav-item">
                   <NavLink className="nav-link" to={docRoot + "/uploadRoster"}>
                     Upload Roster

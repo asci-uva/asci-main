@@ -1,5 +1,6 @@
 export { default as Home } from "./Home";
 export { default as CreateNewCourse } from "./CreateNewCourse";
+export { default as CreateNewQuest } from "./CreateNewQuest";
 export { default as Navigation } from "./Navigation";
 export { default as CourseManagement } from "./CourseManagement";
 export { default as UploadRoster } from "./UploadRoster";
