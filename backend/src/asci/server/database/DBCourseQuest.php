@@ -49,4 +49,17 @@ class DBCourseQuest
 
         return $toReturn;
     }
+
+    public function addQuestsForCourse($quest_id, $course_id)
+    {
+        $query = 'insert into course_quests (quest_id, course_id) values ($1, $2)';
+
+        $result = $this->db->query($query, array($quest_id, $course_id));
+
+        if (!$result) {
+            $this->logger->error("Failed to create quest for course");
+            return false;
+        }
+        return true;
+    }
 }

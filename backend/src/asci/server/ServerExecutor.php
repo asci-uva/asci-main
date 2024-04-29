@@ -1383,4 +1383,34 @@ class ServerExecutor{
         $result["success"] = "true";
         return $result;
     }
+
+    public function createQuestForCourseHandler($courseId, $mnemonic, $name, $description, $total_points){
+        $questId = (new \asci\server\database\DBQuest($this->db))->createQuest($mnemonic, $name, $description, $total_points);
+        $result = [];
+        if ($questId) {
+            // add the newly created quest to the course
+            $courseQuestSuccess = (new \asci\server\database\DBCourseQuest($this->db))->addQuestsForCourse($questId, $courseId);
+            if ($courseQuestSuccess) {
+                // add the quest to users in the course 
+                $user_courses = (new \asci\server\database\DBUserCourse($this->db))->getUsersForCourse($courseId);
+                foreach ($user_courses as $u_c) {
+                    $user_id = ((new \asci\server\database\DBUser($this->db))->getUser($u_c -> getComputingId())) -> getId();
+                    $userQuestSuccess = (new \asci\server\database\DBUserQuest($this->db))->addQuestsForUser($questId, $user_id);
+                    if (!$userQuestSuccess) {
+                        $result["success"] = false;
+                        return $result;
+                    }
+                }
+            }
+            else {
+                $result["success"] = false;
+            }
+            $result["success"] = true;
+        } else {
+            $result["success"] = false;
+        }
+    
+        return $result;
+    }
+
 }

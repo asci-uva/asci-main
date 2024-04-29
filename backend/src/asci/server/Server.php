@@ -437,6 +437,19 @@ class Server
                 
                 $this->setResponse($executor->getPointsForUserHandler($user, $courseId));
                 break;            
+            
+            case "createQuestForCourse":
+                $courseId = $this->input["courseId"];
+                
+                $mnemonic = $this->input["mnemonic"];
+                $name = $this->input["name"];
+                $name = $this->input["name"];
+                $description = $this->input["description"];
+                $total_points = $this->input["total_points"];
+
+                $this->setResponse($executor->createQuestForCourseHandler($courseId, $mnemonic, $name, $description, $total_points));
+                break;
+
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/
 

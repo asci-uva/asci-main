@@ -64,9 +64,20 @@ class DBQuest
         }
     }
 
-    public function createQuest($quest_id, $mnemonic, $name, $description, $total_points) {
+    public function createQuest($mnemonic, $name, $description, $total_points) {
+         // check if the quest is already in the database or not
+         $checkQuestQuery = 'SELECT id FROM courses WHERE mnemonic = $1 AND name = $2 AND description = $3 AND total_points = $4';
+         $result = $this->db->query($checkQuestQuery, array($mnemonic, $name, $description, $total_points));
+ 
+         // if the course has been created, do not create it twice!
+         $row = $this->db->fetchrow($result);
+         if ($row) {
+             $this->logger->error("Quest already exists with ID: " . $row['id']);
+             return false;
+         }
+
         // Insert the new quest into the 'quests' table
-        $insertQuestQuery = 'insert into quests (mnemonic, name, description, total_points) value ($1, $2, $3, $4, $5) returning id';
+        $insertQuestQuery = 'insert into quests (mnemonic, name, description, total_points) values ($1, $2, $3, $4, $5) returning id';
         $params = array($mnemonic, $name, $description, $total_points);
     
         $result = $this->db->query($insertQuestQuery, $params);
@@ -76,7 +87,7 @@ class DBQuest
             return false;
         }
 
-        // Get the ID of the newly created assignment
+        // Get the ID of the newly created quest
         $questId = $this->db->fetchrow($result)['id'];
 
         return $questId;

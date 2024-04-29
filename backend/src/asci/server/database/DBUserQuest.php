@@ -78,4 +78,17 @@ class DBUserQuest
             return false;
         }
     }
+
+    public function addQuestsForUser($quest_id, $user_id)
+    {
+        $query = 'insert into user_quests (quest_id, user_id) values ($1, $2)';
+
+        $result = $this->db->query($query, array($quest_id, $user_id));
+
+        if (!$result) {
+            $this->logger->error("Failed to create quest for user");
+            return false;
+        }
+        return true;
+    }
 }

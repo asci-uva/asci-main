@@ -90,5 +90,25 @@ class DBUserCourse
 
         return $toReturn;
     }
+
+    // returns UserCourse objects for users in the course
+    public function getUsersForCourse($course_id)
+    {
+        $query = 'select computing_id,course_id,mnemonic,number,name,semester,role from (courses C JOIN user_courses U on C.id = U.course_id) J JOIN users Us on J.user_id = Us.id where course_id=$1';
+
+        $result = $this->db->query($query, array($course_id));
+
+        $courses = $this->db->fetchAll($result);
+
+        $toReturn = [];
+        /* Loop through and make user course objects for each */
+        foreach ($courses as $course){
+            $toAdd = new \asci\data\UserCourse();
+            $toAdd->fromArray($course);
+            array_push($toReturn, $toAdd);
+        }
+
+        return $toReturn;
+    }
    
 }
