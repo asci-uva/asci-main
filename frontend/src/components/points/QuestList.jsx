@@ -13,6 +13,7 @@ function QuestList(props) {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [quests, setQuests] = useState({});
+    const [pointCount, setPointCount] = useState(0);
 
     useEffect(() => {
         //If token is set, kick to home screen to check validity of session
@@ -26,6 +27,11 @@ function QuestList(props) {
             request.user = localStorage.getItem('asci-user');
             request.courseId = localStorage.getItem('asci-course');
             getQuests(request, url);
+
+            request.command = "getPointsForUser";
+            request.user = localStorage.getItem('asci-user');
+            request.courseId = localStorage.getItem('asci-course');
+            getPoints(request, url);
         }
         else {
             navigate(docRoot + "/login");
@@ -73,10 +79,39 @@ function QuestList(props) {
             });
     };
 
+    const getPoints = (json0, url0) => {
+        fetch(url0, {
+            method: 'POST', // or 'PUT'
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(json0),
+        }).then(response => response.json())
+            .then(data => {
+                console.log("Data is: ", data);
+                let success = data.success;
+
+                if (success === "true") {
+                    console.log("Get Points: Successfully fetched user quest points");
+                    setPointCount(data.points);
+                }
+                else {
+                    console.log("Get Points: Server returned error");
+                    navigate(docRoot + "/error");
+                }
+            })
+            .catch((error) => {
+                console.log("Get Points: There was an error:", error);
+                navigate(docRoot + "/error");
+            });
+    }
 
     return (
         <div>
             <h1>All Quests for {user}</h1>
+            <div className="pointCount">
+                <h5 className="card-title">Points Earned: {pointCount}</h5>
+            </div>
             <div>
                 {Object.keys(quests).map((questId) => {
                     return <QuestCard currentQuest={quests[questId]} key={questId} />

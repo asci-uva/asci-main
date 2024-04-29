@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import { Home, Login, Error, Navigation, Logout, QuestCard, QuestList, StudentPoints } from "./points";
+import { Home, Login, Error, Navigation, Logout, QuestCard, QuestList } from "./points";
 
 const PointsController = (props) => {
   return (
