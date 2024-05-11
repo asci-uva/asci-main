@@ -9,6 +9,7 @@ class CourseSettings implements \Serializable
     public $grouping_enabled;
     public $smart_grouping;
     public $self_grouping;
+    public $show_quests;
 
     public function __construct()
     {
@@ -22,6 +23,7 @@ class CourseSettings implements \Serializable
         $this->grouping_enabled = $data['grouping_enabled'] ?? null;
         $this->smart_grouping = $data['smart_grouping'] ?? null;
         $this->self_grouping = $data['self_grouping'] ?? null;
+        $this->show_quests = $data['show_quests'] ?? null;
         return $this;
     }
 
@@ -32,7 +34,8 @@ class CourseSettings implements \Serializable
             "show_queue_list" => $this->show_queue_list,
             "grouping_enabled" => $this->grouping_enabled,
             "smart_grouping" => $this->smart_grouping,
-            "self_grouping" => $this->self_grouping
+            "self_grouping" => $this->self_grouping,
+            "show_quests" => $this->show_quests
         );
     }
 

@@ -33,13 +33,15 @@ class DBCourseSettings
             grouping_enabled = $2,
             smart_grouping = $3,
             self_grouping = $4
-            WHERE course_id = $5';
+            show_quests = $5,
+            WHERE course_id = $6';
 
         $result = $this->db->query($query, array(
             $course_settings->show_queue_list,
             $course_settings->grouping_enabled,
             $course_settings->smart_grouping,
             $course_settings->self_grouping,
+            $course_settings->show_quests,
             $course_settings->course_id
         ));
 
