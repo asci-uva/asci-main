@@ -157,6 +157,7 @@ CREATE TABLE quests (
 CREATE TABLE user_quests (
   quest_id INT,
   user_id INT,
+  course_id INT,
   status quest_completion_status,
   PRIMARY KEY (user_id, quest_id)
 );
@@ -263,20 +264,23 @@ VALUES
 
 -- Quest data
 INSERT INTO quests (id, mnemonic, name, description , total_points)
-VALUES (1, 'OH1', 'Attend Office Hours Once', 'Get help at office hours for the one time, minimum 5 minutes', 10);
+VALUES (1, 'OH1', 'Attend Office Hours One Time', 'Get help at office hours the one time, minimum 5 minutes', 10);
 
 INSERT INTO quests (id, mnemonic, name, description , total_points)
-VALUES (2, 'OH2', 'Attend Office Hours Twice', 'Get help at office hours for the two times, minimum 5 minutes', 10);
+VALUES (2, 'OH3', 'Attend Office Hours Three Times', 'Get help at office hours two times, each session minimum 5 minutes', 10);
+
+INSERT INTO quests (id, mnemonic, name, description , total_points)
+VALUES (3, 'OH10', 'Attend Office Hours Ten Times', 'Get help at office hours ten times, each session minimum 5 minutes', 10);
 
 ALTER TABLE user_quests ADD FOREIGN KEY (user_id) REFERENCES users (id);
-
 ALTER TABLE user_quests ADD FOREIGN KEY (quest_id) REFERENCES quests (id);
+ALTER TABLE user_quests ADD FOREIGN KEY (course_id) REFERENCES courses (id);
 
-INSERT INTO user_quests (quest_id, user_id, status)
-VALUES (1, 1, 'Not started');
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (1, 1, 1, 'Not started');
 
-INSERT INTO user_quests (quest_id, user_id, status)
-VALUES (2, 1, 'Not started');
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (2, 1, 1, 'Not started');
 
 
 INSERT INTO course_quests (quest_id, course_id)

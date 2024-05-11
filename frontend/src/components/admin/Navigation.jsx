@@ -37,9 +37,9 @@ function Navigation(props) {
                 <li className="nav-item">
                   <NavLink
                     className="nav-link"
-                    to={docRoot + "/createNewQuest"}
+                    to={docRoot + "/SelectQuests"}
                   >
-                    Create New Quest
+                    Select Quests
                   </NavLink>
                 </li>
                 {/* <li className="nav-item">

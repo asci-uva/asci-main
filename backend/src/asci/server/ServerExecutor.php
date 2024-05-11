@@ -1384,32 +1384,66 @@ class ServerExecutor{
         return $result;
     }
 
-    public function createQuestForCourseHandler($courseId, $mnemonic, $name, $description, $total_points){
-        $questId = (new \asci\server\database\DBQuest($this->db))->createQuest($mnemonic, $name, $description, $total_points);
+    public function getAllQuestsHandler(){
         $result = [];
-        if ($questId) {
-            // add the newly created quest to the course
-            $courseQuestSuccess = (new \asci\server\database\DBCourseQuest($this->db))->addQuestsForCourse($questId, $courseId);
-            if ($courseQuestSuccess) {
-                // add the quest to users in the course 
-                $user_courses = (new \asci\server\database\DBUserCourse($this->db))->getUsersForCourse($courseId);
-                foreach ($user_courses as $u_c) {
-                    $user_id = ((new \asci\server\database\DBUser($this->db))->getUser($u_c -> getComputingId())) -> getId();
-                    $userQuestSuccess = (new \asci\server\database\DBUserQuest($this->db))->addQuestsForUser($questId, $user_id);
-                    if (!$userQuestSuccess) {
-                        $result["success"] = false;
-                        return $result;
-                    }
+
+        $quests = (new \asci\server\database\DBQuest($this->db))->getAllQuests();
+        $result["quests"] = [];
+
+        foreach ($quests as $quest){
+            $result["quests"][$quest->getId()] = $quest->toArray();
+        }
+
+        $this->logger->addDebug("Quest result", array("quests" => $quests[0]));
+
+        $result["success"] = "true";
+
+        return $result;
+    }
+
+    public function addQuestForCourseHandler($quest_id, $course_id){
+        // add the quest to the course
+        $courseQuestSuccess = (new \asci\server\database\DBCourseQuest($this->db))->addQuestToCourse($quest_id, $course_id);
+        if ($courseQuestSuccess) {
+            // get all users
+            $user_courses = (new \asci\server\database\DBUserCourse($this->db))->getStudentsForCourse($course_id);
+            // add the quest to each user in the course 
+            foreach ($user_courses as $u_c) {
+                $user_id = ((new \asci\server\database\DBUser($this->db))->getUser($u_c -> getComputingId())) -> getId();
+                $userQuestSuccess = (new \asci\server\database\DBUserQuest($this->db))->addQuestToUser($quest_id, $user_id, $course_id);
+                if (!$userQuestSuccess) {
+                    $result["success"] = false;
                 }
             }
-            else {
-                $result["success"] = false;
-            }
-            $result["success"] = true;
-        } else {
+        }
+        else {
             $result["success"] = false;
         }
-    
+        $result["success"] = true;
+
+        return $result;
+    }
+
+    public function removeQuestForCourseHandler($quest_id, $course_id){
+        // remove the quest from the course
+        $courseQuestSuccess = (new \asci\server\database\DBCourseQuest($this->db))->removeQuestFromCourse($quest_id, $course_id);
+        if ($courseQuestSuccess) {
+            // get all users
+            $user_courses = (new \asci\server\database\DBUserCourse($this->db))->getStudentsForCourse($course_id);
+            // remove the quest from users in the course 
+            foreach ($user_courses as $u_c) {
+                $user_id = ((new \asci\server\database\DBUser($this->db))->getUser($u_c -> getComputingId())) -> getId();
+                $userQuestSuccess = (new \asci\server\database\DBUserQuest($this->db))->removeQuestFromUser($quest_id, $user_id, $course_id);
+                if (!$userQuestSuccess) {
+                    $result["success"] = false;
+                }
+            }
+        }
+        else {
+            $result["success"] = false;
+        }
+        $result["success"] = true;
+
         return $result;
     }
 

@@ -6,6 +6,7 @@ class UserQuest implements \Serializable {
 
     private $quest_id;
     private $user_id;
+    private $course_id;
     private $status;
     private $mnemonic;
     private $name;
@@ -28,6 +29,12 @@ class UserQuest implements \Serializable {
     {
         return $this->user_id;
     }
+
+    public function getCourseId()
+    {
+        return $this->course_id;
+    }
+
 
     public function getQuestCompletionStatus()
     {
@@ -62,6 +69,7 @@ class UserQuest implements \Serializable {
     {
         $this->quest_id = $data['quest_id'] ?? null;
         $this->user_id = $data['user_id'] ?? null;
+        $this->course_id = $data['course_id'] ?? null;
         $this->status = $data['status'] ?? null;
         $this->mnemonic = $data['mnemonic'] ?? null;
         $this->name = $data['name'] ?? null;
@@ -76,6 +84,7 @@ class UserQuest implements \Serializable {
         return array(
             "quest_id" => $this->quest_id,
             "user_id" => $this->user_id,
+            "course_id" => $this->course_id,
             "status" => $this->status,
             "mnemonic" => $this->mnemonic,
             "name" => $this->name,

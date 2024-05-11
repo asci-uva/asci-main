@@ -92,9 +92,9 @@ class DBUserCourse
     }
 
     // returns UserCourse objects for users in the course
-    public function getUsersForCourse($course_id)
+    public function getStudentsForCourse($course_id)
     {
-        $query = 'select computing_id,course_id,mnemonic,number,name,semester,role from (courses C JOIN user_courses U on C.id = U.course_id) J JOIN users Us on J.user_id = Us.id where course_id=$1';
+        $query = 'select computing_id,course_id,mnemonic,number,name,semester,role from (courses C JOIN user_courses U on C.id = U.course_id) J JOIN users Us on J.user_id = Us.id where course_id=$1 and role=\'student\'';
 
         $result = $this->db->query($query, array($course_id));
 

@@ -92,4 +92,23 @@ class DBQuest
 
         return $questId;
     }
+
+    public function getAllQuests()
+    {
+        $query = 'select * from quests';
+
+        $result = $this->db->query($query, array());
+
+        $quests = $this->db->fetchAll($result);
+
+        $toReturn = [];
+        /* Loop through and make quests objects for each */
+        foreach ($quests as $quest){
+            $toAdd = new \asci\data\Quest();
+            $toAdd->fromArray($quest);
+            array_push($toReturn, $toAdd);
+        }
+
+        return $toReturn;
+    }
 }

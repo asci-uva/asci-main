@@ -10,9 +10,9 @@ class Quest implements \Serializable
     private $description;
     private $total_points;
 
-    public function __construct($data)
+    public function __construct()
     {
-        $this->fromArray($data);
+        
     }
 
     // Getters
@@ -46,7 +46,7 @@ class Quest implements \Serializable
     public function fromArray($data)
     {
         $this->id = $data['id'] ?? null;
-        $this->id = $data['mnemonic'] ?? null;
+        $this->mnemonic = $data['mnemonic'] ?? null;
         $this->name = $data['name'] ?? null;
         $this->description = $data['description'] ?? null;
         $this->total_point = $data['total_points'] ?? null;
@@ -58,7 +58,7 @@ class Quest implements \Serializable
     {
         return array(
             "id" => $this->id,
-            "mnemonic" => $this->id,
+            "mnemonic" => $this->mnemonic,
             "name" => $this->name,
             "description" => $this->description,
             "total_points" => $this->total_points,

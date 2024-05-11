@@ -4,12 +4,12 @@ import { Routes, Route, useNavigate } from "react-router-dom";
 import {
   Home,
   CreateNewCourse,
-  CreateNewQuest,
   Navigation,
   CourseManagement,
   UploadRoster,
   Error,
   EditCourse,
+  SelectQuests,
 } from "./admin";
 
 import CoursePanel from "./admin/CoursePanel";
@@ -57,6 +57,10 @@ const AdminController = (props) => {
         <Route
           path="/coursePanel/:courseId"
           element={<CoursePanel {...props} />}
+        />
+        <Route
+          path="selectQuests"
+          element={<SelectQuests {...props} />}
         />
       </Routes>
     </>

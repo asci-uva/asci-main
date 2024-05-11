@@ -33,7 +33,7 @@ class DBUserQuest
      */
     public function getQuestsForUser($computing_id, $course_id)
     {
-        $query = 'select quest_id,user_id,status,mnemonic,name,description,total_points from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) Qs NATURAL JOIN course_quests CQ where computing_id=$1 and course_id=$2';
+        $query = 'select quest_id,user_id,course_id,status,mnemonic,name,description,total_points from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) where computing_id=$1 and course_id=$2';
 
         $result = $this->db->query($query, array($computing_id, $course_id));
 
@@ -52,7 +52,7 @@ class DBUserQuest
 
     public function getPointsForUser($computing_id, $course_id)
     {
-        $query = 'select sum(total_points) from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) Qs NATURAL JOIN course_quests CQ where computing_id=$1 and course_id=$2 and status=\'Completed\'';
+        $query = 'select sum(total_points) from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) where computing_id=$1 and course_id=$2 and status=\'Completed\'';
 
         $result = $this->db->query($query, array($computing_id, $course_id));
         $row = $this->db->fetchrow($result);
@@ -60,10 +60,10 @@ class DBUserQuest
         return $row["sum"];
     }
 
-    public function updateQuestStatus($quest_id, $user_id, $status)
+    public function updateQuestStatus($quest_id, $user_id, $course_id, $status)
     {
-        $query = 'update user_quests set status = $3 where quest_id = $1 and user_id = $2';
-        $params = array($quest_id, $user_id, $status);
+        $query = 'update user_quests set status = $3 where quest_id = $1 and user_id = $2 and course_id = $3';
+        $params = array($quest_id, $user_id, $status, $course_id);
 
         try {
             $result = $this->db->query($query, $params);
@@ -79,14 +79,27 @@ class DBUserQuest
         }
     }
 
-    public function addQuestsForUser($quest_id, $user_id)
+    public function addQuestToUser($quest_id, $user_id, $course_id)
     {
-        $query = 'insert into user_quests (quest_id, user_id) values ($1, $2)';
+        $query = 'insert into user_quests (quest_id, user_id, course_id, status) values ($1, $2, $3, \'Not started\')';
 
-        $result = $this->db->query($query, array($quest_id, $user_id));
+        $result = $this->db->query($query, array($quest_id, $user_id, $course_id));
 
         if (!$result) {
-            $this->logger->error("Failed to create quest for user");
+            $this->logger->error("Failed to add quest for user");
+            return false;
+        }
+        return true;
+    }
+
+    public function removeQuestFromUser($quest_id, $user_id, $course_id)
+    {
+        $query = 'delete from user_quests where quest_id=$1 and user_id=$2 and course_id =$3';
+
+        $result = $this->db->query($query, array($quest_id, $user_id, $course_id));
+
+        if (!$result) {
+            $this->logger->error("Failed to remove quest for user");
             return false;
         }
         return true;

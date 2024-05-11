@@ -50,7 +50,7 @@ class DBCourseQuest
         return $toReturn;
     }
 
-    public function addQuestsForCourse($quest_id, $course_id)
+    public function addQuestToCourse($quest_id, $course_id)
     {
         $query = 'insert into course_quests (quest_id, course_id) values ($1, $2)';
 
@@ -58,6 +58,19 @@ class DBCourseQuest
 
         if (!$result) {
             $this->logger->error("Failed to create quest for course");
+            return false;
+        }
+        return true;
+    }
+
+    public function removeQuestFromCourse($quest_id, $course_id)
+    {
+        $query = 'delete from course_quests where quest_id=$1 and course_id=$2';
+
+        $result = $this->db->query($query, array($quest_id, $course_id));
+
+        if (!$result) {
+            $this->logger->error("Failed to delete quest for course");
             return false;
         }
         return true;

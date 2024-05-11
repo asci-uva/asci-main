@@ -40,7 +40,17 @@ class QuestStatus
             switch ($currQuest->getMnemonic()) {
                 case "OH1":
                     if ($count >= 1) {
-                        (new \asci\server\database\DBUserQuest($this->db))->updateQuestStatus($questId, $userId, 'Completed');
+                        (new \asci\server\database\DBUserQuest($this->db))->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
+                        $currQuest->setQuestCompletionStatus('Completed');
+                    }
+                case "OH3":
+                    if ($count >= 3) {
+                        (new \asci\server\database\DBUserQuest($this->db))->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
+                        $currQuest->setQuestCompletionStatus('Completed');
+                    }
+                case "OH10":
+                    if ($count >= 10) {
+                        (new \asci\server\database\DBUserQuest($this->db))->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
                         $currQuest->setQuestCompletionStatus('Completed');
                     }
             }
