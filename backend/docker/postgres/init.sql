@@ -168,4 +168,10 @@ VALUES (2, 2, 'student');
 INSERT INTO user_courses (user_id, course_id, role)
 VALUES (3, 1, 'student');
 
+INSERT INTO course_settings (course_id, show_queue_list, grouping_enabled, smart_grouping, self_grouping)
+VALUES (1, true, true, true, true);
+
+INSERT INTO course_settings (course_id, show_queue_list, grouping_enabled, smart_grouping, self_grouping)
+VALUES (2, true, true, true, true);
+
 

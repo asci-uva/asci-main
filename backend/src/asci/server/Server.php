@@ -141,28 +141,28 @@ class Server
         $user = $this->validateUsername($this->input);
         
 
-        /* This section acquires a lock for the given course IF a courseId was provided */
-        /* ------------------------------------------------------------------ */
-        $course_id = $this->input["courseId"] ?? null;
-        $lock = null;
-        $attempt_max = 40; //try to get the lock at most 10 times.
-        if($course_id != null && \asci\Config::$LOCKING_ENABLED){
-            /* acquire the lock */
-            $lock_key = "course-" . $course_id;
-            $lock = new ExclusiveLock($lock_key);
-            $attempt = 0;
-            while($lock->lock() == False && $attempt<$attempt_max){
-                $attempt = $attempt + 1;
-                usleep(250000); // sleep for a quarter of a second
-            }
+        // /* This section acquires a lock for the given course IF a courseId was provided */
+        // /* ------------------------------------------------------------------ */
+        // $course_id = $this->input["courseId"] ?? null;
+        // $lock = null;
+        // $attempt_max = 40; //try to get the lock at most 10 times.
+        // if($course_id != null && \asci\Config::$LOCKING_ENABLED){
+        //     /* acquire the lock */
+        //     $lock_key = "course-" . $course_id;
+        //     $lock = new ExclusiveLock($lock_key);
+        //     $attempt = 0;
+        //     while($lock->lock() == False && $attempt<$attempt_max){
+        //         $attempt = $attempt + 1;
+        //         usleep(250000); // sleep for a quarter of a second
+        //     }
 
-            if($attempt >= $attempt_max){
-                $this->setResponse([
-                    "error" => "Could not acquire lock after multiple attempts. Try again later."
-                ]);
-                //break;
-            }
-        }
+        //     if($attempt >= $attempt_max){
+        //         $this->setResponse([
+        //             "error" => "Could not acquire lock after multiple attempts. Try again later."
+        //         ]);
+        //         //break;
+        //     }
+        // }
 
         /* Lock acquired OR not necessary */
 
@@ -414,12 +414,12 @@ class Server
 
         }
 
-        /* Release the lock if we had one... */
-        /* ------------------------------------------------------------------ */
+        // /* Release the lock if we had one... */
+        // /* ------------------------------------------------------------------ */
         
-        if($lock != null && \asci\Config::$LOCKING_ENABLED){
-            $lock->unlock();
-        }
+        // if($lock != null && \asci\Config::$LOCKING_ENABLED){
+        //     $lock->unlock();
+        // }
 
         /* Lock acquired OR not necessary */
         
