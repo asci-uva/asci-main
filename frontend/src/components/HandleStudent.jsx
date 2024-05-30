@@ -1,5 +1,5 @@
 import React from "react";
-import {useEffect, useState} from "react";
+import {useEffect, useState, useRef} from "react";
 import { useNavigate } from 'react-router-dom';
 
 import ClearQueue from "./ClearQueue";
@@ -22,8 +22,9 @@ function HandleStudent(props) {
   const [numWaiting, setNumWaiting] = useState("Loading...");
   const [courseName, setCourseName] = useState("Loading...");
   const [waitingSessions, setWaitingSessions] = useState([]);
-
   const [settings, setSettings] = useState(null);
+
+  const previousNumWaitingRef = useRef("Loading...");
 
   const navigate = useNavigate();
 
@@ -47,6 +48,14 @@ function HandleStudent(props) {
 
       polling = true;
       pollNumWaiting();
+    }
+
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission().then(permission => {
+        if (permission !== "granted") {
+          alert("Please enable notifications to get alerts about new students.");
+        }
+      });
     }
 
     //called when this component unmounts
@@ -119,37 +128,70 @@ function HandleStudent(props) {
       body: JSON.stringify(json0),
     }).then(response => response.json())
     .then(data => {
-        console.log("Waiting sessions is: ", data);
+      console.log("Waiting sessions is: ", data);
 
-        //if request succeeded
-        if(data.success === "true"){
-          setNumWaiting(data.waiting);
+      //if request succeeded
+      if(data.success === "true"){
+        let previousNumWaiting = previousNumWaitingRef.current;
+        console.log("numWaiting is: " + numWaiting);
+        console.log("Previous num waiting is: " + previousNumWaiting);
+        previousNumWaitingRef.current = data.waiting;
 
-          setWaitingSessions(data.sessions);
+        setNumWaiting(data.waiting);
+        setWaitingSessions(data.sessions);
+        setCourseName(data.usercourse.mnemonic +
+                      data.usercourse.number + "(" +
+                      data.usercourse.name + ")"
+                      );
 
-          setCourseName(data.usercourse.mnemonic +
-                        data.usercourse.number + "(" +
-                        data.usercourse.name + ")"
-                        );
-
-          if(polling == true){
-              timeoutId = setTimeout(pollNumWaiting, pollTime);
-          }
+        console.log("got to before if statement");
+        if (previousNumWaiting == 0 && data.waiting > 0) {
+          console.log("try to call send notification method");
+          sendNotification(data.waiting);
         }
-        else{
-          console.log("Getting number waiting failed");
-          navigate(docRoot + "/error");
+
+        if(polling == true){
+            timeoutId = setTimeout(pollNumWaiting, pollTime);
         }
-        
-      })
-      .catch((error) => {
-        console.log("HOME: There was an error:", error);
+      }
+      else{
+        console.log("Getting number waiting failed");
         navigate(docRoot + "/error");
-        
+      }
+      
+    })
+    .catch((error) => {
+      console.log("HOME: There was an error:", error);
+      navigate(docRoot + "/error"); 
+    });
+
+  }
+
+  const sendNotification = (numWaiting) => {
+    console.log("Sending notification");
+    console.log(Notification.permission);
+  
+    if (Notification.permission === "granted") {
+      new Notification("New Student Waiting", {
+        body: `There are now ${numWaiting} students waiting for assistance.`,
       });
-
+    } else if (Notification.permission === "default") {
+      // Request permission if it hasn't been granted or denied
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          new Notification("New Student Waiting", {
+            body: `There are now ${numWaiting} students waiting for assistance.`,
+          });
+        } else {
+          console.log("Notification permission not granted.");
+          alert("Please enable notifications to get alerts about new students.");
+        }
+      });
+    } else {
+      console.log("Notification permission denied.");
+      alert("Notifications are disabled. Please enable notifications in your browser settings.");
     }
-
+  };
 
 
 
