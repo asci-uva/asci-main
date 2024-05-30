@@ -36,3 +36,5 @@ RUN pip install selenium
 
 
 RUN service apache2 restart
+
+RUN touch /opt/log/server.log && chmod a+w /opt/log/server.log

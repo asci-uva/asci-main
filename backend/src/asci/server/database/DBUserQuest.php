@@ -41,10 +41,12 @@ class DBUserQuest
 
         $toReturn = [];
         /* Loop through and make user quest objects for each */
-        foreach ($quests as $quest){
-            $toAdd = new \asci\data\UserQuest();
-            $toAdd->fromArray($quest);
-            array_push($toReturn, $toAdd);
+        if (!empty($quests)) {
+            foreach ($quests as $quest){
+                $toAdd = new \asci\data\UserQuest();
+                $toAdd->fromArray($quest);
+                array_push($toReturn, $toAdd);
+            }
         }
 
         return $toReturn;

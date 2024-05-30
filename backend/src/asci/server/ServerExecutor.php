@@ -1485,7 +1485,7 @@ class ServerExecutor{
             $result["quests"][$quest->getQuestId()] = $quest->toArray();
         }
 
-        $this->logger->addDebug("Quest result", array("quests" => $quests[0]));
+        $this->logger->addDebug("Quest result", array("quests" => $quests));
 
         $result["success"] = "true";
 
