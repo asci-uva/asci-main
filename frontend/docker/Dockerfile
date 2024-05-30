@@ -13,7 +13,7 @@ COPY ./package.json /app
 RUN npm install
 
 #optimization skip nstall if package unchanged
-COPY . .
+#COPY . .
 
 # Expose the port on which the app will be running (3000 is the default that `serve` uses)
 EXPOSE 3000
@@ -22,4 +22,4 @@ EXPOSE 3000
 # RUN npm run build
 
 # Start the app
-CMD ["npm", "run", "start"]
+CMD ["npm", "start"]
