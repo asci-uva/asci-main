@@ -90,7 +90,7 @@ CREATE TABLE course_settings (
   grouping_enabled BOOL DEFAULT (true),
   smart_grouping BOOL DEFAULT (true),
   self_grouping BOOL DEFAULT (true),
-  show_quests BOOL DEFAULT (true),
+  show_quests BOOL DEFAULT (true)
 );
 
 CREATE TABLE logs (
@@ -148,6 +148,14 @@ CREATE TABLE submissions (
   FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
+CREATE TYPE quest_completion_status AS ENUM (
+  'Locked',
+  'Not started',
+  'In progress',
+  'Completed'
+);
+
+
 -- Quest Tables
 CREATE TABLE quests (
   id SERIAL PRIMARY KEY,
@@ -169,13 +177,6 @@ CREATE TABLE course_quests (
   quest_id INT,
   course_id INT,
   PRIMARY KEY (course_id, quest_id)
-);
-
-CREATE TYPE quest_completion_status AS ENUM (
-  'Locked',
-  'Not started',
-  'In progress',
-  'Completed'
 );
 
 ALTER TABLE queue ADD FOREIGN KEY (user_id) REFERENCES users (id);

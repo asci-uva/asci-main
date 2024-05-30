@@ -6,8 +6,8 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { useSpring, animated, config } from "react-spring";
-import TypingAnimation from "./utils/TypingMessageAnimation";
-import SimpleDialog from "./utils/SimpleDialog";
+import TypingAnimation from "../utils/TypingMessageAnimation";
+import SimpleDialog from "../utils/SimpleDialog";
 
 const Chat = (props) => {
     const url = props.url;

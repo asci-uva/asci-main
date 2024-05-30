@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Chat from "./Chat";
+import Chat from "../chat/Chat";
 
 function StudentWaitingRoom(props) {
     const navigate = useNavigate();
