@@ -284,4 +284,51 @@ class DatabaseConnector {
         return $this->dbHandle;
     }
 
+    /**
+     * Begin a transaction.
+     *
+     * @throws \asci\exceptions\ASCIDatabaseException
+     */
+    public function beginTransaction() {
+        try {
+            $result = \pg_query($this->dbHandle, "BEGIN");
+            if ($result === false) {
+                throw new \Exception("Failed to begin transaction.");
+            }
+        } catch (\Exception $e) {
+            throw new \asci\exceptions\ASCIDatabaseException("DatabaseConnector.php beginTransaction() Error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Commit a transaction.
+     *
+     * @throws \asci\exceptions\ASCIDatabaseException
+     */
+    public function commit() {
+        try {
+            $result = \pg_query($this->dbHandle, "COMMIT");
+            if ($result === false) {
+                throw new \Exception("Failed to commit transaction.");
+            }
+        } catch (\Exception $e) {
+            throw new \asci\exceptions\ASCIDatabaseException("DatabaseConnector.php commit() Error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Roll back a transaction.
+     *
+     * @throws \asci\exceptions\ASCIDatabaseException
+     */
+    public function rollBack() {
+        try {
+            $result = \pg_query($this->dbHandle, "ROLLBACK");
+            if ($result === false) {
+                throw new \Exception("Failed to roll back transaction.");
+            }
+        } catch (\Exception $e) {
+            throw new \asci\exceptions\ASCIDatabaseException("DatabaseConnector.php rollBack() Error: " . $e->getMessage());
+        }
+    }
 }

@@ -208,6 +208,15 @@ class Server
 
                 break;
 
+            //given a userId and token, make sure user is logged in and 
+            //return list of active course objects that student is enrolled in.
+            case "getCoursesByRole":
+                $role = $this->input["role"];
+                
+                $this->setResponse($executor->getCoursesByRoleHandler($user, $role));
+
+                break;
+
             //given student id, token, courseid. Join the queue
             //if student, token pair is valid and they can
             case "joinQueue":
@@ -375,7 +384,7 @@ class Server
                 $this->setResponse($executor->clearQueue($user, $courseId));
                 
                 break;
-
+            
             case "newLlmChat":
                 $result = $executor->startLlmChat($this->input);
                 $this->setResponse($result);
@@ -386,20 +395,55 @@ class Server
                 $this->setResponse($result);
                 break;
 
+            case "createCourse":
+                $mnemonic = $this->input["mnemonic"];
+                $number = $this->input["number"];
+                $name = $this->input["name"];
+                $semester = $this->input["semester"];
+
+                $this->setResponse($executor->createCourse($user, $mnemonic, $number, $name, $semester));
+                break;
+    
+            case "updateCourseInfo":
+                $course_id = $this->input["course_id"];
+                $mnemonic = $this->input["mnemonic"];
+                $number = $this->input["number"];
+                $name = $this->input["name"];
+                $semester = $this->input["semester"];
+    
+                $this->setResponse($executor->updateCourseInfoHandler($course_id, $mnemonic, $number, $name, $semester));
+                break;
+
+            case "uploadRoster":
+                $roster = $this->input["roster"];
+                $course_id = $this->input["course_id"];
+    
+                $this->setResponse($executor->uploadRosterHandler($roster, $course_id));
+                break;
+
+            case "manuallyAddStudent":
+                $fname = $this->input["fname"];
+                $lname = $this->input["lname"];
+                $pname = $this->input["pname"];
+                $computing_id = $this->input["computingId"];
+                $role = $this->input["role"];
+                $course_id = $this->input["course_id"];
+
+                $this->setResponse($executor->manuallyAddStudentHandler($fname, $lname, $pname, $computing_id, $role, $course_id));
+                break;
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/
 
             case "createUser":
-                $result = $executor->createUser($this->input);
-                $this->setResponse(["results" => $result]);
+                $computing_id = $this->input["computing_id"];
+                $fname = $this->input["fname"];
+                $lname = $this->input["lname"];
+                $pname = $this->input["pname"];
+
+                $this->setResponse($executor->createUser($computing_id, $fname, $lname, $pname));
                 break;
             
-            case "createCourse":
-                $result = $executor->createCourse($this->input);
-                $this->setResponse(["results" => $result]);
-                break;
 
-                 
             case "register":
                 $result = $executor->registerUser($this->input);
                 $this->setResponse(["results" => $result]);
@@ -407,6 +451,25 @@ class Server
 
             case "getTip":
                 $this->setResponse(["result" => "success", "tips" => ["The tip will go here", "second tip"]]);
+                break;
+
+            case "getAssignmentByCourse":
+                $course_id = $this->input["course_id"];
+                $this->setResponse($executor->getAssignmentsHandler($course_id));
+                break;
+
+            case "downloadGradescopeData":
+                $gradescope_username = $this->input["email"];
+                $gradescope_password = $this->input["password"];
+                $gradescope_courseNumber = $this->input["courseNumber"];
+                $this->setResponse($executor->runGradescopeDataDownload($gradescope_username, $gradescope_password, $gradescope_courseNumber));
+                break;
+            
+
+            case "updateGradescopeDataByCourse":
+                $course_id = $this->input["course_id"];
+                $download_file_name = $this->input["download_file_name"];
+                $this->setResponse($executor->updateGradescopeDataByCourseHandler($course_id, $download_file_name));
                 break;
                 
             default:

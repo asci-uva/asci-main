@@ -3,25 +3,13 @@ import "./index.css";
 import ReactDOM from "react-dom/client";
 
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import {
-  Navigation,
-  Footer,
-  Home,
-  Question,
-  Login,
-  Ta,
-  StudentWaitingRoom,
-  HandleStudent,
-  Meeting,
-  TASurvey,
-  StudentMeeting,
-  JoinQueue,
-  StudentSurvey,
-  Error,
-  SelectCourse,
-  Logout,
-  HandleGroup
-} from "./components";
+import { Footer } from "./components/queue";
+
+import QueueController from "./components/QueueController";
+import AdminController from "./components/AdminController";
+import HomeController from "./components/HomeController";
+import { UserProvider } from "./components/context/UserContext";
+import { ToastContainer } from "react-toastify";
 
 //SOME GLOBAL CONSTANTS THAT ARE USED THROUGHOUT THE APP
 //const documentRoot = "/asci";
@@ -34,27 +22,44 @@ const debugMode = true; //if true, login page will have you type in a userId to 
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <Router>
-    <Navigation documentRoot={documentRoot} debugMode={debugMode} />
-    <Routes>
-      <Route path={documentRoot + "/"} element={<Home documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/login"} element={<Login documentRoot={documentRoot} url={url} debugMode={debugMode} />} />
-      <Route path={documentRoot + "/question"} element={<Question documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/ta"} element={<Ta documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/studentWaitingRoom"} element={<StudentWaitingRoom documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/handleStudent"} element={<HandleStudent documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/meeting"} element={<Meeting documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/taSurvey"} element={<TASurvey documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/joinQueue"} element={<JoinQueue documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/studentMeeting"} element={<StudentMeeting documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/studentSurvey"} element={<StudentSurvey documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/error"} element={<Error documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/selectCourse"} element={<SelectCourse documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/logout"} element={<Logout documentRoot={documentRoot} url={url} />} />
-      <Route path={documentRoot + "/handleGroup"} element={<HandleGroup documentRoot={documentRoot} url={url} />} />
-    </Routes>
-    <Footer/>
-  </Router>,
+  <UserProvider>
+    <ToastContainer />
+    <Router>
+      <Routes>
+        <Route
+          path={documentRoot + "/*"}
+          element={
+            <HomeController
+              documentRoot={documentRoot}
+              url={url}
+              debugMode={debugMode}
+            />
+          }
+        />
+        {/* Use QueueController for all queue related routes */}
+        <Route
+          path={documentRoot + "/queue/*"}
+          element={
+            <QueueController
+              documentRoot={documentRoot + "/queue"}
+              url={url}
+              debugMode={debugMode}
+            />
+          }
+        />
+        {/* Use AdminController for all admin related routes */}
+        <Route
+          path={documentRoot + "/admin/*"}
+          element={
+            <AdminController
+              documentRoot={documentRoot + "/admin"}
+              url={url}
+              debugMode={debugMode}
+            />
+          }
+        />
+      </Routes>
+      <Footer />
+    </Router>
+  </UserProvider>
 );
-
-

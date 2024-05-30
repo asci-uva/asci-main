@@ -1,21 +1,17 @@
 import React from "react";
-import {useEffect} from "react";
-import {useNavigate} from 'react-router-dom';
-
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 //https://www.youtube.com/watch?v=IkMND33x0qQ
 function Logout(props) {
-  
   const navigate = useNavigate();
 
   let docRoot = props.documentRoot;
-  
-  useEffect(() => {
 
+  useEffect(() => {
     localStorage.clear();
-    navigate(docRoot + "/login");
+    navigate(docRoot);
   }, []);
-  
 
   return (
     <div className="question">

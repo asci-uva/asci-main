@@ -38,12 +38,10 @@ class Config {
      */
     public static $SMART_GROUP_MATCHING = false;
 
-    public static $COSINE_SIMILARITY_SCRIPT = '/opt/asci-queue/asci-main/backend/src/asci/util/group_cosine.py';
+    public static $COSINE_SIMILARITY_SCRIPT = '/opt/src/asci/util/group_cosine.py';
 
     // The path of the LLM chat script
-    // May need to be set as '/opt/asci-queue/asci-main/backend/src/asci/util/llm_chat.py' in other environments
     public static $LLM_CHAT_SCRIPT = '/opt/src/asci/util/llm_chat.py';
-    //public static $LLM_CHAT_SCRIPT = '/opt/asci-queue/asci-main/backend/src/asci/util/llm_chat.py';
 
     /**
       * This is the relative location of the temporary locking files for all requests (see util/ExclusiveLock.php for details)
@@ -52,6 +50,15 @@ class Config {
     public static $LOCKING_ENABLED = true;
     public static $LOCKING_FILE_DIR = "./tmp/lock/";
 
+    public static $GRADESCOPE_SYNC_SCRIPT = '/opt/src/asci/util/data_syn/gradescope_download.py';
+
+    public static $CHROME_DRIVER_PATH = '/usr/bin/chromedriver';
+
+    public static $CHROMIUM_PATH = "/usr/bin/chromium";
+
+    public static $GRADESCOPE_DOWNLOAD_PATH = '/opt/src/asci/tmp/database/data';
+
+
     /**
      * Full database connection information
      *
@@ -59,13 +66,6 @@ class Config {
      *
      * @var array database connection information
      */
-//    public static $DATABASE = array (
-//        "database" => "db_name",
-//        "host" => "hostname.com",
-//        "port" => 5432,
-//        "user" => "user_id",
-//        "password" => "full_password"
-//    );
     public static $DATABASE = array (
         "database" => "asci",
         "host" => "db",

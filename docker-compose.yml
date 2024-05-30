@@ -1,10 +1,10 @@
-version: '3.3'
+version: "3.3"
 
 services:
   db:
     build:
       dockerfile: ./backend/docker/postgres/Dockerfile
-    container_name: 'ASCI_db'
+    container_name: "ASCI_db"
     restart: on-failure
     ports:
       - 15432:5432
@@ -20,7 +20,7 @@ services:
       context: ./backend/
       dockerfile: ./docker/php/Dockerfile
 
-    container_name: 'ASCI_php'
+    container_name: "ASCI_php"
     ports:
       - 8081:80
     volumes:
@@ -44,7 +44,7 @@ services:
     volumes:
       - ./frontend/build/:/app/build/
 
-    container_name: 'ASCI_react'
+    container_name: "ASCI_react"
     ports:
       - 3000:3000
 volumes:

@@ -19,15 +19,15 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
 
@@ -39,12 +39,11 @@ code {
   padding-bottom: 10px;
 }
 
-.error label{
+.error label {
   text-align: center;
   display: block;
-  background-color: #C06572;
+  background-color: #c06572;
 }
-
 
 /*Question form*/
 .question {
@@ -63,7 +62,9 @@ code {
   color: #000000;
   margin-bottom: 30px;
 }
-.question input[type = "text"], .question textarea, .question select {
+.question input[type="text"],
+.question textarea,
+.question select {
   width: 100%;
   padding: 6px 10px;
   margin: 10px 0;
@@ -108,10 +109,9 @@ code {
   margin: 10px auto;
 }
 
-.waitlist table button{
+.waitlist table button {
   margin: 0px;
 }
- 
 
 /*Survey form*/
 .survey {
@@ -128,7 +128,8 @@ code {
   margin-bottom: 15px;
   margin-top: 60px;
 }
-.survey textarea, .survey select {
+.survey textarea,
+.survey select {
   width: 100%;
   margin-left: auto;
   margin-right: auto;
@@ -148,26 +149,25 @@ code {
   cursor: pointer;
 }
 
-
 .survey label {
   text-align: left;
   width: 20%;
   padding: 0px 1em 0px 8px;
 }
-    
-.survey input[type=radio],
+
+.survey input[type="radio"],
 .survey input.radio {
   padding-right: 5px;
   width: 5%;
   margin: 2px 0 0 2px;
 }
 
-.radio_btn_group{
+.radio_btn_group {
   display: block;
 }
 
 /*Uncentered Class*/
-.uncentered button{
+.uncentered button {
   background: #5196d2;
   color: #fff;
   border: 0;

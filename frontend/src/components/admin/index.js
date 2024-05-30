@@ -1,0 +1,8 @@
+export { default as Home } from "./Home";
+export { default as CreateNewCourse } from "./CreateNewCourse";
+export { default as Navigation } from "./Navigation";
+export { default as CourseManagement } from "./CourseManagement";
+export { default as UploadRoster } from "./UploadRoster";
+export { default as Error } from "./Error";
+export { default as EditCourse } from "./EditCourse";
+export { default as AddStudent } from "./AddStudent";
