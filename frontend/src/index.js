@@ -8,13 +8,14 @@ import { Footer } from "./components/queue";
 import QueueController from "./components/QueueController";
 import AdminController from "./components/AdminController";
 import HomeController from "./components/HomeController";
+import PointsController from "./components/PointsController";
 import { UserProvider } from "./components/context/UserContext";
 import { ToastContainer } from "react-toastify";
 
 //SOME GLOBAL CONSTANTS THAT ARE USED THROUGHOUT THE APP
-//const documentRoot = "/asci";
+const documentRoot = "/asci";
 //const url = "https://kytos02.cs.virginia.edu/asci-server/index.php";
-const documentRoot = "/ohq/ohq";
+// const documentRoot = "/ohq/ohq";
 const url = "http://localhost:8081/index.php";
 
 const netbadgeEnabled = false; //if false, login page will have you type in a userId to use
@@ -53,6 +54,17 @@ root.render(
           element={
             <AdminController
               documentRoot={documentRoot + "/admin"}
+              url={url}
+              debugMode={debugMode}
+            />
+          }
+        />
+        {/* Use PointsController for all points related routes */}
+        <Route
+          path={documentRoot + "/points/*"}
+          element={
+            <PointsController
+              documentRoot={documentRoot + "/points"}
               url={url}
               debugMode={debugMode}
             />

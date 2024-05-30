@@ -5,33 +5,34 @@ import { useState, useEffect } from "react";
 function Navigation(props) {
   let docRoot = props.documentRoot;
   let debugMode = props.debugMode;
+  let root = "/asci";
 
   return (
     <div className="navigation">
       <nav className="navbar navbar-expand navbar-dark bg-dark">
         <div className="container">
-          <NavLink className="navbar-brand" to={docRoot + "/"}>
+          <NavLink className="navbar-brand" to={root + "/"}>
             HOME
           </NavLink>
           <div>
             <ul className="navbar-nav ml-auto">
               <li className="nav-item">
-                <NavLink className="nav-link" to={docRoot + "/queue"}>
+                <NavLink className="nav-link" to={root + "/queue"}>
                   Queue
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className="nav-link" to={docRoot + "/admin"}>
+                <NavLink className="nav-link" to={root + "/admin"}>
                   Admin
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className="nav-link" to={docRoot + "/points"}>
-                  Earn Points
-                </NavLink>
-              </li>
+                  <NavLink className="nav-link" to={docRoot + "/"}>
+                    Earn Points
+                  </NavLink>
+                </li>
               <li className="nav-item">
-                <NavLink className="nav-link" to={docRoot + "/logout"}>
+                <NavLink className="nav-link" to={root + "/logout"}>
                   Logout
                 </NavLink>
               </li>

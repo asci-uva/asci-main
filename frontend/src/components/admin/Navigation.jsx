@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 function Navigation(props) {
   let docRoot = props.documentRoot;
   let debugMode = props.debugMode;
-  let root = "/ohq/ohq";
+  let root = "/asci";
 
   if (debugMode) {
     return (
@@ -32,6 +32,14 @@ function Navigation(props) {
                 <li className="nav-item">
                   <NavLink className="nav-link" to={docRoot}>
                     Course Management
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink
+                    className="nav-link"
+                    to={docRoot + "/SelectQuests"}
+                  >
+                    Select Quests
                   </NavLink>
                 </li>
                 {/* <li className="nav-item">

@@ -9,6 +9,7 @@ import {
   UploadRoster,
   Error,
   EditCourse,
+  SelectQuests,
 } from "./admin";
 
 import CoursePanel from "./admin/CoursePanel";
@@ -17,7 +18,7 @@ import { useUser } from "./context/UserContext";
 
 const AdminController = (props) => {
   // const { user, login } = useUser();
-  const root = "/ohq/ohq";
+  const root = "/asci";
   const navigate = useNavigate();
   // If the user is not logged in, redirect to the login page
 
@@ -56,6 +57,10 @@ const AdminController = (props) => {
         <Route
           path="/coursePanel/:courseId"
           element={<CoursePanel {...props} />}
+        />
+        <Route
+          path="selectQuests"
+          element={<SelectQuests {...props} />}
         />
       </Routes>
     </>

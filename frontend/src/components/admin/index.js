@@ -6,3 +6,5 @@ export { default as UploadRoster } from "./UploadRoster";
 export { default as Error } from "./Error";
 export { default as EditCourse } from "./EditCourse";
 export { default as AddStudent } from "./AddStudent";
+export { default as SelectQuests } from "./SelectQuests";
+export { default as QuestCard } from "./QuestCard";

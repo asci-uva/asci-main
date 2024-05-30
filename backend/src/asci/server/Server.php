@@ -12,6 +12,9 @@
  */
 namespace asci\server;
 
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+
 use asci\util\ExclusiveLock as ExclusiveLock;
 
 /**
@@ -431,6 +434,38 @@ class Server
 
                 $this->setResponse($executor->manuallyAddStudentHandler($fname, $lname, $pname, $computing_id, $role, $course_id));
                 break;
+
+            // Points system method 
+            case "getQuestsForUser":
+                $courseId = $this->input["courseId"];
+
+                $this->setResponse($executor->getQuestsForUserHandler($user, $courseId));
+                break;
+
+            case "getPointsForUser":
+                $courseId = $this->input["courseId"];
+                
+                $this->setResponse($executor->getPointsForUserHandler($user, $courseId));
+                break;    
+
+            case "getAllQuests":
+                    $this->setResponse($executor->getAllQuestsHandler());
+                    break;
+            
+            case "addQuestForCourse":
+                $questId = $this->input["questId"];
+                $courseId = $this->input["courseId"];
+
+                $this->setResponse($executor->addQuestForCourseHandler($questId, $courseId));
+                break;
+
+            case "removeQuestForCourse":
+                $questId = $this->input["questId"];
+                $courseId = $this->input["courseId"];
+
+                $this->setResponse($executor->removeQuestForCourseHandler($questId, $courseId));
+                break;
+    
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/
 

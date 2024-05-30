@@ -89,7 +89,8 @@ CREATE TABLE course_settings (
   show_queue_list BOOL DEFAULT (true),
   grouping_enabled BOOL DEFAULT (true),
   smart_grouping BOOL DEFAULT (true),
-  self_grouping BOOL DEFAULT (true)
+  self_grouping BOOL DEFAULT (true),
+  show_quests BOOL DEFAULT (true),
 );
 
 CREATE TABLE logs (
@@ -147,6 +148,35 @@ CREATE TABLE submissions (
   FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
+-- Quest Tables
+CREATE TABLE quests (
+  id SERIAL PRIMARY KEY,
+  mnemonic VARCHAR(10),
+  name TEXT,
+  description TEXT,
+  total_points INT
+);
+
+CREATE TABLE user_quests (
+  quest_id INT,
+  user_id INT,
+  course_id INT,
+  status quest_completion_status,
+  PRIMARY KEY (user_id, quest_id)
+);
+
+CREATE TABLE course_quests (
+  quest_id INT,
+  course_id INT,
+  PRIMARY KEY (course_id, quest_id)
+);
+
+CREATE TYPE quest_completion_status AS ENUM (
+  'Locked',
+  'Not started',
+  'In progress',
+  'Completed'
+);
 
 ALTER TABLE queue ADD FOREIGN KEY (user_id) REFERENCES users (id);
 
@@ -240,4 +270,35 @@ VALUES
 (2, 2, 50, 100, 'graded', '00:00:00', 8, 5),
 (2, 3, NULL, 100, 'missing', NULL, 0, 0);
 
+-- Quest data
+INSERT INTO quests (id, mnemonic, name, description , total_points)
+VALUES (1, 'OH1', 'Attend Office Hours One Time', 'Get help at office hours the one time, minimum 5 minutes', 10);
 
+INSERT INTO quests (id, mnemonic, name, description , total_points)
+VALUES (2, 'OH3', 'Attend Office Hours Three Times', 'Get help at office hours two times, each session minimum 5 minutes', 10);
+
+INSERT INTO quests (id, mnemonic, name, description , total_points)
+VALUES (3, 'OH10', 'Attend Office Hours Ten Times', 'Get help at office hours ten times, each session minimum 5 minutes', 10);
+
+ALTER TABLE user_quests ADD FOREIGN KEY (user_id) REFERENCES users (id);
+ALTER TABLE user_quests ADD FOREIGN KEY (quest_id) REFERENCES quests (id);
+ALTER TABLE user_quests ADD FOREIGN KEY (course_id) REFERENCES courses (id);
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (1, 1, 1, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (2, 1, 1, 'Not started');
+
+
+INSERT INTO course_quests (quest_id, course_id)
+VALUES (1, 1);
+
+INSERT INTO course_quests (quest_id, course_id)
+VALUES (2, 1);
+
+INSERT INTO sessions (id, course_id, fulfillment_time, exit_time)
+VALUES (1, 1, '2024-01-08 04:05:00', '2024-01-08 04:10:00');
+
+INSERT INTO session_users (session_id, user_id)
+VALUES (1, 1);

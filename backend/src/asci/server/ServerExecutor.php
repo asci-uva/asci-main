@@ -11,6 +11,10 @@
  *            the Regents of the University of California
  */
 namespace asci\server;
+
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+
 //todo: we might want seperate classes around certain functionality 
 use asci\server\database\DatabaseConnector as DatabaseConnector;
 
@@ -1464,6 +1468,105 @@ class ServerExecutor{
             $result["message"]="GradeScope downloaded data failed to be inserted into the database.";
             $result["success"] = "false";
         }
+        return $result;
+    }
+
+    public function getQuestsForUserHandler($computing_id, $course_id){
+        $result = [];
+
+        $quests = (new \asci\server\database\DBUserQuest($this->db))->getQuestsForUser($computing_id, $course_id);
+        $result["quests"] = [];
+
+        $status = new  \asci\data\QuestInfo\QuestStatus($this->db, $course_id);
+
+        foreach ($quests as $quest){
+            // modify the quest status
+            $status -> changeStatus($quest);
+            $result["quests"][$quest->getQuestId()] = $quest->toArray();
+        }
+
+        $this->logger->addDebug("Quest result", array("quests" => $quests[0]));
+
+        $result["success"] = "true";
+
+        return $result;
+    }
+
+    public function getPointsForUserHandler($computing_id, $course_id){
+        $result = [];
+
+        $points = (new \asci\server\database\DBUserQuest($this->db))->getPointsForUser($computing_id, $course_id);
+
+        if ($points === null) {
+            $result["points"] = 0;
+        }
+        else {  
+            $result["points"] = $points;
+        }
+        $result["success"] = "true";
+        return $result;
+    }
+
+    public function getAllQuestsHandler(){
+        $result = [];
+
+        $quests = (new \asci\server\database\DBQuest($this->db))->getAllQuests();
+        $result["quests"] = [];
+
+        foreach ($quests as $quest){
+            $result["quests"][$quest->getId()] = $quest->toArray();
+        }
+
+        $this->logger->addDebug("Quest result", array("quests" => $quests[0]));
+
+        $result["success"] = "true";
+
+        return $result;
+    }
+
+    public function addQuestForCourseHandler($quest_id, $course_id){
+        // add the quest to the course
+        $courseQuestSuccess = (new \asci\server\database\DBCourseQuest($this->db))->addQuestToCourse($quest_id, $course_id);
+        if ($courseQuestSuccess) {
+            // get all users
+            $user_courses = (new \asci\server\database\DBUserCourse($this->db))->getStudentsForCourse($course_id);
+            // add the quest to each user in the course 
+            foreach ($user_courses as $u_c) {
+                $user_id = ((new \asci\server\database\DBUser($this->db))->getUser($u_c -> getComputingId())) -> getId();
+                $userQuestSuccess = (new \asci\server\database\DBUserQuest($this->db))->addQuestToUser($quest_id, $user_id, $course_id);
+                if (!$userQuestSuccess) {
+                    $result["success"] = false;
+                }
+            }
+        }
+        else {
+            $result["success"] = false;
+        }
+        $result["success"] = true;
+
+        return $result;
+    }
+
+    public function removeQuestForCourseHandler($quest_id, $course_id){
+        // remove the quest from the course
+        $courseQuestSuccess = (new \asci\server\database\DBCourseQuest($this->db))->removeQuestFromCourse($quest_id, $course_id);
+        if ($courseQuestSuccess) {
+            // get all users
+            $user_courses = (new \asci\server\database\DBUserCourse($this->db))->getStudentsForCourse($course_id);
+            // remove the quest from users in the course 
+            foreach ($user_courses as $u_c) {
+                $user_id = ((new \asci\server\database\DBUser($this->db))->getUser($u_c -> getComputingId())) -> getId();
+                $userQuestSuccess = (new \asci\server\database\DBUserQuest($this->db))->removeQuestFromUser($quest_id, $user_id, $course_id);
+                if (!$userQuestSuccess) {
+                    $result["success"] = false;
+                }
+            }
+        }
+        else {
+            $result["success"] = false;
+        }
+        $result["success"] = true;
+
         return $result;
     }
 

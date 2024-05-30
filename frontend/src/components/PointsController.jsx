@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import { Home, Login, Error, Navigation, Logout, Cards } from "./home";
+import { Home, Login, Error, Navigation, Logout, QuestCard, QuestList } from "./points";
 
-const HomeController = (props) => {
+const PointsController = (props) => {
   return (
     <>
       <Navigation
@@ -15,12 +15,8 @@ const HomeController = (props) => {
         <Route path="error" element={<Error {...props} />} />
         <Route path="logout" element={<Logout {...props} />} />
       </Routes>
-      <Cards
-        documentRoot={props.documentRoot}
-        debugMode={props.debugMode}
-      />
     </>
   );
 };
 
-export default HomeController;
+export default PointsController;

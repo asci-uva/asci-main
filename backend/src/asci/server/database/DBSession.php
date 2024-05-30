@@ -312,6 +312,14 @@ class DBSession
 
         return $sessions;
 
+    }
+
+    public function getCompletedOfficehoursCount ($userId, $courseId) {
+        $query = 'SELECT COUNT(*) FROM (sessions S JOIN session_users U on S.id=U.session_id) where U.user_id=$1 and S.course_id=$2 and (EXTRACT(EPOCH FROM exit_time - fulfillment_time)/60) >= 5';
+        $result = $this->db->query($query, array($userId, $courseId));
+        $row = $this->db->fetchrow($result);
+
+        return $row["count"];
 
     }
    
