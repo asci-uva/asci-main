@@ -10,31 +10,31 @@ function Cards(props) {
   let root = "/asci";
   return (
     <div className="row">
-      <div className="column">
+      <div className="col-md-4">
         <div className="card">
           <img className="card-img-top" src={img} />
           <div className="card-body">
-            <p className="card-text">Office Hours Queue</p>
-            <a href={docRoot + "/queue"} className="btn btn-primary">Join Queue</a>
+            <h5 className="card-title">Office Hours Queue</h5>
+            <p className="card-text text-center"><a href={docRoot + "/queue"} className="btn btn-primary">Join Queue</a></p>
           </div>
         </div>
       </div>
-      <div className="column">
+      <div className="col-md-4">
         <div className="card">
         <img className="card-img-top" src={img2} />
           <div className="card-body">
-            <p className="card-text">Admin</p>
-            <a href={docRoot + "/admin"} className="btn btn-primary">Visit Admin Page</a>
+            <h5 className="card-title">Admin</h5>
+            <p className="card-text text-center"><a href={docRoot + "/admin"} className="btn btn-primary">Visit Admin Page</a></p>
           </div>
         </div>
       </div>
-      <div className="column">
+      <div className="col-md-4">
         <div className="card">
         <img className="card-img-top" src={img3} />
           <div className="card-body">
-            <p className="card-text">Earn Points</p>
+            <h5 className="card-title">Earn Points</h5>
             {/* change link later */}
-            <a href={docRoot + "/points"}  className="btn btn-primary">Earn Points</a>
+            <p className="cart-text text-center"><a href={docRoot + "/points"}  className="btn btn-primary">Earn Points</a></p>
           </div>
         </div>
       </div>

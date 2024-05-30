@@ -29,7 +29,7 @@ function Home(props) {
   return (
     <div className="question">
       <div>
-        <h2>Welcome {user}</h2>
+        <h2>Welcome back {user}</h2>
       </div>
       <br></br>
     </div>
