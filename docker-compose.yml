@@ -43,6 +43,8 @@ services:
 
     volumes:
       - ./frontend/build/:/app/build/
+      - ./frontend/src/:/app/src/
+      - ./frontend/public/:/app/public/
 
     container_name: "ASCI_react"
     ports:
