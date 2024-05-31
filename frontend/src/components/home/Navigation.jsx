@@ -1,10 +1,11 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
 function Navigation(props) {
   let docRoot = props.documentRoot;
   let debugMode = props.debugMode;
-
+  const {user} = useUser();
 
   return (
     <header className="p-3 text-bg-dark mb-4">
@@ -33,7 +34,7 @@ function Navigation(props) {
 
             <div className="flex-shrink-0 dropdown">
               <a href="#" className="d-block text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" area-expanded="false">
-     USERNAME-TODO 
+      {user.pname} {user.lname} ({user.userid}) 
               </a>
                <ul className="dropdown-menu text-small shadow">
               <li>

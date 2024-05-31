@@ -12,7 +12,7 @@ function Logout(props) {
 
   useEffect(() => {
     logout();
-    navigate(docRoot + "/login");
+    navigate(docRoot + "/");
   }, []);
 
   return (

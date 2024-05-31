@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-const UserContext = createContext();
+const UserContext = createContext({
+    userid: null,
+    fname: null,
+    lname: null,
+    login: () => {},
+    logout: () => {}
+});
 
 const url = "http://localhost:8081/index.php";
 
@@ -9,14 +15,10 @@ export const useUser = () => {
 };
 
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    // update the username for each render
-    if (localStorage.getItem("asci-user") !== null) {
-      setUser(localStorage.getItem("asci-user"));
-    }
-  }, []);
+  const [userid, setUserid] = useState(null);
+  const [fname, setFname] = useState(null);
+  const [lname, setLname] = useState(null);
+  const [pname, setPname] = useState(null);
 
   const login = (userInfo, callback) => {
     let json = {};
@@ -38,7 +40,10 @@ export const UserProvider = ({ children }) => {
           // successfully login
           console.log("Login Success");
           localStorage.setItem("asci-user", data.computing_id);
-          setUser(data.computing_id);
+          setUserid(data.computing_id);
+          setFname(data.fname);
+          setLname(data.lname);
+          setPname(data.pname);
           callback(true);
         } else {
           // fail to login
@@ -53,15 +58,30 @@ export const UserProvider = ({ children }) => {
   };
 
   const logout = () => {
-    setUser(null);
+    setUserid(null);
+    setFname(null);
+    setLname(null);
+    setPname(null);
     // Clear LocalStorage
     localStorage.clear();
     console.log("logout successfully, go back to login page");
   };
 
+  const value = {
+      user: {
+          userid,
+          fname,
+          lname,
+          pname
+      },
+      login,
+      logout
+  };
+
   return (
-    <UserContext.Provider value={{ user, login, logout }}>
+    <UserContext.Provider value={value}>
       {children}
     </UserContext.Provider>
   );
 };
+

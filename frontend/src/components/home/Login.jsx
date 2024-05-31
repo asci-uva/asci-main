@@ -7,7 +7,7 @@ import { useUser } from "../context/UserContext";
 function Login(props) {
   const [username, setUsername] = useState("user name");
   const navigate = useNavigate();
-  const { user, login } = useUser();
+  const { login } = useUser();
 
   let url0 = props.url;
   let docRoot = props.documentRoot;

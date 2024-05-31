@@ -1,9 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Home, Login, Error, Navigation, Logout, Cards } from "./home";
-
+import { UserProvider,UserContext,useUser } from "./context/UserContext";
 const HomeController = (props) => {
-  return (
+
+    const {user} = useUser();
+    if (!user.userid) {
+        return (
+      <Login {...props} />
+        )
+    }
+  
+    return (
     <>
       <Navigation
         documentRoot={props.documentRoot}
