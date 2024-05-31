@@ -2,6 +2,7 @@ import React from "react";
 //import {useState, useEffect} from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Cards } from "./";
 
 //This page needs to:
 //See if student is logged in and kick to login page if not
@@ -27,11 +28,17 @@ function Home(props) {
   }, []);
 
   return (
-    <div className="question">
-      <div>
-        <h2>Welcome back {user}</h2>
+    <div className="row">
+      <div className="col-md-6">
+        <h2>ASCI@UVA</h2>
+        <p>Welcome back {user}!  Navigate to different parts of the application from here.</p>
       </div>
-      <br></br>
+      <div className="col-md-6">
+      <Cards
+        documentRoot={props.documentRoot}
+        debugMode={props.debugMode}
+      />
+        </div>
     </div>
   );
 }

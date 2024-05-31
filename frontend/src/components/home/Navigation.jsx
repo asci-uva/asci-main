@@ -1,45 +1,52 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { useState, useEffect } from "react";
 
 function Navigation(props) {
   let docRoot = props.documentRoot;
   let debugMode = props.debugMode;
 
+
   return (
-    <div className="navigation">
-      <nav className="navbar navbar-expand navbar-dark bg-dark">
-        <div className="container">
-          <NavLink className="navbar-brand" to={docRoot + "/"}>
-            HOME
+    <header className="p-3 text-bg-dark mb-4">
+      <div className="container">
+      <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+          <NavLink className="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none" to={docRoot + "/"}>
+            ASCI@UVA
           </NavLink>
-          <div>
-            <ul className="navbar-nav ml-auto">
-              <li className="nav-item">
-                <NavLink className="nav-link" to={docRoot + "/queue"}>
+            <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+              <li>
+                <NavLink className="nav-link px-2 text-white" to={docRoot + "/queue"}>
                   Queue
                 </NavLink>
               </li>
-              <li className="nav-item">
-                <NavLink className="nav-link" to={docRoot + "/admin"}>
+              <li>
+                <NavLink className="nav-link px-2 text-white" to={docRoot + "/admin"}>
                   Admin
                 </NavLink>
               </li>
-              <li className="nav-item">
-                <NavLink className="nav-link" to={docRoot + "/points"}>
+              <li>
+                <NavLink className="nav-link px-2 text-white" to={docRoot + "/points"}>
                   Earn Points
                 </NavLink>
               </li>
-              <li className="nav-item">
-                <NavLink className="nav-link" to={docRoot + "/logout"}>
+            </ul>
+
+            <div className="flex-shrink-0 dropdown">
+              <a href="#" class="d-block text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" area-expanded="false">
+     USERNAME-TODO 
+              </a>
+               <ul className="dropdown-menu text-small shadow">
+              <li>
+                <NavLink className="nav-link px-2" to={docRoot + "/logout"}>
                   Logout
                 </NavLink>
               </li>
-            </ul>
-          </div>
-        </div>
-      </nav>
+               </ul>
     </div>
+                
+      </div>
+      </div>
+    </header>
   );
 }
 

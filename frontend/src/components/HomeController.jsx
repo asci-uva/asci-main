@@ -9,16 +9,14 @@ const HomeController = (props) => {
         documentRoot={props.documentRoot}
         debugMode={props.debugMode}
       />
+      <div className="container">
       <Routes>
         <Route path="/" element={<Home {...props} />} />
         <Route path="login" element={<Login {...props} />} />
         <Route path="error" element={<Error {...props} />} />
         <Route path="logout" element={<Logout {...props} />} />
       </Routes>
-      <Cards
-        documentRoot={props.documentRoot}
-        debugMode={props.debugMode}
-      />
+            </div>
     </>
   );
 };
