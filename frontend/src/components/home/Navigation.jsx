@@ -32,7 +32,7 @@ function Navigation(props) {
             </ul>
 
             <div className="flex-shrink-0 dropdown">
-              <a href="#" class="d-block text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" area-expanded="false">
+              <a href="#" className="d-block text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" area-expanded="false">
      USERNAME-TODO 
               </a>
                <ul className="dropdown-menu text-small shadow">
