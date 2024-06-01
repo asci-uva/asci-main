@@ -85,7 +85,7 @@ The `stopllama` is more straight-forward. It simply terminates the process with 
 
 More information on Llamafile can be found by downloading an llamafile executable from [GitHub](https://github.com/Mozilla-Ocho/llamafile/releases) and run `llamafile --help`.
 
-### Misc. Notes on LLM Operations
+### LLM Operations tips
 
 - A good selection of available Llamafiles are listed on its [Github page](https://github.com/Mozilla-Ocho/llamafile?tab=readme-ov-file). The maintainer has a more complete list on their [HuggingFace profile](https://huggingface.co/jartine).
 - To download a Llamafile, run the bash command `wget <Llamafile URL>`
@@ -94,29 +94,11 @@ More information on Llamafile can be found by downloading an llamafile executabl
   - In order to run bigger models, you need to reduce the `-ngl` parameter to decrease VRAM usage. This will increase latency.
 - To check the current GPU memory (VRAM) usage, run `nvidia-smi`
 - Llamafiles can be run in terminals -- this can be helpful for simple testing. To do so, run commands in the format of `./mistral-7b-instruct-v0.2.Q5_K_M.llamafile  -p '[INST]Explain how does DFS work. Be brief.[/INST]' --gpu NVIDIA -ngl 22`. (You may change each parameter based on the model size/prompt format.)
-- Building Llamafiles for the first time requires (1) CUDA toolkit and (2) a Clang compiler. To load them to your system, run the following commands:
 
-```bash
-module load cuda-toolkit-11.7.0
-module load clang-llvm
-```
+## Troubleshooting Llamafile/`titanx01` issues
 
-- Clang may return warning messages on the Llamafile C++ code styles. As long as they are warnings (rather than errors that terminate the compilation process), you may ignore them. Warnings will not impact the Llamafile compilation.
-- `llamafile --help` is a helpful resource, as mentioned above.
-
-### Troubleshoot
-
-> My `runllama` command failed to start the Llamafile instance! It returned an out-of-memory error message.
-
-The cause of the issue is likely that the OS failed to clears the GPU memory after the Llamafile process terminates.
-
-To check if it is the case, run `nvidia-smi` and check if the `Processes` list is empty. If it is not, run `kill <PID of the process listed>`, and try re-running `runllama`.
+See the [llamafile_troubleshoot.md](docs/llamafile_troubleshoot.md) for more info.
 
 ## To Dos
 
-- **Update the Llamafile with better models as new ones get released. (Ideas: Llama-3-7B, Phi-3-mini)**
-- **Refactor the Python component of the `llm_chat` -- which currently runs inside `asci` -- into its own RESTful API service, and run it on `titanx01`.**
-  - Currently, `asci` runs on the `kytos02` server, and the server has a very outdated GPU. Since the Python component requires GPU to run RAG, the slow GPU performance leads to higher latency in the RAG process.
-  - Refactoring this to `titanx01` will enable the component to use the Nvidia GPU for this task and speed up the process.
-- **Refactor the `asci`-related components to enable the bot to use different course's documents for concurrent classes.** Currently, the bot only supports conversation about one course at a time. It will be helpful to expand the `llm_chat/storage` to support retriving from multiple courses based on course name/ID in the ASCI requests.
-- **Enhance `titanx01` security.** Add firewall rules on `titanx01` to allow only incoming and outbound traffic from the UVA network and `kytos02`. Drop all other traffic.
+See the list of [To Do items](docs/todo.md).
