@@ -87,12 +87,12 @@ More information on Llamafile can be found by downloading an llamafile executabl
 
 ## Llamafile Tips
 
-See [the tips document](docs/llamafile_tips) for a list of general tips.
+See the [Tips document](docs/llamafile_tips).
 
 ## Troubleshooting Llamafile/`titanx01` issues
 
-See the [llamafile_troubleshoot.md](docs/llamafile_troubleshoot.md) for more info.
+See the [Troubleshoot guide](docs/llamafile_troubleshoot.md).
 
 ## To Dos
 
-See the list of [To Do items](docs/todo.md).
+See the project's [To-Do list](docs/todo.md).
