@@ -25,20 +25,9 @@ The component also contains other helpful files to perform its task:
 
 ### `titanx01` component
 
-- The Llamafile-based LLM service. See the section below on the LLM component information.
+The Llamafile-based LLM service. See the section below on the LLM component information. The details are documented in the following documentations:
 
-## Running/Stopping Llamafiles
-
-See [the guide](docs/run_stop_llamafile.md) on how to access the GPU server and run/stop Llamafiles
-
-## Llamafile Tips
-
-See the [Tips document](docs/llamafile_tips.md).
-
-## Troubleshooting Llamafile/`titanx01` issues
-
-See the [Troubleshoot guide](docs/llamafile_troubleshoot.md).
-
-## To Dos
-
-See the project's [To-Do list](docs/todo.md).
+- [`run_stop_llamafile.md`](docs/run_stop_llamafile.md): How to access the GPU server and run/stop Llamafiles
+- [`llamafile_tips.md`](docs/llamafile_tips.md): Generic tips on running/building Llamafiles
+- [`llamafile_troubleshoot.md`](docs/llamafile_troubleshoot.md): How to troubleshoot Llamafile/`titanx01` issues
+- [`todo.md`](docs/todo.md): To-Do items for the project
