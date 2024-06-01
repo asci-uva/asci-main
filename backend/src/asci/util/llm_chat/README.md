@@ -85,15 +85,9 @@ The `stopllama` is more straight-forward. It simply terminates the process with 
 
 More information on Llamafile can be found by downloading an llamafile executable from [GitHub](https://github.com/Mozilla-Ocho/llamafile/releases) and run `llamafile --help`.
 
-### LLM Operations tips
+## Llamafile Tips
 
-- A good selection of available Llamafiles are listed on its [Github page](https://github.com/Mozilla-Ocho/llamafile?tab=readme-ov-file). The maintainer has a more complete list on their [HuggingFace profile](https://huggingface.co/jartine).
-- To download a Llamafile, run the bash command `wget <Llamafile URL>`
-- The maximum Llamafile size for `titanx01` is approximately 5 to 7 GB.
-  - Llamafiles larger than 7 GB typically do not fit in the Nvidia GPU memory (VRAM).
-  - In order to run bigger models, you need to reduce the `-ngl` parameter to decrease VRAM usage. This will increase latency.
-- To check the current GPU memory (VRAM) usage, run `nvidia-smi`
-- Llamafiles can be run in terminals -- this can be helpful for simple testing. To do so, run commands in the format of `./mistral-7b-instruct-v0.2.Q5_K_M.llamafile  -p '[INST]Explain how does DFS work. Be brief.[/INST]' --gpu NVIDIA -ngl 22`. (You may change each parameter based on the model size/prompt format.)
+See [the tips document](docs/llamafile_tips) for a list of general tips.
 
 ## Troubleshooting Llamafile/`titanx01` issues
 
