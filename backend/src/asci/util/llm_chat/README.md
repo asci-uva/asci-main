@@ -87,7 +87,7 @@ More information on Llamafile can be found by downloading an llamafile executabl
 
 ## Llamafile Tips
 
-See the [Tips document](docs/llamafile_tips).
+See the [Tips document](docs/llamafile_tips.md).
 
 ## Troubleshooting Llamafile/`titanx01` issues
 
