@@ -1,14 +1,14 @@
 # Troubleshooting issues from running Llamafile on the `titanx01` GPU server
 
-> My `runllama` command failed to start the Llamafile instance! It returned an out-of-memory error message.
+## The `runllama` command failed and returned an out-of-memory error message
 
 The cause of the issue is likely that the OS failed to clear the GPU memory after the Llamafile process terminated.
 
 To check if this is the case, run `nvidia-smi` and check if the `Processes` list is empty. If it is not, run `kill <PID of the process listed>`, and try re-running `runllama`.
 
-> I got "NVIDIA-SMI has failed because it couldn't communicate with the NVIDIA driver. Make sure that the latest NVIDIA driver is installed and running." when running `nvidia-smi`.
+## The `nvidia-smi` command returned error `NVIDIA-SMI has failed because it couldn't communicate with the NVIDIA driver.`
 
-This error is usually caused by an incompatible Nvidia driver. To fix it, follow the steps below:
+This error is usually caused by an incompatible Nvidia driver. To fix it, follow the steps below to install compatible drivers:
 
 1. Remove existing NVIDIA drivers:
 
@@ -52,7 +52,7 @@ This error is usually caused by an incompatible Nvidia driver. To fix it, follow
 
 Finally, run `nvidia-smi` to verify if the driver is working properly.
 
-> I got "`nvcc` is not found" when running the `runllama` command.
+## The `runllama` command returns an `nvcc is not found` error
 
 **IMPORTANT: Do not download NVCC directly from Nvidia and install it on `titanx01`; this will cause hard-to-debug problems caused by conflicting versions of `nvcc`.**
 
@@ -62,4 +62,4 @@ Llamafile needs `nvcc` (CUDA compiler driver) to build its dependencies. To load
 module load cuda-toolkit-11.7.0
 ```
 
-Re-run `runllama`; you should be able to execute it with no problem.
+Rerun `runllama`; you should be able to execute it with no problem.
