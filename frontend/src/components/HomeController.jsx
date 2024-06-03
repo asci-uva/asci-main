@@ -15,10 +15,6 @@ const HomeController = (props) => {
         <Route path="error" element={<Error {...props} />} />
         <Route path="logout" element={<Logout {...props} />} />
       </Routes>
-      <Cards
-        documentRoot={props.documentRoot}
-        debugMode={props.debugMode}
-      />
     </>
   );
 };

@@ -3,6 +3,8 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import Cards from "./Cards";
+
 //This page needs to:
 //See if student is logged in and kick to login page if not
 //If, logged in, reset student info and kick to dashboard
@@ -32,6 +34,10 @@ function Home(props) {
         <h2>Welcome {user}</h2>
       </div>
       <br></br>
+      <Cards
+        documentRoot={props.documentRoot}
+        debugMode={props.debugMode}
+      />
     </div>
   );
 }
