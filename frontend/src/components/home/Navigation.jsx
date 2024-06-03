@@ -8,46 +8,50 @@ function Navigation(props) {
   const {user} = useUser();
 
   return (
-    <header className="p-3 text-bg-dark mb-4">
+    <nav className="navbar navbar-expand-md navbar-dark bg-dark mb-4">
       <div className="container">
-      <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-          <NavLink className="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none" to={docRoot + "/"}>
-            ASCI@UVA
+          <NavLink className="navbar-brand" to={docRoot + "/"}>
+          ASCI@UVA
           </NavLink>
-            <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-              <li>
-                <NavLink className="nav-link px-2 text-white" to={docRoot + "/queue"}>
-                  Queue
+          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#ascinav" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+              <span className="navbar-toggler-icon"></span>
+          </button>
+          <div className="collapse navbar-collapse" id="ascinav"> 
+            <ul className="navbar-nav me-auto mb-2 mb-md-0">
+              <li className="nav-item">
+                <NavLink className="nav-link" to={docRoot + "/queue"}>
+                  <i className="bi-list-ol"></i> Queue
                 </NavLink>
               </li>
-              <li>
-                <NavLink className="nav-link px-2 text-white" to={docRoot + "/admin"}>
-                  Admin
+              <li className="nav-item">
+                <NavLink className="nav-link" to={docRoot + "/admin"}>
+                  <i className="bi-gear-wide-connected"></i> Admin
                 </NavLink>
               </li>
-              <li>
-                <NavLink className="nav-link px-2 text-white" to={docRoot + "/points"}>
-                  Earn Points
+              <li className="nav-item">
+                <NavLink className="nav-link" to={docRoot + "/points"}>
+                  <i className="bi-trophy-fill"></i> Earn Points
                 </NavLink>
               </li>
-            </ul>
+      </ul>
+            <ul className="navbar-nav ms-auto mb-2 mb-md-0">
 
-            <div className="flex-shrink-0 dropdown">
-              <a href="#" className="d-block text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" area-expanded="false">
-      {user.pname} {user.lname} ({user.userid}) 
+            <li className="nav-item dropdown">
+              <a href="#" className="nav-link dropdown-toggle" data-bs-toggle="dropdown" area-expanded="false">
+      <i className="bi-person-badge-fill"></i> {user.pname} {user.lname} ({user.userid}) 
               </a>
-               <ul className="dropdown-menu text-small shadow">
+               <ul className="dropdown-menu">
               <li>
-                <NavLink className="nav-link px-2" to={docRoot + "/logout"}>
+                <NavLink className="dropdown-item" to={docRoot + "/logout"}>
                   Logout
                 </NavLink>
               </li>
                </ul>
-    </div>
-                
+          </li>
+      </ul>
       </div>
       </div>
-    </header>
+      </nav>
   );
 }
 
