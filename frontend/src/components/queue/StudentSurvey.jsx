@@ -276,7 +276,7 @@ function StudentSurvey(props) {
 
 
             <div>
-            <h2> Was {taFirstName} able to your questions / concerns? </h2>
+            <h2> Was {taFirstName} able to address your questions / concerns? </h2>
             </div>
 
             <div className="radio_btn_group">
