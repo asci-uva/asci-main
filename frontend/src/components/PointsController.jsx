@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import { Home, Login, Error, Navigation, Logout, QuestCard, QuestList } from "./points";
+import { Home, Error, Navigation, Logout, QuestCard, QuestList } from "./points";
 
 const PointsController = (props) => {
   return (
@@ -11,7 +11,6 @@ const PointsController = (props) => {
       />
       <Routes>
         <Route path="/" element={<Home {...props} />} />
-        <Route path="login" element={<Login {...props} />} />
         <Route path="error" element={<Error {...props} />} />
         <Route path="logout" element={<Logout {...props} />} />
       </Routes>
