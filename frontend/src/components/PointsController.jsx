@@ -1,8 +1,21 @@
 import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import { Home, Login, Error, Navigation, Logout, QuestCard, QuestList } from "./points";
+import { Home, QuestCard, QuestList } from "./points";
+import {
+  Login,
+  Error,
+  Logout,
+  Navigation,
+} from "./utils";
+import { useUser } from "./context/UserContext";
 
 const PointsController = (props) => {
+    const {user} = useUser();
+    if (!user.userid) {
+        return (
+      <Login {...props} />
+        )
+    }
   return (
     <>
       <Navigation

@@ -1,25 +1,27 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 
 function Home(props) {
   let url = props.url;
   let docRoot = props.documentRoot;
   const navigate = useNavigate();
-  const user = localStorage.getItem("asci-user");
+  const {user, getCourse} = useUser();
 
   const [purpose, setPurpose] = useState(0);
   const [courses, setCourses] = useState({
     0: "Select course...",
   });
 
+  let course = getCourse();
+
   //This function runs on page load!
   useEffect(() => {
     //setup json command
     let request = {};
     request.command = "getCoursesByRole";
-    request.user = user;
+    request.user = user.userid;
     request.role = "instructor";
 
     getCourses(request, url);
@@ -71,42 +73,45 @@ function Home(props) {
       });
   };
 
-  const handleEditCourse = (courseId) => {
-    console.log(courseId);
-    navigate(docRoot + `/editCourse/${courseId}`);
-  };
-
-  const handleNavigateToCoursePanel = (courseId) => {
-    navigate(`${docRoot}/coursePanel/${courseId}`);
-  };
 
   return (
     <>
-      <div className="question">
-        <h3>Welcome {user}</h3>
-        <h4>
+      <div className="container p-4">
+        <div className="row my-auto">
+        <div className="col-md-4">
+        <h1><i className="bi-gear-wide-connected big-icon"></i></h1>
+        <h2>Admin</h2>
+        <p>
           The courses you instruct are below. Click on the edit button to change
           the settings for that course
-        </h4>
-        {Object.keys(courses).map((courseId) => {
-          if (courseId !== "0") {
-            return (
-              <div key={courseId}>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavigateToCoursePanel(courseId);
-                  }}
-                >
-                  {courses[courseId]}
-                </a>
-                <button onClick={() => handleEditCourse(courseId)}>Edit</button>
-              </div>
-            );
-          }
-          return null;
-        })}
+        </p>
+        </div>
+      <div className="col-md-8 my-auto">
+      <h3 className="mb-3">Course: {course.mnemonic} {course.number} -  {course.name} ({course.semester})</h3>
+    <div className="row">
+      <div className="col-md-4">
+        <div className="card p-3">
+            <div className="card-img-top text-center">
+            <i className="bi-info-circle home-icon"></i>
+          </div>
+          <div className="card-body">
+            <p className="card-text text-center"><Link to={docRoot + "/coursePanel/"+course.course_id} className="btn btn-danger">Course Panel</Link></p>
+          </div>
+        </div>
+      </div>
+      <div className="col-md-4">
+        <div className="card p-3">
+            <div className="card-img-top text-center">
+            <i className="bi-pencil-square home-icon"></i>
+          </div>
+          <div className="card-body">
+            <p className="card-text text-center"><Link to={docRoot + "/editCourse/"+course.course_id} className="btn btn-danger">Edit Details</Link></p>
+          </div>
+        </div>
+      </div>
+      </div>
+      </div>
+      </div>
       </div>
     </>
   );

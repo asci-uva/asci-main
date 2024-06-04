@@ -93,14 +93,20 @@ class ServerExecutor{
     public function loginHandler($computing_id){
         $user = $this->userStore->getUser($computing_id)->toArray();
 
+        $result = [];
         if($user == null || $user["computing_id"] == null){
-            $user = ["success" => "false"];
+            $result["success"] = "false";
         }
         else{
-            $user["success"] = "true";
+            $result["user"] = $user;
+            $courses = $this->getCoursesHandler($computing_id);
+            if ($courses["success"] == "true") {
+                $result["courses"] = $courses["courses"];
+            }
+            $result["success"] = "true";
         }
 
-        return $user;
+        return $result;
     }
 
     /*

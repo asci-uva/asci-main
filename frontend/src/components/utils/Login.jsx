@@ -48,23 +48,35 @@ function Login(props) {
   //RENDERING
   if (debugMode) {
     return (
-      <div className="question">
+      <div className="container p-4">
+        <div className="row my-auto">
+        <div className="col-md-4">
+        <h1><i className="bi-door-open big-icon"></i></h1>
         <h2>Login</h2>
+        <p>Please log in with your computing ID</p>
+        </div>
+      <div className="col-md-8 my-auto">
         <form onSubmit={handleSubmit}>
-          <label>Username</label>
+          <div className="mb-3">
+          <label className="form-label">Username</label>
           <input
             type="text"
+            id="username"
+            className="form-control"
             required
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
-          <button>Submit</button>
+      </div>
+          <button className="btn btn-primary">Submit</button>
         </form>
       </div>
+        </div>
+        </div>
     );
   } else {
     return (
-      <div className="question">
+      <div className="container">
         <h2>Redirecting to netbadge login...</h2>
       </div>
     );
