@@ -93,11 +93,13 @@ function GradescopeSync(props) {
   };
 
   return (
-    <div className="question">
-      <h2>Gradescope Synchronization</h2>
+    <form>
+      <div class="p-2 border border-primary rounded">
+
+      <h4>Gradescope Synchronization</h4>
 
       <label>Gradescope Course Number:</label>
-      <input
+      <input class="form-control mb-2"
         type="text"
         value={courseNumber}
         onChange={(e) => setCourseNumber(e.target.value)}
@@ -105,7 +107,7 @@ function GradescopeSync(props) {
       />
 
       <label>Gradescope Account Username:</label>
-      <input
+      <input class="form-control mb-2"
         type="text"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
@@ -113,15 +115,16 @@ function GradescopeSync(props) {
       />
 
       <label>Gradescope Account Passcode:</label>
-      <input
+      <input class="form-control mb-2"
         type="password"
         value={passcode}
         onChange={(e) => setPasscode(e.target.value)}
         required
       />
 
-      <button onClick={handleSynchronize}>Synchronize the Data</button>
+      <button type="button" class="btn btn-primary" onClick={handleSynchronize}>Synchronize the Data</button>
     </div>
+    </form>
   );
 }
 

@@ -48,12 +48,14 @@ function AddStudent(props) {
   };
 
   return (
-    <div className="question">
-      <h2>Manually Add Student/TA</h2>
-
+    <form>
+      <div class="p-2 border border-primary rounded">
       
+      <div class="mb-2">
+      <h4>Add Student or TA</h4>
+
         <label>First Name:</label>
-        <input
+        <input class="form-control mb-2"
           type="text"
           value={fname}
           onChange={(e) => setFname(e.target.value)}
@@ -63,7 +65,7 @@ function AddStudent(props) {
 
       
         <label>Last Name:</label>
-        <input
+        <input class="form-control mb-2"
           type="text"
           value={lname}
           onChange={(e) => setLname(e.target.value)}
@@ -73,7 +75,7 @@ function AddStudent(props) {
 
       
         <label>Prefer Name:</label>
-        <input
+        <input class="form-control mb-2"
           type="text"
           value={pname}
           onChange={(e) => setPname(e.target.value)}
@@ -83,7 +85,7 @@ function AddStudent(props) {
 
       
         <label>Computing ID:</label>
-        <input
+        <input class="form-control mb-2"
           type="text"
           value={computingId}
           onChange={(e) => setComputingId(e.target.value)}
@@ -97,10 +99,12 @@ function AddStudent(props) {
           <option value="student">Student</option>
           <option value="ta">TA</option>
         </select>
+        </div>
       
 
-      <button onClick={handleAdd}>Add</button>
+      <button type="button" class="btn btn-primary" onClick={handleAdd}>Add</button>
     </div>
+    </form>
   );
 }
 

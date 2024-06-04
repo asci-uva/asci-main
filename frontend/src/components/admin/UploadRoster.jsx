@@ -83,11 +83,13 @@ function UploadRoster(props) {
   };
 
   return (
-    <div className="question">
-      <h2>Upload Roster</h2>
-      <input type="file" onChange={handleFileChange} accept=".csv" />
-      <button onClick={uploadRoster}>Upload</button>
+    <form>
+    <div class="p-2 border border-primary rounded">
+      <h4>Upload Roster</h4>
+      <input class="form-control mb-2" type="file" onChange={handleFileChange} accept=".csv" />
+      <button type="button" class="btn btn-primary" onClick={uploadRoster}>Upload</button>
     </div>
+    </form>
   );
 }
 
