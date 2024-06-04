@@ -106,7 +106,7 @@ function Meeting(props) {
       //End the meeting
       let request = {};
       request.command = "TAEndMeeting";
-      request.user = localStorage.getItem('asci-user');
+      request.user = user.userid;
       request.sessionId = sessionId;
       
       endMeeting(request, url);
