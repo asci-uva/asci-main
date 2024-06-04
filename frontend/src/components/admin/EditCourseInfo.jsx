@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import UploadRoster from "./UploadRoster";
-import AddStudent from "./AddStudent";
-import GradescopeSync from "./GradescopeSync";
-import EditCourseInfo from "./EditCourseInfo";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-function EditCourse(props) {
+function EditCourseInfo(props) {
   let url = props.url;
   let docRoot = props.documentRoot;
   const { courseId } = useParams();
@@ -61,35 +57,40 @@ function EditCourse(props) {
   return (
     <>
     
-      <div class="container">
-        <div class="row">
-          <div class="col-md">
-            <EditCourseInfo />
-          </div>
-          <div class="col-md">
-            <UploadRoster course_id={courseId} {...props} />
-          </div>
-          <div class="col-md">
-            <AddStudent course_id={courseId} {...props} />
-          </div>
+      <form class="border border-primary rounded p-2">
+      <div class="form-group mb-2">
+        <h4>Edit Course Information</h4>
+        <input
+          type="text" class="form-control"
+          value={mnemonic}
+          onChange={(e) => setMnemonic(e.target.value)}
+          placeholder="Mnemonic"></input>
         </div>
-        <div class="row">
-          <div class="col-md">
-            <GradescopeSync course_id={courseId} {...props} />
-          </div>
-          <div class="col-md">
-            
-          </div>
-          <div class="col-md">
-            
-          </div>
+        <div class="form-group mb-2">
+        <input
+          type="text" class="form-control"
+          value={number}
+          onChange={(e) => setNumber(e.target.value)}
+          placeholder="Number" />
         </div>
-      </div>
-      
-      
-      
+        <div class="form-group mb-2">
+        <input
+          type="text" class="form-control"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Name" />
+        </div>
+        <div class="form-group mb-2">
+        <input
+          type="text" class="form-control"
+          value={semester}
+          onChange={(e) => setSemester(e.target.value)}
+          placeholder="Semester" />
+        </div>
+        <button type="button" class="btn btn-primary" onClick={handleSubmit}>Update Course</button>
+      </form>
     </>
   );
 }
 
-export default EditCourse;
+export default EditCourseInfo;
