@@ -59,10 +59,25 @@ class DBCourseSettings
         $result = $this->db->query($query, array($course_id));
         $settings = $this->db->fetchrow($result);
 
+        #creates a new course settings entry if it does not exist
         if($settings == null){
-            return null;
+            if (!$this->createCourseSettings($course_id)){
+                return null;
+            } else {
+                $settings = $this->db->fetchrow($result);
+            }
         }
 
         return (new \asci\data\CourseSettings())->fromArray($settings);
+    }
+    /*
+     * Creates a new course settings entry in the database
+     */
+    public function createCourseSettings($course_id){
+        $query = 'INSERT INTO course_settings (course_id) VALUES ($1)';
+        $result = $this->db->query($query, array($course_id));
+
+        if($result) return true;
+        else return false;
     }
 }
