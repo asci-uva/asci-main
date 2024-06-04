@@ -1,13 +1,16 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 import Chat from "../chat/Chat";
 
 function StudentWaitingRoom(props) {
     const navigate = useNavigate();
+    let {user, getCourse} = useUser();
+    let course = getCourse();
+
 
     const [position, setPosition] = useState(-1);
-    const [courseName, setCourseName] = useState("...");
     const [minsWaiting, setMinsWaiting] = useState("...");
     const [tip, setTip] = useState("This is a really good tip.");
 
@@ -18,32 +21,21 @@ function StudentWaitingRoom(props) {
     let timeoutId = 0;
     let pollTime = 3000;
 
-    let user = null;
-    let courseId = null;
-
     let url = props.url;
     let docRoot = props.documentRoot;
 
     //This function runs on page load!
     useEffect(() => {
         //Make sure id and course are set
-        if (localStorage.getItem("asci-user") === null) {
-            navigate(docRoot + "/login");
-        } else if (localStorage.getItem("asci-course") === null) {
-            navigate(docRoot + "/selectCourse");
-        } else {
-            console.log("StudWait: Setting user and course id");
-            user = localStorage.getItem("asci-user");
-            courseId = localStorage.getItem("asci-course");
-            console.log("StudWait: User: " + user);
-            console.log("StudWait: Course: " + courseId);
+        console.log("StudWait: Setting user and course id");
+        console.log("StudWait: User: " + user);
+        console.log("StudWait: Course: " + course);
 
-            console.log("waiting room mounted, start polling");
-            polling = true;
-            poll();
+        console.log("waiting room mounted, start polling");
+        polling = true;
+        poll();
 
-            getTip();
-        }
+        getTip();
 
         //called when this component unmounts
         return () => {
@@ -54,23 +46,14 @@ function StudentWaitingRoom(props) {
     }, []);
 
     function poll() {
-        if (localStorage.getItem("asci-user") === null) {
-            navigate(docRoot + "/login");
-        } else if (localStorage.getItem("asci-course") === null) {
-            navigate(docRoot + "/selectCourse");
-        } else {
-            console.log("waitingRoom...polling for queue position");
+        console.log("waitingRoom...polling for queue position");
 
-            user = localStorage.getItem("asci-user");
-            courseId = localStorage.getItem("asci-course");
-
-            //setup json command
-            let request = {};
-            request.command = "getQueueStatus";
-            request.user = user;
-            request.courseId = courseId;
-            getStatus(request, url);
-        }
+        //setup json command
+        let request = {};
+        request.command = "getQueueStatus";
+        request.user = user.userid;
+        request.courseId = course.course_id;
+        getStatus(request, url);
     }
     //get another tip
     //This function checks the users queue status and updates things
@@ -79,7 +62,7 @@ function StudentWaitingRoom(props) {
         // e.preventDefault();
 
         let request = {};
-        request.user = user;
+        request.user = user.userid;
         request.command = "getTip";
         fetchTip(request, url);
     };
@@ -145,7 +128,6 @@ function StudentWaitingRoom(props) {
                     data.session.status === "grouping"
                 ) {
                     console.log("WR: Displaying new queue position");
-                    setCourseName(data.usercourse.name);
                     setPosition(5);
 
                     //Get the start date
@@ -181,22 +163,12 @@ function StudentWaitingRoom(props) {
     const leaveQueue = (e) => {
         e.preventDefault();
 
-        if (localStorage.getItem("asci-user") === null) {
-            navigate(docRoot + "/login");
-        } else if (localStorage.getItem("asci-course") === null) {
-            navigate(docRoot + "/selectCourse");
-        } else {
-            user = localStorage.getItem("asci-user");
-            courseId = localStorage.getItem("asci-course");
+        let request = {};
+        request.command = "leaveQueue";
 
-            //JOIN THE QUEUE
-            let request = {};
-            request.command = "leaveQueue";
-
-            request.user = user;
-            request.courseId = courseId;
-            reqLeaveQueue(request, url);
-        }
+        request.user = user.userid;
+        request.courseId = course.course_id;
+        reqLeaveQueue(request, url);
     };
 
     //This function attempts to leave the queue
@@ -230,15 +202,20 @@ function StudentWaitingRoom(props) {
     };
 
     return (
-        <div className="question">
-            <div>
+      <div className="container p-4">
+        <div className="row my-auto">
+        <div className="col-md-4">
+        <h1><i className="bi-clock-history big-icon"></i></h1>
+        <h2>Waiting Room</h2>
+        <p>On the queue.</p>
+        </div>
+      <div className="col-md-8 my-auto">
                 <h4>
-                    You are currently in the queue for {courseName}. A TA Will
-                    be with you shortly.{" "}
+                    You are currently in the queue for {course.name}. A TA Will
+                    be with you shortly
                 </h4>
-            </div>
-            <div style={{ marginBottom: "0px" }}>
-                <button style={{ marginBottom: "15px" }} onClick={leaveQueue}>
+            <div className="text-center my-6">
+                <button className="btn btn-danger" onClick={leaveQueue}>
                     Leave queue
                 </button>
             </div>
@@ -246,8 +223,10 @@ function StudentWaitingRoom(props) {
                 url={url}
                 docRoot={docRoot}
                 issueSubject={issueSubject}
-                courseName={courseName}
+                courseName={course.name}
             />
+        </div>
+        </div>
         </div>
     );
 }

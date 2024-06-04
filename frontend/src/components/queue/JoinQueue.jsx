@@ -184,14 +184,14 @@ function JoinQueue(props) {
 
     if(settings != null && settings.grouping_enabled == "t"){
       return (
-        <div>
-          <label className="form-label">
+        <div className="form-check">
             <input
-              className="form-control"
+              className="form-check-input"
               type="checkbox"
               checked={groupOption}
               onChange={handleCheck}
             />
+          <label className="form-check-label">
             I would like to be placed in a group (this might decrease your wait time)
             
           </label>
@@ -210,7 +210,7 @@ function JoinQueue(props) {
       <div className="container p-4">
         <div className="row my-auto">
         <div className="col-md-4">
-        <h1><i className="bi-door-open big-icon"></i></h1>
+        <h1><i className="bi-list-ol big-icon"></i></h1>
         <h2>Join Queue</h2>
         <p>Please enter the following information to join the queue.</p>
         </div>

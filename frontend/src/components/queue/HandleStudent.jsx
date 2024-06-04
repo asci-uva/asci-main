@@ -1,13 +1,14 @@
 import React from "react";
 import {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
+import { useUser } from "../context/UserContext";
 
 import ClearQueue from "./ClearQueue";
 
 function HandleStudent(props) {
-  
-  let [user, setUser] = useState(null);
-  let [courseId, setCourseId] = useState(null);
+
+  let {user, getCourse} = useUser();
+  let course = getCourse();
 
   //variables for managing polling the server
   let polling = false;
@@ -31,23 +32,10 @@ function HandleStudent(props) {
     //Ping the server and make sure this person is actually a TA
     console.log("TA: Checking if token exists");
 
-    if(localStorage.getItem('asci-user') === null){
-      navigate(docRoot + "/login");
-    }
-
-    else if(localStorage.getItem('asci-course') === null){
-      navigate(docRoot + "/selectCourse");
-    }
-
-    else{
-      setUser(localStorage.getItem('asci-user'));
-      setCourseId(courseId = localStorage.getItem('asci-course'));
-
       getSettings();
 
       polling = true;
       pollNumWaiting();
-    }
 
     //called when this component unmounts
     return () => {
@@ -63,8 +51,8 @@ function HandleStudent(props) {
     /* Also get course settings */
     let request2 = {};
     request2.command = "getCourseSettings";
-    request2.user = localStorage.getItem('asci-user');
-    request2.courseId = localStorage.getItem('asci-course');
+    request2.user = user.userid;
+    request2.courseId = course.course_id;
     fetchSettings(request2, url);
   }
     
@@ -104,8 +92,8 @@ function HandleStudent(props) {
     //Get a student
     let request = {};
     request.command = "getWaitingSessions";
-    request.user = localStorage.getItem('asci-user');
-    request.courseId = localStorage.getItem('asci-course');
+    request.user = user.userid;
+    request.courseId = course.course_id;
     getWaitingSessions(request, url); 
   }
 
@@ -127,11 +115,6 @@ function HandleStudent(props) {
 
           setWaitingSessions(data.sessions);
 
-          setCourseName(data.usercourse.mnemonic +
-                        data.usercourse.number + "(" +
-                        data.usercourse.name + ")"
-                        );
-
           if(polling == true){
               timeoutId = setTimeout(pollNumWaiting, pollTime);
           }
@@ -152,32 +135,15 @@ function HandleStudent(props) {
 
 
 
-
-  const handleLogout = (e) =>{
-    e.preventDefault();
-    localStorage.clear();
-    navigate(docRoot + '/');
-  }
-
   const handleAssign = (e) =>{
     e.preventDefault();
 
-    if(localStorage.getItem('asci-user') === null){
-      navigate(docRoot + "/login");
-    }
-
-    else if(localStorage.getItem('asci-course') === null){
-      navigate(docRoot + "/selectCourse");
-    }
-    else{
-    
       //Get a student
       let request = {};
       request.command = "getStudentForTA";
-      request.user = localStorage.getItem('asci-user');
-      request.courseId = localStorage.getItem('asci-course');
+      request.user = user.userid;
+      request.courseId = course.course_id;
       getStudent(request, url); 
-    }
   }
 
   const handleTake = (e) =>{
@@ -188,24 +154,14 @@ function HandleStudent(props) {
     console.log("value is: " + e.target.value);
 
     /* Need to send sessionId also... */
-
-    if(localStorage.getItem('asci-user') === null){
-      navigate(docRoot + "/login");
-    }
-
-    else if(localStorage.getItem('asci-course') === null){
-      navigate(docRoot + "/selectCourse");
-    }
-    else{
     
       //Get a student
       let request = {};
       request.command = "takeSpecificStudentForTA";
-      request.user = localStorage.getItem('asci-user');
-      request.courseId = localStorage.getItem('asci-course');
+      request.user = user.userid;
+      request.courseId = course.course_id;
       request.sessionId = waitingSessions[e.target.value].id;
       getStudent(request, url); 
-    }
 
   }
 
@@ -251,55 +207,85 @@ function HandleStudent(props) {
 
 
     const WaitTableHeaderRow = () => {
-      return <tr><th>Pos</th><th>Subject</th><th>Issue</th><th>Location</th><th>Take</th></tr>;
+      return <tr><th>No.</th><th className="waitTableIssue">Issue</th><th>Location</th><th>Options</th></tr>;
     }
 
 
     const WaitTableRow = ({data}) => {
       return Object.keys(data).map(k =>
         <tr key={k}>
-          <td>{k}</td><td>{data[k].issue_subject}</td><td>{data[k].issue}</td><td>{data[k].location}</td>
-          <td><button value={k} onClick={handleTake}>Take</button></td>
+          <td>{k}</td><td><b>{data[k].issue_subject}</b><br/>{data[k].issue}</td><td>{data[k].location}</td>
+          <td><button value={k} onClick={handleTake} className="btn btn-sm btn-danger">Take</button></td>
         </tr>
       );
     }
 
     const WaitTable = ({data}) => {
-      if(data.length > 0 && settings != null && settings.show_queue_list=="t"){
+      if(data.length > 0) { // && settings != null && settings.show_queue_list=="t"){
         return (
-          <table>
+          <div className="card my-3">
+            <h5 className="card-header">Waiting List</h5>
+            <div className="card-body">
+            <table className="table table-striped">
+            <thead>
             <WaitTableHeaderRow />
+            </thead>
+            <tbody>
             <WaitTableRow data={data} />
+            </tbody>
           </table>
+            </div>
+            </div>
         );
       }
       else return;
     }
 
   return (
-    <div className="question waitlist">
-      <div>
-        <h2>You are now handling students for <b>{courseName}</b></h2>
-        <h5>There are <b>{numWaiting}</b> student(s) waiting.</h5>
+      <div className="container p-4">
+        <div className="row my-auto">
+        <div className="col-md-4">
+        <h1><i className="bi-list-ol big-icon"></i></h1>
+        <h2>Handle Queue</h2>
+        <p>You are now handling students for <b>{course.name}</b>.</p>
+        </div>
+      <div className="col-md-8 my-auto">
+        <div className="row">
+          <div className="col-md-6">
+            <div className="card text-bg-primary mb-3">
+              <div className="card-body text-center">
+                <p>There are <b>{numWaiting}</b> student(s) waiting.</p>
+        
+                <button onClick={handleAssign} className="btn btn-info">Get Next Student</button>
+                </div>
+                </div>
       </div>
-      <div>
-        <button onClick={handleAssign}>get next student</button>
+          <div className="col-md-6">
+            <div className="card text-bg-danger mb-3">
+              <div className="card-body text-center">
+        <ClearQueue callback={handleClearQueueCallback} url={url} documentRoot={docRoot} user={user.userid} courseId={course.course_id} />
+                </div>
+                </div>
       </div>
-
+      </div>
+            
       <div>
-        <ClearQueue callback={handleClearQueueCallback} url={url} documentRoot={docRoot} user={user} courseId={courseId} />
       </div>
 
       <div>
         <WaitTable data={waitingSessions} />
       </div>
 
-      <div>
-        <h6>Missed a survey from an older meeting? Click here to go back and fill it out!</h6>
-        <button onClick={() => navigate(docRoot + "/taSurvey")}>Go to survey</button>
+      <div className="my-4 card">
+        <div className="card-body text-center">
+        <p>Missed a survey from an older meeting? Click here to go back and fill it out!</p>
+        <button onClick={() => navigate(docRoot + "/taSurvey")} className="btn btn-success">Complete Survey</button>
+      </div>
       </div>
       
     </div>
+      </div>
+      </div>
   );
 }
 

@@ -1,10 +1,14 @@
 import React from "react";
 import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
+import { useUser } from "../context/UserContext";
 
 function StudentMeeting(props) {
   
   const navigate = useNavigate();
+    
+    let {user, getCourse} = useUser();
+    let course = getCourse();
 
   const [taName, setTAName] = useState("TA Name");
   const [taId, setTAId] = useState("TA Id");
@@ -20,23 +24,13 @@ function StudentMeeting(props) {
     //This function runs on page load!
     useEffect(() => {
       
-    if(localStorage['asci-user'] === null){
-      navigate(docRoot + "/login");
-    }
-    else if(localStorage.getItem('asci-course') === null){
-      navigate(docRoot + "/selectCourse");
-    }
-    else{
 
       //Get meeting details
       let request = {};
       request.command = "getMeetingDetails";
-      request.user = localStorage.getItem('asci-user');
-      request.courseId = localStorage.getItem('asci-course');;
+      request.user = user.userid;
+      request.courseId = course.course_id;
       getMeetingInfo(request, url);  
-      
-
-    }
       
     }, []);
 
@@ -78,20 +72,14 @@ function StudentMeeting(props) {
   const leaveMeeting = (e) =>{
     e.preventDefault();
 
-    if(localStorage.getItem('asci-user') === null){
-      navigate(docRoot + "/login");
-    }
-    else if(localStorage.getItem('asci-course') === null){
-      navigate(docRoot + "/selectCourse");
-    }
-    else if(sessionId === null){
+    if(sessionId === null){
       navigate(docRoot + "/error");
     }
     else{
 
       let request = {};
       request.command = "leaveMeeting";
-      request.user = localStorage.getItem('asci-user');
+      request.user = user.userid;
       request.sessionId = sessionId;
       reqLeaveMeeting(request, url); 
     }
@@ -131,43 +119,50 @@ function StudentMeeting(props) {
       /* If student is the main session for a group, just notify them */
       if(isGroup && groupSession == null){
         return (
-          <div>
-          <div>
-            <h5> This is a <b>group meeting</b>. Other students should arrive to join you soon! </h5>
-          </div>
-          <div>
-            <h5>Please be ready when the TA arrives to assist you.</h5>
-          </div>
+          <div className="text-center">
+            <h5>This is a <b>group meeting</b>. Other students should arrive to join you soon! </h5>
+            <h6>Please be ready when the TA arrives to assist you.</h6>
           </div>  );
       }
       else if(isGroup && groupSession != null){
         return(
-          <div>
-            <h5> You have been added to a group (<b>Location: {groupSession.location})</b>. Please proceed to the specified location to find your group!</h5>
+          <div className="text-center">
+            <h6> You have been added to a group (<b>Location: {groupSession.location})</b>. Please proceed to the specified location to find your group!</h6>
           </div>
         );
       }
       else{
         return (
-          <div>
-            <h5>Please be ready when the TA arrives to assist you.</h5>
+          <div className="text-center">
+            <h6>Please be ready when the TA arrives to assist you.</h6>
           </div>  );
       }
     }
 
 
   return (
-    <div className="question">
-      <div>
-        <h4>You are in a meeting with { taName } ( { taId } )</h4>
-      </div>
-
+      <div className="container p-4">
+        <div className="row my-auto">
+        <div className="col-md-4">
+        <h1><i className="bi-person big-icon"></i></h1>
+        <h2>Meeting</h2>
+        <p>Your current meeting information.</p>
+        </div>
+      <div className="col-md-8 my-auto">
+            <h3>You are in a meeting with...</h3>
+            <div className="card my-3">
+             <h5 className="card-header"><b>{taName} ({taId})</b></h5>
+            <div className="card-body">
       <GroupPanel />
-
-      <div>
-        <button onClick={leaveMeeting}>Leave meeting</button>
-      </div>
-    </div>
+            </div>
+            </div>
+            
+            <div className="text-center">
+            <button onClick={leaveMeeting} className="btn btn-primary">Leave Meeting</button>
+          </div>
+          </div>
+        </div>
+            </div>
   );
 }
 

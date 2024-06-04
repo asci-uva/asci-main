@@ -1,6 +1,6 @@
 import logo from "./logo.svg";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { Footer } from "./components/queue";
+import { Footer } from "./components/utils";
 
 import HomeController from "./components/HomeController";
 import { UserProvider } from "./components/context/UserContext";

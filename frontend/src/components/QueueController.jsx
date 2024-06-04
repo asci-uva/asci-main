@@ -22,7 +22,6 @@ import {
 import { useUser } from "./context/UserContext";
 
 const QueueController = (props) => {
-  const root = "/asci";
   const navigate = useNavigate();
   // If the user is not logged in, redirect to the login page
     
