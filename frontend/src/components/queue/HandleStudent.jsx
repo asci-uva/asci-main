@@ -32,10 +32,10 @@ function HandleStudent(props) {
     //Ping the server and make sure this person is actually a TA
     console.log("TA: Checking if token exists");
 
-      getSettings();
+    getSettings();
 
-      polling = true;
-      pollNumWaiting();
+    polling = true;
+    pollNumWaiting();
 
     //called when this component unmounts
     return () => {
@@ -43,8 +43,8 @@ function HandleStudent(props) {
       clearTimeout(timeoutId);
       polling = false;
     }
-    
-    
+
+
   }, []);
 
   function getSettings(){
@@ -55,9 +55,9 @@ function HandleStudent(props) {
     request2.courseId = course.course_id;
     fetchSettings(request2, url);
   }
-    
 
-    
+
+
   const fetchSettings = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
@@ -66,13 +66,13 @@ function HandleStudent(props) {
       },
       body: JSON.stringify(json0),
     }).then(response => response.json())
-    .then(data => {
+      .then(data => {
         console.log("Data is: ", data);
         let success = data.success;
         if(success === "true"){
 
           setSettings(data.settings);
-          
+
         }
         else{
           console.log("HOME: Server returned error");
@@ -82,7 +82,7 @@ function HandleStudent(props) {
       .catch((error) => {
         console.log("HOME: There was an error:", error);
         navigate(docRoot + "/error");
-        
+
       });
   }
 
@@ -106,7 +106,7 @@ function HandleStudent(props) {
       },
       body: JSON.stringify(json0),
     }).then(response => response.json())
-    .then(data => {
+      .then(data => {
         console.log("Waiting sessions is: ", data);
 
         //if request succeeded
@@ -116,34 +116,34 @@ function HandleStudent(props) {
           setWaitingSessions(data.sessions);
 
           if(polling == true){
-              timeoutId = setTimeout(pollNumWaiting, pollTime);
+            timeoutId = setTimeout(pollNumWaiting, pollTime);
           }
         }
         else{
           console.log("Getting number waiting failed");
           navigate(docRoot + "/error");
         }
-        
+
       })
       .catch((error) => {
         console.log("HOME: There was an error:", error);
         navigate(docRoot + "/error");
-        
+
       });
 
-    }
+  }
 
 
 
   const handleAssign = (e) =>{
     e.preventDefault();
 
-      //Get a student
-      let request = {};
-      request.command = "getStudentForTA";
-      request.user = user.userid;
-      request.courseId = course.course_id;
-      getStudent(request, url); 
+    //Get a student
+    let request = {};
+    request.command = "getStudentForTA";
+    request.user = user.userid;
+    request.courseId = course.course_id;
+    getStudent(request, url); 
   }
 
   const handleTake = (e) =>{
@@ -154,14 +154,14 @@ function HandleStudent(props) {
     console.log("value is: " + e.target.value);
 
     /* Need to send sessionId also... */
-    
-      //Get a student
-      let request = {};
-      request.command = "takeSpecificStudentForTA";
-      request.user = user.userid;
-      request.courseId = course.course_id;
-      request.sessionId = waitingSessions[e.target.value].id;
-      getStudent(request, url); 
+
+    //Get a student
+    let request = {};
+    request.command = "takeSpecificStudentForTA";
+    request.user = user.userid;
+    request.courseId = course.course_id;
+    request.sessionId = waitingSessions[e.target.value].id;
+    getStudent(request, url); 
 
   }
 
@@ -174,7 +174,7 @@ function HandleStudent(props) {
       },
       body: JSON.stringify(json0),
     }).then(response => response.json())
-    .then(data => {
+      .then(data => {
         console.log("Data is: ", data);
 
         //if request succeeded
@@ -190,102 +190,99 @@ function HandleStudent(props) {
           console.log("TA: getting student failed for some reason");
           //TODO: Let the student know somehow??
         }
-        
+
       })
       .catch((error) => {
         console.log("HOME: There was an error:", error);
         navigate(docRoot + "/error");
-        
+
       });
 
-    }
+  }
 
-    const handleClearQueueCallback = () => {
-      console.log("Received callback. Refreshing queue page");
-      pollNumWaiting();
-    }
-
-
-    const WaitTableHeaderRow = () => {
-      return <tr><th>No.</th><th className="waitTableIssue">Issue</th><th>Location</th><th>Options</th></tr>;
-    }
+  const handleClearQueueCallback = () => {
+    console.log("Received callback. Refreshing queue page");
+    pollNumWaiting();
+  }
 
 
-    const WaitTableRow = ({data}) => {
-      return Object.keys(data).map(k =>
-        <tr key={k}>
-          <td>{k}</td><td><b>{data[k].issue_subject}</b><br/>{data[k].issue}</td><td>{data[k].location}</td>
-          <td><button value={k} onClick={handleTake} className="btn btn-sm btn-danger">Take</button></td>
-        </tr>
+  const WaitTableHeaderRow = () => {
+    return <tr><th>No.</th><th className="waitTableIssue">Issue</th><th>Location</th><th>Options</th></tr>;
+  }
+
+
+  const WaitTableRow = ({data}) => {
+    return Object.keys(data).map(k =>
+      <tr key={k}>
+        <td>{k}</td><td><b>{data[k].issue_subject}</b><br/>{data[k].issue}</td><td>{data[k].location}</td>
+        <td><button value={k} onClick={handleTake} className="btn btn-sm btn-danger">Take</button></td>
+      </tr>
+    );
+  }
+
+  const WaitTable = ({data}) => {
+    if(data.length > 0) { // && settings != null && settings.show_queue_list=="t"){
+      return (
+        <div className="card my-3">
+          <h5 className="card-header">Waiting List</h5>
+          <div className="card-body">
+            <table className="table table-striped">
+              <thead>
+                <WaitTableHeaderRow />
+              </thead>
+              <tbody>
+                <WaitTableRow data={data} />
+              </tbody>
+            </table>
+          </div>
+        </div>
       );
     }
-
-    const WaitTable = ({data}) => {
-      if(data.length > 0) { // && settings != null && settings.show_queue_list=="t"){
-        return (
-          <div className="card my-3">
-            <h5 className="card-header">Waiting List</h5>
-            <div className="card-body">
-            <table className="table table-striped">
-            <thead>
-            <WaitTableHeaderRow />
-            </thead>
-            <tbody>
-            <WaitTableRow data={data} />
-            </tbody>
-          </table>
-            </div>
-            </div>
-        );
-      }
-      else return;
-    }
+    else return;
+  }
 
   return (
-      <div className="container p-4">
-        <div className="row my-auto">
+    <div className="container p-4">
+      <div className="row my-auto">
         <div className="col-md-4">
-        <h1><i className="bi-list-ol big-icon"></i></h1>
-        <h2>Handle Queue</h2>
-        <p>You are now handling students for <b>{course.name}</b>.</p>
+          <h1><i className="bi-list-ol big-icon"></i></h1>
+          <h2>Handle Queue</h2>
+          <p>You are now handling students for <b>{course.name}</b>.</p>
         </div>
-      <div className="col-md-8 my-auto">
-        <div className="row">
-          <div className="col-md-6">
-            <div className="card text-bg-primary mb-3">
-              <div className="card-body text-center">
-                <p>There are <b>{numWaiting}</b> student(s) waiting.</p>
-        
-                <button onClick={handleAssign} className="btn btn-info">Get Next Student</button>
-                </div>
-                </div>
-      </div>
-          <div className="col-md-6">
-            <div className="card text-bg-danger mb-3">
-              <div className="card-body text-center">
-        <ClearQueue callback={handleClearQueueCallback} url={url} documentRoot={docRoot} user={user.userid} courseId={course.course_id} />
-                </div>
-                </div>
-      </div>
-      </div>
-            
-      <div>
-      </div>
+        <div className="col-md-8 my-auto">
+          <div className="row">
+            <div className="col-md-6">
+              <div className="card text-bg-primary mb-3">
+                <div className="card-body text-center">
+                  <p>There are <b>{numWaiting}</b> student(s) waiting.</p>
 
-      <div>
-        <WaitTable data={waitingSessions} />
-      </div>
+                  <button onClick={handleAssign} className="btn btn-info">Get Next Student</button>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6">
+              <div className="card text-bg-danger mb-3">
+                <div className="card-body text-center">
+                  <ClearQueue callback={handleClearQueueCallback} url={url} documentRoot={docRoot} user={user.userid} courseId={course.course_id} />
+                </div>
+              </div>
+            </div>
+          </div>
 
-      <div className="my-4 card">
-        <div className="card-body text-center">
-        <p>Missed a survey from an older meeting? Click here to go back and fill it out!</p>
-        <button onClick={() => navigate(docRoot + "/taSurvey")} className="btn btn-success">Complete Survey</button>
+          <div>
+            <WaitTable data={waitingSessions} />
+          </div>
+
+          <div className="my-4 card">
+            <div className="card-body text-center">
+              <p>Missed a survey from an older meeting? Click here to go back and fill it out!</p>
+              <button onClick={() => navigate(docRoot + "/taSurvey")} className="btn btn-success">Complete Survey</button>
+            </div>
+          </div>
+
+        </div>
       </div>
-      </div>
-      
     </div>
-      </div>
-      </div>
   );
 }
 

@@ -23,19 +23,19 @@ function Home(props) {
   useEffect(() => {
     console.log("ENTERING HOME");
 
-      //Ok, ping the session and send the user to the proper
-      //page based on their status
+    //Ok, ping the session and send the user to the proper
+    //page based on their status
 
-      console.log("All is fine, pinging session");
-      console.log("user, " + user.userid);
-      console.log("courseId, " + course);
+    console.log("All is fine, pinging session");
+    console.log("user, " + user.userid);
+    console.log("courseId, " + course);
 
-      //setup json command
-      let request = {};
-      request.command = "sessionPing";
-      request.user = user.userid;
-      request.courseId = course;
-      checkSession(request, url);
+    //setup json command
+    let request = {};
+    request.command = "sessionPing";
+    request.user = user.userid;
+    request.courseId = course;
+    checkSession(request, url);
   }, []);
 
   //This function checks the users session

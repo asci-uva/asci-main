@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from "../context/UserContext";
 
 function ClearQueue(props) {
-  
+
   const [clearState, setClearState] = useState(0);
 
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ function ClearQueue(props) {
   let url = props.url;
   let docRoot = props.documentRoot;
   let callback = props.callback;
-  
+
 
   const handleClearClick = (e) =>{
     e.preventDefault();
@@ -51,7 +51,7 @@ function ClearQueue(props) {
 
   }
 
-  
+
 
 
   //This gets a student
@@ -63,12 +63,12 @@ function ClearQueue(props) {
       },
       body: JSON.stringify(json0),
     }).then(response => response.json())
-    .then(data => {
+      .then(data => {
         console.log("Data is: ", data);
 
         //if request succeeded
         if(data.success === "true"){
-          
+
           setClearState(0);
 
           /* TODO: Callback to the parent component */
@@ -79,15 +79,15 @@ function ClearQueue(props) {
           console.log("Clearing queue failed");
           setClearState(4);
         }
-        
+
       })
       .catch((error) => {
         console.log("HOME: There was an error:", error);
         navigate(docRoot + "/error");
-        
+
       });
 
-    }
+  }
 
 
 
@@ -96,9 +96,9 @@ function ClearQueue(props) {
 
   if(clearState == 0){
 
-  return (
+    return (
       <div>
-      <p>Need to clear the queue?</p>
+        <p>Need to clear the queue?</p>
         <button onClick={handleClearClick} className="btn btn-warning">Clear Queue</button>
       </div>
     );
@@ -106,26 +106,26 @@ function ClearQueue(props) {
 
   else if(clearState == 1){
     return (
-    <div>
-      <p>Are you SURE you want to clear the queue?</p>
+      <div>
+        <p>Are you SURE you want to clear the queue?</p>
         <button onClick={cancelClearClick} className="btn btn-success">No</button> &nbsp;
         <button onClick={handleClearClick} className="btn btn-warning">Yes, Clear Queue</button>
-    </div>
+      </div>
     );
   }
   else if(clearState == 2){
     return (
-    <div>
-      <p>Clearing queue. Please wait...</p>
-    </div>
+      <div>
+        <p>Clearing queue. Please wait...</p>
+      </div>
     );
   }
   else if(clearState == 4){
     return (
-    <div>
-      <p>Clearing failed.</p>
+      <div>
+        <p>Clearing failed.</p>
         <button onClick={cancelClearClick} className="btn btn-success">Continue</button>
-    </div>
+      </div>
     );
   }
 }

@@ -5,9 +5,9 @@ import { useUser } from "../context/UserContext";
 
 
 function JoinQueue(props) {
-  
+
   const navigate = useNavigate();
-  
+
   const [subject, setSubject] = useState("");
   const [location, setLocation] = useState("");
   const [details, setDetails] = useState("");
@@ -19,33 +19,33 @@ function JoinQueue(props) {
 
   const [settings, setSettings] = useState(null);
 
-    const { user, getCourse } = useUser();
+  const { user, getCourse } = useUser();
 
   let url = props.url;
   let docRoot = props.documentRoot; 
-  
-    let course = getCourse();
-    //This function runs on page load!
-    useEffect(() => {
 
-        //setup json command
-        let request = {};
-        request.command = "sessionPing";
-        request.user = user.userid;
-        request.courseId = course.course_id; 
-        checkSession(request, url); 
+  let course = getCourse();
+  //This function runs on page load!
+  useEffect(() => {
+
+    //setup json command
+    let request = {};
+    request.command = "sessionPing";
+    request.user = user.userid;
+    request.courseId = course.course_id; 
+    checkSession(request, url); 
 
 
-        /* Also get course settings */
-        let request2 = {};
-        request2.command = "getCourseSettings";
-        request2.user = user.userid; 
-        request2.courseId = course.course_id; 
-        getSettings(request2, url);
-    
-    }, []);
+    /* Also get course settings */
+    let request2 = {};
+    request2.command = "getCourseSettings";
+    request2.user = user.userid; 
+    request2.courseId = course.course_id; 
+    getSettings(request2, url);
 
-    
+  }, []);
+
+
   const getSettings = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
@@ -54,7 +54,7 @@ function JoinQueue(props) {
       },
       body: JSON.stringify(json0),
     }).then(response => response.json())
-    .then(data => {
+      .then(data => {
         console.log("Data is: ", data);
         let success = data.success;
         if(success === "true"){
@@ -63,7 +63,7 @@ function JoinQueue(props) {
           if(data.settings.grouping_enabled == "t"){
             setGroupOption(true);
           }
-          
+
         }
         else{
           console.log("HOME: Server returned error");
@@ -73,7 +73,7 @@ function JoinQueue(props) {
       .catch((error) => {
         console.log("HOME: There was an error:", error);
         navigate(docRoot + "/error");
-        
+
       });
   }
 
@@ -86,12 +86,12 @@ function JoinQueue(props) {
       },
       body: JSON.stringify(json0),
     }).then(response => response.json())
-    .then(data => {
+      .then(data => {
         console.log("Data is: ", data);
         let success = data.success;
         if(success === "true"){
-            // nothing to do if session worked?
-            // originally set the course (again)
+          // nothing to do if session worked?
+          // originally set the course (again)
         }
         else{
           console.log("HOME: Server returned error");
@@ -101,7 +101,7 @@ function JoinQueue(props) {
       .catch((error) => {
         console.log("HOME: There was an error:", error);
         navigate(docRoot + "/error");
-        
+
       });
   }
 
@@ -128,7 +128,7 @@ function JoinQueue(props) {
 
       setIsError(false);
       setErrorMessage("");
-    
+
       console.log("User: ", user);
       console.log("Course: ", course)
       console.log("Question: ", details);
@@ -159,7 +159,7 @@ function JoinQueue(props) {
       },
       body: JSON.stringify(json0),
     }).then(response => response.json())
-    .then(data => {
+      .then(data => {
         console.log("Data is: ", data);
 
         //if request succeeded
@@ -170,36 +170,36 @@ function JoinQueue(props) {
           console.log("JQ: Error, joining the queue didn't succeed");
           navigate(docRoot + "/error");
         }
-        
+
       })
       .catch((error) => {
         console.log("JQ: There was an error:", error);
         navigate(docRoot + "/error");
-        
+
       });
 
-    }
+  }
 
   function GroupCheckBox(props){
 
     if(settings != null && settings.grouping_enabled == "t"){
       return (
         <div className="form-check">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              checked={groupOption}
-              onChange={handleCheck}
-            />
+          <input
+            className="form-check-input"
+            type="checkbox"
+            checked={groupOption}
+            onChange={handleCheck}
+          />
           <label className="form-check-label">
             I would like to be placed in a group (this might decrease your wait time)
-            
+
           </label>
         </div>
       );
     }
     else{
-      
+
       return "";
     }
   }
@@ -207,76 +207,76 @@ function JoinQueue(props) {
 
 
   return (
-      <div className="container p-4">
-        <div className="row my-auto">
+    <div className="container p-4">
+      <div className="row my-auto">
         <div className="col-md-4">
-        <h1><i className="bi-list-ol big-icon"></i></h1>
-        <h2>Join Queue</h2>
-        <p>Please enter the following information to join the queue.</p>
+          <h1><i className="bi-list-ol big-icon"></i></h1>
+          <h2>Join Queue</h2>
+          <p>Please enter the following information to join the queue.</p>
         </div>
-      <div className="col-md-8 my-auto">
-      {isError &&
-        <div className="alert alert-danger">
-        <b>Error:</b> { errorMessage }
+        <div className="col-md-8 my-auto">
+          {isError &&
+          <div className="alert alert-danger">
+            <b>Error:</b> { errorMessage }
+          </div>
+          }
+
+          <form>
+            <div className="mb-3">
+              <label className="form-label">Subject</label>
+              <input
+                type = "text"
+                placeholder="Enter subject here"
+                className="form-control"
+                required
+                value = {subject}
+                onChange={(e)=>setSubject(e.target.value)}
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Description</label>
+              <textarea
+                placeholder="Enter your issue here"
+                required
+                className="form-control"
+                value = {details}
+                onChange={(e)=>setDetails(e.target.value)}>
+              </textarea>
+              <p className="form-text">Please explain your issue in a few sentences before joining the queue.</p>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Location</label>
+              <input
+                type = "text"
+                placeholder="Enter location here"
+                required
+                className="form-control"
+                value = {location}
+                onChange={(e)=>setLocation(e.target.value)}
+              />
+              <p className="form-text">Where can the TA find you?</p>
+            </div>
+
+            <div className="mb-3">
+              <GroupCheckBox />
+            </div>
+          </form>
+
+          <div>
+            <button className="btn btn-primary" onClick={handleQuestion}>Join queue</button>
+          </div>
+
+          <div className="my-4 card">
+            <div className="card-body text-center">
+              <p>Forgot to fill out the survey from last time? Click here to go back and fill it out!</p>
+              <button onClick={() => navigate(docRoot + "/studentSurvey")} className="btn btn-success">Complete Survey</button>
+            </div>
+          </div>
         </div>
-      }
-
-      <form>
-          <div className="mb-3">
-        <label className="form-label">Subject</label>
-        <input
-          type = "text"
-          placeholder="Enter subject here"
-              className="form-control"
-          required
-          value = {subject}
-          onChange={(e)=>setSubject(e.target.value)}
-        />
-      </div>
-
-          <div className="mb-3">
-        <label className="form-label">Description</label>
-        <textarea
-          placeholder="Enter your issue here"
-          required
-              className="form-control"
-          value = {details}
-          onChange={(e)=>setDetails(e.target.value)}>
-        </textarea>
-        <p className="form-text">Please explain your issue in a few sentences before joining the queue.</p>
-      </div>
-
-          <div className="mb-3">
-        <label className="form-label">Location</label>
-        <input
-          type = "text"
-          placeholder="Enter location here"
-          required
-              className="form-control"
-          value = {location}
-          onChange={(e)=>setLocation(e.target.value)}
-        />
-        <p className="form-text">Where can the TA find you?</p>
-      </div>
-
-          <div className="mb-3">
-        <GroupCheckBox />
-      </div>
-      </form>
-      
-      <div>
-        <button className="btn btn-primary" onClick={handleQuestion}>Join queue</button>
-      </div>
-
-      <div className="my-4 card">
-        <div className="card-body text-center">
-        <p>Forgot to fill out the survey from last time? Click here to go back and fill it out!</p>
-        <button onClick={() => navigate(docRoot + "/studentSurvey")} className="btn btn-success">Complete Survey</button>
-      </div>
-      </div>
-    </div>
-   </div> 
-   </div> 
+      </div> 
+    </div> 
   );
 }
 

@@ -15,7 +15,7 @@ function Home(props) {
   let docRoot = props.documentRoot;
   let url = props.url;
 
-  
+
   const {user} = useUser();
 
   return (
@@ -25,11 +25,11 @@ function Home(props) {
         <p>Welcome back {user.pname} {user.lname}!  Navigate to different parts of the application from here.</p>
       </div>
       <div className="col-md-6">
-      <Cards
-        documentRoot={props.documentRoot}
-        debugMode={props.debugMode}
-      />
-        </div>
+        <Cards
+          documentRoot={props.documentRoot}
+          debugMode={props.debugMode}
+        />
+      </div>
     </div>
   );
 }

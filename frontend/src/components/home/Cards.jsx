@@ -12,7 +12,7 @@ function Cards(props) {
     <div className="row">
       <div className="col-md-4">
         <div className="card p-3">
-            <div className="card-img-top text-center">
+          <div className="card-img-top text-center">
             <i className="bi-list-ol home-icon"></i>
           </div>
           <div className="card-body">
@@ -20,21 +20,21 @@ function Cards(props) {
           </div>
         </div>
       </div>
-    { course.role == "instructor" ? (
-      <div className="col-md-4">
-        <div className="card p-3">
+      { course.role == "instructor" ? (
+        <div className="col-md-4">
+          <div className="card p-3">
             <div className="card-img-top text-center">
-            <i className="bi-gear-wide-connected home-icon"></i>
-          </div>
-          <div className="card-body">
-            <p className="card-text text-center"><Link to="admin" className="btn btn-primary">Open Admin</Link></p>
+              <i className="bi-gear-wide-connected home-icon"></i>
+            </div>
+            <div className="card-body">
+              <p className="card-text text-center"><Link to="admin" className="btn btn-primary">Open Admin</Link></p>
+            </div>
           </div>
         </div>
-      </div>
-    ) : null }
+      ) : null }
       <div className="col-md-4">
         <div className="card p-3">
-            <div className="card-img-top text-center">
+          <div className="card-img-top text-center">
             <i className="bi-trophy home-icon"></i>
           </div>
           <div className="card-body">
