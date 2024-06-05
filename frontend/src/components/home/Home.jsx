@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { Cards } from "./";
 import { useUser } from "../context/UserContext";
 
+import Cards from "./Cards";
+
 //This page needs to:
 //See if student is logged in and kick to login page if not
 //If, logged in, reset student info and kick to dashboard

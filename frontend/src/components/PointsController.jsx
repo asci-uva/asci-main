@@ -21,7 +21,6 @@ const PointsController = (props) => {
   
       <Routes>
         <Route path="/" element={<Home {...props} />} />
-        <Route path="login" element={<Login {...props} />} />
         <Route path="error" element={<Error {...props} />} />
         <Route path="logout" element={<Logout {...props} />} />
       </Routes>

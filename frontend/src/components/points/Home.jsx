@@ -20,7 +20,7 @@ function Home(props) {
     //need to redo this. check user set and course set first
     if (localStorage.getItem("asci-user") === null) {
       console.log("User is NOT set, navigating home");
-      navigate(docRoot + "/login");
+      navigate(docRoot + "/../login");
     } else {
       setUser(localStorage.getItem("asci-user"));
     }

@@ -34,7 +34,6 @@ const QueueController = (props) => {
     <>
       <Routes>
         <Route path="/" element={<Home {...props} />} />
-        <Route path="login" element={<Login {...props} />} />
         <Route path="question" element={<Question {...props} />} />
         <Route path="error" element={<Error {...props} />} />
         <Route path="ta" element={<Ta {...props} />} />
