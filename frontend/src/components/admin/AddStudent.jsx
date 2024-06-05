@@ -48,63 +48,68 @@ function AddStudent(props) {
   };
 
   return (
-    <form>
-      <div class="p-2 border border-primary rounded">
-      
-      <div class="mb-2">
-      <h4>Add Student or TA</h4>
+    
 
-        <label>First Name:</label>
-        <input class="form-control mb-2"
-          type="text"
-          value={fname}
-          onChange={(e) => setFname(e.target.value)}
-          required
-        />
-      
+    <div className="card">
+        <h5 className="card-header">Add Student or TA</h5>
+          <div className="card-body">
 
+            <form className="p-2">
       
-        <label>Last Name:</label>
-        <input class="form-control mb-2"
-          type="text"
-          value={lname}
-          onChange={(e) => setLname(e.target.value)}
-          required
-        />
-      
+              <div className="from-group">
+              <label>First Name:</label>
+              <input className="form-control mb-1"
+                type="text"
+                value={fname}
+                onChange={(e) => setFname(e.target.value)}
+                required
+              />
+              </div>
+              
+              <div className="from-group">
+              <label>Last Name:</label>
+              <input className="form-control mb-1"
+                type="text"
+                value={lname}
+                onChange={(e) => setLname(e.target.value)}
+                required
+              />
+              </div>
+            
+              <div className="from-group">
+              <label>Prefer Name:</label>
+              <input className="form-control mb-1"
+                type="text"
+                value={pname}
+                onChange={(e) => setPname(e.target.value)}
+                required
+              />
+              </div>
+            
+              <div className="from-group">
+              <label>Computing ID:</label>
+              <input className="form-control mb-2"
+                type="text"
+                value={computingId}
+                onChange={(e) => setComputingId(e.target.value)}
+                required
+              />
+              </div>
+            
+              <div className="from-group">
+              <label className="mb-2">Role:</label>
+              <select value={role} onChange={(e) => setRole(e.target.value)}>
+                <option value="student">Student</option>
+                <option value="ta">TA</option>
+              </select>
+              </div>
+            
 
-      
-        <label>Prefer Name:</label>
-        <input class="form-control mb-2"
-          type="text"
-          value={pname}
-          onChange={(e) => setPname(e.target.value)}
-          required
-        />
-      
-
-      
-        <label>Computing ID:</label>
-        <input class="form-control mb-2"
-          type="text"
-          value={computingId}
-          onChange={(e) => setComputingId(e.target.value)}
-          required
-        />
-      
-
-      
-        <label>Role:</label>
-        <select value={role} onChange={(e) => setRole(e.target.value)}>
-          <option value="student">Student</option>
-          <option value="ta">TA</option>
-        </select>
-        </div>
-      
-
-      <button type="button" class="btn btn-primary" onClick={handleAdd}>Add</button>
-    </div>
-    </form>
+              <button type="button" className="btn btn-primary" onClick={handleAdd}>Add</button>
+  
+            </form>
+          </div>
+      </div>
   );
 }
 

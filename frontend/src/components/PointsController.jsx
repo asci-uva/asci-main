@@ -18,10 +18,7 @@ const PointsController = (props) => {
     }
   return (
     <>
-      <Navigation
-        documentRoot={props.documentRoot}
-        debugMode={props.debugMode}
-      />
+  
       <Routes>
         <Route path="/" element={<Home {...props} />} />
         <Route path="login" element={<Login {...props} />} />

@@ -62,6 +62,40 @@ export const UserProvider = ({ children }) => {
       });
   };
 
+  const refreshCourseList = (userInfo, callback) => {
+    let json = {};
+    json.command = "getCourses";
+    json.user = userInfo.user;
+
+    let jsonString = JSON.stringify(json);
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonString,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        if (data.success === "true") {
+          
+          setCourseList(data.courses);
+          
+          callback(true);
+        } else {
+          // fail to login
+          console.log("refreshing courses failed");
+          callback(false);
+        }
+      })
+      .catch((error) => {
+        console.error("Error during refresh course list:", error);
+        callback(false); // Call the callback with failure status
+      });
+  };
+
   const courseListString = () => {
           let cList = {};
             for(var key in courseList){
@@ -111,7 +145,9 @@ export const UserProvider = ({ children }) => {
       logout,
       course,
       getCourse,
-      setCourse
+      setCourse,
+      setCourseList,
+      refreshCourseList
   };
 
   return (

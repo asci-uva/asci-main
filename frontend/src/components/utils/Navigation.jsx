@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+//import { UserProvider } from "../context/UserContext";
 
 function Navigation(props) {
   let docRoot = props.documentRoot;

@@ -93,38 +93,43 @@ function GradescopeSync(props) {
   };
 
   return (
-    <form>
-      <div class="p-2 border border-primary rounded">
 
-      <h4>Gradescope Synchronization</h4>
+    <div className="card">
+        <h5 className="card-header">Gradescope Synchronization</h5>
+          <div className="card-body">
 
-      <label>Gradescope Course Number:</label>
-      <input class="form-control mb-2"
-        type="text"
-        value={courseNumber}
-        onChange={(e) => setCourseNumber(e.target.value)}
-        required
-      />
+            <form className="p-2">
 
-      <label>Gradescope Account Username:</label>
-      <input class="form-control mb-2"
-        type="text"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        required
-      />
 
-      <label>Gradescope Account Passcode:</label>
-      <input class="form-control mb-2"
-        type="password"
-        value={passcode}
-        onChange={(e) => setPasscode(e.target.value)}
-        required
-      />
+              <label>Gradescope Course Number:</label>
+              <input className="form-control mb-2"
+                type="text"
+                value={courseNumber}
+                onChange={(e) => setCourseNumber(e.target.value)}
+                required
+              />
 
-      <button type="button" class="btn btn-primary" onClick={handleSynchronize}>Synchronize the Data</button>
+              <label>Gradescope Account Username:</label>
+              <input className="form-control mb-2"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+
+              <label>Gradescope Account Passcode:</label>
+              <input className="form-control mb-2"
+                type="password"
+                value={passcode}
+                onChange={(e) => setPasscode(e.target.value)}
+                required
+              />
+
+              <button type="button" className="btn btn-primary" onClick={handleSynchronize}>Synchronize the Data</button>
+    
+            </form>
+          </div>
     </div>
-    </form>
   );
 }
 

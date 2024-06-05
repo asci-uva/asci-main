@@ -13,74 +13,30 @@ function EditCourse(props) {
   const { courseId } = useParams();
   const navigate = useNavigate();
 
-  const [mnemonic, setMnemonic] = useState("");
-  const [number, setNumber] = useState("");
-  const [name, setName] = useState("");
-  const [semester, setSemester] = useState("");
-
-  const handleSubmit = () => {
-    const updatedCourse = {
-      course_id: courseId,
-      mnemonic,
-      number,
-      name,
-      semester,
-      command: "updateCourseInfo",
-      user: localStorage.getItem("asci-user"),
-    };
-
-    // Call the backend API to update the course
-    updateCourse(updatedCourse);
-  };
-
-  const updateCourse = (course) => {
-    fetch(props.url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(course),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        if (data.success) {
-          toast.success("Course updated successfully!");
-          navigate(docRoot);
-        } else {
-          toast.error("Error updating the course");
-          navigate(docRoot + "/error");
-        }
-      })
-      .catch((error) => {
-        toast.error("Error updating the course");
-        navigate(docRoot + "/error");
-      });
-  };
-
+  
   return (
     <>
     
-      <div class="container">
-        <div class="row">
-          <div class="col-md">
-            <EditCourseInfo />
+      <div className="container">
+        <div className="row">
+          <div className="col-md">
+            <EditCourseInfo course_id={courseId} {...props} />
           </div>
-          <div class="col-md">
+          <div className="col-md">
             <UploadRoster course_id={courseId} {...props} />
           </div>
-          <div class="col-md">
+          <div className="col-md">
             <AddStudent course_id={courseId} {...props} />
           </div>
         </div>
-        <div class="row">
-          <div class="col-md">
+        <div className="row">
+          <div className="col-md">
             <GradescopeSync course_id={courseId} {...props} />
           </div>
-          <div class="col-md">
+          <div className="col-md">
             
           </div>
-          <div class="col-md">
+          <div className="col-md">
             
           </div>
         </div>

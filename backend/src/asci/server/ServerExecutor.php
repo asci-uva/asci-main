@@ -1354,13 +1354,13 @@ class ServerExecutor{
         }
     
         // If any attribute is empty, use the original value
-        $mnemonic = empty($mnemonic) ? $originalCourse->getMnemonic() : $mnemonic;
-        $number = empty($number) ? $originalCourse->getNumber() : $number;
-        $name = empty($name) ? $originalCourse->getName() : $name;
-        $semester = empty($semester) ? $originalCourse->getSemester() : $semester;
+        $originalCourse->mnemonic = empty($mnemonic) ? $originalCourse->getMnemonic() : $mnemonic;
+        $originalCourse->number = empty($number) ? $originalCourse->getNumber() : $number;
+        $originalCourse->name = empty($name) ? $originalCourse->getName() : $name;
+        $originalCourse->semester = empty($semester) ? $originalCourse->getSemester() : $semester;
     
         // Now update the course with the potentially updated attributes
-        $success = (new \asci\server\database\DBCourse($this->db))->updateCourse($course_id, $mnemonic, $number, $name, $semester);
+        $success = (new \asci\server\database\DBCourse($this->db))->updateCourseByObject($originalCourse);
     
         $result = [];
         if ($success) {
@@ -1369,6 +1369,7 @@ class ServerExecutor{
             $result["success"] = false;
         }
     
+        $result["course"] = $originalCourse;
         return $result;
     }
     
