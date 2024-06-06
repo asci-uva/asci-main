@@ -1,10 +1,13 @@
 import React from "react";
 import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
+import { useUser } from "../context/UserContext";
 
 function TASurvey(props) {
 
   const navigate = useNavigate();
+  let {user, getCourse} = useUser();
+  let course = getCourse();
 
   /* This state lets us know what to show the user */
   // Value: "loading", "survey", "submitted", "none"
@@ -28,14 +31,6 @@ function TASurvey(props) {
     //This function runs on page load!
     useEffect(() => {
       
-    if(localStorage['asci-user'] === null){
-      navigate(docRoot + "/login");
-    }
-    else if(localStorage.getItem('asci-course') === null){
-      navigate(docRoot + "/selectCourse");
-    }
-    else{
-
       /* Two ways to pull a session. */
       let request = {};
       
@@ -49,12 +44,11 @@ function TASurvey(props) {
         request.command = "GetMostRecentSessionWithNoSurvey";
       }
 
-      request.user = localStorage.getItem('asci-user');
-      request.courseId = localStorage.getItem('asci-course');
+      request.user = user.userid;
+      request.courseId = course.course_id;
       request.sessionId = localStorage.getItem('asci-session');
       getSessionInfo(request, url);
       
-    }
       
     }, []);
 
@@ -101,20 +95,14 @@ function TASurvey(props) {
   const submitSurvey = (e) =>{
     e.preventDefault();
 
-    if(localStorage.getItem('asci-user') === null){
-      navigate(docRoot + "/login");
-    }
-    else if(localStorage.getItem('asci-course') === null){
-      navigate(docRoot + "/selectCourse");
-    }
-    else if(sessionId === null){
+    if(sessionId === null){
        navigate(docRoot + "/error");
     }
     else{
 
       let request = {};
       request.command = "SubmitSurvey";
-      request.user = localStorage.getItem('asci-user');
+      request.user = user.userid; 
       request.sessionId = sessionId;
 
       let surveyData = {};
@@ -179,104 +167,122 @@ function TASurvey(props) {
     
     function getSurveyHtml(){
         return (
-          <div className="survey">
-            <div>
-            <h1> Tell us about your meeting with {studFirstName} {studLastName} ({studId}) </h1>
-            <h4>This meeting occured on {new Date(meetingDate).toLocaleString()}</h4>
+          <div className="row">
+
+            <div className="text-center m-2">
+              <button onClick={() => navigate(docRoot + "/")} className="btn btn-danger">Skip Survey</button>
             </div>
 
-            <div>
-              <button onClick={() => navigate(docRoot + "/")}>Skip Survey</button>
-            </div>
+            <div className="card my-3 p-0">
+            <h5 className="card-header">Quick Survey</h5>
+            <div className="card-body">
 
-            
-            <div>
-            <h2> Were you able to address the concerns of {studFirstName}? </h2>
-            </div>
+            <p> Tell us about your meeting with {studFirstName} {studLastName} ({studId}).
+            This meeting occured on {new Date(meetingDate).toLocaleString()}</p>
 
-            <div className="radio_btn_group">
-            <label>
-              <input type="radio" name="q1" value="1"
+            <p className="form-label"> Were you able to address the concerns of {studFirstName}? </p>
+
+            <div className="mb-3">
+            <div className="form-check form-check-inline">
+            <label className="form-check-label">
+              <input type="radio" name="q1" value="1" className="form-check-input"
                 checked={q1Ans === "1"}
                 onChange={() => setQ1Ans("1")}
               />
               it was very difficult
             </label>
-            <label>
-              <input type="radio" name="q1" value="2"
+            </div>
+            <div className="form-check form-check-inline">
+            <label className="form-check-label">
+              <input type="radio" name="q1" value="2" className="form-check-input"
                 checked={q1Ans === "2"}
                 onChange={() => setQ1Ans("2")}
               />
               it was a bit difficult
             </label>
-            <label>
-              <input type="radio" name="q1" value="3"
+            </div>
+            <div className="form-check form-check-inline">
+            <label className="form-check-label">
+              <input type="radio" name="q1" value="3" className="form-check-input"
                 checked={q1Ans === "3"}
                 onChange={() => setQ1Ans("3")}
               />
               neutral
             </label>
-            <label>
-              <input type="radio" name="q1" value="4"
+            </div>
+            <div className="form-check form-check-inline">
+            <label className="form-check-label">
+              <input type="radio" name="q1" value="4" className="form-check-input"
                 checked={q1Ans === "4"}
                 onChange={() => setQ1Ans("4")}
               />
               some concerns were addressed
             </label>
-            <label>
-              <input type="radio" name="q1" value="5"
+            </div>
+            <div className="form-check form-check-inline">
+            <label className="form-check-label">
+              <input type="radio" name="q1" value="5" className="form-check-input"
                 checked={q1Ans === "5"}
                 onChange={() => setQ1Ans("5")}
               />
               all concerns were addressed
             </label>
             </div>
-
-            <div>
-            <h2> How satisfied were you with your meeting with {studFirstName}? </h2>
             </div>
 
-            <div className="radio_btn_group">
-            <label>
-              <input type="radio" name="q2" value="1"
+            <p className="form-label"> How satisfied were you with your meeting with {studFirstName}? </p>
+
+            <div className="mb-3">
+            <div className="form-check form-check-inline">
+            <label className="form-check-label">
+              <input type="radio" name="q2" value="1" className="form-check-input"
                 checked={q2Ans === "1"}
                 onChange={() => setQ2Ans("1")}
               />
               very unsatisfied
             </label>
-            <label>
-              <input type="radio" name="q2" value="2"
+            </div>
+            <div className="form-check form-check-inline">
+            <label className="form-check-label">
+              <input type="radio" name="q2" value="2" className="form-check-input"
                 checked={q2Ans === "2"}
                 onChange={() => setQ2Ans("2")}
               />
               unsatisfied
             </label>
-            <label>
-              <input type="radio" name="q2" value="3"
+            </div>
+            <div className="form-check form-check-inline">
+            <label className="form-check-label">
+              <input type="radio" name="q2" value="3" className="form-check-input"
                 checked={q2Ans === "3"}
                 onChange={() => setQ2Ans("3")}
               />
               neutral
             </label>
-            <label>
-              <input type="radio" name="q2" value="4"
+            </div>
+            <div className="form-check form-check-inline">
+            <label className="form-check-label">
+              <input type="radio" name="q2" value="4" className="form-check-input"
                 checked={q2Ans === "4"}
                 onChange={() => setQ2Ans("4")}
               />
               satisfied
             </label>
-            <label>
-              <input type="radio" name="q2" value="5"
+            </div>
+            <div className="form-check form-check-inline">
+            <label className="form-check-label">
+              <input type="radio" name="q2" value="5" className="form-check-input"
                 checked={q2Ans === "5"}
                 onChange={() => setQ2Ans("5")}
               />
               very satisfied
             </label>
             </div>
+            </div>
 
-            <div>
-            <h2>[Optional] Anything you would like us to know?</h2>
-              <textarea
+            <div class="mb-3">
+            <p className="form-label">[Optional] Anything you would like us to know?</p>
+              <textarea className="form-control"
                 placeholder="Tell us about your experience..."
                 value = {feedback}
                 onChange={(e)=>setFeedback(e.target.value)}>
@@ -284,10 +290,11 @@ function TASurvey(props) {
               </div>
         
 
-            <div>
-              <button onClick={submitSurvey}>Submit Survey!</button>
+            <div className="text-center mb-3">
+              <button onClick={submitSurvey} className="btn btn-info">Submit Survey!</button>
             </div>
-            
+            </div>
+            </div>
           </div>
           );
     }
@@ -295,11 +302,11 @@ function TASurvey(props) {
 
     function getSurveyDoneHTML(){
       return (
-        <div className="question">
+        <div>
           <h2> Thank you for submitting the survey! </h2>
 
-          <div>
-          <button onClick={() => navigate(docRoot + "/")}>Go Back</button>
+          <div className="text-center">
+          <button onClick={() => navigate(docRoot + "/")} className="btn btn-info">Go Back</button>
           </div>
 
         </div>
@@ -308,11 +315,11 @@ function TASurvey(props) {
 
     function getNoSurveyHTML(){
       return (
-        <div className="question">
+        <div>
           <h2> Oops! There is no survey for you to fill out right now! </h2>
 
-          <div>
-          <button onClick={() => navigate(docRoot + "/")}>Go Back</button>
+          <div className="text-center">
+          <button onClick={() => navigate(docRoot + "/")} className="btn btn-info">Go Back</button>
           </div>
 
         </div>

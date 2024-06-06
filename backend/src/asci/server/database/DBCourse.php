@@ -61,6 +61,13 @@ class DBCourse
         }
     }
 
+    public function updateCourseByObject($course){
+        $success = $this->updateCourse($course->getId(), $course->getMnemonic(), $course->getNumber(), $course->getName(), $course->getSemester());
+
+        if($success) return $course;
+        else return null;
+    }
+
     public function createCourse($user, $mnemonic, $number, $name, $semester) {
         // check if the course has already in the database or not
         $checkCourseQuery = 'SELECT id FROM courses WHERE mnemonic = $1 AND number = $2 AND name = $3 AND semester = $4';

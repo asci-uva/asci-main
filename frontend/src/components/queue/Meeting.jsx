@@ -1,11 +1,14 @@
 import React from "react";
 import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
+import { useUser } from "../context/UserContext";
 
 function Meeting(props) {
 
   let url = props.url;
   let docRoot = props.documentRoot;
+  let {user, getCourse} = useUser();
+  let course = getCourse();
 
   const [student, setStudent] = useState(null);
   const [session, setSession] = useState(null);
@@ -28,31 +31,22 @@ function Meeting(props) {
     poll();
 
     return () => {
-        console.log("Meeting room: Stopping polling");
-        clearTimeout(timeoutId);
-        polling = false;
+      console.log("Meeting room: Stopping polling");
+      clearTimeout(timeoutId);
+      polling = false;
     }
-    
+
   }, []);
 
   function poll(){
 
-    if(localStorage.getItem('asci-user') === null){
-        navigate(docRoot + "/login");
-    }
-    else if(localStorage.getItem('asci-course') === null){
-        navigate(docRoot + "/selectCourse");
-    }
-    else{
+    //Get meeting details
+    let request = {};
+    request.command = "getTAMeetingDetails";
+    request.user = user.userid;
+    request.courseId = course.course_id;
+    getMeetingDetails(request, url);  
 
-      //Get meeting details
-      let request = {};
-      request.command = "getTAMeetingDetails";
-      request.user = localStorage.getItem('asci-user');
-      request.courseId = localStorage.getItem('asci-course');
-      getMeetingDetails(request, url);  
-
-    }
   }
 
   //This gets the meeting details and displays them
@@ -64,7 +58,7 @@ function Meeting(props) {
       },
       body: JSON.stringify(json0),
     }).then(response => response.json())
-    .then(data => {
+      .then(data => {
         console.log("Data is: ", data);
 
         //if request succeeded
@@ -86,37 +80,25 @@ function Meeting(props) {
             timeoutId = setTimeout(poll, pollTime);
           }
 
-          
+
         }
         else{
           console.log("Fetching meeting details failed for some reason");
           navigate(docRoot + "/error");
         }
-        
+
       })
       .catch((error) => {
         console.log("Meeting: There was an error:", error);
         navigate(docRoot + "/error");
-        
+
       });
 
-    }
-
-  
-  const handleLogout = (e) =>{
-    e.preventDefault();
-    localStorage.clear();
-    navigate(docRoot + '/');
   }
 
+
   const handleEndMeeting = (e) =>{
-    if(localStorage.getItem('asci-user') === null){
-      navigate(docRoot + "/login");
-    }
-    else if(localStorage.getItem('asci-course') === null){
-      navigate(docRoot + "/selectCourse");
-    }
-    else if(sessionId === null){
+    if(sessionId === null){
       console.log("Session id is null");
       navigate(docRoot + "/error");
     }
@@ -124,9 +106,9 @@ function Meeting(props) {
       //End the meeting
       let request = {};
       request.command = "TAEndMeeting";
-      request.user = localStorage.getItem('asci-user');
+      request.user = user.userid;
       request.sessionId = sessionId;
-      
+
       endMeeting(request, url);
     }
   }
@@ -140,7 +122,7 @@ function Meeting(props) {
       },
       body: JSON.stringify(json0),
     }).then(response => response.json())
-    .then(data => {
+      .then(data => {
         console.log("Data is: ", data);
 
         //if request succeeded
@@ -152,39 +134,33 @@ function Meeting(props) {
           console.log("Ending meeting failed");
           navigate(docRoot + "/error");
         }
-        
+
       })
       .catch((error) => {
         console.log("HOME: There was an error:", error);
         navigate(docRoot + "/error");
-        
+
       });
 
-    }
+  }
 
-    const handlePutGroupMemberBack = (e) =>{
-      console.log(e);
-    }
+  const handlePutGroupMemberBack = (e) =>{
+    console.log(e);
+  }
 
 
   const handlePutBack = (e) =>{
-    if(localStorage.getItem('asci-user') === null){
-      navigate(docRoot + "/login");
-    }
-    else if(localStorage.getItem('asci-course') === null){
-      navigate(docRoot + "/selectCourse");
-    }
-    else if(sessionId === null){
+    if(sessionId === null){
       navigate(docRoot + "/error");
     }
     else{
       //End the meeting
       let request = {};
       request.command = "PutStudentBackOnQueue";
-      request.user = localStorage.getItem('asci-user');
+      request.user = user.userid;
       request.studentId = student.computing_id;
       request.sessionId = sessionId;
-      
+
       putBack(request, url);
     }
   }
@@ -198,7 +174,7 @@ function Meeting(props) {
       },
       body: JSON.stringify(json0),
     }).then(response => response.json())
-    .then(data => {
+      .then(data => {
         console.log("Data is: ", data);
 
         //if request succeeded
@@ -210,99 +186,118 @@ function Meeting(props) {
           console.log("Ending meeting failed");
           navigate(docRoot + "/error");
         }
-        
+
       })
       .catch((error) => {
         console.log("HOME: There was an error:", error);
         navigate(docRoot + "/error");
-        
+
       });
 
-    }
+  }
 
-    function EmptyMeetingPanel(props){
-      return(
-        <div className="question">
-          <div>
-            <h5>Woops, this meeting looks empty. Click below to end the meeting.</h5>            
+  function EmptyMeetingPanel(props){
+    return(
+      <div className="question">
+        <div>
+          <h5>Woops, this meeting looks empty. Click below to end the meeting.</h5>            
+        </div>
+
+        <div>
+          <button onClick={handleEndMeeting}>End Meeting!</button>
+        </div>
+      </div>
+    );
+  }
+
+
+  function SinglePanel(props){
+    return(
+      <div className="container p-4">
+        <div className="row my-auto">
+          <div className="col-md-4">
+            <h1><i className="bi-person big-icon"></i></h1>
+            <h2>Individual Meeting</h2>
+            <p>Your current meeting information.</p>
           </div>
-      
-          <div>
-            <button onClick={handleEndMeeting}>End Meeting!</button>
+          <div className="col-md-8 my-auto">
+            <h3>You are currently helping...</h3>
+            <div className="card my-3">
+              <h5 className="card-header"><b>{student.fname} {student.lname}</b> (<b>{student.computing_id}</b>)</h5>
+              <div className="card-body">
+                <dl><dt>Subject</dt> <dd>{session.issue_subject}</dd>
+                  <dt>Description</dt> <dd>{session.issue}</dd>
+                  <dt>Location</dt> <dd>{session.location}</dd>
+                </dl>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <button onClick={handlePutBack} className="btn btn-danger">Put student(s) back in queue</button> &nbsp;
+              <button onClick={handleEndMeeting} className="btn btn-primary">End Meeting</button>
+            </div>
           </div>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
+  function GroupPanel(props) {
+    /* If student is the main session for a group, just notify them */
 
-    function SinglePanel(props){
+    if(groupSessions != null){
       return(
-        <div className="question">
-          <div>
-            <h5>You are currently helping <b>{student.fname} {student.lname}</b> (<b>{student.computing_id}</b>)</h5>
-            <h5><b>Subject:</b> {session.issue_subject}</h5>
-            <h5><b>Description:</b> {session.issue}</h5>
-            <h5><b>Location:</b> {session.location}</h5>
-          </div>
-      
-          <div>
-            <button onClick={handlePutBack}>Put student(s) back in queue!</button>
-            <button onClick={handleEndMeeting}>End Meeting!</button>
-            <p style={{   
-              fontSize: '15px',
-              padding: '20px',
-              color: 'red',
-            }} id="warning"></p>
-          </div>
-        </div>
-      );
-    }
-
-    function GroupPanel(props) {
-      /* If student is the main session for a group, just notify them */
-      
-      if(groupSessions != null){
-        return(
-          <div className="question">
-            <h3>You are in a group meeting!</h3>
-            <h4>Location: {session.location}</h4>
-            <div>
-              <h2>Group Members:</h2>
+        <div className="container p-4">
+          <div className="row my-auto">
+            <div className="col-md-4">
+              <h1><i className="bi-people big-icon"></i></h1>
+              <h2>Group Meeting</h2>
+              <p>Your current meeting information.</p>
+            </div>
+            <div className="col-md-8 my-auto">
+              <h3>You are currently helping a group...</h3>
+              <div className="card my-3">
+                <h5 className="card-header">Location: {session.location}</h5>
+                <ul className="list-group list-group-flush">
                   {Object.keys(groupSessions).map(k => { 
-                          if(groupMembers[k] != null){
-                          return (
-                            <div key={'div_' + k}>
-                            <h5 key={'memberInfo_' + k}><b>{groupMembers[k].fname} {groupMembers[k].lname}</b>: {groupSessions[k].issue}</h5>                            
-                            <h5 key={'location_' + k}>(<b>Location</b>: {groupSessions[k].location})</h5>
-                            </div>
-                          );
-                          } 
-                        })
+                    if(groupMembers[k] != null){
+                      return (
+                        <li key={'div_' + k}>
+                          <h6 key={'memberInfo_' + k}><b>{groupMembers[k].fname} {groupMembers[k].lname}</b></h6>
+                          <p><b>Issue</b>: {groupSessions[k].issue}</p>
+                          <p key={'location_' + k}>(<b>Location</b>: {groupSessions[k].location})</p>
+                        </li>
+                      );
+                    } 
+                  })
                   }
-            </div>
+                </ul>
+              </div>
 
-            <div>
-            <button onClick={handleEndMeeting}>End Meeting for all!</button>
+              <div className="text-center">
+                <button onClick={handleEndMeeting} className="btn btn-primary">End Meeting for All</button>
+              </div>
             </div>
           </div>
-        );
-      }
-    }
-
-
-    if(student == null && isGroup == false){
-      return (
-        <EmptyMeetingPanel />
+        </div>
       );
     }
-    if(student != null)
-      return (
-        <SinglePanel />
-      );
-    else
-      return (
-        <GroupPanel />
-      );
+  }
+
+
+  if(student == null && isGroup == false){
+    return (
+      <EmptyMeetingPanel />
+    );
+  }
+  if(student != null)
+    return (
+      <SinglePanel />
+    );
+  else
+    return (
+      <GroupPanel />
+    );
 
 }
 

@@ -4,13 +4,17 @@ import { Routes, Route, useNavigate } from "react-router-dom";
 import {
   Home,
   CreateNewCourse,
-  Navigation,
   CourseManagement,
   UploadRoster,
-  Error,
   EditCourse,
   SelectQuests,
 } from "./admin";
+import {
+  Login,
+  Error,
+  Logout,
+  Navigation,
+} from "./utils";
 
 import CoursePanel from "./admin/CoursePanel";
 
@@ -20,24 +24,9 @@ const AdminController = (props) => {
   // const { user, login } = useUser();
   const root = "/asci";
   const navigate = useNavigate();
-  // If the user is not logged in, redirect to the login page
-
-  useEffect(() => {
-    //need to redo this. check user set and course set first
-    if (localStorage.getItem("asci-user") === null) {
-      console.log(
-        "Try to access admin, But User is NOT set, navigating to home"
-      );
-      navigate(root + "/login");
-    }
-  }, []);
 
   return (
     <>
-      <Navigation
-        documentRoot={props.documentRoot}
-        debugMode={props.debugMode}
-      />
       <Routes>
         <Route path="/" element={<Home {...props} />} />
         <Route

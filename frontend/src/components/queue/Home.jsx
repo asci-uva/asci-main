@@ -2,6 +2,7 @@ import React from "react";
 //import {useState, useEffect} from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
 //This page needs to:
 //See if student is logged in and kick to login page if not
@@ -13,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 
 function Home(props) {
   const navigate = useNavigate();
+  const { user, course } = useUser();
 
   let docRoot = props.documentRoot;
   let url = props.url;
@@ -21,30 +23,19 @@ function Home(props) {
   useEffect(() => {
     console.log("ENTERING HOME");
 
-    //need to redo this. check user set and course set first
-    if (localStorage.getItem("asci-user") === null) {
-      console.log("User is NOT set, navigating to home login");
-      // navigate(docRoot + "/login");
-    } else if (localStorage.getItem("asci-course") === null) {
-      console.log("Course is NOT set, navigating to selectCourse");
-      navigate(docRoot + "/selectCourse");
-    } else {
-      //Ok, ping the session and send the user to the proper
-      //page based on their status
-      let user = localStorage.getItem("asci-user");
-      let courseId = localStorage.getItem("asci-course");
+    //Ok, ping the session and send the user to the proper
+    //page based on their status
 
-      console.log("All is fine, pinging session");
-      console.log("user, " + user);
-      console.log("courseId, " + localStorage.getItem("asci-course"));
+    console.log("All is fine, pinging session");
+    console.log("user, " + user.userid);
+    console.log("courseId, " + course);
 
-      //setup json command
-      let request = {};
-      request.command = "sessionPing";
-      request.user = user;
-      request.courseId = courseId;
-      checkSession(request, url);
-    }
+    //setup json command
+    let request = {};
+    request.command = "sessionPing";
+    request.user = user.userid;
+    request.courseId = course;
+    checkSession(request, url);
   }, []);
 
   //This function checks the users session

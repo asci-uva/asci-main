@@ -27,7 +27,7 @@ function Home(props) {
   }, []);
   
   return (
-    <div className="question">
+    <div>
       <QuestList
         documentRoot={props.documentRoot}
         debugMode={props.debugMode}

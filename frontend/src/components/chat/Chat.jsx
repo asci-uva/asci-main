@@ -8,14 +8,16 @@ import rehypeRaw from "rehype-raw";
 import { useSpring, animated, config } from "react-spring";
 import TypingAnimation from "../utils/TypingMessageAnimation";
 import SimpleDialog from "../utils/SimpleDialog";
+import { useUser } from "../context/UserContext";
 
 const Chat = (props) => {
     const url = props.url;
     const docRoot = props.docRoot;
     const issueSubject = props.issueSubject;
-    const courseName = props.courseName;
+    let {user, getCourse} = useUser();
+    let course = getCourse();
 
-    console.log("courseName in Chat: ", courseName);
+    console.log("course in Chat: ", course);
 
     const isValidIssueSubject = (issueSubject) => {
         return (
@@ -23,18 +25,6 @@ const Chat = (props) => {
             typeof issueSubject === "string" &&
             issueSubject.trim() !== ""
         );
-    };
-
-    const getUserAndCourseID = () => {
-        if (localStorage.getItem("asci-user") === null) {
-            navigate(docRoot + "/login");
-        } else if (localStorage.getItem("asci-course") === null) {
-            navigate(docRoot + "/selectCourse");
-        } else {
-            const user = localStorage.getItem("asci-user");
-            const courseId = localStorage.getItem("asci-course");
-            return { user: user, courseId: courseId };
-        }
     };
 
     const navigate = useNavigate();
@@ -87,9 +77,8 @@ const Chat = (props) => {
 
     const getLlmResponse = async (question, apiEndpoint) => {
         setLlmProcessing(true);
-        const userInfo = getUserAndCourseID();
 
-        question.user = userInfo.user;
+        question.user = user.userid;
 
         const response = await fetch(apiEndpoint, {
             method: "POST",
@@ -99,9 +88,11 @@ const Chat = (props) => {
             body: JSON.stringify(question),
         });
         const data = await response.json();
-        const chatbotResponse = JSON.parse(data.response);
+        let chatbotResponse = null;
+        if (data.response) 
+            JSON.parse(data.response);
 
-        if (response.ok) {
+        if (response.ok && chatbotResponse) {
             console.log(chatbotResponse);
             appendToChatHistory(chatbotResponse);
             setLlmProcessing(false);
@@ -365,7 +356,7 @@ const Chat = (props) => {
     };
 
     const display =
-        courseName && courseName.includes("Data Structures and Algorithms");
+        course.name && course.name.includes("Data Structures and Algorithms");
 
     if (!display) {
         return null;

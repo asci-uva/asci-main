@@ -60,7 +60,8 @@ class DBCourseSettings
         $settings = $this->db->fetchrow($result);
 
         if($settings == null){
-            return null;
+            //return null;
+            $settings = [];
         }
 
         return (new \asci\data\CourseSettings())->fromArray($settings);

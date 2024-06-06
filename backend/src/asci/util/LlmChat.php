@@ -102,7 +102,7 @@ class LlmChat
 
             if ($return_value == 1) {
                 $this->logger->error("Process ended with an error: " . $error);
-                echo "Detailed Error: " . $error . "\n";
+                //echo "Detailed Error: " . $error . "\n";
             }
 
             return [$return_value, $output, $error];

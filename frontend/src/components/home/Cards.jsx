@@ -1,40 +1,44 @@
 import React from "react";
-
-import img from './document-icon.png';
-import img2 from './card-id-icon.png';
-import img3 from './trophy-icon.png';
+import { Link } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
 function Cards(props) {
   let docRoot = props.documentRoot;
   let debugMode = props.debugMode;
   let root = "/asci";
+  const {getCourse} = useUser();
+  let course = getCourse();
   return (
     <div className="row">
-      <div className="column">
-        <div className="card">
-          <img className="card-img-top" src={img} />
+      <div className="col-md-4">
+        <div className="card p-3">
+          <div className="card-img-top text-center">
+            <i className="bi-list-ol home-icon"></i>
+          </div>
           <div className="card-body">
-            <p className="card-text">Office Hours Queue</p>
-            <a href={docRoot + "/queue"} className="btn btn-primary">Join Queue</a>
+            <p className="card-text text-center"><Link to="queue" className="btn btn-primary">Join Queue</Link></p>
           </div>
         </div>
       </div>
-      <div className="column">
-        <div className="card">
-        <img className="card-img-top" src={img2} />
-          <div className="card-body">
-            <p className="card-text">Admin</p>
-            <a href={docRoot + "/admin"} className="btn btn-primary">Visit Admin Page</a>
+      { course.role == "instructor" ? (
+        <div className="col-md-4">
+          <div className="card p-3">
+            <div className="card-img-top text-center">
+              <i className="bi-gear-wide-connected home-icon"></i>
+            </div>
+            <div className="card-body">
+              <p className="card-text text-center"><Link to="admin" className="btn btn-primary">Open Admin</Link></p>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="column">
-        <div className="card">
-        <img className="card-img-top" src={img3} />
+      ) : null }
+      <div className="col-md-4">
+        <div className="card p-3">
+          <div className="card-img-top text-center">
+            <i className="bi-trophy home-icon"></i>
+          </div>
           <div className="card-body">
-            <p className="card-text">Earn Points</p>
-            {/* change link later */}
-            <a href={docRoot + "/points"}  className="btn btn-primary">Earn Points</a>
+            <p className="card-text text-center"><Link to="points" className="btn btn-primary">Earn Points</Link></p>
           </div>
         </div>
       </div>
