@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-const UserContext = createContext();
+const UserContext = createContext({
+    userid: null,
+    fname: null,
+    lname: null,
+    login: () => {},
+    logout: () => {}
+});
 
 const url = "http://localhost:8081/index.php";
 
@@ -9,14 +15,12 @@ export const useUser = () => {
 };
 
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    // update the username for each render
-    if (localStorage.getItem("asci-user") !== null) {
-      setUser(localStorage.getItem("asci-user"));
-    }
-  }, []);
+  const [userid, setUserid] = useState(null);
+  const [fname, setFname] = useState(null);
+  const [lname, setLname] = useState(null);
+  const [pname, setPname] = useState(null);
+  const [courseList, setCourseList] = useState(null);
+  const [course, setCourse] = useState(null);
 
   const login = (userInfo, callback) => {
     let json = {};
@@ -38,7 +42,13 @@ export const UserProvider = ({ children }) => {
           // successfully login
           console.log("Login Success");
           localStorage.setItem("asci-user", data.computing_id);
-          setUser(data.computing_id);
+          setUserid(data.user.computing_id);
+          setFname(data.user.fname);
+          setLname(data.user.lname);
+          setPname(data.user.pname);
+
+          setCourseList(data.courses);
+          setCourse(null);
           callback(true);
         } else {
           // fail to login
@@ -52,16 +62,98 @@ export const UserProvider = ({ children }) => {
       });
   };
 
+  const refreshCourseList = (userInfo, callback) => {
+    let json = {};
+    json.command = "getCourses";
+    json.user = userInfo.user;
+
+    let jsonString = JSON.stringify(json);
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonString,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        if (data.success === "true") {
+          
+          setCourseList(data.courses);
+          
+          callback(true);
+        } else {
+          // fail to login
+          console.log("refreshing courses failed");
+          callback(false);
+        }
+      })
+      .catch((error) => {
+        console.error("Error during refresh course list:", error);
+        callback(false); // Call the callback with failure status
+      });
+  };
+
+  const courseListString = () => {
+          let cList = {};
+            for(var key in courseList){
+              //Construct the course title from it's pieces
+              let courseName = "" 
+                                + courseList[key]["mnemonic"]
+                                + courseList[key]["number"]
+                                + " "
+                                + courseList[key]["name"]
+                                + " - "
+                                + courseList[key]["semester"]
+                                + " ("
+                                + courseList[key]["role"]
+                                + ")";
+
+              cList[key] = courseName;
+            }
+        return cList;
+  }
+
+  const getCourse = () => {
+    return courseList[course];
+  }
+
   const logout = () => {
-    setUser(null);
+    setUserid(null);
+    setFname(null);
+    setLname(null);
+    setPname(null);
+    setCourseList(null);
+    setCourse(null);
     // Clear LocalStorage
     localStorage.clear();
     console.log("logout successfully, go back to login page");
   };
 
+  const value = {
+      user: {
+          userid,
+          fname,
+          lname,
+          pname
+      },
+      courseList,
+      courseListString,
+      login,
+      logout,
+      course,
+      getCourse,
+      setCourse,
+      setCourseList,
+      refreshCourseList
+  };
+
   return (
-    <UserContext.Provider value={{ user, login, logout }}>
+    <UserContext.Provider value={value}>
       {children}
     </UserContext.Provider>
   );
 };
+

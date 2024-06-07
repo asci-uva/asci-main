@@ -4,14 +4,20 @@ namespace asci\data;
 
 class Course implements \Serializable
 {
-    private $mnemonic;
-    private $number;
-    private $name;
-    private $semester;
+    public $id;
+    public $mnemonic;
+    public $number;
+    public $name;
+    public $semester;
 
     public function __construct($data)
     {
         $this->fromArray($data);
+    }
+
+    public function getId()
+    {
+        return $this->id;
     }
 
     public function getMnemonic()
@@ -37,6 +43,7 @@ class Course implements \Serializable
 
     public function fromArray($data)
     {
+        $this->id = $data['id'] ?? null;
         $this->mnemonic = $data['mnemonic'] ?? null;
         $this->number = $data['number'] ?? null;
         $this->name = $data['name'] ?? null;
@@ -47,6 +54,7 @@ class Course implements \Serializable
     public function toArray()
     {
         return array(
+            "id" => $this->id,
             "mnemonic" => $this->mnemonic,
             "number" => $this->number,
             "name" => $this->name,

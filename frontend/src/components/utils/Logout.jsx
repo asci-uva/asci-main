@@ -12,11 +12,11 @@ function Logout(props) {
 
   useEffect(() => {
     logout();
-    navigate(docRoot + "/login");
+    navigate(docRoot + "/");
   }, []);
 
   return (
-    <div className="question">
+    <div className="container">
       <h2>Logging out...You should be redirected soon.</h2>
     </div>
   );

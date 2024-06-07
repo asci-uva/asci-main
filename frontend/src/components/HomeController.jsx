@@ -1,24 +1,73 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Routes, Route } from "react-router-dom";
-import { Home, Login, Error, Navigation, Logout, Cards } from "./home";
-
+import QueueController from "./QueueController";
+import AdminController from "./AdminController";
+import PointsController from "./PointsController";
+import { Home, Cards } from "./home";
+import { Login, Error, Navigation, Logout, SelectCourse } from "./utils";
+import { useUser } from "./context/UserContext";
 const HomeController = (props) => {
-  return (
+
+    const {user, course} = useUser();
+    if (!user.userid) {
+        return (
+      <Login {...props} />
+        )
+    }
+    if (!course) {
+        return (
+      <SelectCourse {...props} />
+        )
+    }
+  
+    return (
     <>
       <Navigation
         documentRoot={props.documentRoot}
         debugMode={props.debugMode}
       />
+      <div className="container">
       <Routes>
         <Route path="/" element={<Home {...props} />} />
+        <Route path="changeCourse" element={<SelectCourse {...props} />} />
         <Route path="login" element={<Login {...props} />} />
         <Route path="error" element={<Error {...props} />} />
         <Route path="logout" element={<Logout {...props} />} />
+        {/* Use QueueController for all queue related routes */}
+        <Route
+          path={"queue/*"}
+          element={
+            <QueueController
+              documentRoot={props.documentRoot + "/queue"}
+              url={props.url}
+              debugMode={props.debugMode}
+            />
+          }
+        />
+        {/* Use AdminController for all admin related routes */}
+        <Route
+          path={"admin/*"}
+          element={
+            <AdminController
+              documentRoot={props.documentRoot + "/admin"}
+              url={props.url}
+              debugMode={props.debugMode}
+            />
+          }
+        />
+        {/* Use PointsController for all points related routes */}
+        <Route
+          path={"points/*"}
+          element={
+            <PointsController
+              documentRoot={props.documentRoot + "/points"}
+              url={props.url}
+              debugMode={props.debugMode}
+            />
+          }
+        />
       </Routes>
-      <Cards
-        documentRoot={props.documentRoot}
-        debugMode={props.debugMode}
-      />
+            </div>
     </>
   );
 };

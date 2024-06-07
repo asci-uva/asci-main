@@ -3,7 +3,6 @@ import { Routes, Route, useNavigate } from "react-router-dom";
 import {
   Home,
   Question,
-  Login,
   Ta,
   StudentWaitingRoom,
   HandleStudent,
@@ -12,38 +11,29 @@ import {
   StudentMeeting,
   JoinQueue,
   StudentSurvey,
-  Error,
-  SelectCourse,
-  Logout,
   HandleGroup,
-  Navigation,
 } from "./queue";
+import {
+  Login,
+  Error,
+  Logout,
+  Navigation,
+} from "./utils";
 import { useUser } from "./context/UserContext";
 
 const QueueController = (props) => {
-  const { user, login } = useUser();
-  const root = "/asci";
   const navigate = useNavigate();
   // If the user is not logged in, redirect to the login page
-
-  useEffect(() => {
-    //need to redo this. check user set and course set first
-    if (localStorage.getItem("asci-user") === null) {
-      console.log(
-        "Try to access queue, But User is NOT set, navigating to home"
-      );
-      navigate(root + "/login");
-    }
-  }, []);
-  return (
+    
+    const {user} = useUser();
+    // NOTE TO SELF: Why isn't user being passed here after the router
+    // hard Navigates us to this page?  It's a page reload, which may mean
+    // that there's a better way to navigate between components, or I'm
+    // missing something!
+    return (
     <>
-      <Navigation
-        documentRoot={props.documentRoot}
-        debugMode={props.debugMode}
-      />
       <Routes>
         <Route path="/" element={<Home {...props} />} />
-        <Route path="login" element={<Login {...props} />} />
         <Route path="question" element={<Question {...props} />} />
         <Route path="error" element={<Error {...props} />} />
         <Route path="ta" element={<Ta {...props} />} />
@@ -57,7 +47,6 @@ const QueueController = (props) => {
         <Route path="studentMeeting" element={<StudentMeeting {...props} />} />
         <Route path="joinQueue" element={<JoinQueue {...props} />} />
         <Route path="studentSurvey" element={<StudentSurvey {...props} />} />
-        <Route path="selectCourse" element={<SelectCourse {...props} />} />
         <Route path="logout" element={<Logout {...props} />} />
         <Route path="handleGroup" element={<HandleGroup {...props} />} />
       </Routes>
