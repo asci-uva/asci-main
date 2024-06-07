@@ -25,7 +25,7 @@ function UploadRoster(props) {
         users.push({
           fname: cells[1].trim(),
           lname: cells[0].trim(),
-          pname: cells[2].trim(),
+          pname: cells[1].trim(),
           computing_id: cells[3].trim(),
           role: role,
         });
