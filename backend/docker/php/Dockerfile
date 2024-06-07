@@ -39,3 +39,5 @@ RUN service apache2 restart
 
 RUN mkdir /opt/log
 RUN touch /opt/log/server.log && chmod a+w /opt/log/server.log
+
+RUN mkdir /opt/tmp && chmod a+rw /opt/tmp

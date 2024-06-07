@@ -48,7 +48,7 @@ class Config {
       * You can also enable/disable locking here
       */
     public static $LOCKING_ENABLED = true;
-    public static $LOCKING_FILE_DIR = "./tmp/lock/";
+    public static $LOCKING_FILE_DIR = "/opt/tmp/";
 
     public static $GRADESCOPE_SYNC_SCRIPT = '/opt/src/asci/util/data_syn/gradescope_download.py';
 
