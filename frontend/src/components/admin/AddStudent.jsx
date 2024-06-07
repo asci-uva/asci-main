@@ -3,12 +3,17 @@ import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { useUser } from "../context/UserContext";
+
+
 function AddStudent(props) {
   const [fname, setFname] = useState("");
   const [lname, setLname] = useState("");
   const [pname, setPname] = useState("");
   const [computingId, setComputingId] = useState("");
   const [role, setRole] = useState("student"); // default to 'student' / can be switched to ta
+
+    let {user, getCourse} = useUser();
 
   const { course_id } = props;
   const navigate = useNavigate();
@@ -23,7 +28,7 @@ function AddStudent(props) {
       computingId,
       role,
       course_id: course_id,
-      user: localStorage.getItem("asci-user"),
+      user: user,
     };
 
     fetch(props.url, {
@@ -36,7 +41,7 @@ function AddStudent(props) {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        if (data) {
+        if (data.success) {
           toast.success("Student/TA added successfully!");
         } else {
           toast.error("Error adding the student/TA");

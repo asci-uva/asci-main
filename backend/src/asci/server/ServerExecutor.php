@@ -1249,6 +1249,8 @@ class ServerExecutor{
                 $response[$computing_id] = ["success" => false];
             }
         }
+
+        $response["success"] = true;
         return $response;
     }
 
