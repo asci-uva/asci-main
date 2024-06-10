@@ -1397,8 +1397,7 @@ class ServerExecutor{
     {
         $result = [];
         // check the gradescope_download python script path
-        $relativePathToPythonScript = \asci\Config::$GRADESCOPE_SYNC_SCRIPT; 
-        $scriptPath = realpath(dirname(__FILE__) . '/' . $relativePathToPythonScript);
+        $scriptPath = \asci\Config::$GRADESCOPE_SYNC_SCRIPT;
         if (!file_exists($scriptPath)) {
             $this->logger->error("Python script does not exist at $scriptPath");
             $result["success"]="false";
@@ -1411,7 +1410,10 @@ class ServerExecutor{
         $chromiumPath = \asci\Config::$CHROMIUM_PATH;
         
         // Construct an absolute path for the download directory
-        $downloadPath = realpath(dirname(__FILE__)) . '/' . \asci\Config::$GRADESCOPE_DOWNLOAD_PATH;
+        //TODO: Get random number and create new dir under that path with that number
+        //TODO: remember this number and use it throughout.
+        $downloadPath = \asci\Config::$GRADESCOPE_DOWNLOAD_PATH;
+        $this->logger->debug("Download path is: $downloadPath");
 
         // Escaping arguments to ensure safe command execution
         $cmd = sprintf(
@@ -1428,6 +1430,7 @@ class ServerExecutor{
         // Execute the Python script with the provided arguments
         exec($cmd, $output, $returnVar);
 
+        //<TODO: Change this to return the filedpath directly. Don't scan output like this>
         $downloadedFileName = '';
         foreach ($output as $line) {
             // Look for the line that contains the filename

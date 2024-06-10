@@ -27,19 +27,22 @@ class DBSynchronization
 
     public function updateGradescopeAssignmentSubmissionByCourseId($course_id, $download_file_name) {
         $filename = $download_file_name;
-        $filePath = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "{$filename}";
+        $filePath = \asci\Config::$GRADESCOPE_DOWNLOAD_PATH . DIRECTORY_SEPARATOR . "{$filename}";
 
         if (!file_exists($filePath) || !is_readable($filePath)) {
+            $this->logger->addDebug("File could not be read", array("path" => $filePath));
             return NULL;
         }
 
         $handle = fopen($filePath, "r");
         if ($handle === FALSE) {
+            $this->logger->addDebug("file could not be opened", array("path" => $filePath));
             return NULL;
         }
 
         $header = fgetcsv($handle);
         if (!$header) {
+            $this->logger->addDebug("File has no header", array("path" => $filePath));
             fclose($handle);
             return NULL;
         }
@@ -89,6 +92,7 @@ class DBSynchronization
             }
         }
         else{
+            $this->logger->addDebug("row was null for some reason", array("data" => null));
             return NULL;
         }
 
