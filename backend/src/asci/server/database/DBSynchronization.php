@@ -25,9 +25,9 @@ class DBSynchronization
         $this->logger->pushHandler($log);
     }
 
-    public function updateGradescopeAssignmentSubmissionByCourseId($course_id, $download_file_name) {
+    public function updateGradescopeAssignmentSubmissionByCourseId($course_id, $download_unique_id, $download_file_name) {
         $filename = $download_file_name;
-        $filePath = \asci\Config::$GRADESCOPE_DOWNLOAD_PATH . DIRECTORY_SEPARATOR . "{$filename}";
+        $filePath = \asci\Config::$GRADESCOPE_DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $download_unique_id . DIRECTORY_SEPARATOR . "{$filename}";
 
         if (!file_exists($filePath) || !is_readable($filePath)) {
             $this->logger->addDebug("File could not be read", array("path" => $filePath));

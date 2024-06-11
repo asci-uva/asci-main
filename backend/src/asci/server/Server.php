@@ -497,7 +497,8 @@ class Server
                 $gradescope_username = $this->input["email"];
                 $gradescope_password = $this->input["password"];
                 $gradescope_courseNumber = $this->input["courseNumber"];
-                $this->setResponse($executor->runGradescopeDataDownload($gradescope_username, $gradescope_password, $gradescope_courseNumber));
+                $course_id = $this->input["course_id"];
+                $this->setResponse($executor->runGradescopeDataDownload($gradescope_username, $gradescope_password, $gradescope_courseNumber, $course_id));
                 break;
             
 

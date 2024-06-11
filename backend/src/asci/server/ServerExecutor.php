@@ -1393,7 +1393,7 @@ class ServerExecutor{
         return $result;
     }
 
-    public function runGradescopeDataDownload($email, $password, $courseNumber)
+    public function runGradescopeDataDownload($email, $password, $courseNumber, $courseId)
     {
         $result = [];
         // check the gradescope_download python script path
@@ -1410,9 +1410,9 @@ class ServerExecutor{
         $chromiumPath = \asci\Config::$CHROMIUM_PATH;
         
         // Construct an absolute path for the download directory
-        //TODO: Get random number and create new dir under that path with that number
-        //TODO: remember this number and use it throughout.
-        $downloadPath = \asci\Config::$GRADESCOPE_DOWNLOAD_PATH;
+
+        $downloadUniqueNum = rand();
+        $downloadPath = \asci\Config::$GRADESCOPE_DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $downloadUniqueNum . DIRECTORY_SEPARATOR;
         $this->logger->debug("Download path is: $downloadPath");
 
         // Escaping arguments to ensure safe command execution
@@ -1441,6 +1441,7 @@ class ServerExecutor{
             }
         }
 
+
         // if the download failed, return success as null. Else return success as true
         if ($returnVar !== 0) {
             // Handle the error case
@@ -1452,23 +1453,24 @@ class ServerExecutor{
             $result["message"]="Download Gradescope data Python script returned an error.";
             return $result;
         } else {
-            // Handle the success case
-            // echo "Success: Download Gradescope data Python script executed without errors.\n";
-            // foreach ($output as $line) {
-            //     echo $line . "\n";
-            // }
-            $result["success"]="true";
-            $result["message"]="Python script run and successfully download Gradescope data.";
-            $result["filename"] = $downloadedFileName;
+            
+            /* Ok, it worked, call the second function directly */
+            $result = $this->updateGradescopeDataByCourseHandler($courseId, $downloadUniqueNum, $downloadedFileName);
+
+            /* delete the downloaded file and directory */
+            unlink($downloadPath . $downloadedFileName);
+            rmdir($downloadPath);
+
             return $result;
+
         }
     }
 
     
-    public function updateGradescopeDataByCourseHandler($course_id, $download_file_name) {
+    public function updateGradescopeDataByCourseHandler($course_id, $download_unique_id, $download_file_name) {
         $result = [];
 
-        $missingStudents = (new \asci\server\database\DBSynchronization($this->db))->updateGradescopeAssignmentSubmissionByCourseId($course_id, $download_file_name);
+        $missingStudents = (new \asci\server\database\DBSynchronization($this->db))->updateGradescopeAssignmentSubmissionByCourseId($course_id, $download_unique_id, $download_file_name);
 
         if($missingStudents){
             $result["missingStudents"] = $missingStudents;
