@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import { Routes, Route } from "react-router-dom";
 import QueueController from "./QueueController";
+import ChatController from "./ChatController";
 import AdminController from "./AdminController";
 import PointsController from "./PointsController";
 import { Home, Cards } from "./home";
@@ -39,6 +40,17 @@ const HomeController = (props) => {
           element={
             <QueueController
               documentRoot={props.documentRoot + "/queue"}
+              url={props.url}
+              debugMode={props.debugMode}
+            />
+          }
+        />
+        {/* Use ChatController for chat related routes */}
+        <Route
+          path={"chat/*"}
+          element={
+            <ChatController
+              documentRoot={props.documentRoot + "/chat"}
               url={props.url}
               debugMode={props.debugMode}
             />

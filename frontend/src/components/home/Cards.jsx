@@ -20,6 +20,16 @@ function Cards(props) {
           </div>
         </div>
       </div>
+      <div className="col-md-4">
+        <div className="card p-3">
+          <div className="card-img-top text-center">
+            <i className="bi-chat-right-text home-icon"></i>
+          </div>
+          <div className="card-body">
+            <p className="card-text text-center"><Link to="chat" className="btn btn-primary">Bot Chat</Link></p>
+          </div>
+        </div>
+      </div>
       { course.role == "instructor" ? (
         <div className="col-md-4">
           <div className="card p-3">

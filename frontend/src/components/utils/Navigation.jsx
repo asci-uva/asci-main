@@ -25,6 +25,11 @@ function Navigation(props) {
                   <i className="bi-list-ol"></i> Queue
                 </NavLink>
               </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/asci/chat">
+                  <i className="bi-chat-right-text"></i> BotChat
+                </NavLink>
+              </li>
             { course.role == "instructor" ? (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/asci/admin">
