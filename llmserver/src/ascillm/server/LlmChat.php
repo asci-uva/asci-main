@@ -63,8 +63,26 @@ class LlmChat
     
     public function getLlmResponse($input){
 
-        if (\ascillm\Config::$FAKE_LLM_MODE) {
-          return [];
+      if (\ascillm\Config::$FAKE_LLM_MODE) {
+        // Pause as if we're waiting for a reply
+        sleep(5);
+        // Reply with a canned answer
+          return [
+            "role" => "assistant",
+            "content" => "This is an example LLM response for testing",
+            "questions" => ["One question", "A second question"],
+            "context" => [
+              [
+                "file_name" => "syllabus.md",
+                "text" => "A clip from the syllabus text."
+              ],
+              [
+                "file_name" => "day1-slides.pdf",
+                "page_label" => "21",
+                "text" => "text in the middle of the day 1 slides"
+              ]
+            ]
+          ];
         }
 
         /* Testing opening up pipes and just sending some simple data */
