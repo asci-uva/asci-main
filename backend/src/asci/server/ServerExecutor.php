@@ -12,9 +12,6 @@
  */
 namespace asci\server;
 
-error_reporting(E_ALL);
-ini_set('display_errors', 0);
-
 //todo: we might want seperate classes around certain functionality 
 use asci\server\database\DatabaseConnector as DatabaseConnector;
 
@@ -1309,24 +1306,19 @@ class ServerExecutor{
         return $this->userStore->register($data["userid"],$data["password"]);
     }
 
-    public function startLlmChat($data) {
+    public function llmChat($data) {
         
         // similar to $cosSim
         $chat = new \asci\util\LlmChat();
 
-        // always print "received data" in all situations
-        // echo "=======\n";   
-
         /* Get the matches among everything */
-        $buffer = $chat->getLlmResponse($data);
+        $llmResponse = $chat->getLlmResponse($data);
 
-        $this->logger->info("LLM Chat Buffer", array("buffer" => $buffer));
+        $this->logger->info("LLM Chat Buffer", array($llmResponse));
 
         /* If the LLM Chat call failed, report that to frontend */
-        if($buffer == null || $buffer[0] != 0) return $this->err("LLM Chat call failed");
-
-        /* We made it, return the sessions (up to max) that we care about */
-        $jsonResponse = $buffer[1];
+        if($llmResponse == null || !is_array($llmResponse)) 
+          throw new \asci\exceptions\ASCIException("LLM Chat call failed");
 
 
         // Log the response into the database
@@ -1336,13 +1328,12 @@ class ServerExecutor{
 
         $dbLogger = new \asci\server\database\DBLogs($this->db);
         $type = $data["command"];
-        $studentString = json_encode(["role" => "user", "content" => $data["studentQuestion"]]);
-        $logString = $studentString . ":" . $jsonResponse;
+        $logString = json_encode(["role" => "user", "content" => $data["studentQuestion"], "response"=>$llmResponse]);
 
         $dbLogger->log($user_id, $type, $logString);
 
         $result = [];
-        $result["response"] = $jsonResponse;
+        $result["response"] = $llmResponse;
         return $result;
     }
     

@@ -43,6 +43,8 @@ class Config {
     // The path of the LLM chat script
     public static $LLM_CHAT_SCRIPT = '/opt/src/asci/util/llm_chat.py';
 
+    public static $LLM_SERVER_URL = "http://chat:80/";
+
     /**
       * This is the relative location of the temporary locking files for all requests (see util/ExclusiveLock.php for details)
       * You can also enable/disable locking here

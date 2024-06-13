@@ -88,9 +88,8 @@ const Chat = (props) => {
             body: JSON.stringify(question),
         });
         const data = await response.json();
-        let chatbotResponse = null;
-        if (data.response) 
-            JSON.parse(data.response);
+       console.log(data);
+        let chatbotResponse = data.response;
 
         if (response.ok && chatbotResponse) {
             console.log(chatbotResponse);
@@ -354,13 +353,6 @@ const Chat = (props) => {
             </form>
         );
     };
-
-    const display =
-        course.name && course.name.includes("Data Structures and Algorithms");
-
-    if (!display) {
-        return null;
-    }
 
     return (
         <div className="flex flex-1 flex-col m-0">

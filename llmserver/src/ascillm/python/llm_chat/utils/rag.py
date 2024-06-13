@@ -7,6 +7,7 @@ from llama_index.core import (
 )
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core import Settings
+from llm_chat.constants import PERSIST_DIR, DATA_DIR 
 import sys
 import os
 import traceback
@@ -26,9 +27,6 @@ if script_directory not in sys.path:
 
 DEV_MODE = False
 
-# check if storage already exists
-PERSIST_DIR = "./storage" if DEV_MODE else "/opt/src/asci/util/llm_chat/storage"
-DATA_DIR = "./data" if DEV_MODE else "/opt/src/asci/util/llm_chat/data"
 
 Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
 

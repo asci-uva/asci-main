@@ -389,12 +389,12 @@ class Server
                 break;
             
             case "newLlmChat":
-                $result = $executor->startLlmChat($this->input);
+                $result = $executor->llmChat($this->input);
                 $this->setResponse($result);
                 break;
 
             case "followupLlmChat":
-                $result = $executor->startLlmChat($this->input);
+                $result = $executor->llmChat($this->input);
                 $this->setResponse($result);
                 break;
 

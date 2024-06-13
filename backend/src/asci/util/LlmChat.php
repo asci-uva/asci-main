@@ -14,29 +14,25 @@
 namespace asci\util;
 
 /**
- * LlmChat Class
+ * LlmChat Connector Class
  *
  * The purpose of this class is to interact with a python implementation of LLM-based chatbot. 
  * Two strings (the question and an optional assignment name) are passed to this program, 
  * and an response from LLM (in the form of a JSON object) is returned.
  *
- * @author Robert Bao
+ * @author Robbie Hott
  */
 
 class LlmChat
 {
 
     /**
-     * Input parameters from the querier
-     *
-     * @var array Associative array of the input query
-     */
-    private $input = null;
-
-    /**
      * @var \Monolog\Logger $logger the logger for this server
      */
     private $logger;
+
+
+    private $serverURL;
 
     /**
      * Constructor
@@ -50,66 +46,63 @@ class LlmChat
         global $log;
 
         // create a log channel
-        $this->logger = new \Monolog\Logger('Server');
+        $this->logger = new \Monolog\Logger('LLMChat');
         $this->logger->pushHandler($log);
+
+        $this->serverURL = \asci\Config::$LLM_SERVER_URL;
     }
 
-    public function testGetLlmResponse(){
-        $input_str = "{'command': 'newLlmChat', 'assignmentName': '', 'studentQuestion': 'hi'}";
+    public function getLlmResponse($input) {
 
-        return $this->getLlmResponse($input_str);
+      $query = [
+        "command" => "llmchat",
+        "data" => $input
+      ]; 
+
+      $response = $this->query($query);
+
+      return $response["response"];
     }
 
-    
-    public function getLlmResponse($input){
+    public function query($query) {
+        $this->logger->addDebug("Sending the following server query to {$this->serverURL}", $query);
+        // Encode the query as json
+        $data = json_encode($query);
 
-        /* Testing opening up pipes and just sending some simple data */
-        $descriptorspec = array(
-            0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
-            1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
-            2 => array("pipe", "w")
-        );
+        // Use CURL to send request to the internal server
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->serverURL);
+        curl_setopt($ch, CURLOPT_HTTPHEADER,
+                array (
+                        'Content-Type: application/json',
+                        'Content-Length: ' . strlen($data)
+                ));
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($ch);
 
-        /* Hardcoding the call to the python script for now */
-        $command = "python3 " . \asci\Config::$LLM_CHAT_SCRIPT;
-
-        // print out the command
-        $this->logger->info("Command: " . $command);
-        
-        $pipes = array();
-        $process = proc_open($command, $descriptorspec, $pipes);
-
-        if (is_resource($process)) {
-            // $pipes now looks like this:
-            // 0 => writeable handle connected to child stdin
-            // 1 => readable handle connected to child stdout
-
-            $json_data = json_encode($input);
+        if($errno = curl_errno($ch)) {
+          $error_message = curl_strerror($errno);
+          $this->logger->addError("cURL error ({$errno}):\n {$error_message}");
+        }
+        curl_close($ch);
 
 
-            fwrite($pipes[0], $json_data . "\n");  
-            fwrite($pipes[0], "-1");
-            
-            fclose($pipes[0]);
-            $output = stream_get_contents($pipes[1]);
-            fclose($pipes[1]);
-            $error = stream_get_contents($pipes[2]);
-            fclose($pipes[2]);
-
-            // It is important that you close any pipes before calling
-            // proc_close in order to avoid a deadlock
-            $return_value = proc_close($process);
-
-            if ($return_value == 1) {
-                $this->logger->error("Process ended with an error: " . $error);
-                //echo "Detailed Error: " . $error . "\n";
-            }
-
-            return [$return_value, $output, $error];
+        // Return the server response as associative array
+        $return = json_decode($response, true);
+        if ($return == null) {
+            $this->logger->addDebug("Got the following improper server response", array($response));
+            return $response;
         }
 
-        return null;
+        $this->logger->addDebug("Got the following server response", $return);
+
+        return $return;
     }
 
-    
+
+
+
 }
+
