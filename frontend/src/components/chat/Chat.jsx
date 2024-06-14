@@ -79,6 +79,7 @@ const Chat = (props) => {
         setLlmProcessing(true);
 
         question.user = user.userid;
+        question.course = course;
 
         const response = await fetch(apiEndpoint, {
             method: "POST",

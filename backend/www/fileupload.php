@@ -41,20 +41,13 @@ if (\asci\Config::$DEBUG_MODE) {
 $log = new StreamHandler(\asci\Config::$LOG_DIR . \asci\Config::$SERVER_LOGFILE, $loglevel);
 
 try {
-    // Get the request body for processing
-    $input = file_get_contents("php://input");
+  $input = $_POST;
     if ($input == null) {
         throw new \asci\exceptions\ASCIException("No input given");
     }
     
-    // Parse the JSON input
-    $jsonInput = json_decode($input, true);
-    if ($jsonInput == null) {
-        throw new \asci\exceptions\ASCIException("Could not parse input");
-    }
-    
-    // Instantiate and run the server
-    $server = new Server($jsonInput);
+    // Instantiate and run the server with POST values
+    $server = new Server($input);
     $server->run();
     
     // Return the content type and output of the server

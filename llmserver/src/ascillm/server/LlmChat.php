@@ -60,8 +60,79 @@ class LlmChat
         return $this->getLlmResponse($input_str);
     }
 
+
+    public function runScript($scriptName, $stdInput=null, ...$params) {
+        /* Testing opening up pipes and just sending some simple data */
+        $descriptorspec = array(
+            0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
+            1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
+            2 => array("pipe", "w")
+        );
+
+        /* Hardcoding the call to the python script for now */
+        $command = "export HF_HOME=/tmp; python3 $scriptName";
+        if (!empty($params))
+          $command .= " " . implode(" ", $params);
+
+        // print out the command
+        $this->logger->debug("Command: " . $command);
+        
+        $pipes = array();
+        $process = proc_open($command, $descriptorspec, $pipes);
+        $this->logger->debug("opened proc: " . $command);
+
+        $this->logger->debug("Writing stdin", $stdInput);
+
+        if (is_resource($process)) {
+            // $pipes now looks like this:
+            // 0 => writeable handle connected to child stdin
+            // 1 => readable handle connected to child stdout
+
+
+
+          //if ($stdInput != null && !empty($stdInput))
+            //foreach ($stdInput as $line)
+              //fwrite($pipes[0], $line."\n");  
+              fwrite($pipes[0], $stdInput[0]."\n");  
+              fwrite($pipes[0], $stdInput[1]);  
+            fclose($pipes[0]);
+            
+            $output = stream_get_contents($pipes[1]);
+            fclose($pipes[1]);
+            $error = stream_get_contents($pipes[2]);
+            fclose($pipes[2]);
+
+            // It is important that you close any pipes before calling
+            // proc_close in order to avoid a deadlock
+            $return_value = proc_close($process);
+
+            if ($return_value != 0) {
+                $this->logger->error("Process ended with an error: " . $error);
+            }
+
+            $this->logger->addDebug("Called the process", ["output"=>$output, "error"=> $error, "retval" => $return_value]);
+            return [
+              "retval" => $return_value,
+              "output" => $output,
+              "error" => $error
+            ];
+        } else {
+          $this->logger->addDebug("Could not open the process");
+          throw new \ascillm\exceptions\ASCILLMException("Could not run LLM code");
+        }
+
+        return false;
+    }
     
-    public function getLlmResponse($input){
+    public function getLlmResponse($input=null, $course=null){
+
+      if ($input == null)
+        throw new \ascillm\exceptions\ASCILLMException("User input was not provided");
+
+      if ($course == null || !is_numeric($course))
+        throw new \ascillm\exceptions\ASCILLMException("Course was not provided");
+
+      // TODO check that course directory does exist
 
       if (\ascillm\Config::$FAKE_LLM_MODE) {
         // Pause as if we're waiting for a reply
@@ -85,63 +156,21 @@ class LlmChat
           ];
         }
 
-        /* Testing opening up pipes and just sending some simple data */
-        $descriptorspec = array(
-            0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
-            1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
-            2 => array("pipe", "w")
-        );
+      $llm_data = [
+        json_encode($input),
+        "-1"
+      ];
 
-        /* Hardcoding the call to the python script for now */
-        $command = "python3 " . \ascillm\Config::$LLM_CHAT_SCRIPT;
+        $result = $this->runScript(\ascillm\Config::$LLM_CHAT_SCRIPT, $llm_data, $course);
 
-        // print out the command
-        $this->logger->debug("Command: " . $command);
-        
-        $pipes = array();
-        $process = proc_open($command, $descriptorspec, $pipes);
-        $this->logger->debug("opened proc: " . $command);
+        $this->logger->addDebug("LLM output", $result); 
+        /* If the LLM Chat call failed, report that to frontend */
+        if ($result === false || $result["output"] == null || $result["retval"] != 0) 
+          return false;
 
-        if (is_resource($process)) {
-            // $pipes now looks like this:
-            // 0 => writeable handle connected to child stdin
-            // 1 => readable handle connected to child stdout
+        /* We made it, return the sessions (up to max) that we care about */
+        return json_decode($result["output"], true);
 
-            $json_data = json_encode($input);
-
-
-            fwrite($pipes[0], $json_data . "\n");  
-            fwrite($pipes[0], "-1");
-            
-            fclose($pipes[0]);
-            $output = stream_get_contents($pipes[1]);
-            fclose($pipes[1]);
-            $error = stream_get_contents($pipes[2]);
-            fclose($pipes[2]);
-
-            // It is important that you close any pipes before calling
-            // proc_close in order to avoid a deadlock
-            $return_value = proc_close($process);
-
-            if ($return_value == 1) {
-                $this->logger->error("Process ended with an error: " . $error);
-                //echo "Detailed Error: " . $error . "\n";
-            }
-
-            $this->logger->addDebug("Called the process", ["output"=>$output, "retval" => $return_value]);
-
-            /* If the LLM Chat call failed, report that to frontend */
-            if($output == null || $return_value != 0) return false;
-
-            /* We made it, return the sessions (up to max) that we care about */
-            return json_decode($output, true);
-        } else {
-          $this->logger->addDebug("Could not open the process");
-          throw new \ascillm\exceptions\ASCILLMException("Could not run LLM code");
-        }
-
-        $this->logger->debug("Made it here");
-        return false;
     }
 
     

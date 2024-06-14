@@ -121,7 +121,10 @@ class Server
                 $result = $executor->llmChat($this->input);
                 $this->setResponse(["response" => $result]);
                 break;
-
+            case "create":
+                $result = $executor->createRAG($this->input);
+                $this->setResponse($result);
+                break;
             default:
                 $this->setResponse(["response" => "Hello world!"]);
 

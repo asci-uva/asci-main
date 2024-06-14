@@ -52,16 +52,89 @@ class LlmChat
         $this->serverURL = \asci\Config::$LLM_SERVER_URL;
     }
 
-    public function getLlmResponse($input) {
+    public function getLlmResponse($data, $course) {
 
-      $query = [
-        "command" => "llmchat",
-        "data" => $input
-      ]; 
+        // Build request object
+        $query = [
+          "course" => $course["course_id"],
+          "command" => "llmchat",
+          "data" => [
+            "command" => $data["command"],
+            "studentQuestion" => $data["studentQuestion"]
+          ]
+        ];
+        if (isset($data["assignmentName"]))
+         $query["data"]["assignmentName"] = $data["assignmentName"]; 
+
+        if (isset($data["chatHistory"]))
+         $query["data"]["chatHistory"] = $data["chatHistory"]; 
+
+
 
       $response = $this->query($query);
 
       return $response["response"];
+    }
+
+    public function createLLM($course) {
+
+      $response = [
+            "result" => "failure"
+        ];
+
+        $file = null;
+        if (isset($_FILES['coursecontent']) && !(!isset($_FILES['coursecontent']['error']) ||
+            is_array($_FILES['coursecontent']['error']))) {
+            // Check $_FILES[$name]['error'] value.
+            switch ($_FILES['coursecontent']['error']) {
+                case UPLOAD_ERR_OK:
+                    break;
+                case UPLOAD_ERR_NO_FILE:
+                    return array_merge($response, ["error" => "No file selected."]);
+                case UPLOAD_ERR_INI_SIZE:
+                case UPLOAD_ERR_FORM_SIZE:
+                    return array_merge($response, ["error" => "File exceeded the filesize limit.  Please contact us."]);
+                default:
+                    return array_merge($response, ["error" => "An unknown error occurred in uploading the file"]);
+            }
+
+            // You should also check filesize here.
+            if ($_FILES['coursecontent']['size'] > \asci\Config::$MAX_UPLOAD_SIZE) {
+                return array_merge($response, ["error" => "File exceeded the filesize limit.  Please contact us."]);
+            }
+
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            if (false === $ext = array_search(
+                $finfo->file($_FILES['coursecontent']['tmp_name']),
+                array(
+                    'zip' => 'application/zip'
+                ),
+                true
+            )) {
+                return array_merge($response, ["error" => "Invalid upload file format: " .$finfo->file($_FILES['coursecontent']['tmp_name']). ".  Please upload a ZIP file."]);
+            }
+
+            $file = base64_encode(file_get_contents($_FILES['coursecontent']['tmp_name']));
+        } else {
+          return array_merge($response, ["error" => "An error occurred in uploading the file."]);
+        }
+
+        
+
+
+        // Build request object
+        $query = [
+          "course" => $course["course_id"],
+          "command" => "create",
+          "file" => [
+            "mime-type" => "application/zip",
+            "content" => $file
+          ]
+        ];
+
+      $response = $this->query($query);
+
+      return $response;
     }
 
     public function query($query) {

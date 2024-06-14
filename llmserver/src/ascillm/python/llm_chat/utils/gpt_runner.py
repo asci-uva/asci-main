@@ -25,11 +25,12 @@ Settings.llm = Llamafile(base_url=LLAMAFILE_BASE_URL_HOME)
 
 
 class GPTRunner:
-    def __init__(self, client):
+    def __init__(self, client, course):
         self.client = client
         self.file_handler = FileHandler()
         self.formatter = ChatHistoryFormatter()
         self.prompt_builder = PromptBuilder()
+        self.course = course
 
     def get_gpt_response(self, messages: list, response_format=None) -> str:
         response = self.client.chat.completions.create(
@@ -156,7 +157,7 @@ class GPTRunner:
             response = self.get_gpt_response(history)
             response = self.remove_code_in_response(question, response)
         else:
-            index = load_rag_index()
+            index = load_rag_index(self.course)
             gpt_response = self.get_gpt_response_with_rag(index, question, history)
             response, contexts = gpt_response["response"], gpt_response["contexts"]
             response = self.remove_code_in_response(question, response)

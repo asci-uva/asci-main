@@ -6,11 +6,11 @@ import traceback
 
 
 class OpenaiConnector:
-    def __init__(self, base_url, openai_api_key):
+    def __init__(self, base_url, openai_api_key, course):
         self.client = OpenAI(base_url=base_url, api_key=openai_api_key)
         self.formatter = ChatHistoryFormatter()
         self.prompt_builder = PromptBuilder()
-        self.runner = GPTRunner(self.client)
+        self.runner = GPTRunner(self.client, course)
 
     def create_newchat(self, question: str, assignment: str = ""):
         messages = self.prompt_builder.build_newchat_messages(question, assignment)

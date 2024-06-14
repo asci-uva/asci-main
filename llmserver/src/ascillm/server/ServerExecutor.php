@@ -13,29 +13,110 @@
 namespace ascillm\server;
 
 class ServerExecutor {
-  
-    //Logging
-    private $logger;
+
+  //Logging
+  private $logger;
 
 
-    public function __construct(){
-        global $log;
-        
-        // create a log channel
-        $this->logger = new \Monolog\Logger('ServerExecutor');
-        $this->logger->pushHandler($log);
+  public function __construct(){
+    global $log;
+
+    // create a log channel
+    $this->logger = new \Monolog\Logger('ServerExecutor');
+    $this->logger->pushHandler($log);
+  }
+
+
+  public function llmChat($input) {
+    $chat = new LlmChat();
+
+    $this->logger->addDebug("Handling request", $input);
+    $response = $chat->getLlmResponse($input["data"], $input["course"]);
+
+    if ($response === false)
+      throw new \ascillm\exceptions\ASCILLMException("Could not connect to LLM");
+
+    return $response;
+  }
+
+  public function createRAG($input) {
+    if (!isset($input["course"]) || !is_numeric($input["course"]))
+      throw new \ascillm\exceptions\ASCILLMException("Course not provided");
+
+    if (!isset($input["file"]) || !isset($input["file"]["mime-type"]) || !isset($input["file"]["content"])) {
+      throw new \ascillm\exceptions\ASCILLMException("No file uploaded");
     }
 
+    $dir = \ascillm\Config::$LLM_DATA_DIR.$input["course"]."/";
 
-    public function llmChat($input) {
-        $chat = new LlmChat();
+    // Clear and recreate the directory
+    if (is_dir($dir))
+      $this->delTree($dir);
+    mkdir($dir);
+    mkdir($dir."storage");
+    mkdir($dir."data");
 
-        $response = $chat->getLlmResponse($input["data"]);
+    // get the file contents
+    $file = base64_decode($input["file"]["content"]);
 
-        if ($response === false)
-          throw new \ascillm\exceptions\ASCILLMException("Could not connect to LLM");
 
-        return $response;
+    // Unzip the file
+    $tmpfile = $dir."__tempzip.zip";
+    file_put_contents($tmpfile, $file);
+    $zip = new \ZipArchive();
+
+    // NOTE: Mac OS Zip files seem to fail consistency checks
+    // It works to ignore this check, but we should NOT let everyone upload
+    // files -- only trusted sources!
+    $result = $zip->open($tmpfile, \ZipArchive::CHECKCONS);
+    if ($result !== true) {
+      switch($result) {
+      case \ZipArchive::ER_NOZIP:
+        throw new \ascillm\exceptions\ASCILLMException('Uploaded file is not a zip archive.');
+      case \ZipArchive::ER_INCONS :
+        // Workaround for Mac zip files -- if they are inconsistent, that's okay
+        $result = $zip->open($infile);
+        if ($result === true)
+          break;
+        throw new \ascillm\exceptions\ASCILLMException('Uploaded file failed consistency check.');
+      case \ZipArchive::ER_CRC :
+        throw new \ascillm\exceptions\ASCILLMException('Uploaded file failed checksum.');
+      default:
+        throw new \ascillm\exceptions\ASCILLMException('An error occurred: ' . $result);
+      }
     }
+
+    // Loop through all files in the zip
+    for($i = 0; $i < $zip->numFiles; $i++) {
+      $innerPath = $zip->getNameIndex($i);
+      $fileinfo = pathinfo($innerPath);
+
+      // check for MACOSX folder, too.
+      if (strpos($innerPath, 'MACOSX') === false)
+        file_put_contents($dir."data/".$fileinfo['basename'], $zip->getFromIndex($i));
+    }
+
+    $zip->close();
+
+    unlink($tmpfile);
+
+    return ["result" => "success"];
+  }
+
+  /**
+   * Recursively delete a directory
+   *
+   * Deletes a directory and it's contents from the filesystem.
+   * From https://www.php.net/manual/en/function.rmdir.php
+   *
+   * @param $dir The temporary directory to delete
+   */
+  private function delTree($dir) {
+    $files = array_diff(scandir($dir), array('.','..'));
+    foreach ($files as $file) {
+      (is_dir("$dir/$file")) ? $this->delTree("$dir/$file") : unlink("$dir/$file");
+    }
+    return rmdir($dir);
+  }
 
 }

@@ -398,6 +398,11 @@ class Server
                 $this->setResponse($result);
                 break;
 
+            case "createLlm":
+                $result = $executor->createLlm($this->input);
+                $this->setResponse($result);
+                break;
+
             case "createCourse":
                 $mnemonic = $this->input["mnemonic"];
                 $number = $this->input["number"];

@@ -88,5 +88,6 @@ class Config {
      */
     public static $SERVER_LOGFILE = "server.log";
 
+    public static $MAX_UPLOAD_SIZE = "500000000";
 }
 

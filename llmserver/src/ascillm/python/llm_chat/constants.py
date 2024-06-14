@@ -31,5 +31,5 @@ LLAMAFILE_KEY_PLACEHOLDER = "sk-no-key-required"
 LLAMAFILE_BASE_URL = "http://titanx01.cs.virginia.edu:8080/v1"
 LLAMAFILE_BASE_URL_HOME = "http://titanx01.cs.virginia.edu:8080"
 
-PERSIST_DIR = "/opt/data/dsa2/storage"
-DATA_DIR = "/opt/data/dsa2/data"
+PERSIST_DIR = "/opt/data/COURSEID/storage"
+DATA_DIR = "/opt/data/COURSEID/data"

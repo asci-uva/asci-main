@@ -5,7 +5,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
 
-from llm_chat.constants import PERSIST_DIR, DATA_DIR 
 from llama_index.core import (
     VectorStoreIndex,
     SimpleDirectoryReader,
@@ -28,14 +27,15 @@ DEV_MODE = False
 
 Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
 
+PERSIST_DIR = "/opt/data/COURSEID/storage"
+DATA_DIR = "/opt/data/COURSEID/data"
 
 def load_rag_index(course):
-    realdir = PERSIST_DIR.replace("COURSEID", course)
-    realdatadir = DATA_DIR.replace("COURSEID", course)
+    realdir = PERSIST_DIR.replace("COURSEID", str(course))
+    realdatadir = DATA_DIR.replace("COURSEID", str(course))
 
-    dir = Path(realdir)
-    dir_exists = os.path.exists(dir)
-    doc_file_exists = os.path.exists(dir / "docstore.json")
+    dir_exists = os.path.exists(realdir)
+    doc_file_exists = os.path.exists(realdir + "docstore.json")
 
     if not (dir_exists and doc_file_exists):
         # load the documents and create the index
