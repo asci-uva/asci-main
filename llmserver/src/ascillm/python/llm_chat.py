@@ -65,13 +65,18 @@ course = sys.argv[1]
 # READ IN DATA FROM STANDARD INPUT, ONE STRING ENTRY PER LINE
 dataIn = []
 
-while len(dataIn) <= 2:
-    input_line = input()
-    # quit when we see a -1
-    if input_line == "-1":
-        break
+for line in sys.stdin:
+    cleaned = line.strip()
+    if cleaned:
+        dataIn.append(cleaned)
 
-    dataIn.append(input_line)
+#while len(dataIn) <= 2:
+#    input_line = input()
+    # quit when we see a -1
+#    if input_line == "-1":
+#        break
+
+#    dataIn.append(input_line)
 
 
 if dataIn:

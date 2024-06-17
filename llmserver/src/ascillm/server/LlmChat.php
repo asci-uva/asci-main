@@ -80,8 +80,9 @@ class LlmChat
         $pipes = array();
         $process = proc_open($command, $descriptorspec, $pipes);
         $this->logger->debug("opened proc: " . $command);
-
-        $this->logger->debug("Writing stdin", $stdInput);
+        
+        if ($stdInput != null)
+          $this->logger->debug("Writing stdin", $stdInput);
 
         if (is_resource($process)) {
             // $pipes now looks like this:
@@ -90,11 +91,9 @@ class LlmChat
 
 
 
-          //if ($stdInput != null && !empty($stdInput))
-            //foreach ($stdInput as $line)
-              //fwrite($pipes[0], $line."\n");  
-              fwrite($pipes[0], $stdInput[0]."\n");  
-              fwrite($pipes[0], $stdInput[1]);  
+          if ($stdInput != null && !empty($stdInput))
+            foreach ($stdInput as $line)
+              fwrite($pipes[0], $line."\n");  
             fclose($pipes[0]);
             
             $output = stream_get_contents($pipes[1]);
@@ -157,8 +156,7 @@ class LlmChat
         }
 
       $llm_data = [
-        json_encode($input),
-        "-1"
+        json_encode($input)
       ];
 
         $result = $this->runScript(\ascillm\Config::$LLM_CHAT_SCRIPT, $llm_data, $course);
@@ -173,5 +171,7 @@ class LlmChat
 
     }
 
-    
+    public function generateRAG($course) {
+        $result = $this->runScript(\ascillm\Config::$LLM_RAG_SCRIPT, null, $course);
+    } 
 }

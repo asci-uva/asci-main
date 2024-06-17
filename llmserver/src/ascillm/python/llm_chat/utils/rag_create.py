@@ -59,6 +59,4 @@ def load_rag_index(course):
 
 
 if __name__ == "__main__":
-    print("start")
-    load_rag_index(1)
-    print("done")
+    load_rag_index(sys.argv[1])

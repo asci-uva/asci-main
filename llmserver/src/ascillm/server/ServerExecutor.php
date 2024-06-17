@@ -17,9 +17,13 @@ class ServerExecutor {
   //Logging
   private $logger;
 
+  private $chat;
+
 
   public function __construct(){
     global $log;
+    
+    $this->chat = new LlmChat();
 
     // create a log channel
     $this->logger = new \Monolog\Logger('ServerExecutor');
@@ -28,10 +32,9 @@ class ServerExecutor {
 
 
   public function llmChat($input) {
-    $chat = new LlmChat();
 
     $this->logger->addDebug("Handling request", $input);
-    $response = $chat->getLlmResponse($input["data"], $input["course"]);
+    $response = $this->chat->getLlmResponse($input["data"], $input["course"]);
 
     if ($response === false)
       throw new \ascillm\exceptions\ASCILLMException("Could not connect to LLM");
@@ -99,6 +102,8 @@ class ServerExecutor {
     $zip->close();
 
     unlink($tmpfile);
+
+    $this->chat->generateRAG($input["course"]);
 
     return ["result" => "success"];
   }
