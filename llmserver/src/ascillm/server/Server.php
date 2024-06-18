@@ -121,8 +121,12 @@ class Server
                 $result = $executor->llmChat($this->input);
                 $this->setResponse(["response" => $result]);
                 break;
-            case "create":
-                $result = $executor->createRAG($this->input);
+            case "uploadContent":
+                $result = $executor->createContentRAG($this->input);
+                $this->setResponse($result);
+                break;
+            case "uploadPiazza":
+                $result = $executor->createPiazzaRAG($this->input);
                 $this->setResponse($result);
                 break;
             default:

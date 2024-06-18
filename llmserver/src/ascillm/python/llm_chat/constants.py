@@ -24,7 +24,7 @@ prompt_paths = {
 OPENAI_MODEL = "gpt-3.5-turbo"
 OPENAI_MAX_TOKENS = 300
 
-SHOWING_ONLY_ONE_CONTEXT = True
+SHOWING_ONLY_ONE_CONTEXT = False
 RAG_DISABLED = False
 
 LLAMAFILE_KEY_PLACEHOLDER = "sk-no-key-required"

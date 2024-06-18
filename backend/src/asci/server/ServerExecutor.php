@@ -1308,7 +1308,7 @@ class ServerExecutor{
     return $this->userStore->register($data["userid"],$data["password"]);
   }
 
-  public function createLlm($data) {
+  public function uploadContentLLM($data) {
     $this->logger->addDebug("Handling LLM create request", $data);
     // Check for the course first
     //$course = $data["course"];
@@ -1327,7 +1327,30 @@ class ServerExecutor{
     // similar to $cosSim
     $chat = new \asci\util\LlmChat($course);
 
-    return $chat->createLLM($course);
+    return $chat->uploadContent($course);
+
+  }
+
+  public function uploadPiazzaLLM($data) {
+    $this->logger->addDebug("Handling LLM create request", $data);
+    // Check for the course first
+    //$course = $data["course"];
+    $course = ["course_id" => $data["courseid"]];
+    if($this->courseStore->getCourseById($course["course_id"]) === false)
+      throw new \asci\exceptions\ASCIException("Unknown course");
+
+    // Check for the user 
+    $computing_id = $data["user"];
+    $user = $this->userStore->getUser($computing_id)->toArray();
+    if ($user == null || empty($user)) 
+      throw new \asci\exceptions\ASCIException("Unknown user");
+
+    $user_id = $user["id"];
+
+    // similar to $cosSim
+    $chat = new \asci\util\LlmChat($course);
+
+    return $chat->uploadPiazza($course);
 
   }
 

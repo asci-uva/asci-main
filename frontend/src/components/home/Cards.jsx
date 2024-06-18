@@ -39,6 +39,7 @@ function Cards(props) {
           </div>
         </div>
       ) : null }
+      { false ? (
       <div className="col-lg-4 col-md-6 mb-4">
         <div className="card p-3">
           <div className="card-img-top text-center">
@@ -49,6 +50,7 @@ function Cards(props) {
           </div>
         </div>
       </div>
+      ) : null }
     </div>
   );
 }

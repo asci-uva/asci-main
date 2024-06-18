@@ -37,11 +37,13 @@ function Navigation(props) {
                 </NavLink>
               </li>
             ) : null }
+            { false ? (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/asci/points">
                   <i className="bi-trophy-fill"></i> Earn Points
                 </NavLink>
               </li>
+              ) : null }
       </ul>
             <ul className="navbar-nav ms-auto mb-2 mb-md-0">
             <li className="nav-item dropdown">

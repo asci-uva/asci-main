@@ -399,7 +399,12 @@ class Server
                 break;
 
             case "createLlm":
-                $result = $executor->createLlm($this->input);
+                $result = $executor->uploadContentLLM($this->input);
+                $this->setResponse($result);
+                break;
+
+            case "createLlmPiazza":
+                $result = $executor->uploadPiazzaLLM($this->input);
                 $this->setResponse($result);
                 break;
 

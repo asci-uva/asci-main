@@ -76,7 +76,7 @@ class LlmChat
       return $response["response"];
     }
 
-    public function createLLM($course) {
+    public function uploadContent($course) {
 
       $response = [
             "result" => "failure"
@@ -125,10 +125,83 @@ class LlmChat
         // Build request object
         $query = [
           "course" => $course["course_id"],
-          "command" => "create",
+          "command" => "uploadContent",
           "file" => [
             "mime-type" => "application/zip",
             "content" => $file
+          ]
+        ];
+
+      $response = $this->query($query);
+
+      return $response;
+    }
+
+    public function uploadPiazza($course) {
+
+      $response = [
+            "result" => "failure"
+        ];
+
+        $file = null;
+        if (isset($_FILES['piazzacontent']) && !(!isset($_FILES['piazzacontent']['error']) ||
+            is_array($_FILES['piazzacontent']['error']))) {
+            // Check $_FILES[$name]['error'] value.
+            switch ($_FILES['piazzacontent']['error']) {
+                case UPLOAD_ERR_OK:
+                    break;
+                case UPLOAD_ERR_NO_FILE:
+                    return array_merge($response, ["error" => "No file selected."]);
+                case UPLOAD_ERR_INI_SIZE:
+                case UPLOAD_ERR_FORM_SIZE:
+                    return array_merge($response, ["error" => "File exceeded the filesize limit.  Please contact us."]);
+                default:
+                    return array_merge($response, ["error" => "An unknown error occurred in uploading the file"]);
+            }
+
+            // You should also check filesize here.
+            if ($_FILES['piazzacontent']['size'] > \asci\Config::$MAX_UPLOAD_SIZE) {
+                return array_merge($response, ["error" => "File exceeded the filesize limit.  Please contact us."]);
+            }
+
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            if (false === $ext = array_search(
+                $finfo->file($_FILES['piazzacontent']['tmp_name']),
+                array(
+                    'zip' => 'application/zip'
+                ),
+                true
+            )) {
+                return array_merge($response, ["error" => "Invalid upload file format: " .$finfo->file($_FILES['piazzacontent']['tmp_name']). ".  Please upload a ZIP file."]);
+            }
+
+            $file = false; 
+  
+            $zip = new \ZipArchive;
+            if ($zip->open($_FILES['piazzacontent']['tmp_name'], \ZipArchive::RDONLY) === true) {
+              $file = $zip->getFromName("class_content_flat.json");
+              if ($file === false)
+                return array_merge($response, ["error" => "Could not find Piazza course contents in zip."]);
+              $zip->close();
+            } else {
+              return array_merge($response, ["error" => "Could not open Piazza zip file."]);
+            }
+        } else {
+          return array_merge($response, ["error" => "An error occurred in uploading the file."]);
+        }
+
+        
+        if ($file === false)
+          return array_merge($response, ["error" => "An error occurred when uploading the file."]);
+
+
+        // Build request object
+        $query = [
+          "course" => $course["course_id"],
+          "command" => "uploadPiazza",
+          "file" => [
+            "mime-type" => "application/json",
+            "content" => base64_encode($file)
           ]
         ];
 

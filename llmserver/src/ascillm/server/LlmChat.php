@@ -167,8 +167,19 @@ class LlmChat
           return false;
 
         /* We made it, return the sessions (up to max) that we care about */
-        return json_decode($result["output"], true);
+        return $this->sanitize(json_decode($result["output"], true));
 
+    }
+
+    private function sanitize($data) {
+      $result = $data;
+      $context = [];
+      foreach ($data["context"] as $c) {
+        if (stripos($c["file_name"], "piazza") === false)
+          array_push($context, $c);
+      }
+      $result["context"] = $context;
+      return $result;
     }
 
     public function generateRAG($course) {

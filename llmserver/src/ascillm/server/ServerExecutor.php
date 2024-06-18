@@ -42,7 +42,7 @@ class ServerExecutor {
     return $response;
   }
 
-  public function createRAG($input) {
+  public function createContentRAG($input) {
     if (!isset($input["course"]) || !is_numeric($input["course"]))
       throw new \ascillm\exceptions\ASCILLMException("Course not provided");
 
@@ -53,11 +53,13 @@ class ServerExecutor {
     $dir = \ascillm\Config::$LLM_DATA_DIR.$input["course"]."/";
 
     // Clear and recreate the directory
-    if (is_dir($dir))
-      $this->delTree($dir);
-    mkdir($dir);
-    mkdir($dir."storage");
-    mkdir($dir."data");
+    if (!is_dir($dir))
+      mkdir($dir);
+    if (!is_dir($dir."data"))
+      mkdir($dir."data");
+    if (is_dir($dir."data/content"))
+      $this->delTree($dir."data/content");
+    mkdir($dir."data/content");
 
     // get the file contents
     $file = base64_decode($input["file"]["content"]);
@@ -96,13 +98,72 @@ class ServerExecutor {
 
       // check for MACOSX folder, too.
       if (strpos($innerPath, 'MACOSX') === false)
-        file_put_contents($dir."data/".$fileinfo['basename'], $zip->getFromIndex($i));
+        file_put_contents($dir."data/content/".$fileinfo['basename'], $zip->getFromIndex($i));
     }
 
     $zip->close();
 
     unlink($tmpfile);
 
+    if (is_dir($dir."storage"))
+      $this->delTree($dir."storage");
+    mkdir($dir."storage");
+    $this->chat->generateRAG($input["course"]);
+
+    return ["result" => "success"];
+  }
+
+  public function createPiazzaRAG($input) {
+    if (!isset($input["course"]) || !is_numeric($input["course"]))
+      throw new \ascillm\exceptions\ASCILLMException("Course not provided");
+
+    if (!isset($input["file"]) || !isset($input["file"]["mime-type"]) || !isset($input["file"]["content"])) {
+      throw new \ascillm\exceptions\ASCILLMException("No file uploaded");
+    }
+
+    $dir = \ascillm\Config::$LLM_DATA_DIR.$input["course"]."/";
+
+    // Clear and recreate the directory
+    if (!is_dir($dir))
+      mkdir($dir);
+    if (!is_dir($dir."data"))
+      mkdir($dir."data");
+    if (is_dir($dir."data/piazza"))
+      $this->delTree($dir."data/piazza");
+    mkdir($dir."data/piazza");
+
+    // get the file contents
+    $file = base64_decode($input["file"]["content"]);
+
+    $json = json_decode($file, true);
+
+    $qns = [];
+
+    foreach ($json as $q) {
+      if (!isset($q["thread_id"])) {
+        $qns[$q["id"]] = [
+          $q
+        ];
+      } else if (isset($qns[$q["thread_id"]])) {
+        array_push($qns[$q["thread_id"]], $q);
+      }
+    }
+
+    foreach ($qns as $k => $arr) {
+      $output = "";
+
+      foreach ($arr as $v) {
+        if (isset($v["subject"]))
+          $output .= "# " . $v["subject"] . "\n\n";
+        $output .= $v["content"] . "\n\n";
+      }
+
+      file_put_contents($dir."data/piazza/piazza-$k.md", $output);
+    }
+    
+    if (is_dir($dir."storage"))
+      $this->delTree($dir."storage");
+    mkdir($dir."storage");
     $this->chat->generateRAG($input["course"]);
 
     return ["result" => "success"];

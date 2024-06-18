@@ -63,6 +63,7 @@ const HomeController = (props) => {
             <AdminController
               documentRoot={props.documentRoot + "/admin"}
               url={props.url}
+              uploadurl={props.uploadurl}
               debugMode={props.debugMode}
             />
           }
