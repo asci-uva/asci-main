@@ -14,6 +14,7 @@ const documentRoot = "/asci";
 //const url = "https://kytos02.cs.virginia.edu/asci-server/index.php";
 // const documentRoot = "/ohq/ohq";
 const url = "http://localhost:8081/index.php";
+const uploadurl = "http://localhost:8081/fileupload.php";
 
 const netbadgeEnabled = false; //if false, login page will have you type in a userId to use
 const debugMode = true; //if true, login page will have you type in a userId to use
@@ -28,6 +29,7 @@ const debugMode = true; //if true, login page will have you type in a userId to 
             <HomeController
               documentRoot={documentRoot}
               url={url}
+              uploadurl={uploadurl}
               debugMode={debugMode}
             />
           }

@@ -14,6 +14,7 @@ function UpdateChat(props) {
 
   const uploadContent = () => {
     if (!courseFile) return;
+    toast("Uploading course content and creating RAG. Please wait...", { autoClose: false});
 
     var formData = new FormData();
 
@@ -22,24 +23,25 @@ function UpdateChat(props) {
     formData.append("courseid", course.course_id);
     formData.append('coursecontent', courseFile);
 
-    fetch("http://localhost:8081/fileupload.php", {
+    fetch(props.uploadurl, {
       method: "POST",
       body: formData
     })
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
+        toast.dismiss();
         if (data) {
-          console.log("Roster uploaded successfully!");
-          toast.success("Roster uploaded successfully!");
+          console.log("Course contents uploaded successfully!");
+          toast.success("Course contents uploaded successfully!");
         } else {
-          console.error("Error uploading the roster");
-          toast.error("Error uploading the roster");
+          console.error("Error uploading the course contents");
+          toast.error("Error uploading the course contents");
         }
       })
       .catch((error) => {
         console.error("There was an error:", error);
-        toast.error("There was an error uploading the roster");
+        toast.error("There was an error uploading the course contents");
       });
 
   };
