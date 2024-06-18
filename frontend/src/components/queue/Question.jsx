@@ -17,7 +17,7 @@ function Question(props) {
     event.preventDefault();
     navigate(docRoot + '/studentwaitingroom');
   };
-  
+
   return ( 
     <div className="question">
       <h2>What is your question today?</h2>

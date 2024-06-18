@@ -93,14 +93,20 @@ class ServerExecutor{
     public function loginHandler($computing_id){
         $user = $this->userStore->getUser($computing_id)->toArray();
 
+        $result = [];
         if($user == null || $user["computing_id"] == null){
-            $user = ["success" => "false"];
+            $result["success"] = "false";
         }
         else{
-            $user["success"] = "true";
+            $result["user"] = $user;
+            $courses = $this->getCoursesHandler($computing_id);
+            if ($courses["success"] == "true") {
+                $result["courses"] = $courses["courses"];
+            }
+            $result["success"] = "true";
         }
 
-        return $user;
+        return $result;
     }
 
     /*
@@ -1243,6 +1249,8 @@ class ServerExecutor{
                 $response[$computing_id] = ["success" => false];
             }
         }
+
+        $response["success"] = true;
         return $response;
     }
 
@@ -1348,13 +1356,13 @@ class ServerExecutor{
         }
     
         // If any attribute is empty, use the original value
-        $mnemonic = empty($mnemonic) ? $originalCourse->getMnemonic() : $mnemonic;
-        $number = empty($number) ? $originalCourse->getNumber() : $number;
-        $name = empty($name) ? $originalCourse->getName() : $name;
-        $semester = empty($semester) ? $originalCourse->getSemester() : $semester;
+        $originalCourse->mnemonic = empty($mnemonic) ? $originalCourse->getMnemonic() : $mnemonic;
+        $originalCourse->number = empty($number) ? $originalCourse->getNumber() : $number;
+        $originalCourse->name = empty($name) ? $originalCourse->getName() : $name;
+        $originalCourse->semester = empty($semester) ? $originalCourse->getSemester() : $semester;
     
         // Now update the course with the potentially updated attributes
-        $success = (new \asci\server\database\DBCourse($this->db))->updateCourse($course_id, $mnemonic, $number, $name, $semester);
+        $success = (new \asci\server\database\DBCourse($this->db))->updateCourseByObject($originalCourse);
     
         $result = [];
         if ($success) {
@@ -1363,6 +1371,7 @@ class ServerExecutor{
             $result["success"] = false;
         }
     
+        $result["course"] = $originalCourse;
         return $result;
     }
     
@@ -1384,12 +1393,11 @@ class ServerExecutor{
         return $result;
     }
 
-    public function runGradescopeDataDownload($email, $password, $courseNumber)
+    public function runGradescopeDataDownload($email, $password, $courseNumber, $courseId)
     {
         $result = [];
         // check the gradescope_download python script path
-        $relativePathToPythonScript = \asci\Config::$GRADESCOPE_SYNC_SCRIPT; 
-        $scriptPath = realpath(dirname(__FILE__) . '/' . $relativePathToPythonScript);
+        $scriptPath = \asci\Config::$GRADESCOPE_SYNC_SCRIPT;
         if (!file_exists($scriptPath)) {
             $this->logger->error("Python script does not exist at $scriptPath");
             $result["success"]="false";
@@ -1402,7 +1410,10 @@ class ServerExecutor{
         $chromiumPath = \asci\Config::$CHROMIUM_PATH;
         
         // Construct an absolute path for the download directory
-        $downloadPath = realpath(dirname(__FILE__)) . '/' . \asci\Config::$GRADESCOPE_DOWNLOAD_PATH;
+
+        $downloadUniqueNum = rand();
+        $downloadPath = \asci\Config::$GRADESCOPE_DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $downloadUniqueNum . DIRECTORY_SEPARATOR;
+        $this->logger->debug("Download path is: $downloadPath");
 
         // Escaping arguments to ensure safe command execution
         $cmd = sprintf(
@@ -1419,6 +1430,7 @@ class ServerExecutor{
         // Execute the Python script with the provided arguments
         exec($cmd, $output, $returnVar);
 
+        //<TODO: Change this to return the filedpath directly. Don't scan output like this>
         $downloadedFileName = '';
         foreach ($output as $line) {
             // Look for the line that contains the filename
@@ -1428,6 +1440,7 @@ class ServerExecutor{
                 break;
             }
         }
+
 
         // if the download failed, return success as null. Else return success as true
         if ($returnVar !== 0) {
@@ -1440,23 +1453,24 @@ class ServerExecutor{
             $result["message"]="Download Gradescope data Python script returned an error.";
             return $result;
         } else {
-            // Handle the success case
-            // echo "Success: Download Gradescope data Python script executed without errors.\n";
-            // foreach ($output as $line) {
-            //     echo $line . "\n";
-            // }
-            $result["success"]="true";
-            $result["message"]="Python script run and successfully download Gradescope data.";
-            $result["filename"] = $downloadedFileName;
+            
+            /* Ok, it worked, call the second function directly */
+            $result = $this->updateGradescopeDataByCourseHandler($courseId, $downloadUniqueNum, $downloadedFileName);
+
+            /* delete the downloaded file and directory */
+            unlink($downloadPath . $downloadedFileName);
+            rmdir($downloadPath);
+
             return $result;
+
         }
     }
 
     
-    public function updateGradescopeDataByCourseHandler($course_id, $download_file_name) {
+    public function updateGradescopeDataByCourseHandler($course_id, $download_unique_id, $download_file_name) {
         $result = [];
 
-        $missingStudents = (new \asci\server\database\DBSynchronization($this->db))->updateGradescopeAssignmentSubmissionByCourseId($course_id, $download_file_name);
+        $missingStudents = (new \asci\server\database\DBSynchronization($this->db))->updateGradescopeAssignmentSubmissionByCourseId($course_id, $download_unique_id, $download_file_name);
 
         if($missingStudents){
             $result["missingStudents"] = $missingStudents;

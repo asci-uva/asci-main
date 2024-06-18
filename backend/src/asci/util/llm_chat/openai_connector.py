@@ -19,8 +19,8 @@ class OpenaiConnector:
             return res
         except Exception as e:
             traceback.print_exc()
-            print(f"Error requesting GPT response (OpenAI connector): {str(e)}")
-            # raise ValueError(f"Error requesting GPT response: {str(e)}")
+            #print(f"Error requesting GPT response (OpenAI connector): {str(e)}")
+            raise ValueError(f"Error requesting GPT response: {str(e)}")
 
     def create_followup(self, question: str, messages: list):
         try:
