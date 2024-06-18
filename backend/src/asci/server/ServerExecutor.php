@@ -398,10 +398,11 @@ class ServerExecutor{
         //DB objects we will be using
         $dbsession = new \asci\server\database\DBSession($this->db);
         $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+        $dbLogger = new \asci\server\database\DBLogs($this->db);
 
         //0: Grab the user
         $user = $this->userStore->getUser($computing_id);
-
+        $user_id = $user->getId();
         $result = [];
 
         //2: Grab session for the given user (TA must be in the stud session at this point)
@@ -436,6 +437,7 @@ class ServerExecutor{
             return $result;
         }
 
+
         //Done. Set up the info to return
         $result["success"] = "true";
         $result["session"] = $session->toArray();
@@ -446,6 +448,9 @@ class ServerExecutor{
         /* Limit is 30 but we will trim that down to max group size */
         $group_sessions = $dbsession->getPotentialGroupSessions($course_id, 30);
         $max_group_options = 8;
+
+        //Logger information
+        $usedCosSim = False;
 
         /* TWO CASES: We want to group or we just take the top available (else clause) */
         if(count($group_sessions) > $max_group_options && \asci\Config::$SMART_GROUP_MATCHING){
@@ -484,7 +489,7 @@ class ServerExecutor{
                 }
                 $result["group_sessions"] = $group_sessions_ret;
             }
-            
+            $usedCosSim = True;
         }
         else{
 
@@ -493,6 +498,10 @@ class ServerExecutor{
                 $group_sessions = array_slice($group_sessions, 0, $max_group_options);
             $result["group_sessions"] = $group_sessions;
         }
+        $type = "group_creation";
+        print("RAWR" + $result["group_sessions"]); 
+        $logAction = json_encode(["Group" => $result["group_sessions"], "cosSim" => $usedCosSim]);
+        $dbLogger->log($user_id, $type, $logAction);
 
 
         return $result;
@@ -511,7 +520,7 @@ class ServerExecutor{
         $dbsession = new \asci\server\database\DBSession($this->db);
         $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
         $dbgroupmap = new \asci\server\database\DBGroupMapping($this->db);
-
+        $dbLogger = new \asci\server\database\DBLog($this->db);
         /* Grab the TA */
         $taUser = $this->userStore->getUser($ta_computing_id);
 
