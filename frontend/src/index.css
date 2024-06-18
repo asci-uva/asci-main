@@ -3,6 +3,21 @@
     font-size: 200px;
     color: #333;
 }
+
+@media screen and (max-width: 992px) and (min-width: 768px) {
+  .big-icon {
+    font-size: 100px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .big-icon {
+    font-size: 50px;
+    text-align: right;
+  }
+}
+
+
 .home-icon {
     font-size: 140px;
    line-height: 140px;

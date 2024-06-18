@@ -3,14 +3,11 @@ import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 
 function Cards(props) {
-  let docRoot = props.documentRoot;
-  let debugMode = props.debugMode;
-  let root = "/asci";
   const {getCourse} = useUser();
   let course = getCourse();
   return (
     <div className="row">
-      <div className="col-md-4">
+      <div className="col-lg-4 col-md-6 mb-4">
         <div className="card p-3">
           <div className="card-img-top text-center">
             <i className="bi-list-ol home-icon"></i>
@@ -20,7 +17,7 @@ function Cards(props) {
           </div>
         </div>
       </div>
-      <div className="col-md-4">
+      <div className="col-lg-4 col-md-6 mb-4">
         <div className="card p-3">
           <div className="card-img-top text-center">
             <i className="bi-chat-right-text home-icon"></i>
@@ -30,8 +27,8 @@ function Cards(props) {
           </div>
         </div>
       </div>
-      { course.role == "instructor" ? (
-        <div className="col-md-4">
+      { course.role === "instructor" ? (
+        <div className="col-lg-4 col-md-6 mb-4">
           <div className="card p-3">
             <div className="card-img-top text-center">
               <i className="bi-gear-wide-connected home-icon"></i>
@@ -42,7 +39,7 @@ function Cards(props) {
           </div>
         </div>
       ) : null }
-      <div className="col-md-4">
+      <div className="col-lg-4 col-md-6 mb-4">
         <div className="card p-3">
           <div className="card-img-top text-center">
             <i className="bi-trophy home-icon"></i>

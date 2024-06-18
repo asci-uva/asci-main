@@ -1,13 +1,10 @@
 import React from "react";
-import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 
 function Home(props) {
-  let url = props.url;
   let docRoot = props.documentRoot;
-  const navigate = useNavigate();
-  const {user, courseList, course} = useUser();
+  const {courseList, course} = useUser();
 
 
   return (
@@ -25,7 +22,7 @@ function Home(props) {
       <div className="col-md-8 my-auto">
       <h3 className="mb-3">Course: {courseList[course].mnemonic} {courseList[course].number} -  {courseList[course].name} ({courseList[course].semester})</h3>
     <div className="row">
-      <div className="col-md-4">
+      <div className="col-lg-4 col-md-6 mb-4">
         <div className="card p-3">
             <div className="card-img-top text-center">
             <i className="bi-info-circle home-icon"></i>
@@ -35,7 +32,7 @@ function Home(props) {
           </div>
         </div>
       </div>
-      <div className="col-md-4">
+      <div className="col-lg-4 col-md-6 mb-4">
         <div className="card p-3">
             <div className="card-img-top text-center">
             <i className="bi-pencil-square home-icon"></i>
