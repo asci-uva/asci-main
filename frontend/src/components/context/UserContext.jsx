@@ -21,6 +21,7 @@ export const UserProvider = ({ children }) => {
   const [pname, setPname] = useState(null);
   const [courseList, setCourseList] = useState(null);
   const [course, setCourse] = useState(null);
+  const [courseSettings, setCourseSettings] = useState(null);
 
   const login = (userInfo, callback) => {
     let json = {};
@@ -120,6 +121,10 @@ export const UserProvider = ({ children }) => {
     return courseList[course];
   }
 
+  const getCourseSettings = () => {
+    return courseSettings;
+  }
+
   const logout = () => {
     setUserid(null);
     setFname(null);
@@ -147,7 +152,10 @@ export const UserProvider = ({ children }) => {
       getCourse,
       setCourse,
       setCourseList,
-      refreshCourseList
+      refreshCourseList,
+      courseSettings,
+      getCourseSettings,
+      setCourseSettings
   };
 
   return (

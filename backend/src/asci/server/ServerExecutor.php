@@ -1128,6 +1128,22 @@ class ServerExecutor{
         return $result;
     }
 
+    public function setCourseSettings($course_id, $settings){
+
+        /* Database Object we are going to need */
+        $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
+        $this->logger->debug("settings in executor 1: ", array("settings" => $settings));
+        $newSettings = (new \asci\data\CourseSettings())->fromArray($settings);
+        $this->logger->debug("settings in executor 2: ", array("newSettings" => $newSettings));
+
+        $result = $dbcrsset->update($newSettings);
+        
+        if($settings == null) return $this->err("Error: Something went wrong when updating course settings");
+
+        //Done. Fetch the settings again to let the user know what the new values are
+        return $this->getCourseSettings($course_id);
+    }
+
     
     /*
      * Inserts the survey into the DB

@@ -89,7 +89,6 @@ CREATE TABLE course_settings (
   show_queue_list BOOL DEFAULT (true),
   grouping_enabled BOOL DEFAULT (true),
   smart_grouping BOOL DEFAULT (true),
-  self_grouping BOOL DEFAULT (true),
   show_quests BOOL DEFAULT (true)
 );
 

@@ -6,6 +6,7 @@ import UploadRoster from "./UploadRoster";
 import AddStudent from "./AddStudent";
 import GradescopeSync from "./GradescopeSync";
 import EditCourseInfo from "./EditCourseInfo";
+import EditCourseSettings from "./EditCourseSettings";
 import CreateNewCourse from "./CreateNewCourse";
 
 function Home(props) {
@@ -14,6 +15,8 @@ function Home(props) {
   const navigate = useNavigate();
   const {user, courseList, course} = useUser();
   const { courseId } = useParams();
+
+
 
 
   return (
@@ -32,30 +35,30 @@ function Home(props) {
             <h3 className="mb-3">Course: {courseList[course].mnemonic} {courseList[course].number} -  {courseList[course].name} ({courseList[course].semester})</h3>
             
 
-            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-              <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="pills-general-tab" data-bs-toggle="pill" data-bs-target="#pills-general" type="button" role="tab" aria-controls="pills-home" aria-selected="true">General</button>
+            <ul className="nav nav-pills mb-3" id="pills-tab" role="tablist">
+              <li className="nav-item" role="presentation">
+                <button className="nav-link active" id="pills-general-tab" data-bs-toggle="pill" data-bs-target="#pills-general" type="button" role="tab" aria-controls="pills-home" aria-selected="true">General</button>
               </li>
-              <li class="nav-item" role="presentation">
-                <button class="nav-link" id="pills-settings-tab" data-bs-toggle="pill" data-bs-target="#pills-settings" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Settings</button>
+              <li className="nav-item" role="presentation">
+                <button className="nav-link" id="pills-settings-tab" data-bs-toggle="pill" data-bs-target="#pills-settings" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Settings</button>
               </li>
-              <li class="nav-item" role="presentation">
-                <button class="nav-link" id="pills-roster-tab" data-bs-toggle="pill" data-bs-target="#pills-roster" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Roster</button>
+              <li className="nav-item" role="presentation">
+                <button className="nav-link" id="pills-roster-tab" data-bs-toggle="pill" data-bs-target="#pills-roster" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Roster</button>
               </li>
-              <li class="nav-item" role="presentation">
-                <button class="nav-link" id="pills-sync-tab" data-bs-toggle="pill" data-bs-target="#pills-sync" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Synchronization</button>
+              <li className="nav-item" role="presentation">
+                <button className="nav-link" id="pills-sync-tab" data-bs-toggle="pill" data-bs-target="#pills-sync" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Synchronization</button>
               </li>
             </ul>
             
-            <div class="tab-content" id="pills-tabContent">
+            <div className="tab-content" id="pills-tabContent">
               
-              <div class="tab-pane fade show active" id="pills-general" role="tabpanel" aria-labelledby="pills-home-tab">               
+              <div className="tab-pane fade show active" id="pills-general" role="tabpanel" aria-labelledby="pills-home-tab">               
                 <div className="col-md-6 my-auto"> 
                   <EditCourseInfo course_id={courseId} {...props} />                              
                 </div>
               </div>
 
-              <div class="tab-pane fade" id="pills-roster" role="tabpanel" aria-labelledby="pills-profile-tab">
+              <div className="tab-pane fade" id="pills-roster" role="tabpanel" aria-labelledby="pills-profile-tab">
                 <div className="col-md-6 my-auto mb-2">
                     <UploadRoster course_id={courseId} {...props} />                                
                 </div>
@@ -64,11 +67,13 @@ function Home(props) {
                 </div>
               </div>
 
-              <div class="tab-pane fade" id="pills-settings" role="tabpanel" aria-labelledby="pills-contact-tab">
-                Settings coming soon...
+              <div className="tab-pane fade" id="pills-settings" role="tabpanel" aria-labelledby="pills-contact-tab">
+                <div className="col-md-10 my-auto">
+                    <EditCourseSettings course_id={courseId} {...props} />                                
+                </div>
               </div>
               
-              <div class="tab-pane fade" id="pills-sync" role="tabpanel" aria-labelledby="pills-contact-tab">
+              <div className="tab-pane fade" id="pills-sync" role="tabpanel" aria-labelledby="pills-contact-tab">
                 <div className="row">
                   <div className="col-md-6 my-auto">
                     <GradescopeSync course_id={courseId} {...props} />              

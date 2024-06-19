@@ -25,7 +25,7 @@ function EditCourseInfo(props) {
       name,
       semester,
       command: "updateCourseInfo",
-      user: localStorage.getItem("asci-user"),
+      user: user.userid,
     };
 
     // Call the backend API to update the course

@@ -65,7 +65,7 @@ function AddStudent(props) {
                 <div className="form-floating mb-1">
                   <input type="text" value={fname} onChange={(e) => setFname(e.target.value)}
                   required className="form-control" id="fnameinput" placeholder="first name"></input>
-                  <label for="fnameinput">First Name</label>
+                  <label htmlFor="fnameinput">First Name</label>
                 </div>
               
 
@@ -73,7 +73,7 @@ function AddStudent(props) {
                 <div className="form-floating mb-1">
                   <input type="text" value={lname} onChange={(e) => setLname(e.target.value)}
                   required className="form-control" id="lnameinput" placeholder="last name"></input>
-                  <label for="lnameinput">Last Name</label>
+                  <label htmlFor="lnameinput">Last Name</label>
                 </div>
               
 
@@ -81,7 +81,7 @@ function AddStudent(props) {
                 <div className="form-floating mb-1">
                   <input type="text" value={pname} onChange={(e) => setPname(e.target.value)}
                   required className="form-control" id="pnameinput" placeholder="preferred name"></input>
-                  <label for="onameinput">Preferred Name</label>
+                  <label htmlFor="onameinput">Preferred Name</label>
                 </div>
               
 
@@ -89,7 +89,7 @@ function AddStudent(props) {
                 <div className="form-floating mb-1">
                   <input type="text" value={computingId} onChange={(e) => setComputingId(e.target.value)}
                   required className="form-control" id="compidinput" placeholder="Computing Id"></input>
-                  <label for="compidinput">Computing Id</label>
+                  <label htmlFor="compidinput">Computing Id</label>
                 </div>
               
             

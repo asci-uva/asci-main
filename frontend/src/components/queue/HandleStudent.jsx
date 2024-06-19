@@ -7,7 +7,7 @@ import ClearQueue from "./ClearQueue";
 
 function HandleStudent(props) {
 
-  let {user, getCourse} = useUser();
+  let {user, getCourse, courseSettings} = useUser();
   let course = getCourse();
 
   //variables for managing polling the server
@@ -221,7 +221,8 @@ function HandleStudent(props) {
   }
 
   const WaitTable = ({data}) => {
-    if(data.length > 0) { // && settings != null && settings.show_queue_list=="t"){
+    console.log("waittable: settings: " , courseSettings);
+    if(data.length > 0 && courseSettings.show_queue_list == "t"){
       return (
         <div className="card my-3">
           <h5 className="card-header">Waiting List</h5>
