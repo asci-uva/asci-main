@@ -106,22 +106,22 @@ function EditCourseSettings(props) {
 
             <div className="form-check form-switch">
               <input className="form-check-input" type="checkbox" id="showQueueList" checked={showQueueList} onChange={ handleShowQueueListChange }></input>
-              <label className="form-check-label" htmlFor="showQueueList">Show full list of students in queue to teaching assistants</label>
+              <label className="form-check-label" htmlFor="showQueueList"><b>Show Full Queue: </b>Entire queue will be shown to teaching assistants</label>
             </div>
             <div className="form-check form-switch">
               <input className="form-check-input" type="checkbox" id="groupingEnabled" checked={groupingEnabled} onChange={ handleGroupingEnabledChange }></input>
-              <label className="form-check-label" htmlFor="groupingEnabled">Allow students to be helped in groups</label>
+              <label className="form-check-label" htmlFor="groupingEnabled"><b>Enable Groups: </b>Allow students to be helped in groups</label>
             </div>
             <div className="form-check form-switch">
               <input className="form-check-input" type="checkbox" id="smartGrouping" checked={smartGrouping} onChange={ handleSmartGroupingChange }></input>
-              <label className="form-check-label" htmlFor="smartGrouping">Enable smart grouping. Recommended student groups will be presented to TAs based on student issues</label>
+              <label className="form-check-label" htmlFor="smartGrouping"><b>Enable Smart Grouping: </b>Recommended student groups will be presented to TAs based on student issues</label>
             </div>
 
             <h5>Quest Settings</h5>
 
             <div className="form-check form-switch mb-1">
               <input className="form-check-input" type="checkbox" id="showQuests" checked={false} disabled></input>
-              <label className="form-check-label" htmlFor="showQuests">Enable students quest system (Coming Soon...)</label>
+              <label className="form-check-label" htmlFor="showQuests"><b>Enable Quests: </b>(Coming Soon...)</label>
             </div>
 
             <button type="button" className="btn btn-primary" onClick={handleSubmit}>Save Settings</button>

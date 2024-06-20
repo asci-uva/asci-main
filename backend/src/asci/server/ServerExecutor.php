@@ -1288,6 +1288,33 @@ class ServerExecutor{
         return $response;
     }
 
+    public function getCourseRosterHandler($computing_id, $course_id) {
+        
+        /* Grab the user first */
+        $user = $this->userStore->getUser($computing_id);
+
+        //Some DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbusrcourse = new \asci\server\database\DBUserCourse($this->db);
+
+
+        /* Make sure user is TA or Instructor for this course */
+        //Get the UserCourse object
+        $userCourse = $dbusrcourse->getCourseForUser($user->getComputingId(), $course_id);
+
+        if($userCourse == null) return $this->err("ERROR: This user not associated with this course");
+        else if($userCourse->getRole() != "ta" && $userCourse->getRole() != "instructor") return $this->err("ERROR: This user not a ta for this course");
+        
+
+        $roster = $this->userStore->getRosterForCourse($course_id);
+
+        $result = [];
+        $result["roster"] = $roster;
+        $result["success"] = "true";
+        return $result;
+
+    }
+
 
 
     /**

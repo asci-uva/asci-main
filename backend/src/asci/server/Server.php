@@ -431,6 +431,12 @@ class Server
                 $this->setResponse($executor->uploadRosterHandler($roster, $course_id));
                 break;
 
+            case "getCourseRoster":                
+                $course_id = $this->input["course_id"];
+    
+                $this->setResponse($executor->getCourseRosterHandler($user, $course_id));
+                break;
+
             case "manuallyAddStudent":
                 $fname = $this->input["fname"];
                 $lname = $this->input["lname"];

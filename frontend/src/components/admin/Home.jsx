@@ -8,6 +8,7 @@ import GradescopeSync from "./GradescopeSync";
 import EditCourseInfo from "./EditCourseInfo";
 import EditCourseSettings from "./EditCourseSettings";
 import CreateNewCourse from "./CreateNewCourse";
+import ViewRoster from "./ViewRoster";
 
 function Home(props) {
   let url = props.url;
@@ -43,7 +44,10 @@ function Home(props) {
                 <button className="nav-link" id="pills-settings-tab" data-bs-toggle="pill" data-bs-target="#pills-settings" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Settings</button>
               </li>
               <li className="nav-item" role="presentation">
-                <button className="nav-link" id="pills-roster-tab" data-bs-toggle="pill" data-bs-target="#pills-roster" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Roster</button>
+                <button className="nav-link" id="pills-view-roster-tab" data-bs-toggle="pill" data-bs-target="#pills-view-roster" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">View Roster</button>
+              </li>
+              <li className="nav-item" role="presentation">
+                <button className="nav-link" id="pills-roster-tab" data-bs-toggle="pill" data-bs-target="#pills-roster" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Upload Roster</button>
               </li>
               <li className="nav-item" role="presentation">
                 <button className="nav-link" id="pills-sync-tab" data-bs-toggle="pill" data-bs-target="#pills-sync" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Synchronization</button>
@@ -65,6 +69,12 @@ function Home(props) {
                 <div className="col-md-6 my-auto">
                     <AddStudent course_id={courseId} {...props} />                                
                 </div>
+              </div>
+
+              <div className="tab-pane fade" id="pills-view-roster" role="tabpanel" aria-labelledby="pills-profile-tab">
+                <div className="col-md-10 my-auto mb-2">
+                    <ViewRoster course_id={courseId} {...props} />                                
+                </div>                
               </div>
 
               <div className="tab-pane fade" id="pills-settings" role="tabpanel" aria-labelledby="pills-contact-tab">

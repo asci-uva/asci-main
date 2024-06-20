@@ -22,6 +22,7 @@ export const UserProvider = ({ children }) => {
   const [courseList, setCourseList] = useState(null);
   const [course, setCourse] = useState(null);
   const [courseSettings, setCourseSettings] = useState(null);
+  const [courseRoster, setCourseRoster] = useState([]);
 
   const login = (userInfo, callback) => {
     let json = {};
@@ -123,7 +124,44 @@ export const UserProvider = ({ children }) => {
 
   const getCourseSettings = () => {
     return courseSettings;
-  }
+  };
+
+  const refreshCourseRoster = (user) => {
+    let json = {};
+    json.command = "getCourseRoster";
+    json.user = userid;
+    json.course_id = getCourse().course_id;
+
+    let jsonString = JSON.stringify(json);
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonString,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("data is: " , data);
+        if (data.success === "true") {
+          
+          setCourseRoster(data.roster);
+          
+        } else {
+          // fail to login
+          console.log("refreshing course roster failed");
+        }
+      })
+      .catch((error) => {
+        console.error("Error during refresh course roster:", error);
+        
+      });
+  };
+
+  const getCourseRoster = () => {
+    return courseRoster;
+  };
 
   const logout = () => {
     setUserid(null);
@@ -155,7 +193,11 @@ export const UserProvider = ({ children }) => {
       refreshCourseList,
       courseSettings,
       getCourseSettings,
-      setCourseSettings
+      setCourseSettings,
+      setCourseRoster,
+      courseRoster,
+      getCourseRoster,
+      refreshCourseRoster
   };
 
   return (
