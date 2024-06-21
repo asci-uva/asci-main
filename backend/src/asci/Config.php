@@ -52,13 +52,15 @@ class Config {
     public static $LOCKING_ENABLED = true;
     public static $LOCKING_FILE_DIR = "./tmp/lock/";
 
-    public static $GRADESCOPE_SYNC_SCRIPT = '/opt/src/asci/util/data_syn/gradescope_download.py';
 
     public static $CHROME_DRIVER_PATH = '/usr/bin/chromedriver';
-
     public static $CHROMIUM_PATH = "/usr/bin/chromium";
 
-    public static $GRADESCOPE_DOWNLOAD_PATH = '/opt/src/asci/tmp/database/data';
+    /*
+     * Variables used for Gradescope data sync
+     */
+    public static $GRADESCOPE_SYNC_SCRIPT = '/opt/src/asci/util/data_syn/gradescope_download.py';
+    public static $GRADESCOPE_DOWNLOAD_PATH = '/tmp/asci/gradescope/';
 
 
     /**

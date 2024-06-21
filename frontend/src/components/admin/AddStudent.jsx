@@ -59,55 +59,48 @@ function AddStudent(props) {
         <h5 className="card-header">Add Student or TA</h5>
           <div className="card-body">
 
-            <form className="p-2">
+            <form className="">
       
-              <div className="from-group">
-              <label>First Name:</label>
-              <input className="form-control mb-1"
-                type="text"
-                value={fname}
-                onChange={(e) => setFname(e.target.value)}
-                required
-              />
-              </div>
               
-              <div className="from-group">
-              <label>Last Name:</label>
-              <input className="form-control mb-1"
-                type="text"
-                value={lname}
-                onChange={(e) => setLname(e.target.value)}
-                required
-              />
-              </div>
+                <div className="form-floating mb-1">
+                  <input type="text" value={fname} onChange={(e) => setFname(e.target.value)}
+                  required className="form-control" id="fnameinput" placeholder="first name"></input>
+                  <label htmlFor="fnameinput">First Name</label>
+                </div>
+              
+
+              
+                <div className="form-floating mb-1">
+                  <input type="text" value={lname} onChange={(e) => setLname(e.target.value)}
+                  required className="form-control" id="lnameinput" placeholder="last name"></input>
+                  <label htmlFor="lnameinput">Last Name</label>
+                </div>
+              
+
+              
+                <div className="form-floating mb-1">
+                  <input type="text" value={pname} onChange={(e) => setPname(e.target.value)}
+                  required className="form-control" id="pnameinput" placeholder="preferred name"></input>
+                  <label htmlFor="onameinput">Preferred Name</label>
+                </div>
+              
+
+              
+                <div className="form-floating mb-1">
+                  <input type="text" value={computingId} onChange={(e) => setComputingId(e.target.value)}
+                  required className="form-control" id="compidinput" placeholder="Computing Id"></input>
+                  <label htmlFor="compidinput">Computing Id</label>
+                </div>
+              
             
-              <div className="from-group">
-              <label>Prefer Name:</label>
-              <input className="form-control mb-1"
-                type="text"
-                value={pname}
-                onChange={(e) => setPname(e.target.value)}
-                required
-              />
-              </div>
-            
-              <div className="from-group">
-              <label>Computing ID:</label>
-              <input className="form-control mb-2"
-                type="text"
-                value={computingId}
-                onChange={(e) => setComputingId(e.target.value)}
-                required
-              />
-              </div>
-            
-              <div className="from-group">
-              <label className="mb-2">Role:</label>
+              <div>
+              <label className="mb-1">Role:</label>
               <select value={role} onChange={(e) => setRole(e.target.value)}>
                 <option value="student">Student</option>
                 <option value="ta">TA</option>
               </select>
               </div>
+              
             
 
               <button type="button" className="btn btn-primary" onClick={handleAdd}>Add</button>

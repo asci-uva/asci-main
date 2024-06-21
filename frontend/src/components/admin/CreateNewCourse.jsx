@@ -52,43 +52,49 @@ function CreateNewCourse(props) {
   };
 
   return (
-    <div className="question">
-      <h2>Create New Course</h2>
+
+    <div className="card">
+        <h5 className="card-header">Create New Course</h5>
+          <div className="card-body">
+
+            <form className="p-2">
 
 
-        <label>Mnemonic:</label>
-        <input
-          type="text"
-          value={mnemonic}
-          onChange={(e) => setMnemonic(e.target.value)}
-          required
-        />
+              <label className="mb-2">Mnemonic:</label>
+              <input className="form-control mb-1"
+                type="text"
+                value={mnemonic}
+                onChange={(e) => setMnemonic(e.target.value)}
+                required
+              />
 
-        <label>Number:</label>
-        <input
-          type="text"
-          value={number}
-          onChange={(e) => setNumber(e.target.value)}
-          required
-        />
+              <label className="mb-2">Number:</label>
+              <input className="form-control mb-1"
+                type="text"
+                value={number}
+                onChange={(e) => setNumber(e.target.value)}
+                required
+              />
 
-        <label>Name:</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
+              <label className="mb-2">Name:</label>
+              <input className="form-control mb-1"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
 
-        <label>Semester:</label>
-        <input
-          type="text"
-          value={semester}
-          onChange={(e) => setSemester(e.target.value)}
-          required
-        />
+              <label className="mb-2">Semester:</label>
+              <input className="form-control mb-1"
+                type="text"
+                value={semester}
+                onChange={(e) => setSemester(e.target.value)}
+                required
+              />
 
-      <button onClick={handleCreateCourse}>Create Course</button>
+            <button className="btn btn-primary" onClick={handleCreateCourse}>Create Course</button>
+            </form>
+          </div>
     </div>
   );
 }

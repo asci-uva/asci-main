@@ -1224,90 +1224,6 @@ class ServerExecutor{
     //-------------------------------------------
   }
 
-  // manually add student/ta to the course
-  public function manuallyAddStudentHandler($fname, $lname, $pname, $computing_id, $role, $course_id) {
-    $user = [
-      'fname' => $fname,
-      'lname' => $lname,
-      'pname' => $pname,
-      'computing_id' => $computing_id,
-      'role' => $role
-    ];
-
-    $users = [$user];  // Wrap the single user in an outer array
-
-    // Now, we can pass $users and $course_id to manuallyAddStudentsHandler        
-    $results = (new \asci\server\database\DBUser($this->db))->ManuallyAddUsersForCourse($users, $course_id);
-
-    // Here, $results is an associative array with computing_id as key and true/false as value indicating success/failure.
-    $response = [];
-    foreach ($results as $computing_id => $success) {
-      if ($success) {
-        $response[$computing_id] = ["success" => true];
-      } else {
-        $response[$computing_id] = ["success" => false];
-      }
-    }
-
-    $response["success"] = true;
-    return $response;
-  }
-
-  // upload roster
-  public function uploadRosterHandler($users, $course_id) {
-    // Note: $users should be an array of associative arrays, where each associative array represents a user with keys 'fname', 'lname', 'pname', 'computing_id', and 'role'.        
-    $results = (new \asci\server\database\DBUser($this->db))->ManuallyAddUsersForCourse($users, $course_id);
-
-    // Here, $results is an associative array with computing_id as key and true/false as value indicating success/failure.
-    $response = [];
-    foreach ($results as $computing_id => $success) {
-      if ($success) {
-        $response[$computing_id] = ["success" => true];
-      } else {
-        $response[$computing_id] = ["success" => false];
-      }
-    }
-
-    return $response;
-  }
-
-
-
-  /**
-   * Creates a new User in the database
-   *
-   * Generates password, new User then stores into DB
-   *
-   * @return bool login success
-   */
-  public function createUser($computing_id, $fname, $lname, $pname) {
-    $success = (new \asci\server\database\DBUser($this->db))->createUser($computing_id, $fname, $lname, $pname);
-    $result = [];
-    if ($success) {
-      $result["success"] = true;
-    } else {
-      $result["success"] = false;
-    }
-
-    return $result;
-  }
-
-  public function createCourse($user, $mnemonic, $number, $name, $semester) {
-    $success = $this->courseStore->createCourse($user, $mnemonic, $number, $name, $semester);
-    $result = [];
-    if ($success) {
-      $result["success"] = true;
-    } else {
-      $result["success"] = false;
-    }
-
-    return $result;
-  }
-
-  public function registerUser($data) {
-    return $this->userStore->register($data["userid"],$data["password"]);
-  }
-
   public function uploadContentLLM($data) {
     $this->logger->addDebug("Handling LLM create request", $data);
     // Check for the course first
@@ -1397,237 +1313,345 @@ class ServerExecutor{
     return $result;
   }
 
-  public function updateCourseInfoHandler($course_id, $mnemonic, $number, $name, $semester) {
-    // Retrieve the original course data using the getCourseById method
-    $originalCourse = $this->courseStore->getCourseById($course_id);
 
-    if (!$originalCourse) {
-      // Handle the error if no course found
-      return ["success" => false, "message" => "Original course not found"];
+    public function setCourseSettings($course_id, $settings){
+
+        /* Database Object we are going to need */
+        $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
+        $this->logger->debug("settings in executor 1: ", array("settings" => $settings));
+        $newSettings = (new \asci\data\CourseSettings())->fromArray($settings);
+        $this->logger->debug("settings in executor 2: ", array("newSettings" => $newSettings));
+
+        $result = $dbcrsset->update($newSettings);
+        
+        if($settings == null) return $this->err("Error: Something went wrong when updating course settings");
+
+        //Done. Fetch the settings again to let the user know what the new values are
+        return $this->getCourseSettings($course_id);
     }
 
-    // If any attribute is empty, use the original value
-    $originalCourse->mnemonic = empty($mnemonic) ? $originalCourse->getMnemonic() : $mnemonic;
-    $originalCourse->number = empty($number) ? $originalCourse->getNumber() : $number;
-    $originalCourse->name = empty($name) ? $originalCourse->getName() : $name;
-    $originalCourse->semester = empty($semester) ? $originalCourse->getSemester() : $semester;
-
-    // Now update the course with the potentially updated attributes
-    $success = $this->courseStore->updateCourseByObject($originalCourse);
-
-    $result = [];
-    if ($success) {
-      $result["success"] = true;
-    } else {
-      $result["success"] = false;
-    }
-
-    $result["course"] = $originalCourse;
-    return $result;
-  }
-
-  /*
-   * Given a course, gets all the assignments that course is associated with 
-   */
-  public function getAssignmentsHandler($course_id){
-    $result = [];
-
-    $assignments = (new \asci\server\database\DBAssignment($this->db))->getAssignmentsByCourseId($course_id);
-
-    $result["assignments"] = [];
-    foreach ($assignments as $assignment){
-      $result["assignments"][$assignment->getId()] = $assignment->toArray();
-    }
-
-    $result["success"] = "true";
-
-    return $result;
-  }
-
-  public function runGradescopeDataDownload($email, $password, $courseNumber)
-  {
-    $result = [];
-    // check the gradescope_download python script path
-    $relativePathToPythonScript = \asci\Config::$GRADESCOPE_SYNC_SCRIPT; 
-    $scriptPath = realpath(dirname(__FILE__) . '/' . $relativePathToPythonScript);
-    if (!file_exists($scriptPath)) {
-      $this->logger->error("Python script does not exist at $scriptPath");
-      $result["success"]="false";
-      $result["message"]="Download Gradescope data Python script not found";
-      return $result;
-    }
-
-    // setup the chromium and chrome-driver path in Docker
-    $chromedriverPath = \asci\Config::$CHROME_DRIVER_PATH; 
-    $chromiumPath = \asci\Config::$CHROMIUM_PATH;
-
-    // Construct an absolute path for the download directory
-    $downloadPath = realpath(dirname(__FILE__)) . '/' . \asci\Config::$GRADESCOPE_DOWNLOAD_PATH;
-
-    // Escaping arguments to ensure safe command execution
-    $cmd = sprintf(
-      'python3 %s %s %s %s %s %s %s 2>&1',      
-      escapeshellarg($scriptPath),
-      escapeshellarg($email),
-      escapeshellarg($password),
-      escapeshellarg($downloadPath),
-      escapeshellarg($chromedriverPath),
-      escapeshellarg($chromiumPath),
-      escapeshellarg($courseNumber)
-    );
-
-    // Execute the Python script with the provided arguments
-    exec($cmd, $output, $returnVar);
-
-    $downloadedFileName = '';
-    foreach ($output as $line) {
-      // Look for the line that contains the filename
-      if (strpos($line, "Latest downloaded file:") !== false) {
-        // Extract the filename from the line
-        $downloadedFileName = trim(str_replace("Latest downloaded file:", "", $line));
-        break;
-      }
-    }
-
-    // if the download failed, return success as null. Else return success as true
-    if ($returnVar !== 0) {
-      // Handle the error case
-      // echo "Error: Download Gradescope data Python script returned an error.\n";
-      // foreach ($output as $line) {
-      //     echo $line . "\n";
-      // }
-      $result["success"]="false";
-      $result["message"]="Download Gradescope data Python script returned an error.";
-      return $result;
-    } else {
-      // Handle the success case
-      // echo "Success: Download Gradescope data Python script executed without errors.\n";
-      // foreach ($output as $line) {
-      //     echo $line . "\n";
-      // }
-      $result["success"]="true";
-      $result["message"]="Python script run and successfully download Gradescope data.";
-      $result["filename"] = $downloadedFileName;
-      return $result;
-    }
-  }
 
 
-  public function updateGradescopeDataByCourseHandler($course_id, $download_file_name) {
-    $result = [];
+    // manually add student/ta to the course
+    public function manuallyAddStudentHandler($fname, $lname, $pname, $computing_id, $role, $course_id) {
+        $user = [
+            'fname' => $fname,
+            'lname' => $lname,
+            'pname' => $pname,
+            'computing_id' => $computing_id,
+            'role' => $role
+        ];
+        
+        $users = [$user];  // Wrap the single user in an outer array
 
-    $missingStudents = (new \asci\server\database\DBSynchronization($this->db))->updateGradescopeAssignmentSubmissionByCourseId($course_id, $download_file_name);
+        // Now, we can pass $users and $course_id to manuallyAddStudentsHandler        
+        $results = (new \asci\server\database\DBUser($this->db))->ManuallyAddUsersForCourse($users, $course_id);
 
-    if($missingStudents){
-      $result["missingStudents"] = $missingStudents;
-      $result["message"]="GradeScope downloaded data successfully inserted into the database.";
-      $result["success"] = "true";
-    }
-    else{
-      $result["missingStudents"] = [];
-      $result["message"]="GradeScope downloaded data failed to be inserted into the database.";
-      $result["success"] = "false";
-    }
-    return $result;
-  }
-
-  public function getQuestsForUserHandler($computing_id, $course_id){
-    $result = [];
-
-    $quests = (new \asci\server\database\DBUserQuest($this->db))->getQuestsForUser($computing_id, $course_id);
-    $result["quests"] = [];
-
-    $status = new  \asci\data\QuestInfo\QuestStatus($this->db, $course_id);
-
-    foreach ($quests as $quest){
-      // modify the quest status
-      $status -> changeStatus($quest);
-      $result["quests"][$quest->getQuestId()] = $quest->toArray();
-    }
-
-    $this->logger->addDebug("Quest result", array("quests" => $quests));
-
-    $result["success"] = "true";
-
-    return $result;
-  }
-
-  public function getPointsForUserHandler($computing_id, $course_id){
-    $result = [];
-
-    $points = (new \asci\server\database\DBUserQuest($this->db))->getPointsForUser($computing_id, $course_id);
-
-    if ($points === null) {
-      $result["points"] = 0;
-    }
-    else {  
-      $result["points"] = $points;
-    }
-    $result["success"] = "true";
-    return $result;
-  }
-
-  public function getAllQuestsHandler(){
-    $result = [];
-
-    $quests = (new \asci\server\database\DBQuest($this->db))->getAllQuests();
-    $result["quests"] = [];
-
-    foreach ($quests as $quest){
-      $result["quests"][$quest->getId()] = $quest->toArray();
-    }
-
-    $this->logger->addDebug("Quest result", array("quests" => $quests[0]));
-
-    $result["success"] = "true";
-
-    return $result;
-  }
-
-  public function addQuestForCourseHandler($quest_id, $course_id){
-    // add the quest to the course
-    $courseQuestSuccess = (new \asci\server\database\DBCourseQuest($this->db))->addQuestToCourse($quest_id, $course_id);
-    if ($courseQuestSuccess) {
-      // get all users
-      $user_courses = (new \asci\server\database\DBUserCourse($this->db))->getStudentsForCourse($course_id);
-      // add the quest to each user in the course 
-      foreach ($user_courses as $u_c) {
-        $user_id = ((new \asci\server\database\DBUser($this->db))->getUser($u_c -> getComputingId())) -> getId();
-        $userQuestSuccess = (new \asci\server\database\DBUserQuest($this->db))->addQuestToUser($quest_id, $user_id, $course_id);
-        if (!$userQuestSuccess) {
-          $result["success"] = false;
+        // Here, $results is an associative array with computing_id as key and true/false as value indicating success/failure.
+        $response = [];
+        foreach ($results as $computing_id => $success) {
+            if ($success) {
+                $response[$computing_id] = ["success" => true];
+            } else {
+                $response[$computing_id] = ["success" => false];
+            }
         }
-      }
-    }
-    else {
-      $result["success"] = false;
-    }
-    $result["success"] = true;
 
-    return $result;
-  }
+        $response["success"] = true;
+        return $response;
+    }
 
-  public function removeQuestForCourseHandler($quest_id, $course_id){
-    // remove the quest from the course
-    $courseQuestSuccess = (new \asci\server\database\DBCourseQuest($this->db))->removeQuestFromCourse($quest_id, $course_id);
-    if ($courseQuestSuccess) {
-      // get all users
-      $user_courses = (new \asci\server\database\DBUserCourse($this->db))->getStudentsForCourse($course_id);
-      // remove the quest from users in the course 
-      foreach ($user_courses as $u_c) {
-        $user_id = ((new \asci\server\database\DBUser($this->db))->getUser($u_c -> getComputingId())) -> getId();
-        $userQuestSuccess = (new \asci\server\database\DBUserQuest($this->db))->removeQuestFromUser($quest_id, $user_id, $course_id);
-        if (!$userQuestSuccess) {
-          $result["success"] = false;
+    // upload roster
+    public function uploadRosterHandler($users, $course_id) {
+        // Note: $users should be an array of associative arrays, where each associative array represents a user with keys 'fname', 'lname', 'pname', 'computing_id', and 'role'.        
+        $results = (new \asci\server\database\DBUser($this->db))->ManuallyAddUsersForCourse($users, $course_id);
+
+        // Here, $results is an associative array with computing_id as key and true/false as value indicating success/failure.
+        $response = [];
+        foreach ($results as $computing_id => $success) {
+            if ($success) {
+                $response[$computing_id] = ["success" => true];
+            } else {
+                $response[$computing_id] = ["success" => false];
+            }
         }
-      }
-    }
-    else {
-      $result["success"] = false;
-    }
-    $result["success"] = true;
 
-    return $result;
-  }
+        return $response;
+    }
+
+
+
+    /**
+     * Creates a new User in the database
+     *
+     * Generates password, new User then stores into DB
+     *
+     * @return bool login success
+     */
+    public function createUser($computing_id, $fname, $lname, $pname) {
+        $success = (new \asci\server\database\DBUser($this->db))->createUser($computing_id, $fname, $lname, $pname);
+        $result = [];
+        if ($success) {
+            $result["success"] = true;
+        } else {
+            $result["success"] = false;
+        }
+
+        return $result;
+    }
+
+    public function createCourse($user, $mnemonic, $number, $name, $semester) {
+        $success = (new \asci\server\database\DBCourse($this->db))->createCourse($user, $mnemonic, $number, $name, $semester);
+        $result = [];
+        if ($success) {
+            $result["success"] = true;
+        } else {
+            $result["success"] = false;
+        }
+    
+        return $result;
+    }
+
+    public function registerUser($data) {
+        return $this->userStore->register($data["userid"],$data["password"]);
+    }
+
+    public function updateCourseInfoHandler($course_id, $mnemonic, $number, $name, $semester) {
+        // Retrieve the original course data using the getCourseById method
+        $originalCourse = (new \asci\server\database\DBCourse($this->db))->getCourseById($course_id);
+
+        if (!$originalCourse) {
+            // Handle the error if no course found
+            return ["success" => false, "message" => "Original course not found"];
+        }
+    
+        // If any attribute is empty, use the original value
+        $originalCourse->mnemonic = empty($mnemonic) ? $originalCourse->getMnemonic() : $mnemonic;
+        $originalCourse->number = empty($number) ? $originalCourse->getNumber() : $number;
+        $originalCourse->name = empty($name) ? $originalCourse->getName() : $name;
+        $originalCourse->semester = empty($semester) ? $originalCourse->getSemester() : $semester;
+    
+        // Now update the course with the potentially updated attributes
+        $success = (new \asci\server\database\DBCourse($this->db))->updateCourseByObject($originalCourse);
+    
+        $result = [];
+        if ($success) {
+            $result["success"] = true;
+        } else {
+            $result["success"] = false;
+        }
+    
+        $result["course"] = $originalCourse;
+        return $result;
+    }
+    
+    /*
+     * Given a course, gets all the assignments that course is associated with 
+    */
+    public function getAssignmentsHandler($course_id){
+        $result = [];
+
+        $assignments = (new \asci\server\database\DBAssignment($this->db))->getAssignmentsByCourseId($course_id);
+
+        $result["assignments"] = [];
+        foreach ($assignments as $assignment){
+            $result["assignments"][$assignment->getId()] = $assignment->toArray();
+        }
+
+        $result["success"] = "true";
+
+        return $result;
+    }
+
+    public function runGradescopeDataDownload($email, $password, $courseNumber, $courseId)
+    {
+        $result = [];
+        // check the gradescope_download python script path
+        $scriptPath = \asci\Config::$GRADESCOPE_SYNC_SCRIPT;
+        if (!file_exists($scriptPath)) {
+            $this->logger->error("Python script does not exist at $scriptPath");
+            $result["success"]="false";
+            $result["message"]="Download Gradescope data Python script not found";
+            return $result;
+        }
+
+        // setup the chromium and chrome-driver path in Docker
+        $chromedriverPath = \asci\Config::$CHROME_DRIVER_PATH; 
+        $chromiumPath = \asci\Config::$CHROMIUM_PATH;
+        
+        // Construct an absolute path for the download directory
+
+        $downloadUniqueNum = rand();
+        $downloadPath = \asci\Config::$GRADESCOPE_DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $downloadUniqueNum . DIRECTORY_SEPARATOR;
+        $this->logger->debug("Download path is: $downloadPath");
+
+        // Escaping arguments to ensure safe command execution
+        $cmd = sprintf(
+            'python3 %s %s %s %s %s %s %s 2>&1',      
+            escapeshellarg($scriptPath),
+            escapeshellarg($email),
+            escapeshellarg($password),
+            escapeshellarg($downloadPath),
+            escapeshellarg($chromedriverPath),
+            escapeshellarg($chromiumPath),
+            escapeshellarg($courseNumber)
+        );
+
+        // Execute the Python script with the provided arguments
+        exec($cmd, $output, $returnVar);
+
+        //<TODO: Change this to return the filedpath directly. Don't scan output like this>
+        $downloadedFileName = '';
+        foreach ($output as $line) {
+            // Look for the line that contains the filename
+            if (strpos($line, "Latest downloaded file:") !== false) {
+                // Extract the filename from the line
+                $downloadedFileName = trim(str_replace("Latest downloaded file:", "", $line));
+                break;
+            }
+        }
+
+
+        // if the download failed, return success as null. Else return success as true
+        if ($returnVar !== 0) {
+            // Handle the error case
+            // echo "Error: Download Gradescope data Python script returned an error.\n";
+            // foreach ($output as $line) {
+            //     echo $line . "\n";
+            // }
+            $result["success"]="false";
+            $result["message"]="Download Gradescope data Python script returned an error.";
+            return $result;
+        } else {
+            
+            /* Ok, it worked, call the second function directly */
+            $result = $this->updateGradescopeDataByCourseHandler($courseId, $downloadUniqueNum, $downloadedFileName);
+
+            /* delete the downloaded file and directory */
+            unlink($downloadPath . $downloadedFileName);
+            rmdir($downloadPath);
+
+            return $result;
+
+        }
+    }
+
+    
+    public function updateGradescopeDataByCourseHandler($course_id, $download_unique_id, $download_file_name) {
+        $result = [];
+
+        $missingStudents = (new \asci\server\database\DBSynchronization($this->db))->updateGradescopeAssignmentSubmissionByCourseId($course_id, $download_unique_id, $download_file_name);
+
+        if($missingStudents){
+            $result["missingStudents"] = $missingStudents;
+            $result["message"]="GradeScope downloaded data successfully inserted into the database.";
+            $result["success"] = "true";
+        }
+        else{
+            $result["missingStudents"] = [];
+            $result["message"]="GradeScope downloaded data failed to be inserted into the database.";
+            $result["success"] = "false";
+        }
+        return $result;
+    }
+
+    public function getQuestsForUserHandler($computing_id, $course_id){
+        $result = [];
+
+        $quests = (new \asci\server\database\DBUserQuest($this->db))->getQuestsForUser($computing_id, $course_id);
+        $result["quests"] = [];
+
+        $status = new  \asci\data\QuestInfo\QuestStatus($this->db, $course_id);
+
+        foreach ($quests as $quest){
+            // modify the quest status
+            $status -> changeStatus($quest);
+            $result["quests"][$quest->getQuestId()] = $quest->toArray();
+        }
+
+        $this->logger->addDebug("Quest result", array("quests" => $quests));
+
+        $result["success"] = "true";
+
+        return $result;
+    }
+
+    public function getPointsForUserHandler($computing_id, $course_id){
+        $result = [];
+
+        $points = (new \asci\server\database\DBUserQuest($this->db))->getPointsForUser($computing_id, $course_id);
+
+        if ($points === null) {
+            $result["points"] = 0;
+        }
+        else {  
+            $result["points"] = $points;
+        }
+        $result["success"] = "true";
+        return $result;
+    }
+
+    public function getAllQuestsHandler(){
+        $result = [];
+
+        $quests = (new \asci\server\database\DBQuest($this->db))->getAllQuests();
+        $result["quests"] = [];
+
+        foreach ($quests as $quest){
+            $result["quests"][$quest->getId()] = $quest->toArray();
+        }
+
+        $this->logger->addDebug("Quest result", array("quests" => $quests[0]));
+
+        $result["success"] = "true";
+
+        return $result;
+    }
+
+    public function addQuestForCourseHandler($quest_id, $course_id){
+        // add the quest to the course
+        $courseQuestSuccess = (new \asci\server\database\DBCourseQuest($this->db))->addQuestToCourse($quest_id, $course_id);
+        if ($courseQuestSuccess) {
+            // get all users
+            $user_courses = (new \asci\server\database\DBUserCourse($this->db))->getStudentsForCourse($course_id);
+            // add the quest to each user in the course 
+            foreach ($user_courses as $u_c) {
+                $user_id = ((new \asci\server\database\DBUser($this->db))->getUser($u_c -> getComputingId())) -> getId();
+                $userQuestSuccess = (new \asci\server\database\DBUserQuest($this->db))->addQuestToUser($quest_id, $user_id, $course_id);
+                if (!$userQuestSuccess) {
+                    $result["success"] = false;
+                }
+            }
+        }
+        else {
+            $result["success"] = false;
+        }
+        $result["success"] = true;
+
+        return $result;
+    }
+
+    public function removeQuestForCourseHandler($quest_id, $course_id){
+        // remove the quest from the course
+        $courseQuestSuccess = (new \asci\server\database\DBCourseQuest($this->db))->removeQuestFromCourse($quest_id, $course_id);
+        if ($courseQuestSuccess) {
+            // get all users
+            $user_courses = (new \asci\server\database\DBUserCourse($this->db))->getStudentsForCourse($course_id);
+            // remove the quest from users in the course 
+            foreach ($user_courses as $u_c) {
+                $user_id = ((new \asci\server\database\DBUser($this->db))->getUser($u_c -> getComputingId())) -> getId();
+                $userQuestSuccess = (new \asci\server\database\DBUserQuest($this->db))->removeQuestFromUser($quest_id, $user_id, $course_id);
+                if (!$userQuestSuccess) {
+                    $result["success"] = false;
+                }
+            }
+        }
+        else {
+            $result["success"] = false;
+        }
+        $result["success"] = true;
+
+        return $result;
+    }
 
 }

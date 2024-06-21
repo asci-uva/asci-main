@@ -12,8 +12,8 @@ function SelectCourse(props) {
   const [purpose, setPurpose] = useState(0);
   
     let url = props.url;
-  let docRoot = props.documentRoot; 
-    const {user, courseListString, setCourse} = useUser();
+    let docRoot = props.documentRoot; 
+    const {user, courseListString, setCourse, setCourseSettings} = useUser();
   
     let courseList = courseListString();
     courseList[0] = "Select a course";
@@ -22,19 +22,53 @@ function SelectCourse(props) {
 
     //if user didn't select a course
     if (purpose !== 0){
-      //TODO: Add student question
+      
       console.log("Course id: ", purpose);
       console.log("Course name: ", courseList[purpose])
 
       //Set the local storage item
       setCourse(purpose);
 
-      //navigate to the home page finally
-      navigate(docRoot + "/");
+      /* Get the course settings out of the DB */
+      //Call the clear queue method
+      let request = {};
+      request.command = "getCourseSettings";
+      request.user = user.userid;
+      request.courseId = purpose;
+      getCourseSettings(request, url); 
 
     }
+  }
 
-    
+  const getCourseSettings = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+      .then(data => {
+        console.log("Data is: ", data);
+
+        //if request succeeded
+        if(data.success === "true"){
+
+          console.log("Course settings retrieved");
+          setCourseSettings(data.settings);
+          //navigate to the home page finally
+          navigate(docRoot + "/");          
+        }
+        else{
+          console.log("FATAL ERROR: Failed to get course settings");
+        }
+
+      })
+      .catch((error) => {
+        console.log("HOME: There was an error:", error);
+        navigate(docRoot + "/error");
+
+      });
 
   }
 

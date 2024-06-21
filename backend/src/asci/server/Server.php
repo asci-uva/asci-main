@@ -373,6 +373,13 @@ class Server
                 $this->setResponse($executor->getCourseSettings($courseId));
                 break;
 
+            case "setCourseSettings":
+                $courseId = $this->input["courseId"];
+                $newSettings = $this->input["settings"];
+
+                $this->setResponse($executor->setCourseSettings($courseId, $newSettings));
+                break;
+
             case "cancelGroup":
                 $courseId = $this->input["courseId"];
                 $sessionId = $this->input["sessionId"];
@@ -507,7 +514,8 @@ class Server
                 $gradescope_username = $this->input["email"];
                 $gradescope_password = $this->input["password"];
                 $gradescope_courseNumber = $this->input["courseNumber"];
-                $this->setResponse($executor->runGradescopeDataDownload($gradescope_username, $gradescope_password, $gradescope_courseNumber));
+                $course_id = $this->input["course_id"];
+                $this->setResponse($executor->runGradescopeDataDownload($gradescope_username, $gradescope_password, $gradescope_courseNumber, $course_id));
                 break;
             
 

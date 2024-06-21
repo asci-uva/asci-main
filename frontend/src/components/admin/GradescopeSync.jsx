@@ -2,25 +2,31 @@ import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useUser } from "../context/UserContext";
+
 
 function GradescopeSync(props) {
-  const { courseId } = useParams();
   const [courseNumber, setCourseNumber] = useState("");
   const [username, setUsername] = useState("");
   const [passcode, setPasscode] = useState("");
+  const [disabled, setDisabled] = useState(false);
+
+  let {user, getCourse} = useUser();
+  let course = getCourse();
 
   const navigate = useNavigate();
 
   const handleSynchronize = () => {
+    setDisabled(true);
     const payload = {
       email: username,
       password: passcode,
       // this is the course number on GradeScope
       courseNumber: courseNumber,
       // this is the course id in database
-      course_id: courseId,
+      course_id: course.course_id,
       command: "downloadGradescopeData",
-      user: localStorage.getItem("asci-user"),
+      user: user.userid,
     };
 
     fetch(props.url, {
@@ -33,36 +39,14 @@ function GradescopeSync(props) {
       .then((response) => {
         if (!response.ok) {
           // If the HTTP status code is not 200-299, throw an error
+          setDisabled(false);
           throw new Error("Network response was not ok");
         }
         return response.json(); // Parse the JSON of the response
       })
       .then((data) => {
-        if (data.success === "true") {
-          toast.success(data.message);
-          console.log(data.message);
-          console.log(data.filename);
-          // After the Python script has successfully downloaded the CSV, trigger the PHP function to parse the download csv and store the data to the db
-          fetch(props.url, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              command: "updateGradescopeDataByCourse",
-              user: localStorage.getItem("asci-user"),
-              course_id: courseId,
-              download_file_name: data.filename,
-            }),
-          })
-            .then((response) => {
-              if (!response.ok) {
-                // If the HTTP status code is not 200-299, throw an error
-                throw new Error("Network response was not ok");
-              }
-              return response.json(); // Parse the JSON of the response
-            })
-            .then((data) => {
+        console.log("data is: ", data);
+              setDisabled(false);
               if (data.success === "true") {
                 toast.success(data.message);
                 console.log(data.message);
@@ -77,20 +61,24 @@ function GradescopeSync(props) {
                     "Failed to insert GradeScope downloaded data into the database."
                 );
               }
-            })
-            .catch((error) => {
-              console.error("Error calling PHP backend:", error);
-            });
-        } else {
-          console.log(data.message);
-          toast.error(data.message || "Failed to download Gradescope data.");
-        }
       })
       .catch((error) => {
         console.error("Error during synchronization:", error);
+        setDisabled(false);
         toast.error("Error during synchronization.");
       });
   };
+
+  function getButton(){
+    if(disabled)
+      return (
+          <button type="button" className="btn btn-primary" onClick={handleSynchronize} disabled>Synchronizing (Please Wait)</button>
+        );
+    else
+      return (
+          <button type="button" className="btn btn-primary" onClick={handleSynchronize}>Synchronize the Data</button>
+        );
+  }
 
   return (
 
@@ -125,8 +113,9 @@ function GradescopeSync(props) {
                 required
               />
 
-              <button type="button" className="btn btn-primary" onClick={handleSynchronize}>Synchronize the Data</button>
-    
+              
+              {getButton()}
+              
             </form>
           </div>
     </div>
