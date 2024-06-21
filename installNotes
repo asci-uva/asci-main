@@ -38,10 +38,11 @@ psql -U postgres -h localhost -p 5432
 docker exec -it ASCI_db bash
 
 #Connect to the actual DB. Afterwards you can run queries and such on the command line.
-psql -U postgres
+psql -U asci
 ----------------------
 #Alternatively, connect through postgres on your local machine (so you must have psql installed)
-psql -U postgres -W -h localhost -p 15432 postgres
+psql -U asci -W -h localhost -p 15432 asci
+#password is asci as well
 
 
 
