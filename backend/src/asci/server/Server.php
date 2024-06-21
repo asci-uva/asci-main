@@ -396,12 +396,22 @@ class Server
                 break;
             
             case "newLlmChat":
-                $result = $executor->startLlmChat($this->input);
+                $result = $executor->llmChat($this->input);
                 $this->setResponse($result);
                 break;
 
             case "followupLlmChat":
-                $result = $executor->startLlmChat($this->input);
+                $result = $executor->llmChat($this->input);
+                $this->setResponse($result);
+                break;
+
+            case "createLlm":
+                $result = $executor->uploadContentLLM($this->input);
+                $this->setResponse($result);
+                break;
+
+            case "createLlmPiazza":
+                $result = $executor->uploadPiazzaLLM($this->input);
                 $this->setResponse($result);
                 break;
 

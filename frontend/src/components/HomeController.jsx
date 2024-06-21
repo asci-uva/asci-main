@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import { Routes, Route } from "react-router-dom";
 import QueueController from "./QueueController";
+import ChatController from "./ChatController";
 import AdminController from "./AdminController";
 import PointsController from "./PointsController";
 import { Home, Cards } from "./home";
@@ -44,6 +45,17 @@ const HomeController = (props) => {
             />
           }
         />
+        {/* Use ChatController for chat related routes */}
+        <Route
+          path={"chat/*"}
+          element={
+            <ChatController
+              documentRoot={props.documentRoot + "/chat"}
+              url={props.url}
+              debugMode={props.debugMode}
+            />
+          }
+        />
         {/* Use AdminController for all admin related routes */}
         <Route
           path={"admin/*"}
@@ -51,6 +63,7 @@ const HomeController = (props) => {
             <AdminController
               documentRoot={props.documentRoot + "/admin"}
               url={props.url}
+              uploadurl={props.uploadurl}
               debugMode={props.debugMode}
             />
           }

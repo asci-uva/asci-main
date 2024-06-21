@@ -29,7 +29,24 @@ services:
       - ./backend/log/:/opt/log/
     depends_on:
       - db
+      - chat
 
+    environment:
+      TZ: "America/New_York"
+
+  chat:
+    build:
+      context: ./llmserver/
+      dockerfile: ./docker/Dockerfile
+
+    container_name: "ASCI_chat"
+    ports:
+      - 8082:80
+    volumes:
+      - ./llmserver/src/ascillm/:/opt/src/ascillm/
+      - ./llmserver/www/:/var/www/html/
+      - ./llmserver/log/:/opt/log/
+      - ./llmserver/data/:/opt/data/
     environment:
       TZ: "America/New_York"
 

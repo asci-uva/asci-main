@@ -1,7 +1,10 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:3000");
+header("Access-Control-Allow-Origin: http://localhost:8081");
+//header("Access-Control-Allow-Credentials ")
+
+
 header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Origin, Content-Type, Accept");
 /**
  * Landing page of internal server api
@@ -22,35 +25,35 @@ include ("/opt/src/vendor/autoload.php");
 /**
  * If debug is on, turn on error reporting
  */
-if (\asci\Config::$DEBUG_MODE) {
+/*if (\asci\Config::$DEBUG_MODE) {
     error_reporting(E_ALL);
     ini_set('display_errors', 0);
-}
+}*/
 
 
 // Namespace shortcuts
-use \asci\server\Server as Server;
+use \ascillm\server\Server as Server;
 use \Monolog\Logger;
 use \Monolog\Handler\StreamHandler;
 
 // Set up the global log stream
 $loglevel = Logger::WARNING;
-if (\asci\Config::$DEBUG_MODE) {
+if (\ascillm\Config::$DEBUG_MODE) {
     $loglevel = Logger::DEBUG;
 }
-$log = new StreamHandler(\asci\Config::$LOG_DIR . \asci\Config::$SERVER_LOGFILE, $loglevel);
+$log = new StreamHandler(\ascillm\Config::$LOG_DIR . \ascillm\Config::$SERVER_LOGFILE, $loglevel);
 
 try {
     // Get the request body for processing
     $input = file_get_contents("php://input");
     if ($input == null) {
-        throw new \asci\exceptions\ASCIException("No input given");
+        throw new \ascillm\exceptions\ASCIException("No input given");
     }
     
     // Parse the JSON input
     $jsonInput = json_decode($input, true);
     if ($jsonInput == null) {
-        throw new \asci\exceptions\ASCIException("Could not parse input");
+        throw new \ascillm\exceptions\ASCIException("Could not parse input");
     }
     
     // Instantiate and run the server
@@ -68,3 +71,5 @@ try {
         http_response_code($e->getCode());
     die($e);
 }
+// Exit
+exit();

@@ -1,6 +1,5 @@
 import React from "react";
-import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import UploadRoster from "./UploadRoster";
 import AddStudent from "./AddStudent";
@@ -11,13 +10,8 @@ import CreateNewCourse from "./CreateNewCourse";
 import ViewRoster from "./ViewRoster";
 
 function Home(props) {
-  let url = props.url;
   let docRoot = props.documentRoot;
-  const navigate = useNavigate();
   const {user, courseList, course} = useUser();
-  const { courseId } = useParams();
-
-
 
 
   return (
@@ -58,16 +52,16 @@ function Home(props) {
               
               <div className="tab-pane fade show active" id="pills-general" role="tabpanel" aria-labelledby="pills-home-tab">               
                 <div className="col-md-6 my-auto"> 
-                  <EditCourseInfo course_id={courseId} {...props} />                              
+                  <EditCourseInfo course_id={courseList[course].course_id} {...props} />                              
                 </div>
               </div>
 
               <div className="tab-pane fade" id="pills-roster" role="tabpanel" aria-labelledby="pills-profile-tab">
                 <div className="col-md-6 my-auto mb-2">
-                    <UploadRoster course_id={courseId} {...props} />                                
+                    <UploadRoster course_id={courseList[course].course_id} {...props} />                                
                 </div>
                 <div className="col-md-6 my-auto">
-                    <AddStudent course_id={courseId} {...props} />                                
+                    <AddStudent course_id={courseList[course].course_id} {...props} />                                
                 </div>
               </div>
 
@@ -79,14 +73,14 @@ function Home(props) {
 
               <div className="tab-pane fade" id="pills-settings" role="tabpanel" aria-labelledby="pills-contact-tab">
                 <div className="col-md-10 my-auto">
-                    <EditCourseSettings course_id={courseId} {...props} />                                
+                    <EditCourseSettings course_id={courseList[course].course_id} {...props} />                                
                 </div>
               </div>
               
               <div className="tab-pane fade" id="pills-sync" role="tabpanel" aria-labelledby="pills-contact-tab">
                 <div className="row">
                   <div className="col-md-6 my-auto">
-                    <GradescopeSync course_id={courseId} {...props} />              
+                    <GradescopeSync course_id={courseList[course].course_id} {...props} />              
                   </div>
                 </div>
               </div>

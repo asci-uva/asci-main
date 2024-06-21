@@ -1,0 +1,12 @@
+
+{
+    "require": {
+        "php": ">=7.0",
+        "monolog/monolog": "^1.18"
+    },
+    "autoload": {
+        "psr-4": {
+            "ascillm\\": "ascillm/"
+        }
+    }
+}

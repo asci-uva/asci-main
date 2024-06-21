@@ -1,4 +1,5 @@
 import json
+import sys
 from llm_chat.openai_connector import OpenaiConnector
 from llm_chat.constants import LLAMAFILE_KEY_PLACEHOLDER, LLAMAFILE_BASE_URL
 
@@ -21,55 +22,66 @@ MOCK_FOLLOWUP_RESPONSE = {
 }
 
 
-def get_newchat_response(input_object: dict[str, str]):
+def get_newchat_response(input_object: dict[str, str], course):
     if MOCKING_LLM_RESPONSE:
         return MOCK_NEWCHAT_RESPONSE
     else:
         question = input_object["studentQuestion"]
 
-        connector = OpenaiConnector(LLAMAFILE_BASE_URL, LLAMAFILE_KEY_PLACEHOLDER)
+        connector = OpenaiConnector(LLAMAFILE_BASE_URL, LLAMAFILE_KEY_PLACEHOLDER, course)
         response = connector.create_newchat(question)
         return response
 
 
-def get_followup_response(input_object: dict[str, str]):
+def get_followup_response(input_object: dict[str, str], course):
     if MOCKING_LLM_RESPONSE:
         return MOCK_FOLLOWUP_RESPONSE
     else:
         question = input_object["studentQuestion"]
         chat_history = input_object["chatHistory"]
-        connector = OpenaiConnector(LLAMAFILE_BASE_URL, LLAMAFILE_KEY_PLACEHOLDER)
+        connector = OpenaiConnector(LLAMAFILE_BASE_URL, LLAMAFILE_KEY_PLACEHOLDER, course)
         response = connector.create_followup(question, chat_history)
         return response
 
 
-def get_llm_response(input_object: dict[str, str]):
+def get_llm_response(input_object: dict[str, str], course):
     command = input_object["command"]
 
     is_newchat = command == "newLlmChat"
     is_followup = command == "followupLlmChat"
 
     if is_newchat:
-        return get_newchat_response(input_object)
+        return get_newchat_response(input_object, course)
     elif is_followup:
-        return get_followup_response(input_object)
+        return get_followup_response(input_object, course)
 
+
+if len(sys.argv) < 2:
+    print("Course number required")
+    sys.exit(1)
+
+course = sys.argv[1]
 
 # READ IN DATA FROM STANDARD INPUT, ONE STRING ENTRY PER LINE
 dataIn = []
 
-while len(dataIn) <= 2:
-    input_line = input()
-    # quit when we see a -1
-    if input_line == "-1":
-        break
+for line in sys.stdin:
+    cleaned = line.strip()
+    if cleaned:
+        dataIn.append(cleaned)
 
-    dataIn.append(input_line)
+#while len(dataIn) <= 2:
+#    input_line = input()
+    # quit when we see a -1
+#    if input_line == "-1":
+#        break
+
+#    dataIn.append(input_line)
 
 
 if dataIn:
     input_object = json.loads(dataIn[0])
-    res = get_llm_response(input_object)
+    res = get_llm_response(input_object, course)
     json_res = json.dumps(res)
     print(json_res, end="")
 
@@ -82,6 +94,6 @@ if RUN_MAIN:
     ]
     if dataIn:
         input_object = json.loads(dataIn[0])
-        res = get_llm_response(input_object)
+        res = get_llm_response(input_object, course)
         json_res = json.dumps(res)
         print(json_res, end="")

@@ -1,44 +1,23 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-
-
-
-.dot {
-  height: 14px;
-  width: 14px;
-  border-radius: 100%;
-  display: inline-block;
-  background-color: #B4B5B9;
-  animation: 1.2s typing-dot ease-in-out infinite;
-}
-
-.dot:nth-of-type(2) {
-  animation-delay: 0.15s;
-}
-
-.dot:nth-of-type(3) {
-  animation-delay: 0.25s;
-}
-
-@keyframes typing-dot {
-  15% {
-    transform: translateY(-35%);
-    opacity: 0.5;
-  }
-  30% {
-    transform: translateY(0%);
-    opacity: 1;
-  }
-}
-
-
 /* Robbie added these styles for bootstrapify */
 .big-icon {
     font-size: 200px;
     color: #333;
 }
+
+@media screen and (max-width: 992px) and (min-width: 768px) {
+  .big-icon {
+    font-size: 100px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .big-icon {
+    font-size: 50px;
+    text-align: right;
+  }
+}
+
+
 .home-icon {
     font-size: 140px;
    line-height: 140px;
@@ -47,4 +26,13 @@
 
 .waitTableIssue {
     width: 50%;
+}
+
+.chathistory {
+  height: 500px;
+  overflow: auto;
+}
+
+.chat-markdown p {
+  margin-bottom: 1px;
 }

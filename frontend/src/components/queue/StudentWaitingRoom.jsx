@@ -19,7 +19,7 @@ function StudentWaitingRoom(props) {
   //variables for managing polling the server
   let polling = false;
   let timeoutId = 0;
-  let pollTime = 3000;
+  let pollTime = 300000;
 
   let url = props.url;
   let docRoot = props.documentRoot;
@@ -219,12 +219,18 @@ function StudentWaitingRoom(props) {
               Leave queue
             </button>
           </div>
+          <h4>While you wait...</h4>
+          <p>We've automatically sent your question to the course's TA bot.  It may be able to help you while you're waiting for the next available TA.  Use the interface below to chat.</p>
+          <div className="card">
+            <div className="card-body">
           <Chat
             url={url}
             docRoot={docRoot}
             issueSubject={issueSubject}
             courseName={course.name}
           />
+          </div>
+          </div>
         </div>
       </div>
     </div>
