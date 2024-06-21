@@ -48,7 +48,7 @@ class Config {
       * You can also enable/disable locking here
       */
     public static $LOCKING_ENABLED = true;
-    public static $LOCKING_FILE_DIR = "./tmp/lock/";
+    public static $LOCKING_FILE_DIR = "/opt/tmp/";
 
 
     public static $CHROME_DRIVER_PATH = '/usr/bin/chromedriver';
