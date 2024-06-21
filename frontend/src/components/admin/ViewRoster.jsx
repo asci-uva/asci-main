@@ -23,32 +23,79 @@ function ViewRoster(props) {
 
   }, []);
 
+  /* Handle searching through the table */
+  /* ---------------------------------- */
+  const onSearchBarChange = (e) => {
+    console.log("searching!");
+    var input, filter, table, tr, td, i, txtValue;
+    input = document.getElementById("rosterSearchTextBox");
+    filter = input.value.toUpperCase();
+    table = document.getElementById("rosterTable");
+    tr = table.getElementsByTagName("tr");
+
+    // Loop through all table rows, and hide those who don't match the search query
+    for (i = 0; i < tr.length; i++) {
+      var tdAll = tr[i].getElementsByTagName("td");
+      var match = false;
+      for(var j = 0; j < tdAll.length; j++){
+        td = tdAll[j];
+        if (td) {
+          txtValue = td.textContent || td.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            match = true;
+            break;
+            
+          } else {
+            //keep searching
+            
+          }
+        }
+      }
+
+      if(match) tr[i].style.display = "";
+      else tr[i].style.display = "none";
+    }
+  }
+  /* ---------------------------------- */
+  /* ---------------------------------- */
+
   
 
 
-  const WaitTableHeaderRow = () => {
-    return <tr><th>Comp. Id.</th><th>First Name</th><th>Last Name</th><th>Preferred Name</th><th>Role</th></tr>;
+  const RosterTableHeaderRow = () => {
+    return (
+        <tr>
+          <th>Comp. Id.</th>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Pref. Name</th>
+          <th>Role</th>
+        </tr>
+      );
   }
 
 
-  const WaitTableRow = ({data}) => {
+  const RosterTableRow = ({data}) => {
     return Object.keys(data).map(k =>
       <tr key={k}>
-        <td><b>{data[k].computing_id}</b></td><td>{data[k].fname}</td><td>{data[k].lname}</td><td>{data[k].pname}</td><td>{data[k].role}</td>
+        <td><b>{data[k].computing_id}</b></td>
+        <td>{data[k].fname}</td>
+        <td>{data[k].lname}</td>
+        <td>{data[k].pname}</td>
+        <td>{data[k].role}</td>
       </tr>
     );
   }
 
-  const WaitTable = ({data}) => {    
+  const RosterTable = ({data}) => {    
     if(data.length > 0){
       return (
-        
-            <table className="table table-striped">
+            <table id="rosterTable" className="table table-striped table-bordered table-hover table-sm">
               <thead>
-                <WaitTableHeaderRow />
+                <RosterTableHeaderRow />
               </thead>
               <tbody>
-                <WaitTableRow data={data} />
+                <RosterTableRow data={data} />
               </tbody>
             </table>
           
@@ -63,9 +110,15 @@ function ViewRoster(props) {
     <div className="container p-4">
       <div className="row my-auto">        
         <div className="col-md-12 my-auto">
-          <h5> You can view the roster for {course.name} below.</h5>
           <div>
-            <WaitTable data={courseRoster} />
+            <input
+              id="rosterSearchTextBox"
+              type="text" className="mb-1"
+              onChange={onSearchBarChange}
+              placeholder="Search..." />
+          </div>
+          <div style={{height: 500 + 'px'}} className="overflow-auto">
+            <RosterTable data={courseRoster} />
           </div>
         </div>
       </div>
