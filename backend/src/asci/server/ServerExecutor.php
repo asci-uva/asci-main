@@ -392,13 +392,11 @@ class ServerExecutor{
    */
   public function getPotentialGroupInfo($computing_id, $course_id){
 
-    /* FIRST, GRAB JUST THE MAIN USER THE TA IS INTERACTING WITH */
-
     //DB objects we will be using
     $dbsession = new \asci\server\database\DBSession($this->db);
     $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
 
-    //0: Grab the user
+    /* FIRST, GRAB JUST THE MAIN USER THE TA IS INTERACTING WITH */
     $user = $this->userStore->getUser($computing_id);
 
     $result = [];
@@ -446,8 +444,14 @@ class ServerExecutor{
     $group_sessions = $dbsession->getPotentialGroupSessions($course_id, 30);
     $max_group_options = 8;
 
+    /*  Grab the course settings */
+    /* Database Object we are going to need */
+    $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
+    $courseSettings = $dbcrsset->getCourseSettings($course_id);
+
+
     /* TWO CASES: We want to group or we just take the top available (else clause) */
-    if(count($group_sessions) > $max_group_options && \asci\Config::$SMART_GROUP_MATCHING){
+    if($courseSettings->smart_grouping && count($group_sessions) > $max_group_options){
 
       /* initialize cosine simulator class */
       $cosSim = new \asci\util\CosineSim();
@@ -1116,7 +1120,10 @@ class ServerExecutor{
 
     $settings = $dbcrsset->getCourseSettings($course_id);
 
-    if($settings == null) return $this->err("This course id does not have any associated course settings");
+    if($settings == null){
+        //TODO: CREATE THEM IF THEY DON"T EXIST!!
+        return $this->err("This course id does not have any associated course settings");
+    }
 
     //Done. Set up the info to return
     $result = [];

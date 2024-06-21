@@ -96,8 +96,6 @@ function EditCourseSettings(props) {
 
   return (
     <>
-    
-      
       <div className="card">
         <h5 className="card-header">Course Settings</h5>
           <div className="card-body">
@@ -117,11 +115,11 @@ function EditCourseSettings(props) {
               <label className="form-check-label" htmlFor="smartGrouping"><b>Enable Smart Grouping: </b>Recommended student groups will be presented to TAs based on student issues</label>
             </div>
 
-            <h5>Quest Settings</h5>
+            <h5>Quick Task Settings</h5>
 
             <div className="form-check form-switch mb-1">
               <input className="form-check-input" type="checkbox" id="showQuests" checked={false} disabled></input>
-              <label className="form-check-label" htmlFor="showQuests"><b>Enable Quests: </b>(Coming Soon...)</label>
+              <label className="form-check-label" htmlFor="showQuests"><b>Enable Quick Tasks: </b>(Coming Soon...)</label>
             </div>
 
             <button type="button" className="btn btn-primary" onClick={handleSubmit}>Save Settings</button>

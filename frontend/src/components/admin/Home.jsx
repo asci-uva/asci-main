@@ -67,7 +67,7 @@ function Home(props) {
 
               <div className="tab-pane fade" id="pills-view-roster" role="tabpanel" aria-labelledby="pills-profile-tab">
                 <div className="col-md-10 my-auto mb-2">
-                    <ViewRoster course_id={courseId} {...props} />                                
+                    <ViewRoster course_id={courseList[course].course_id} {...props} />                                
                 </div>                
               </div>
 

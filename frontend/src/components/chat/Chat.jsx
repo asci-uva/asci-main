@@ -364,7 +364,7 @@ const Chat = (props) => {
                 onSubmit={handleFollowupChatSubmit}
                 className=""
             >
-              <div class="mb-3">
+              <div className="mb-3">
                 <textarea
                     className="form-control"
                     placeholder="Message the TA bot with a follow-up question"
@@ -375,7 +375,7 @@ const Chat = (props) => {
                     onChange={handleFollowupQuestionChange}
                 />
               </div>
-              <div class="mb-3 d-flex justify-content-end">
+              <div className="mb-3 d-flex justify-content-end">
                 <button type="submit" className="btn btn-primary">
                             <i className="bi-arrow-up-square-fill"
                                 aria-hidden="true"

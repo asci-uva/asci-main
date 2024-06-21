@@ -1,10 +1,16 @@
 import React from "react";
 import {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
+import { useUser } from "../context/UserContext";
 
 function HandleGroup(props) {
   let url = props.url;
   let docRoot = props.documentRoot;
+
+  /* Importing user context */
+  const { user, getCourse } = useUser();
+  let course = getCourse();
+
 
   /* Info for the first student (from front of queue) */
   const [loading, setLoading] = useState(true);
@@ -47,8 +53,8 @@ function HandleGroup(props) {
   function pollMatchedStudents(){
     let request = {};
     request.command = "getPotentialGroupInfo";
-    request.user = localStorage.getItem('asci-user');
-    request.courseId = localStorage.getItem('asci-course');
+    request.user = user.userid;
+    request.courseId = course.course_id;
     getMatchedInfo(request, url); 
   }
 
@@ -101,38 +107,28 @@ function HandleGroup(props) {
   const createGroup = (e) =>{
     e.preventDefault();
 
-    if(localStorage.getItem('asci-user') === null){
-      navigate(docRoot + "/login");
-    }
-    else if(localStorage.getItem('asci-course') === null){
-      navigate(docRoot + "/selectCourse");
-    }
-    else{
+    //JOIN THE QUEUE
+    let request = {};
+    request.command = "createGroup";
 
-      //JOIN THE QUEUE
-      let request = {};
-      request.command = "createGroup";
+    //set user and course so the server knows
+    request.user = user.userid;
+    request.courseId = course.course_id;
+    request.sessionId = mainSessionId;
+    request.location = location;
 
-      //set user and course so the server knows
-      request.user = localStorage.getItem('asci-user');
-      request.courseId = localStorage.getItem('asci-course');
-      request.sessionId = mainSessionId;
-      request.location = location;
+    request.groupSessions = [];
 
-      request.groupSessions = [];
+    for(var key in otherSessions){
+      var sessId = otherSessions[key]['id'];
 
-      for(var key in otherSessions){
-        var sessId = otherSessions[key]['id'];
-
-        if(checked[sessId] == true){
-          request.groupSessions.push(sessId);
-        }
+      if(checked[sessId] == true){
+        request.groupSessions.push(sessId);
       }
-
-      console.log(request);
-      createGroupRequest(request, url); 
     }
 
+    console.log(request);
+    createGroupRequest(request, url); 
   }
 
   //This function group request to server
@@ -169,27 +165,17 @@ function HandleGroup(props) {
   const cancelGroup = (e) =>{
     e.preventDefault();
 
-    if(localStorage.getItem('asci-user') === null){
-      navigate(docRoot + "/login");
-    }
-    else if(localStorage.getItem('asci-course') === null){
-      navigate(docRoot + "/selectCourse");
-    }
-    else{
+    //JOIN THE QUEUE
+    let request = {};
+    request.command = "cancelGroup";
 
-      //JOIN THE QUEUE
-      let request = {};
-      request.command = "cancelGroup";
+    //set user and course so the server knows
+    request.user = user.userid;
+    request.courseId = course.course_id;
+    request.sessionId = mainSessionId;
 
-      //set user and course so the server knows
-      request.user = localStorage.getItem('asci-user');
-      request.courseId = localStorage.getItem('asci-course');
-      request.sessionId = mainSessionId;
-
-      console.log(request);
-      cancelGroupRequest(request, url); 
-    }
-
+    console.log(request);
+    cancelGroupRequest(request, url); 
   }
 
   //This function cancels group request to server
@@ -275,32 +261,37 @@ function HandleGroup(props) {
 
   if(!loading){
     return(
-      <div className="question">
-        <div>
-          <h2>The next student is willing to be in a group:</h2>
-          <label><b>Subject:</b> {primeSubject}</label>
-          <label><b>Issue:</b> {primeIssue} </label>
-          <label><b>Location:</b> {primeLocation} </label>
-        </div>
+      <div className="container p-4">
+        <div className="row my-auto">
+      
+          <div>
+            <h2>The next student is willing to be in a group:</h2>
+            <label><b>Subject:</b> {primeSubject}</label>
+            <label><b>Issue:</b> {primeIssue} </label>
+            <label><b>Location:</b> {primeLocation} </label>
+          </div>
 
-        <div>
-          {GroupPanel(null)}
-        </div>
+          <div>
+            {GroupPanel(null)}
+          </div>
 
 
-        <div>
-          <h6>Click here when you are ready to start the session.</h6>
-          <button onClick={cancelGroup}>Cancel</button>
-          <button onClick={createGroup}>Start Session</button>
+          <div>
+            <h6>Click here when you are ready to start the session.</h6>
+            <button className="btn btn-primary p-1" onClick={cancelGroup}>Cancel</button>
+            <button className="btn btn-primary p-1" onClick={createGroup}>Start Session</button>
+          </div>
         </div>
       </div>
     );
   }
   else{
     return(
-      <div className="question">
-        <div>
-          <h2>Finding potential group members. This might take a few seconds.:</h2>
+      <div className="container p-4">
+        <div className="row my-auto">
+          <div>
+            <h2>Finding potential group members. This might take a few seconds.:</h2>
+          </div>
         </div>
       </div>
     );
