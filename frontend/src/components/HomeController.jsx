@@ -5,8 +5,9 @@ import ChatController from "./ChatController";
 import AdminController from "./AdminController";
 import PointsController from "./PointsController";
 import { Home, Cards } from "./home";
-import { Login, Error, Navigation, Logout, SelectCourse } from "./utils";
+import { Login, Error, Navigation, Logout, SelectCourseHome } from "./utils";
 import { useUser } from "./context/UserContext";
+
 const HomeController = (props) => {
 
     const {user, course} = useUser();
@@ -17,7 +18,7 @@ const HomeController = (props) => {
     }
     if (!course) {
         return (
-      <SelectCourse {...props} />
+      <SelectCourseHome {...props} />
         )
     }
   
@@ -30,7 +31,7 @@ const HomeController = (props) => {
       <div className="container">
       <Routes>
         <Route path="/" element={<Home {...props} />} />
-        <Route path="changeCourse" element={<SelectCourse {...props} />} />
+        <Route path="changeCourse" element={<SelectCourseHome {...props} />} />
         <Route path="login" element={<Login {...props} />} />
         <Route path="error" element={<Error {...props} />} />
         <Route path="logout" element={<Logout {...props} />} />

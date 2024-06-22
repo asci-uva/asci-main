@@ -75,33 +75,26 @@ function SelectCourse(props) {
     console.log("Courses", courseList);
     return (
       <div className="container p-4">
-        <div className="row my-auto">
-        <div className="col-md-4">
-        <h1><i className="bi-mortarboard big-icon"></i></h1>
-        <h2>Select Course</h2>
-        <p>Please select the course you would like to view.</p>
-        </div>
-      <div className="col-md-8 my-auto">
-      <form>
-          <div className="mb-3">
-          <label className="form-label">Please select your course below.</label>
-        <select className="form-select" 
-          value={purpose}
-          onChange={(e)=>setPurpose(e.target.value)}>
-          {Object.keys(courseList).map(
-                k => (
-                <option key={k} value={k}>
-                    {courseList[k]}
-                </option>
-                )
-          )}
-        </select>
-      </div>
-          <button className="btn btn-primary" onClick={handleSelectCourse}>Select Course</button>
+        
+        <form>
+            <div className="mb-3">
+              <label className="form-label">Please select your course below.</label>
+              <select className="form-select" 
+                value={purpose}
+                onChange={(e)=>setPurpose(e.target.value)}>
+                {Object.keys(courseList).map(
+                      k => (
+                      <option key={k} value={k}>
+                          {courseList[k]}
+                      </option>
+                      )
+                )}
+              </select>
+          </div>
+            <button className="btn btn-primary" onClick={handleSelectCourse}>Select Course</button>
         </form>
+      
       </div>
-        </div>
-        </div>
     );
 }
 
