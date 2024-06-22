@@ -118,6 +118,15 @@ export const UserProvider = ({ children }) => {
         return cList;
   }
 
+  const isInstructor = () => {
+
+    for(var key in courseList){
+      if(courseList[key]["role"] == "instructor") return true;
+    }
+
+    return false;
+  }
+
   const getCourse = () => {
     return courseList[course];
   }
@@ -197,7 +206,8 @@ export const UserProvider = ({ children }) => {
       setCourseRoster,
       courseRoster,
       getCourseRoster,
-      refreshCourseRoster
+      refreshCourseRoster,
+      isInstructor
   };
 
   return (
