@@ -499,9 +499,22 @@ class ServerExecutor{
             $result["group_sessions"] = $group_sessions;
         }
         $type = "group_creation";
-        print("RAWR" + $result["group_sessions"]); 
-        $logAction = json_encode(["Group" => $result["group_sessions"], "cosSim" => $usedCosSim]);
-        $dbLogger->log($user_id, $type, $logAction);
+        $group_information = [];
+        $student_info = ["Student" => $student->getId(), "Subject" => $session->issue_subject, "issue" => $session->issue];
+        array_push($group_information, $student_info);
+        foreach($result["group_sessions"] as  $group_session){
+            $group_session_user = $dbsessusr->getSessionUserByRole($group_session->getId(), 'student');
+            if($group_session_user == null){
+                $result["success"] = "false";
+                $result["error"] = "ERROR: Session does not have any associated students when Logging";
+                return $result;
+            }
+            $student_info = ["Student" => $group_session_user->getId(), "Subject" => $group_session->issue_subject, "issue" => $group_session->issue];
+            array_push($group_information, $student_info);
+        }
+        $logAction = json_encode(["Group" => $group_information, "cosSim" => $usedCosSim, "ta" => $user_id]);
+        #need to get this person and their problem, plus group members and their problems ;
+        $dbLogger->log($student->getId(), $type, $logAction);
 
 
         return $result;
@@ -520,7 +533,7 @@ class ServerExecutor{
         $dbsession = new \asci\server\database\DBSession($this->db);
         $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
         $dbgroupmap = new \asci\server\database\DBGroupMapping($this->db);
-        $dbLogger = new \asci\server\database\DBLog($this->db);
+        $dbLogger = new \asci\server\database\DBLogs($this->db);
         /* Grab the TA */
         $taUser = $this->userStore->getUser($ta_computing_id);
 
