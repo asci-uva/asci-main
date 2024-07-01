@@ -1,18 +1,18 @@
 import sys
+sys.path.insert(0,'/usr/lib/python3.10/site-packages')
 import os
 import traceback
 from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
 
-from llama_index.core import (
-    VectorStoreIndex,
-    SimpleDirectoryReader,
-    StorageContext,
-    load_index_from_storage,
-)
+from llama_index.core import VectorStoreIndex
+from llama_index.core import SimpleDirectoryReader 
+from llama_index.core import StorageContext
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core import Settings
+from llama_index.vector_stores.postgres import PGVectorStore
+from sqlalchemy import make_url
 
 
 # Get the directory of the current script
@@ -36,26 +36,25 @@ def load_rag_index(course):
 
     dir_exists = os.path.exists(realdir)
     doc_file_exists = os.path.exists(realdir + "docstore.json")
+    
+    vector_store = PGVectorStore.from_params(
+        database="ascillm",
+        host="db",
+        password="ascillm",
+        port=5432,
+        user="ascillm",
+        table_name="rag_"+str(course),
+        embed_dim=384) 
 
-    if not (dir_exists and doc_file_exists):
-        # load the documents and create the index
-        documents = SimpleDirectoryReader(realdatadir, recursive=True).load_data()
+    # load the documents and create the index
+    documents = SimpleDirectoryReader(realdatadir, recursive=True).load_data()
 
-        index = VectorStoreIndex.from_documents(documents)
+    # Sanitize for Postgres
+    for document in documents:
+        document.text = document.text.replace('\x00', '')
 
-        # store it for later
-        index.storage_context.persist(persist_dir=realdir)
-    else:
-        # load the existing index
-
-        storage_context = StorageContext.from_defaults(persist_dir=realdir)
-        try:
-
-            index = load_index_from_storage(storage_context)
-            return index
-        except Exception as e:
-            print(str(e))
-            traceback.print_exc()
+    storage_context = StorageContext.from_defaults(vector_store=vector_store)
+    index = VectorStoreIndex.from_documents(documents, storage_context=storage_context)
 
 
 if __name__ == "__main__":

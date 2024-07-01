@@ -70,7 +70,6 @@ class Server
         $this->input = $input;
         $this->timing = $_SERVER["REQUEST_TIME_FLOAT"];
         $this->response = array(
-            "request" => $this->input,
         );
 
 

@@ -80,7 +80,7 @@ class ServerExecutor {
         throw new \ascillm\exceptions\ASCILLMException('Uploaded file is not a zip archive.');
       case \ZipArchive::ER_INCONS :
         // Workaround for Mac zip files -- if they are inconsistent, that's okay
-        $result = $zip->open($infile);
+        $result = $zip->open($tmpfile);
         if ($result === true)
           break;
         throw new \ascillm\exceptions\ASCILLMException('Uploaded file failed consistency check.');

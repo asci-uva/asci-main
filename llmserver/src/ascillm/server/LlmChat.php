@@ -69,8 +69,7 @@ class LlmChat
             2 => array("pipe", "w")
         );
 
-        /* Hardcoding the call to the python script for now */
-        $command = "export HF_HOME=/tmp; python3 $scriptName";
+        $command = "export HF_HOME=/localtmp; export TOKENIZERS_PARALLELISM=true; python3 $scriptName";
         if (!empty($params))
           $command .= " " . implode(" ", $params);
 
@@ -179,6 +178,8 @@ class LlmChat
           array_push($context, $c);
       }
       $result["context"] = $context;
+      $result["content"] = preg_replace("/^.*Assistant response:/", "", $result["content"]);
+      $result["content"] = str_replace('"""', "", $result["content"]);
       return $result;
     }
 
