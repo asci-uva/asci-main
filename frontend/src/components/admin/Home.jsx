@@ -1,53 +1,94 @@
 import React from "react";
-import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import UploadRoster from "./UploadRoster";
+import AddStudent from "./AddStudent";
+import GradescopeSync from "./GradescopeSync";
+import EditCourseInfo from "./EditCourseInfo";
+import EditCourseSettings from "./EditCourseSettings";
+import CreateNewCourse from "./CreateNewCourse";
+import ViewRoster from "./ViewRoster";
 
 function Home(props) {
-  let url = props.url;
   let docRoot = props.documentRoot;
-  const navigate = useNavigate();
   const {user, courseList, course} = useUser();
 
 
   return (
     <>
       <div className="container p-4">
-        <div className="row my-auto">
-        <div className="col-md-4">
-        <h1><i className="bi-gear-wide-connected big-icon"></i></h1>
-        <h2>Admin</h2>
-        <p>
-          The courses you instruct are below. Click on the edit button to change
-          the settings for that course
-        </p>
+        <div className="row">
+          <div className="col-md-4">
+            <h1><i className="bi-gear-wide-connected big-icon"></i></h1>
+            <h2>Admin</h2>
+            <p>
+              On this page, you can make adjustments to your course, manage your course, and synchronize your course with outside utilities.
+            </p>
+          </div>
+          <div className="col-md-8">
+            
+            <h3 className="mb-3">Course: {courseList[course].mnemonic} {courseList[course].number} -  {courseList[course].name} ({courseList[course].semester})</h3>
+            
+
+            <ul className="nav nav-pills mb-3" id="pills-tab" role="tablist">
+              <li className="nav-item" role="presentation">
+                <button className="nav-link active" id="pills-general-tab" data-bs-toggle="pill" data-bs-target="#pills-general" type="button" role="tab" aria-controls="pills-home" aria-selected="true">General</button>
+              </li>
+              <li className="nav-item" role="presentation">
+                <button className="nav-link" id="pills-settings-tab" data-bs-toggle="pill" data-bs-target="#pills-settings" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Settings</button>
+              </li>
+              <li className="nav-item" role="presentation">
+                <button className="nav-link" id="pills-view-roster-tab" data-bs-toggle="pill" data-bs-target="#pills-view-roster" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">View Roster</button>
+              </li>
+              <li className="nav-item" role="presentation">
+                <button className="nav-link" id="pills-roster-tab" data-bs-toggle="pill" data-bs-target="#pills-roster" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Upload Roster</button>
+              </li>
+              <li className="nav-item" role="presentation">
+                <button className="nav-link" id="pills-sync-tab" data-bs-toggle="pill" data-bs-target="#pills-sync" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Synchronization</button>
+              </li>
+            </ul>
+            
+            <div className="tab-content" id="pills-tabContent">
+              
+              <div className="tab-pane fade show active" id="pills-general" role="tabpanel" aria-labelledby="pills-home-tab">               
+                <div className="col-md-6 my-auto"> 
+                  <EditCourseInfo course_id={courseList[course].course_id} {...props} />                              
+                </div>
+              </div>
+
+              <div className="tab-pane fade" id="pills-roster" role="tabpanel" aria-labelledby="pills-profile-tab">
+                <div className="col-md-6 my-auto mb-2">
+                    <UploadRoster course_id={courseList[course].course_id} {...props} />                                
+                </div>
+                <div className="col-md-6 my-auto">
+                    <AddStudent course_id={courseList[course].course_id} {...props} />                                
+                </div>
+              </div>
+
+              <div className="tab-pane fade" id="pills-view-roster" role="tabpanel" aria-labelledby="pills-profile-tab">
+                <div className="col-md-10 my-auto mb-2">
+                    <ViewRoster course_id={courseList[course].course_id} {...props} />                                
+                </div>                
+              </div>
+
+              <div className="tab-pane fade" id="pills-settings" role="tabpanel" aria-labelledby="pills-contact-tab">
+                <div className="col-md-10 my-auto">
+                    <EditCourseSettings course_id={courseList[course].course_id} {...props} />                                
+                </div>
+              </div>
+              
+              <div className="tab-pane fade" id="pills-sync" role="tabpanel" aria-labelledby="pills-contact-tab">
+                <div className="row">
+                  <div className="col-md-6 my-auto">
+                    <GradescopeSync course_id={courseList[course].course_id} {...props} />              
+                  </div>
+                </div>
+              </div>
+            
+            </div>
+
+          </div>
         </div>
-      <div className="col-md-8 my-auto">
-      <h3 className="mb-3">Course: {courseList[course].mnemonic} {courseList[course].number} -  {courseList[course].name} ({courseList[course].semester})</h3>
-    <div className="row">
-      <div className="col-md-4">
-        <div className="card p-3">
-            <div className="card-img-top text-center">
-            <i className="bi-info-circle home-icon"></i>
-          </div>
-          <div className="card-body">
-            <p className="card-text text-center"><Link to={docRoot + "/coursePanel/"+courseList[course].course_id} className="btn btn-danger">Course Panel</Link></p>
-          </div>
-        </div>
-      </div>
-      <div className="col-md-4">
-        <div className="card p-3">
-            <div className="card-img-top text-center">
-            <i className="bi-pencil-square home-icon"></i>
-          </div>
-          <div className="card-body">
-            <p className="card-text text-center"><Link to={docRoot + "/editCourse/"+courseList[course].course_id} className="btn btn-danger">Edit Details</Link></p>
-          </div>
-        </div>
-      </div>
-      </div>
-      </div>
-      </div>
       </div>
     </>
   );

@@ -43,12 +43,14 @@ class Config {
     // The path of the LLM chat script
     public static $LLM_CHAT_SCRIPT = '/opt/src/asci/util/llm_chat.py';
 
+    public static $LLM_SERVER_URL = "http://chat:80/";
+
     /**
       * This is the relative location of the temporary locking files for all requests (see util/ExclusiveLock.php for details)
       * You can also enable/disable locking here
       */
     public static $LOCKING_ENABLED = true;
-    public static $LOCKING_FILE_DIR = "./tmp/lock/";
+    public static $LOCKING_FILE_DIR = "/opt/tmp/";
 
 
     public static $CHROME_DRIVER_PATH = '/usr/bin/chromedriver';
@@ -88,5 +90,6 @@ class Config {
      */
     public static $SERVER_LOGFILE = "server.log";
 
+    public static $MAX_UPLOAD_SIZE = "500000000";
 }
 

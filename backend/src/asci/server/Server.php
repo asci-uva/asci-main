@@ -144,28 +144,28 @@ class Server
         $user = $this->validateUsername($this->input);
         
 
-        // /* This section acquires a lock for the given course IF a courseId was provided */
-        // /* ------------------------------------------------------------------ */
-        // $course_id = $this->input["courseId"] ?? null;
-        // $lock = null;
-        // $attempt_max = 40; //try to get the lock at most 10 times.
-        // if($course_id != null && \asci\Config::$LOCKING_ENABLED){
-        //     /* acquire the lock */
-        //     $lock_key = "course-" . $course_id;
-        //     $lock = new ExclusiveLock($lock_key);
-        //     $attempt = 0;
-        //     while($lock->lock() == False && $attempt<$attempt_max){
-        //         $attempt = $attempt + 1;
-        //         usleep(250000); // sleep for a quarter of a second
-        //     }
+        /* This section acquires a lock for the given course IF a courseId was provided */
+        /* ------------------------------------------------------------------ */
+        $course_id = $this->input["courseId"] ?? null;
+        $lock = null;
+        $attempt_max = 40; //try to get the lock at most 10 times.
+        if($course_id != null && \asci\Config::$LOCKING_ENABLED){
+            /* acquire the lock */
+            $lock_key = "course-" . $course_id;
+            $lock = new ExclusiveLock($lock_key);
+            $attempt = 0;
+            while($lock->lock() == False && $attempt<$attempt_max){
+                $attempt = $attempt + 1;
+                usleep(250000); // sleep for a quarter of a second
 
-        //     if($attempt >= $attempt_max){
-        //         $this->setResponse([
-        //             "error" => "Could not acquire lock after multiple attempts. Try again later."
-        //         ]);
-        //         //break;
-        //     }
-        // }
+              if($attempt >= $attempt_max){
+                  $this->setResponse([
+                      "error" => "Could not acquire lock after multiple attempts. Try again later."
+                  ]);
+                 return;
+              }
+            }
+        }
 
         /* Lock acquired OR not necessary */
 
@@ -373,6 +373,13 @@ class Server
                 $this->setResponse($executor->getCourseSettings($courseId));
                 break;
 
+            case "setCourseSettings":
+                $courseId = $this->input["courseId"];
+                $newSettings = $this->input["settings"];
+
+                $this->setResponse($executor->setCourseSettings($courseId, $newSettings));
+                break;
+
             case "cancelGroup":
                 $courseId = $this->input["courseId"];
                 $sessionId = $this->input["sessionId"];
@@ -389,12 +396,22 @@ class Server
                 break;
             
             case "newLlmChat":
-                $result = $executor->startLlmChat($this->input);
+                $result = $executor->llmChat($this->input);
                 $this->setResponse($result);
                 break;
 
             case "followupLlmChat":
-                $result = $executor->startLlmChat($this->input);
+                $result = $executor->llmChat($this->input);
+                $this->setResponse($result);
+                break;
+
+            case "createLlm":
+                $result = $executor->uploadContentLLM($this->input);
+                $this->setResponse($result);
+                break;
+
+            case "createLlmPiazza":
+                $result = $executor->uploadPiazzaLLM($this->input);
                 $this->setResponse($result);
                 break;
 
@@ -422,6 +439,12 @@ class Server
                 $course_id = $this->input["course_id"];
     
                 $this->setResponse($executor->uploadRosterHandler($roster, $course_id));
+                break;
+
+            case "getCourseRoster":                
+                $course_id = $this->input["course_id"];
+    
+                $this->setResponse($executor->getCourseRosterHandler($user, $course_id));
                 break;
 
             case "manuallyAddStudent":

@@ -38,6 +38,21 @@ class DBUser
         return $user;
     }
 
+    public function getRosterForCourse($course_id){
+        $query = 'SELECT U.computing_id, U.fname, U.lname, U.pname, C.role FROM (users U JOIN user_courses C on U.id=C.user_id) WHERE C.course_id=$1';
+
+        $result = $this->db->query($query, array($course_id));
+
+        if(!$result) return null;
+
+        $roster = [];
+        while($row = $this->db->fetchrow($result)){
+            $roster[] = $row;
+        }
+
+        return $roster;
+    }
+
     public function getUserById($user_id){
         $query = 'select * from users where id = $1';
         $result = $this->db->query($query, array($user_id));

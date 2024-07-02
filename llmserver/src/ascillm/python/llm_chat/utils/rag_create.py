@@ -1,4 +1,10 @@
-import os.path
+import sys
+import os
+import traceback
+from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
+
 from llama_index.core import (
     VectorStoreIndex,
     SimpleDirectoryReader,
@@ -7,13 +13,6 @@ from llama_index.core import (
 )
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core import Settings
-import sys
-import os
-import traceback
-from pathlib import Path
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 # Get the directory of the current script
@@ -23,33 +22,33 @@ script_directory = os.path.abspath(os.path.dirname(__file__))
 if script_directory not in sys.path:
     sys.path.append(script_directory)
 
-
 DEV_MODE = False
 
-# check if storage already exists
-PERSIST_DIR = "./storage" if DEV_MODE else "/opt/src/asci/util/llm_chat/storage"
-DATA_DIR = "./data" if DEV_MODE else "/opt/src/asci/util/llm_chat/data"
 
 Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
 
+PERSIST_DIR = "/opt/data/COURSEID/storage"
+DATA_DIR = "/opt/data/COURSEID/data"
 
-def load_rag_index():
-    dir = Path(PERSIST_DIR)
-    dir_exists = os.path.exists(dir)
-    doc_file_exists = os.path.exists(dir / "docstore.json")
+def load_rag_index(course):
+    realdir = PERSIST_DIR.replace("COURSEID", str(course))
+    realdatadir = DATA_DIR.replace("COURSEID", str(course))
+
+    dir_exists = os.path.exists(realdir)
+    doc_file_exists = os.path.exists(realdir + "docstore.json")
 
     if not (dir_exists and doc_file_exists):
         # load the documents and create the index
-        documents = SimpleDirectoryReader(DATA_DIR, recursive=True).load_data()
+        documents = SimpleDirectoryReader(realdatadir, recursive=True).load_data()
 
         index = VectorStoreIndex.from_documents(documents)
 
         # store it for later
-        index.storage_context.persist(persist_dir=PERSIST_DIR)
+        index.storage_context.persist(persist_dir=realdir)
     else:
         # load the existing index
 
-        storage_context = StorageContext.from_defaults(persist_dir=PERSIST_DIR)
+        storage_context = StorageContext.from_defaults(persist_dir=realdir)
         try:
 
             index = load_index_from_storage(storage_context)
@@ -60,6 +59,4 @@ def load_rag_index():
 
 
 if __name__ == "__main__":
-    print("start")
-    load_rag_index()
-    print("done")
+    load_rag_index(sys.argv[1])

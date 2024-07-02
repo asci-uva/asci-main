@@ -25,6 +25,11 @@ function Navigation(props) {
                   <i className="bi-list-ol"></i> Queue
                 </NavLink>
               </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/asci/chat">
+                  <i className="bi-chat-right-text"></i> BotChat
+                </NavLink>
+              </li>
             { course.role == "instructor" ? (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/asci/admin">
@@ -32,11 +37,13 @@ function Navigation(props) {
                 </NavLink>
               </li>
             ) : null }
+            { false ? (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/asci/points">
                   <i className="bi-trophy-fill"></i> Earn Points
                 </NavLink>
               </li>
+              ) : null }
       </ul>
             <ul className="navbar-nav ms-auto mb-2 mb-md-0">
             <li className="nav-item dropdown">

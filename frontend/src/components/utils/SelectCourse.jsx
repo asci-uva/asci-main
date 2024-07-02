@@ -12,8 +12,8 @@ function SelectCourse(props) {
   const [purpose, setPurpose] = useState(0);
   
     let url = props.url;
-  let docRoot = props.documentRoot; 
-    const {user, courseListString, setCourse} = useUser();
+    let docRoot = props.documentRoot; 
+    const {user, courseListString, setCourse, setCourseSettings} = useUser();
   
     let courseList = courseListString();
     courseList[0] = "Select a course";
@@ -22,52 +22,79 @@ function SelectCourse(props) {
 
     //if user didn't select a course
     if (purpose !== 0){
-      //TODO: Add student question
+      
       console.log("Course id: ", purpose);
       console.log("Course name: ", courseList[purpose])
 
       //Set the local storage item
       setCourse(purpose);
 
-      //navigate to the home page finally
-      navigate(docRoot + "/");
+      /* Get the course settings out of the DB */
+      //Call the clear queue method
+      let request = {};
+      request.command = "getCourseSettings";
+      request.user = user.userid;
+      request.courseId = purpose;
+      getCourseSettings(request, url); 
 
     }
+  }
 
-    
+  const getCourseSettings = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+      .then(data => {
+        console.log("Data is: ", data);
+
+        //if request succeeded
+        if(data.success === "true"){
+
+          console.log("Course settings retrieved");
+          setCourseSettings(data.settings);
+          //navigate to the home page finally
+          navigate(docRoot + "/");          
+        }
+        else{
+          console.log("FATAL ERROR: Failed to get course settings");
+        }
+
+      })
+      .catch((error) => {
+        console.log("HOME: There was an error:", error);
+        navigate(docRoot + "/error");
+
+      });
 
   }
 
     console.log("Courses", courseList);
     return (
       <div className="container p-4">
-        <div className="row my-auto">
-        <div className="col-md-4">
-        <h1><i className="bi-mortarboard big-icon"></i></h1>
-        <h2>Select Course</h2>
-        <p>Please select the course you would like to view.</p>
-        </div>
-      <div className="col-md-8 my-auto">
-      <form>
-          <div className="mb-3">
-          <label className="form-label">Please select your course below.</label>
-        <select className="form-select" 
-          value={purpose}
-          onChange={(e)=>setPurpose(e.target.value)}>
-          {Object.keys(courseList).map(
-                k => (
-                <option key={k} value={k}>
-                    {courseList[k]}
-                </option>
-                )
-          )}
-        </select>
-      </div>
-          <button className="btn btn-primary" onClick={handleSelectCourse}>Select Course</button>
+        
+        <form>
+            <div className="mb-3">
+              <label className="form-label">Please select your course below.</label>
+              <select className="form-select" 
+                value={purpose}
+                onChange={(e)=>setPurpose(e.target.value)}>
+                {Object.keys(courseList).map(
+                      k => (
+                      <option key={k} value={k}>
+                          {courseList[k]}
+                      </option>
+                      )
+                )}
+              </select>
+          </div>
+            <button className="btn btn-primary" onClick={handleSelectCourse}>Select Course</button>
         </form>
+      
       </div>
-        </div>
-        </div>
     );
 }
 

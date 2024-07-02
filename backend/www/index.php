@@ -1,10 +1,7 @@
 <?php
 header("Access-Control-Allow-Origin: http://localhost:3000");
-//header("Access-Control-Allow-Credentials ")
-
-
 header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
 header("Access-Control-Allow-Headers: Origin, Content-Type, Accept");
 /**
  * Landing page of internal server api
@@ -25,10 +22,10 @@ include ("/opt/src/vendor/autoload.php");
 /**
  * If debug is on, turn on error reporting
  */
-/*if (\asci\Config::$DEBUG_MODE) {
+if (\asci\Config::$DEBUG_MODE) {
     error_reporting(E_ALL);
     ini_set('display_errors', 0);
-}*/
+}
 
 
 // Namespace shortcuts
@@ -71,5 +68,3 @@ try {
         http_response_code($e->getCode());
     die($e);
 }
-// Exit
-exit();

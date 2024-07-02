@@ -60,6 +60,7 @@ class ExclusiveLock
 
     function lock( ) 
     {
+        
         if( !flock($this->file, LOCK_EX | LOCK_NB)) 
         { //failed
             $key = $this->key;

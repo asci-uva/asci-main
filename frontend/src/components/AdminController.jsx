@@ -6,6 +6,7 @@ import {
   CreateNewCourse,
   CourseManagement,
   UploadRoster,
+  UpdateChat,
   EditCourse,
   SelectQuests,
 } from "./admin";

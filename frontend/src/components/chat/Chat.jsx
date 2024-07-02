@@ -79,6 +79,7 @@ const Chat = (props) => {
         setLlmProcessing(true);
 
         question.user = user.userid;
+        question.course = course;
 
         const response = await fetch(apiEndpoint, {
             method: "POST",
@@ -88,9 +89,8 @@ const Chat = (props) => {
             body: JSON.stringify(question),
         });
         const data = await response.json();
-        let chatbotResponse = null;
-        if (data.response) 
-            JSON.parse(data.response);
+       console.log(data);
+        let chatbotResponse = data.response;
 
         if (response.ok && chatbotResponse) {
             console.log(chatbotResponse);
@@ -159,7 +159,7 @@ const Chat = (props) => {
             <div
                 id={index}
                 key={index}
-                className="py-2 px-3 rounded-full text-sm inline-flex items-center hover:cursor-pointer shadow my-0"
+                className="btn btn-outline-success me-1"
                 onClick={handleFollowupChipSubmit}
             >
                 {el}
@@ -178,25 +178,54 @@ const Chat = (props) => {
         return null;
     };
 
+    const displayContextList = (contextList) => {
+        if (contextList.length > 0) {
+          return (<div className="card-footer">
+            <p className="mb-1" >This answer came from the following course documents:</p>
+            <dl>
+              {contextList.map((el, i) => displayContext(el, i))}
+            </dl>
+          </div>
+          )
+
+        }
+      return null;
+    };
+
+  const displayContext = (context, i) => {
+    return (
+      <>
+        <dt>{context.file_name}
+                    {context.page_label
+                      ? ` (page/slide: ${context.page_label})`
+                        : null}</dt>
+        <dd>{context.text}</dd>
+      </>
+    )
+
+  }
+
     const displayChatHistoryRecord = (chatHistoryRecord, index) => {
         if (chatHistoryRecord.role === "assistant") {
             return (
                 <div
                     id={index}
                     key={index}
-                    className="flex flex-col space-y-1 mb-6 my-1"
+                    className="row"
                 >
-                    <p className="text-base font-bold text-left">TA Bot</p>
-                    <div className="relative bg-slate-200 p-4 pb-6 rounded-3xl w-4/5 min-h-12 mr-auto">
+                  <div className="col-8 card text-bg-success m-2 mb-1 p-0">
+                    <div className="card-header">TA Bot</div>
+                    <div className="card-body">
                         <Markdown
                             remarkPlugins={[remarkGfm]}
                             rehypePlugins={[rehypeRaw]}
                             children={chatHistoryRecord.content}
-                            className="prose text-sm max-w-none font-medium my-0 text-left"
+                            className=""
                         />
-                        <SimpleDialog contexts={chatHistoryRecord.context} />
                     </div>
-                    <div className="flex flex-row w-3/4 space-x-2 py-1">
+                        {displayContextList(chatHistoryRecord.context)}
+                  </div>
+                    <div className="col-8 p-0 m-2">
                         {displayFollowupQuestionChips(chatHistoryRecord, index)}
                     </div>
                 </div>
@@ -206,15 +235,17 @@ const Chat = (props) => {
                 <div
                     id={index}
                     key={index}
-                    className="flex flex-col space-y-1 mb-4 my-1"
+                    className="row justify-content-end"
                 >
-                    <div className="bg-slate-700 p-4 rounded-3xl max-w-4/5 min-h-12 ml-auto">
+                    <div className="col-4 card text-bg-primary m-2  mb-1">
+                      <div className="card-body">
                         <Markdown
                             remarkPlugins={[remarkGfm]}
                             rehypePlugins={[rehypeRaw]}
                             children={chatHistoryRecord.content}
-                            className="prose text-sm max-w-none font-medium my-0 text-slate-50 prose-code:text-slate-50"
+                            className="chat-markdown"
                         />
+                      </div>
                     </div>
                 </div>
             );
@@ -224,16 +255,20 @@ const Chat = (props) => {
     const displayChatHistoryRecords = (chatHistoryRecords) => {
         if (llmProcessing) {
             return (
-                <div className="m-0">
+                <div>
                     {chatHistoryRecords.map((el, i) =>
                         displayChatHistoryRecord(el, i)
                     )}
-                    <div className="flex flex-1 flex-col m-0 items-start">
-                        <p className="text-base font-bold">TA Bot</p>
-                        <div className="my-0 mr-auto">
-                            <TypingAnimation />
+                  <div className="row">
+                    <div className="col-8 card text-bg-success m-2 mb-1 p-0">
+                      <div className="card-header">TA Bot</div>
+                      <div className="card-body text-center">
+                        <div className="spinner-border" role="status">
+                          <span className="visually-hidden">Loading...</span>
                         </div>
+                      </div>
                     </div>
+                  </div>
                 </div>
             );
         } else {
@@ -249,35 +284,28 @@ const Chat = (props) => {
 
     const displayChatHistory = (chatHistoryRecords) => {
         return (
-            <div className="flex flex-1 flex-col space-y-2 m-4 max-h-94 overflow-auto">
+            <div className="">
                 {displayNewChatQuestions(true)}
-                <div className="max-h-78 overflow-auto">
+                <div className="my-4 chathistory card">
+                  <div className="card-body">
                     {displayChatHistoryRecords(chatHistoryRecords)}
+                  </div>
                 </div>
             </div>
         );
     };
 
     const displayChatInterface = () => {
-        if (!conversationStarted) {
-            return (
-                <div className="flex flex-1 items-center justify-center m-0">
-                    <h4 className="tracking-tight font-bold">
-                        Ask the TA bot for help
-                    </h4>
-                </div>
-            );
-        }
         if (conversationStarted) {
             return displayChatHistory(chatHistory);
-        }
+        } 
     };
 
     const displayNewChatInput = () => {
         return (
-            <animated.div style={slideIn}>
+            <div>
                 {displayNewChatQuestions(false)}
-            </animated.div>
+            </div>
         );
     };
 
@@ -294,33 +322,34 @@ const Chat = (props) => {
             <form
                 onSubmit={handleNewChatSubmit}
                 onKeyDown={handleNewChatKeyDown}
-                className="flex flex-col"
+                className="mb-3"
             >
-                <label className="flex flex-row items-center w-full max-h-20 flex-grow">
-                    <div className="w-32 font-bold my-0">Question</div>
-                    <textarea
-                        className="ml-4 input-base resize-none w-5/6"
-                        placeholder={questionPlaceholder}
-                        type="text"
-                        rows={2}
-                        name="studentQuestion"
-                        value={newChatQuestion.studentQuestion}
-                        disabled={disabled}
-                        onChange={handleNewChatInputChange}
-                    />
+              <div className="mb-3">
+                <label className="form-label">
+                    Question
                 </label>
+                <textarea
+                  className="form-control"
+                  placeholder={questionPlaceholder}
+                  type="text"
+                  rows={2}
+                  name="studentQuestion"
+                  value={newChatQuestion.studentQuestion}
+                  disabled={disabled}
+                  onChange={handleNewChatInputChange}
+                />
+              </div>
 
                 {disabled ? null : (
-                    <div className="flex flex-row justify-end m-0">
+                    <div className="mb-3 d-flex justify-content-end">
                         <button
                             type="submit"
-                            className="text-button m-0"
+                            className="btn btn-primary"
                             disabled={newChatQuestion.studentQuestion === ""}
                         >
-                            <ArrowUpIcon
-                                className="mr-1 text-button-icon"
+                            <i className="bi-arrow-up-square-fill"
                                 aria-hidden="true"
-                            />
+                            ></i> &nbsp; 
                             Submit
                         </button>
                     </div>
@@ -333,10 +362,11 @@ const Chat = (props) => {
         return (
             <form
                 onSubmit={handleFollowupChatSubmit}
-                className="flex flex-row space-x-4 pt-1"
+                className=""
             >
-                <input
-                    className="input-base"
+              <div className="mb-3">
+                <textarea
+                    className="form-control"
                     placeholder="Message the TA bot with a follow-up question"
                     type="text"
                     autoComplete="off"
@@ -344,32 +374,29 @@ const Chat = (props) => {
                     value={followupQuestion}
                     onChange={handleFollowupQuestionChange}
                 />
-                <button type="submit" className="text-button">
-                    <ArrowUpIcon
-                        className="mr-1 text-button-icon "
-                        aria-hidden="true"
-                    />
+              </div>
+              <div className="mb-3 d-flex justify-content-end">
+                <button type="submit" className="btn btn-primary">
+                            <i className="bi-arrow-up-square-fill"
+                                aria-hidden="true"
+                            ></i> &nbsp; 
                     Submit
                 </button>
+              </div>
             </form>
         );
     };
 
-    const display =
-        course.name && course.name.includes("Data Structures and Algorithms");
-
-    if (!display) {
-        return null;
-    }
-
     return (
-        <div className="flex flex-1 flex-col m-0">
+        <div className="row">
+          <div className="col-12">
             {displayChatInterface()}
-            <div className="sticky bottom-0 flex justify-center flex-col w-full m-0">
+            <div className="">
                 {conversationStarted
                     ? displayFollowUpChatInput()
                     : displayNewChatInput()}
             </div>
+          </div>
         </div>
     );
 };

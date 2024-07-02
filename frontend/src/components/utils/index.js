@@ -4,4 +4,6 @@ export { default as Navigation } from "./Navigation";
 export { default as Logout } from "./Logout";
 export { default as Error } from "./Error";
 export { default as SelectCourse } from "./SelectCourse";
+export { default as SelectCourseHome } from "./SelectCourseHome";
+export { default as CreateNewCourse } from "./CreateNewCourse";
 

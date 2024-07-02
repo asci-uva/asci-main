@@ -24,14 +24,6 @@ RUN pip install pandas
 RUN pip install numpy
 RUN pip install -U scikit-learn
 
-
-RUN pip install -U openai
-RUN pip install -U python-dotenv 
-RUN pip install -U llama-index
-RUN pip install -U llama-index-core
-RUN pip install -U llama-index-readers-file
-RUN pip install -U llama-index-embeddings-huggingface
-RUN pip install -U install llama-index-llms-llamafile
 RUN pip install selenium
 
 
@@ -39,3 +31,5 @@ RUN service apache2 restart
 
 RUN mkdir /opt/log
 RUN touch /opt/log/server.log && chmod a+w /opt/log/server.log
+
+RUN mkdir /opt/tmp && chmod a+rw /opt/tmp

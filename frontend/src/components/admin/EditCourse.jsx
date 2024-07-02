@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import UploadRoster from "./UploadRoster";
+import UpdateChat from "./UpdateChat";
 import AddStudent from "./AddStudent";
 import GradescopeSync from "./GradescopeSync";
 import EditCourseInfo from "./EditCourseInfo";
@@ -34,7 +35,7 @@ function EditCourse(props) {
             <GradescopeSync course_id={courseId} {...props} />
           </div>
           <div className="col-md">
-            
+            <UpdateChat {...props} /> 
           </div>
           <div className="col-md">
             
