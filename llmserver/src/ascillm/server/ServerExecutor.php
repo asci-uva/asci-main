@@ -140,7 +140,11 @@ class ServerExecutor {
     $qns = [];
 
     foreach ($json as $q) {
-      if (!isset($q["thread_id"])) {
+      if (!isset($q["thread_id"]) && isset($q["views"]) && $q["views"] > 10) {
+        // Only add this new thread if there are at least 10 views on the initial post.
+        // There is no official format for determining from the JSON if a post was private,
+        // as far as I can see, but if only instructors are viewing private posts, then
+        // those will have much fewer views than others.
         $qns[$q["id"]] = [
           $q
         ];
