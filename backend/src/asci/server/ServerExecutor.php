@@ -501,18 +501,17 @@ $usedCosSim = True;
                 $group_sessions = array_slice($group_sessions, 0, $max_group_options);
             $result["group_sessions"] = $group_sessions;
         }
-        $type = "group_creation";
+        $type = "potentialGroupInfo";
         $group_information = [];
         $student_info = ["Student" => $student->getId(), "Subject" => $session->issue_subject, "issue" => $session->issue];
         array_push($group_information, $student_info);
-        foreach($result["group_sessions"] as  $group_session){
-            $group_session_user = $dbsessusr->getSessionUserByRole($group_session->getId(), 'student');
+        foreach($result["group_sessions"] as $group_session){
             if($group_session_user == null){
                 $result["success"] = "false";
                 $result["error"] = "ERROR: Session does not have any associated students when Logging";
                 return $result;
             }
-            $student_info = ["Student" => $group_session_user->getId(), "Subject" => $group_session->issue_subject, "issue" => $group_session->issue];
+            $student_info = ["Student" => $group_session_user->getUserId(), "Subject" => $group_session->issue_subject, "issue" => $group_session->issue];
             array_push($group_information, $student_info);
         }
         $logAction = json_encode(["Group" => $group_information, "cosSim" => $usedCosSim, "ta" => $user_id]);
