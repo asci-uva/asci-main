@@ -69,7 +69,7 @@ class LlmChat
             2 => array("pipe", "w")
         );
 
-        $command = "export HF_HOME=/localtmp; export TOKENIZERS_PARALLELISM=true; python3 $scriptName";
+        $command = "export HF_HOME=/tmp; export TOKENIZERS_PARALLELISM=true; python3 $scriptName";
         if (!empty($params))
           $command .= " " . implode(" ", $params);
 
