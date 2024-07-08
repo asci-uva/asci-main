@@ -20,7 +20,7 @@ header("Access-Control-Allow-Headers: Origin, Content-Type, Accept");
 /**
  * Load dependencies
  */
-include ("../src/vendor/autoload.php");
+include ("/opt/src/vendor/autoload.php");
 
 /**
  * If debug is on, turn on error reporting
