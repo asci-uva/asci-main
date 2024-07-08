@@ -39,11 +39,11 @@ def load_rag_index(course):
     doc_file_exists = os.path.exists(dir / "docstore.json")
     
     vector_store = PGVectorStore.from_params(
-        database="ascillm",
+        database="asci",
         host="db",
-        password="ascillm",
+        password="asci",
         port="5432",
-        user="ascillm",
+        user="asci",
         table_name="rag_"+str(course),
         embed_dim=384)
 
