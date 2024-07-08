@@ -117,8 +117,8 @@ class ServerExecutor {
     if (!isset($input["course"]) || !is_numeric($input["course"]))
       throw new \ascillm\exceptions\ASCILLMException("Course not provided");
 
-    if (!isset($input["file"]) || !isset($input["file"]["mime-type"]) || !isset($input["file"]["content"])) {
-      throw new \ascillm\exceptions\ASCILLMException("No file uploaded");
+    if (!isset($input["data"])) {
+      throw new \ascillm\exceptions\ASCILLMException("No course data uploaded");
     }
 
     $dir = \ascillm\Config::$LLM_DATA_DIR.$input["course"]."/";
@@ -132,10 +132,8 @@ class ServerExecutor {
       $this->delTree($dir."data/piazza");
     mkdir($dir."data/piazza");
 
-    // get the file contents
-    $file = base64_decode($input["file"]["content"]);
-
-    $json = json_decode($file, true);
+    // get the data 
+    $json = $input["data"];
 
     $qns = [];
 

@@ -194,15 +194,15 @@ class LlmChat
         if ($file === false)
           return array_merge($response, ["error" => "An error occurred when uploading the file."]);
 
+        $piazzaData = json_decode($file, true);
+        if ($piazzaData === null)
+          return array_merge($response, ["error" => "An error occurred when decoding the Piazza course content."]);
 
         // Build request object
         $query = [
           "course" => $course["course_id"],
           "command" => "uploadPiazza",
-          "file" => [
-            "mime-type" => "application/json",
-            "content" => base64_encode($file)
-          ]
+          "data" => $piazzaData
         ];
 
       $response = $this->query($query);
