@@ -148,7 +148,7 @@ class ServerExecutor {
         $qns[$q["id"]] = [
           $q
         ];
-      } else if (isset($qns[$q["thread_id"]])) {
+      } else if (isset($q["thread_id"]) && isset($qns[$q["thread_id"]])) {
         array_push($qns[$q["thread_id"]], $q);
       }
     }
