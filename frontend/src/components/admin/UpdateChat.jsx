@@ -86,23 +86,27 @@ function UpdateChat(props) {
 
   return (
 
-    <div className="card">
-        <h4 className="card-header">Update/Create LLM</h4>
-          <form className="p-3">
+    <div className="card mb-4">
+        <h4 className="card-header">Upload Course Content</h4>
+        <div className="card-body">
+          <p>You may optionally upload course content to provide context to students using the LLM chatbot, so that they can get more tailored results based on your actual course content.</p>
+          <form className="mb-3">
             <p className="form-label">Course Content ZIP</p>
-      
-            <input className="form-control mb-2" type="file" onChange={handleFileChange} accept=".zip" />
+            <div class="input-group mb-3"> 
+            <input className="form-control" type="file" onChange={handleFileChange} accept=".zip" />
             <button type="button" className="btn btn-primary" onClick={uploadContent}>Upload</button>
-      
+            </div>
           </form>
-          <form className="p-3">
+          <form className="mb-3">
             <p className="form-label">Piazza Export ZIP</p>
       
-            <input className="form-control mb-2" type="file" onChange={handlePiazzaFileChange} accept=".zip" />
+            <div class="input-group mb-3"> 
+            <input className="form-control" type="file" onChange={handlePiazzaFileChange} accept=".zip" />
             <button type="button" className="btn btn-primary" onClick={uploadPiazza}>Upload</button>
+            </div>
       
           </form>
-
+      </div>
     </div>
   );
 }
