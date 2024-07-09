@@ -37,3 +37,22 @@
   margin-bottom: 1px;
 }
 
+
+[data-bs-theme=dark] .c3 path,
+[data-bs-theme=dark] .c3 line
+{
+  stroke: white;
+}
+
+[data-bs-theme=dark] .tick text,
+[data-bs-theme=dark] .c3 text
+{
+  fill: white;
+}
+
+[data-bs-theme=dark] .c3-tooltip-container 
+{
+  color: black;
+}
+
+
