@@ -39,6 +39,18 @@ function Cards(props) {
           </div>
         </div>
       ) : null }
+      { course.role === "instructor" ? (
+        <div className="col-lg-4 col-md-6 mb-4">
+          <div className="card p-3">
+            <div className="card-img-top text-center">
+              <i className="bi-bar-chart-line home-icon"></i>
+            </div>
+            <div className="card-body">
+              <p className="card-text text-center"><Link to="stats" className="btn btn-primary">Statistics</Link></p>
+            </div>
+          </div>
+        </div>
+      ) : null }
       { false ? (
       <div className="col-lg-4 col-md-6 mb-4">
         <div className="card p-3">

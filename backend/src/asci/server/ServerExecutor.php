@@ -1320,6 +1320,18 @@ class ServerExecutor{
     return $result;
   }
 
+  public function getCourseStats($course_id) {
+    $dbstat = new database\DBStats($this->db);
+
+    $stats = $dbstat->getTAHelpStatsForCourse($course_id);
+
+    $result = [
+      "stats" => $stats,
+      "success" => "true"
+    ];
+    return $result;
+
+  }
 
     public function setCourseSettings($course_id, $settings){
 
