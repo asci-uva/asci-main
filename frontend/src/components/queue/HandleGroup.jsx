@@ -218,35 +218,48 @@ function HandleGroup(props) {
     }
     else{
       return(
-        <div>
+        <div className="my-3">
           <form>
             <div>
-              <h2>Please select other issues that are similar to the one above:</h2>
+              <h4>Select similar issues to create a group</h4>
+              <div className="card">
+                <h5 className="card-header">Potential Group Members</h5>
+                <ul className="list-group list-group-flush">
               {Object.keys(otherSessions).map(k => { 
-                return (<label key ={k}>
-                  <input
-                    type="checkbox"
-                    name={otherSessions[k]['id']}
-                    checked={checked[otherSessions[k]['id']]}
-                    onChange={handleCheck}
-                  />
-                  <b>  Issue:</b> {otherSessions[k]['issue']}
-                  <br />
-                  <b>Location:</b> {otherSessions[k]['location']}
-                </label>
+                return (<li className="list-group-item" key ={k}>
+                  <div className="row"><div className="col-1">
+                    <input
+                      type="checkbox"
+                      className="form-check-input me-1"
+                      id={"checkbox" + otherSessions[k]['id']}
+                      name={otherSessions[k]['id']}
+                      checked={checked[otherSessions[k]['id']]}
+                      onChange={handleCheck}
+                    />
+                  </div><div className="col-11">
+                    <label class="form-check-label stretched-link" htmlFor={"checkbox"+otherSessions[k]['id']}>{otherSessions[k]['issue']}</label>
+                    <p class="mb-1"><b>Location:</b> {otherSessions[k]['location']}</p>
+                  </div></div>
+                  </li>
                 );
               })}
+                </ul>
+            </div>
             </div>
 
-            <div>
-              <label>Where should the group meet?</label>
-              <input
-                type = "text"
-                placeholder="Enter location here..."
-                required
-                value = {location}
-                onChange={(e)=>setLocation(e.target.value)}
-              />
+            <div className="my-3">
+              <h4>Begin the session</h4>
+              <div className="input-group">
+                <input
+                  type = "text"
+                  className="form-control"
+                  placeholder="Enter meeting location..."
+                  required
+                  value = {location}
+                  onChange={(e)=>setLocation(e.target.value)}
+                />
+                <button className="btn btn-primary" onClick={createGroup}>Start Session</button>
+              </div>
             </div>
           </form>
         </div>
@@ -263,23 +276,33 @@ function HandleGroup(props) {
     return(
       <div className="container p-4">
         <div className="row my-auto">
-      
-          <div>
-            <h2>The next student is willing to be in a group:</h2>
-            <label><b>Subject:</b> {primeSubject}</label>
-            <label><b>Issue:</b> {primeIssue} </label>
-            <label><b>Location:</b> {primeLocation} </label>
+          <div className="col-md-4">
+            <h1><i className="bi-list-ol big-icon"></i></h1>
+            <h2>Handle Queue</h2>
+            <p>You are now handling students for <b>{course.name}</b>.</p>
           </div>
+          <div className="col-md-8 my-auto">
+            <h3>Create Group</h3>
+            <div className="card my-3">
+              <h4 className="card-header">The following student is willing to be in a group</h4>
+              <div className="card-body">
+                <h5>{primeSubject}</h5>
+                <p class="mb-0">{primeIssue}</p>
+              </div>
+              <div className="card-footer pb-0">
+                <p className="mb-2"><b>Location:</b> {primeLocation}</p>
+                
+              </div>
+            </div>
 
-          <div>
-            {GroupPanel(null)}
-          </div>
+            <div>
+              {GroupPanel(null)}
+            </div>
 
 
-          <div>
-            <h6>Click here when you are ready to start the session.</h6>
-            <button className="btn btn-primary p-1" onClick={cancelGroup}>Cancel</button>
-            <button className="btn btn-primary p-1" onClick={createGroup}>Start Session</button>
+            <div className="my-auto text-center">
+              <button className="btn btn-danger mx-3" onClick={cancelGroup}>Cancel</button>
+            </div>
           </div>
         </div>
       </div>

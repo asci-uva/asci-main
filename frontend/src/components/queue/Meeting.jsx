@@ -262,10 +262,10 @@ function Meeting(props) {
                   {Object.keys(groupSessions).map(k => { 
                     if(groupMembers[k] != null){
                       return (
-                        <li key={'div_' + k}>
+                        <li className="list-group-item" key={'div_' + k}>
                           <h6 key={'memberInfo_' + k}><b>{groupMembers[k].fname} {groupMembers[k].lname}</b></h6>
-                          <p><b>Issue</b>: {groupSessions[k].issue}</p>
-                          <p key={'location_' + k}>(<b>Location</b>: {groupSessions[k].location})</p>
+                          <p className="mb-1"><b>Issue</b>: {groupSessions[k].issue}</p>
+                          <p className="text-secondary mb-1" key={'location_' + k}><b>Original Location</b>: {groupSessions[k].location}</p>
                         </li>
                       );
                     } 
