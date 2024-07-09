@@ -184,6 +184,9 @@ class LlmChat
     }
 
     public function generateRAG($course) {
-        $result = $this->runScript(\ascillm\Config::$LLM_RAG_SCRIPT, null, $course);
+      if (\ascillm\Config::$FAKE_LLM_MODE) {
+        return true;
+      }
+      $result = $this->runScript(\ascillm\Config::$LLM_RAG_SCRIPT, null, $course);
     } 
 }
