@@ -80,7 +80,7 @@ class ServerExecutor {
         throw new \ascillm\exceptions\ASCILLMException('Uploaded file is not a zip archive.');
       case \ZipArchive::ER_INCONS :
         // Workaround for Mac zip files -- if they are inconsistent, that's okay
-        $result = $zip->open($infile);
+        $result = $zip->open($tmpfile);
         if ($result === true)
           break;
         throw new \ascillm\exceptions\ASCILLMException('Uploaded file failed consistency check.');
@@ -117,8 +117,8 @@ class ServerExecutor {
     if (!isset($input["course"]) || !is_numeric($input["course"]))
       throw new \ascillm\exceptions\ASCILLMException("Course not provided");
 
-    if (!isset($input["file"]) || !isset($input["file"]["mime-type"]) || !isset($input["file"]["content"])) {
-      throw new \ascillm\exceptions\ASCILLMException("No file uploaded");
+    if (!isset($input["data"])) {
+      throw new \ascillm\exceptions\ASCILLMException("No course data uploaded");
     }
 
     $dir = \ascillm\Config::$LLM_DATA_DIR.$input["course"]."/";
@@ -132,19 +132,21 @@ class ServerExecutor {
       $this->delTree($dir."data/piazza");
     mkdir($dir."data/piazza");
 
-    // get the file contents
-    $file = base64_decode($input["file"]["content"]);
-
-    $json = json_decode($file, true);
+    // get the data 
+    $json = $input["data"];
 
     $qns = [];
 
     foreach ($json as $q) {
-      if (!isset($q["thread_id"])) {
+      if (!isset($q["thread_id"]) && isset($q["views"]) && $q["views"] > 10) {
+        // Only add this new thread if there are at least 10 views on the initial post.
+        // There is no official format for determining from the JSON if a post was private,
+        // as far as I can see, but if only instructors are viewing private posts, then
+        // those will have much fewer views than others.
         $qns[$q["id"]] = [
           $q
         ];
-      } else if (isset($qns[$q["thread_id"]])) {
+      } else if (isset($q["thread_id"]) && isset($qns[$q["thread_id"]])) {
         array_push($qns[$q["thread_id"]], $q);
       }
     }

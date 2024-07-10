@@ -8,6 +8,7 @@ import EditCourseInfo from "./EditCourseInfo";
 import EditCourseSettings from "./EditCourseSettings";
 import CreateNewCourse from "./CreateNewCourse";
 import ViewRoster from "./ViewRoster";
+import UpdateChat from "./UpdateChat";
 
 function Home(props) {
   let docRoot = props.documentRoot;
@@ -52,7 +53,10 @@ function Home(props) {
               
               <div className="tab-pane fade show active" id="pills-general" role="tabpanel" aria-labelledby="pills-home-tab">               
                 <div className="col-md-6 my-auto"> 
-                  <EditCourseInfo course_id={courseList[course].course_id} {...props} />                              
+                  <EditCourseInfo course_id={courseList[course].course_id} {...props} />
+                </div>
+                <div className="col-md-6 my-auto"> 
+                  <UpdateChat course_id={courseList[course].course_id} {...props} /> 
                 </div>
               </div>
 

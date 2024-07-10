@@ -1,7 +1,9 @@
 import json
 import sys
+sys.path.insert(0,'/usr/lib/python3.10/site-packages')
 from llm_chat.openai_connector import OpenaiConnector
 from llm_chat.constants import LLAMAFILE_KEY_PLACEHOLDER, LLAMAFILE_BASE_URL
+
 
 MOCKING_LLM_RESPONSE = False
 
