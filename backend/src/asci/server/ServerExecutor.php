@@ -395,7 +395,7 @@ class ServerExecutor{
     //DB objects we will be using
     $dbsession = new \asci\server\database\DBSession($this->db);
     $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
-        $dbLogger = new \asci\server\database\DBLogs($this->db);
+    $dbLogger = new \asci\server\database\DBLogs($this->db);
 
     /* FIRST, GRAB JUST THE MAIN USER THE TA IS INTERACTING WITH */
     $user = $this->userStore->getUser($computing_id);
@@ -415,7 +415,6 @@ class ServerExecutor{
       $result["error"] = "session is not in the grouping state (and it should be)";
       return $result;
     }
-
     //Ok, let's try to grab the student's information
     $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), 'student');
 
@@ -515,9 +514,10 @@ $usedCosSim = True;
             $studentInfo = ["Student" => $group_session_user->getUserId(), "Subject" => $group_session->issue_subject, "issue" => $group_session->issue];
             array_push($groupInformation, $studentInfo);
         }
-        $logAction = json_encode(["Group" => $groupInformation, "cosSim" => $usedCosSim, "ta" => $user_id, "session" => $session->id, "current_time" => date("Y-m-d H:i:s")]);
+        $logAction = json_encode(["Group" => $groupInformation, "cosSim" => $usedCosSim, "ta" => $user_id, "session" => $session->id]);
         #need to get this person and their problem, plus group members and their problems ;
         $dbLogger->log($student->getId(), $type, $logAction);
+        
 
 
     return $result;
@@ -611,7 +611,7 @@ $usedCosSim = True;
       }
     }
     $type = "GroupCreation";
-    $logAction = json_encode(["Group" => $groupInformation, "ta" => $ta_computing_id, "session" => $session_id, "current_time" => date("Y-m-d H:i:s")]);
+    $logAction = json_encode(["Group" => $groupInformation, "ta" => $ta_computing_id, "session" => $session_id]);
 
     $dbLogger->log($mainSessUsr->userId, $type, $logAction);
     $result = [];
