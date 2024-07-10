@@ -5,7 +5,7 @@ import { useUser } from "../context/UserContext";
 
 //https://www.youtube.com/watch?v=IkMND33x0qQ
 function Login(props) {
-  const [username, setUsername] = useState("user name");
+  const [username, setUsername] = useState(null);
   const navigate = useNavigate();
   const { login } = useUser();
 
@@ -65,6 +65,7 @@ function Login(props) {
             className="form-control"
             required
             value={username}
+            placeholder="User Name"
             onChange={(e) => setUsername(e.target.value)}
           />
       </div>
