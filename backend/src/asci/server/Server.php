@@ -380,6 +380,12 @@ class Server
                 $this->setResponse($executor->setCourseSettings($courseId, $newSettings));
                 break;
 
+            case "getCourseStats":
+                $courseId = $this->input["courseId"];
+
+                $this->setResponse($executor->getCourseStats($courseId));
+                break;
+
             case "cancelGroup":
                 $courseId = $this->input["courseId"];
                 $sessionId = $this->input["sessionId"];

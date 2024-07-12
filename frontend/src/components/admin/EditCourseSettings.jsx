@@ -96,33 +96,33 @@ function EditCourseSettings(props) {
 
   return (
     <>
-      <div className="card">
-        <h5 className="card-header">Course Settings</h5>
+      <div className="card mb-4">
+        <h4 className="card-header">ASCI@UVA Settings</h4>
           <div className="card-body">
 
             <h5>Queue Settings</h5>
 
-            <div className="form-check form-switch">
+            <div className="form-check form-switch mb-3">
               <input className="form-check-input" type="checkbox" id="showQueueList" checked={showQueueList} onChange={ handleShowQueueListChange }></input>
               <label className="form-check-label" htmlFor="showQueueList"><b>Show Full Queue: </b>Entire queue will be shown to teaching assistants</label>
             </div>
-            <div className="form-check form-switch">
+            <div className="form-check form-switch mb-3">
               <input className="form-check-input" type="checkbox" id="groupingEnabled" checked={groupingEnabled} onChange={ handleGroupingEnabledChange }></input>
               <label className="form-check-label" htmlFor="groupingEnabled"><b>Enable Groups: </b>Allow students to be helped in groups</label>
             </div>
-            <div className="form-check form-switch">
+            <div className="form-check form-switch mb-3">
               <input className="form-check-input" type="checkbox" id="smartGrouping" checked={smartGrouping} onChange={ handleSmartGroupingChange }></input>
               <label className="form-check-label" htmlFor="smartGrouping"><b>Enable Smart Grouping: </b>Recommended student groups will be presented to TAs based on student issues</label>
             </div>
 
             <h5>Quick Task Settings</h5>
 
-            <div className="form-check form-switch mb-1">
+            <div className="form-check form-switch mb-3">
               <input className="form-check-input" type="checkbox" id="showQuests" checked={false} disabled></input>
               <label className="form-check-label" htmlFor="showQuests"><b>Enable Quick Tasks: </b>(Coming Soon...)</label>
             </div>
 
-            <button type="button" className="btn btn-primary" onClick={handleSubmit}>Save Settings</button>
+            <button type="button" className="btn btn-primary mb-3 mx-auto" onClick={handleSubmit}>Save Settings</button>
 
           </div>
       </div>
