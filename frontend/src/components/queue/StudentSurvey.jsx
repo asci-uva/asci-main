@@ -26,6 +26,7 @@ function StudentSurvey(props) {
   const [q2Ans, setQ2Ans] = useState("3");
   const [q3Ans, setQ3Ans] = useState("3");
   const [q4Ans, setQ4Ans] = useState("3");
+  const [q5Ans, setQ5Ans] = useState("3");
   const [feedback, setFeedback] = useState("");
 
   let url = props.url;
@@ -113,13 +114,14 @@ function StudentSurvey(props) {
       surveyData.q2_score = q2Ans;
       surveyData.q3_score = q3Ans;
       surveyData.q4_score = q4Ans;
-      surveyData.q5_score = -1; //no q5 at the moment
+      surveyData.q5_score = q5Ans;
       surveyData.feedback = feedback;
 
       console.log("Selected option q1: " + q1Ans);
       console.log("Selected option q2: " + q2Ans);
       console.log("Selected option q3: " + q3Ans);
       console.log("Selected option q4: " + q4Ans);
+      console.log("Selected option q5: " + q5Ans);
       console.log("Feedback: " + feedback);
 
       /*TODO: Setup the survey data array!!*/
@@ -182,7 +184,7 @@ function StudentSurvey(props) {
               This meeting occured on {new Date(meetingDate).toLocaleString()}</p>
 
 
-            <p className="form-label"> How long did {taFirstName} spend with you? </p>
+            <p className="form-label"> How long did you wait in the queue? </p>
 
             <div className="mb-3">
               <div className="form-check form-check-inline">
@@ -191,7 +193,7 @@ function StudentSurvey(props) {
                     checked={q1Ans === "1"}
                     onChange={() => setQ1Ans("1")}
                   />
-                  Less than 10 minutes
+                  A really long time
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -200,7 +202,7 @@ function StudentSurvey(props) {
                     checked={q1Ans === "2"}
                     onChange={() => setQ1Ans("2")}
                   />
-                  10-20 minutes
+                  A long time
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -209,7 +211,7 @@ function StudentSurvey(props) {
                     checked={q1Ans === "3"}
                     onChange={() => setQ1Ans("3")}
                   />
-                  21-40 minutes
+                  A moderate amount of time
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -218,7 +220,7 @@ function StudentSurvey(props) {
                     checked={q1Ans === "4"}
                     onChange={() => setQ1Ans("4")}
                   />
-                  60-90 minutes
+                  A little time
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -227,12 +229,12 @@ function StudentSurvey(props) {
                     checked={q1Ans === "5"}
                     onChange={() => setQ1Ans("5")}
                   />
-                  More than 90 minutes
+                  No time
                 </label>
               </div>
             </div>
 
-            <p className="form-label"> How helpful was {taFirstName}? </p>
+            <p className="form-label"> Did waiting in the queue frustrate you? </p>
 
             <div className="mb-3">
               <div className="form-check form-check-inline">
@@ -241,7 +243,7 @@ function StudentSurvey(props) {
                     checked={q2Ans === "1"}
                     onChange={() => setQ2Ans("1")}
                   />
-                  1 (not helpful at all)
+                  Yes, it was very frustrating
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -250,7 +252,7 @@ function StudentSurvey(props) {
                     checked={q2Ans === "2"}
                     onChange={() => setQ2Ans("2")}
                   />
-                  2 (somewhat unhelpful)
+                  Yes, it was somewhat frustrating
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -259,7 +261,7 @@ function StudentSurvey(props) {
                     checked={q2Ans === "3"}
                     onChange={() => setQ2Ans("3")}
                   />
-                  3 (neutral)
+                  It was okay
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -268,7 +270,7 @@ function StudentSurvey(props) {
                     checked={q2Ans === "4"}
                     onChange={() => setQ2Ans("4")}
                   />
-                  4 (helpful)
+                  No, it was not very frustrating
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -277,13 +279,13 @@ function StudentSurvey(props) {
                     checked={q2Ans === "5"}
                     onChange={() => setQ2Ans("5")}
                   />
-                  5 (very helpful)
+                  No, it was not frustrating at all
                 </label>
               </div>
             </div>
 
 
-            <p className="form-label"> Was {taFirstName} able to your questions / concerns? </p>
+            <p className="form-label"> How helpful was the TA that you met with? </p>
 
             <div className="mb-3">
               <div className="form-check form-check-inline">
@@ -292,7 +294,7 @@ function StudentSurvey(props) {
                     checked={q3Ans === "1"}
                     onChange={() => setQ3Ans("1")}
                   />
-                  No, I am much more concerned now
+                  1 (not helpful at all)
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -301,7 +303,7 @@ function StudentSurvey(props) {
                     checked={q3Ans === "2"}
                     onChange={() => setQ3Ans("2")}
                   />
-                  No, I am more concerned now
+                  2 (somewhat unhelpful)
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -310,7 +312,7 @@ function StudentSurvey(props) {
                     checked={q3Ans === "3"}
                     onChange={() => setQ3Ans("3")}
                   />
-                  Neutral
+                  3 (neither helpful nor unhelpful)
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -319,7 +321,7 @@ function StudentSurvey(props) {
                     checked={q3Ans === "4"}
                     onChange={() => setQ3Ans("4")}
                   />
-                  Some of my concerns were addressed
+                  4 (somewhat helpful)
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -328,14 +330,14 @@ function StudentSurvey(props) {
                     checked={q3Ans === "5"}
                     onChange={() => setQ3Ans("5")}
                   />
-                  All of my concerns were addressed
+                  5 (very helpful)
                 </label>
               </div>
             </div>
 
 
 
-            <p className="form-label"> Overall, how satisfied are you with the meeting? </p>
+            <p className="form-label"> Was the TA able to address your questions/concerns? </p>
 
             <div className="mb-3">
               <div className="form-check form-check-inline">
@@ -344,7 +346,7 @@ function StudentSurvey(props) {
                     checked={q4Ans === "1"}
                     onChange={() => setQ4Ans("1")}
                   />
-                  1 (very unsatisfied)
+                  I left more confused than when I arrived
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -353,7 +355,7 @@ function StudentSurvey(props) {
                     checked={q4Ans === "2"}
                     onChange={() => setQ4Ans("2")}
                   />
-                  2 (unsatisfied)
+                  No, the TA answered/addressed none of my questions/concerns
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -362,7 +364,7 @@ function StudentSurvey(props) {
                     checked={q4Ans === "3"}
                     onChange={() => setQ4Ans("3")}
                   />
-                  3 (neutral)
+                  Yes, the TA answered/addressed some of my questions/concerns
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -371,7 +373,7 @@ function StudentSurvey(props) {
                     checked={q4Ans === "4"}
                     onChange={() => setQ4Ans("4")}
                   />
-                  4 (satisfied)
+                  Yes, the TA answered/addressed most of my questions/concerns
                 </label>
               </div>
               <div className="form-check form-check-inline">
@@ -380,13 +382,64 @@ function StudentSurvey(props) {
                     checked={q4Ans === "5"}
                     onChange={() => setQ4Ans("5")}
                   />
+                  Yes, the TA answered/addressed all of my questions/concerns
+                </label>
+              </div>
+            </div>
+
+
+            <p className="form-label"> Overall, how satisfied were you with your office hours experience? </p>
+
+            <div className="mb-3">
+              <div className="form-check form-check-inline">
+                <label className="form-check-label">
+                  <input type="radio" name="q5" value="1" className="form-check-input"
+                    checked={q5Ans === "1"}
+                    onChange={() => setQ5Ans("1")}
+                  />
+                  1 (very unsatisfied)
+                </label>
+              </div>
+              <div className="form-check form-check-inline">
+                <label className="form-check-label">
+                  <input type="radio" name="q5" value="2" className="form-check-input"
+                    checked={q5Ans === "2"}
+                    onChange={() => setQ5Ans("2")}
+                  />
+                  2 (somewhat unsatisfied)
+                </label>
+              </div>
+              <div className="form-check form-check-inline">
+                <label className="form-check-label">
+                  <input type="radio" name="q5" value="3" className="form-check-input"
+                    checked={q5Ans === "3"}
+                    onChange={() => setQ5Ans("3")}
+                  />
+                  3 (neither satisfied nor unsatisfied)
+                </label>
+              </div>
+              <div className="form-check form-check-inline">
+                <label className="form-check-label">
+                  <input type="radio" name="q5" value="4" className="form-check-input"
+                    checked={q5Ans === "4"}
+                    onChange={() => setQ5Ans("4")}
+                  />
+                  4 (somewhat satisfied)
+                </label>
+              </div>
+              <div className="form-check form-check-inline">
+                <label className="form-check-label">
+                  <input type="radio" name="q5" value="5" className="form-check-input"
+                    checked={q5Ans === "5"}
+                    onChange={() => setQ5Ans("5")}
+                  />
                   5 (very satisfied)
                 </label>
               </div>
             </div>
 
             <div className="mb-3">
-              <p className="form-label">[Optional] Anything you would like us to know?</p>
+              <p className="form-label">If you would like to leave any additional comments about your office hour experience, please do so here (Optional)</p>
               <textarea className="form-control"
                 placeholder="Tell us about your experience..."
                 value = {feedback}
