@@ -183,7 +183,7 @@ function TASurvey(props) {
             <p className="form-label"> Were you able to address the questions/concerns of the student? </p>
 
             <div className="mb-3">
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q1" value="1" className="form-check-input"
                 checked={q1Ans === "1"}
@@ -192,7 +192,7 @@ function TASurvey(props) {
               The student left more confused than when they arrived
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q1" value="2" className="form-check-input"
                 checked={q1Ans === "2"}
@@ -201,7 +201,7 @@ function TASurvey(props) {
               I was able to address none of the questions/concerns
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q1" value="3" className="form-check-input"
                 checked={q1Ans === "3"}
@@ -210,7 +210,7 @@ function TASurvey(props) {
               I was able to address some of the questions/concerns
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q1" value="4" className="form-check-input"
                 checked={q1Ans === "4"}
@@ -219,7 +219,7 @@ function TASurvey(props) {
               I was able to address most of the questions/concerns
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q1" value="5" className="form-check-input"
                 checked={q1Ans === "5"}
@@ -233,7 +233,7 @@ function TASurvey(props) {
             <p className="form-label"> Overall, how satisfied were you with your office hours experience? </p>
 
             <div className="mb-3">
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q2" value="1" className="form-check-input"
                 checked={q2Ans === "1"}
@@ -242,7 +242,7 @@ function TASurvey(props) {
               1 (very unsatisfied)
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q2" value="2" className="form-check-input"
                 checked={q2Ans === "2"}
@@ -251,7 +251,7 @@ function TASurvey(props) {
               2 (somewhat unsatisfied)
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q2" value="3" className="form-check-input"
                 checked={q2Ans === "3"}
@@ -260,7 +260,7 @@ function TASurvey(props) {
               3 (neither satisfied nor unsatisfied)
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q2" value="4" className="form-check-input"
                 checked={q2Ans === "4"}
@@ -269,7 +269,7 @@ function TASurvey(props) {
               4 (somewhat satisfied)
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q2" value="5" className="form-check-input"
                 checked={q2Ans === "5"}

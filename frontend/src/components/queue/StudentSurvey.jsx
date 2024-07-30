@@ -187,7 +187,7 @@ function StudentSurvey(props) {
             <p className="form-label"> How long did you wait in the queue? </p>
 
             <div className="mb-3">
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q1" value="1" className="form-check-input"
                     checked={q1Ans === "1"}
@@ -196,7 +196,7 @@ function StudentSurvey(props) {
                   A really long time
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q1" value="2" className="form-check-input"
                     checked={q1Ans === "2"}
@@ -205,7 +205,7 @@ function StudentSurvey(props) {
                   A long time
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q1" value="3" className="form-check-input"
                     checked={q1Ans === "3"}
@@ -214,7 +214,7 @@ function StudentSurvey(props) {
                   A moderate amount of time
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q1" value="4" className="form-check-input"
                     checked={q1Ans === "4"}
@@ -223,7 +223,7 @@ function StudentSurvey(props) {
                   A little time
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q1" value="5" className="form-check-input"
                     checked={q1Ans === "5"}
@@ -237,7 +237,7 @@ function StudentSurvey(props) {
             <p className="form-label"> Did waiting in the queue frustrate you? </p>
 
             <div className="mb-3">
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q2" value="1" className="form-check-input"
                     checked={q2Ans === "1"}
@@ -246,7 +246,7 @@ function StudentSurvey(props) {
                   Yes, it was very frustrating
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q2" value="2" className="form-check-input"
                     checked={q2Ans === "2"}
@@ -255,7 +255,7 @@ function StudentSurvey(props) {
                   Yes, it was somewhat frustrating
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q2" value="3" className="form-check-input"
                     checked={q2Ans === "3"}
@@ -264,7 +264,7 @@ function StudentSurvey(props) {
                   It was okay
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q2" value="4" className="form-check-input"
                     checked={q2Ans === "4"}
@@ -273,7 +273,7 @@ function StudentSurvey(props) {
                   No, it was not very frustrating
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q2" value="5" className="form-check-input"
                     checked={q2Ans === "5"}
@@ -288,7 +288,7 @@ function StudentSurvey(props) {
             <p className="form-label"> How helpful was the TA that you met with? </p>
 
             <div className="mb-3">
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q3" value="1" className="form-check-input"
                     checked={q3Ans === "1"}
@@ -297,7 +297,7 @@ function StudentSurvey(props) {
                   1 (not helpful at all)
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q3" value="2" className="form-check-input"
                     checked={q3Ans === "2"}
@@ -306,7 +306,7 @@ function StudentSurvey(props) {
                   2 (somewhat unhelpful)
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q3" value="3" className="form-check-input"
                     checked={q3Ans === "3"}
@@ -315,7 +315,7 @@ function StudentSurvey(props) {
                   3 (neither helpful nor unhelpful)
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q3" value="4" className="form-check-input"
                     checked={q3Ans === "4"}
@@ -324,7 +324,7 @@ function StudentSurvey(props) {
                   4 (somewhat helpful)
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q3" value="5" className="form-check-input"
                     checked={q3Ans === "5"}
@@ -340,7 +340,7 @@ function StudentSurvey(props) {
             <p className="form-label"> Was the TA able to address your questions/concerns? </p>
 
             <div className="mb-3">
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q4" value="1" className="form-check-input"
                     checked={q4Ans === "1"}
@@ -349,7 +349,7 @@ function StudentSurvey(props) {
                   I left more confused than when I arrived
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q4" value="2" className="form-check-input"
                     checked={q4Ans === "2"}
@@ -358,7 +358,7 @@ function StudentSurvey(props) {
                   No, the TA answered/addressed none of my questions/concerns
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q4" value="3" className="form-check-input"
                     checked={q4Ans === "3"}
@@ -367,7 +367,7 @@ function StudentSurvey(props) {
                   Yes, the TA answered/addressed some of my questions/concerns
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q4" value="4" className="form-check-input"
                     checked={q4Ans === "4"}
@@ -376,7 +376,7 @@ function StudentSurvey(props) {
                   Yes, the TA answered/addressed most of my questions/concerns
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q4" value="5" className="form-check-input"
                     checked={q4Ans === "5"}
@@ -391,7 +391,7 @@ function StudentSurvey(props) {
             <p className="form-label"> Overall, how satisfied were you with your office hours experience? </p>
 
             <div className="mb-3">
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q5" value="1" className="form-check-input"
                     checked={q5Ans === "1"}
@@ -400,7 +400,7 @@ function StudentSurvey(props) {
                   1 (very unsatisfied)
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q5" value="2" className="form-check-input"
                     checked={q5Ans === "2"}
@@ -409,7 +409,7 @@ function StudentSurvey(props) {
                   2 (somewhat unsatisfied)
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q5" value="3" className="form-check-input"
                     checked={q5Ans === "3"}
@@ -418,7 +418,7 @@ function StudentSurvey(props) {
                   3 (neither satisfied nor unsatisfied)
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q5" value="4" className="form-check-input"
                     checked={q5Ans === "4"}
@@ -427,7 +427,7 @@ function StudentSurvey(props) {
                   4 (somewhat satisfied)
                 </label>
               </div>
-              <div className="form-check form-check-inline">
+              <div className="form-check">
                 <label className="form-check-label">
                   <input type="radio" name="q5" value="5" className="form-check-input"
                     checked={q5Ans === "5"}
