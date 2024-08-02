@@ -92,10 +92,11 @@ function UpdateChat(props) {
           <p>You may optionally upload course content to provide context to students using the LLM chatbot, so that they can get more tailored results based on your actual course content.</p>
           <form className="mb-3">
             <p className="form-label">Course Content ZIP</p>
-            <div class="input-group mb-3"> 
+            <div className="input-group mb-3"> 
             <input className="form-control" type="file" onChange={handleFileChange} accept=".zip" />
             <button type="button" className="btn btn-primary" onClick={uploadContent}>Upload</button>
             </div>
+            <p className="form-text">This zip file should include any course content you would like the LLM to use when answering student questions.  Ideally, documents should be text, markdown, or PDF files.  Max upload size is 80MB.</p>
           </form>
           <form className="mb-3">
             <p className="form-label">Piazza Export ZIP</p>
@@ -104,6 +105,7 @@ function UpdateChat(props) {
             <input className="form-control" type="file" onChange={handlePiazzaFileChange} accept=".zip" />
             <button type="button" className="btn btn-primary" onClick={uploadPiazza}>Upload</button>
             </div>
+            <p className="form-text">This zip file should be the exact file provided by Piazza when downloading all course content.  When requesting it from Piazza's statistics page, they will email you a link to this file.  We will ignore any posts with less than 10 views.  Max upload size is 80MB.</p>
       
           </form>
       </div>
