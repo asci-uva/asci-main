@@ -6,6 +6,7 @@ import { useUser } from "../context/UserContext";
 function UpdateChat(props) {
   const [courseFile, setCourseFile] = useState(null);
   const [piazzaFile, setPiazzaFile] = useState(null);
+  const [uploadInProgress, setUploadInProgress] = useState(false);
   const {user, getCourse} = useUser();
   let course = getCourse();
 
@@ -19,7 +20,9 @@ function UpdateChat(props) {
   const uploadContent = () => {
     if (!courseFile) return;
     toast("Uploading course content and creating RAG. Please wait...", { autoClose: false});
-
+    
+    setUploadInProgress(true);
+    
     var formData = new FormData();
 
     formData.append("command", "createLlm");
@@ -42,10 +45,12 @@ function UpdateChat(props) {
           console.error("Error uploading the course contents");
           toast.error("Error uploading the course contents");
         }
+        setUploadInProgress(false);
       })
       .catch((error) => {
         console.error("There was an error:", error);
         toast.error("There was an error uploading the course contents");
+        setUploadInProgress(false);
       });
 
   };
@@ -53,6 +58,8 @@ function UpdateChat(props) {
   const uploadPiazza = () => {
     if (!piazzaFile) return;
     toast("Uploading piazza data and creating RAG. Please wait...", { autoClose: false});
+
+    setUploadInProgress(true);
 
     var formData = new FormData();
 
@@ -76,10 +83,12 @@ function UpdateChat(props) {
           console.error("Error uploading the piazza contents");
           toast.error("Error uploading the piazza contents");
         }
+        setUploadInProgress(false);
       })
       .catch((error) => {
         console.error("There was an error:", error);
         toast.error("There was an error uploading the piazza contents");
+        setUploadInProgress(false);
       });
 
   };
@@ -94,7 +103,7 @@ function UpdateChat(props) {
             <p className="form-label">Course Content ZIP</p>
             <div className="input-group mb-3"> 
             <input className="form-control" type="file" onChange={handleFileChange} accept=".zip" />
-            <button type="button" className="btn btn-primary" onClick={uploadContent}>Upload</button>
+            <button type="button" disabled={uploadInProgress} className="btn btn-primary" onClick={uploadContent}>Upload</button>
             </div>
             <p className="form-text">This zip file should include any course content you would like the LLM to use when answering student questions.  Ideally, documents should be text, markdown, or PDF files.  Max upload size is 80MB.</p>
           </form>
@@ -103,7 +112,7 @@ function UpdateChat(props) {
       
             <div class="input-group mb-3"> 
             <input className="form-control" type="file" onChange={handlePiazzaFileChange} accept=".zip" />
-            <button type="button" className="btn btn-primary" onClick={uploadPiazza}>Upload</button>
+            <button type="button" disabled={uploadInProgress} className="btn btn-primary" onClick={uploadPiazza}>Upload</button>
             </div>
             <p className="form-text">This zip file should be the exact file provided by Piazza when downloading all course content.  When requesting it from Piazza's statistics page, they will email you a link to this file.  We will ignore any posts with less than 10 views.  Max upload size is 80MB.</p>
       
