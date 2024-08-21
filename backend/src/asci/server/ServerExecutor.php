@@ -415,9 +415,12 @@ class ServerExecutor{
     //DB objects we will be using
     $dbsession = new \asci\server\database\DBSession($this->db);
     $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+    $dbLogger = new \asci\server\database\DBLogs($this->db);
 
     /* FIRST, GRAB JUST THE MAIN USER THE TA IS INTERACTING WITH */
     $user = $this->userStore->getUser($computing_id);
+
+    $user_id = $user->getId();
 
     //1: Check that the user has permission to access queue
     if (!$this->userCourseStore->userHasPermission($user, $course_id, "ta-queue"))
@@ -438,7 +441,6 @@ class ServerExecutor{
       $result["error"] = "session is not in the grouping state (and it should be)";
       return $result;
     }
-
     //Ok, let's try to grab the student's information
     $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), 'student');
 
@@ -457,6 +459,7 @@ class ServerExecutor{
       return $result;
     }
 
+
     //Done. Set up the info to return
     $result["success"] = "true";
     $result["session"] = $session->toArray();
@@ -467,6 +470,9 @@ class ServerExecutor{
     /* Limit is 30 but we will trim that down to max group size */
     $group_sessions = $dbsession->getPotentialGroupSessions($course_id, 30);
     $max_group_options = 8;
+
+        //Logger information
+        $usedCosSim = False;
 
     /*  Grab the course settings */
     /* Database Object we are going to need */
@@ -511,15 +517,33 @@ class ServerExecutor{
         }
         $result["group_sessions"] = $group_sessions_ret;
       }
-
+$usedCosSim = True;
     }
     else{
 
-      /* Trim down to max option size */
-      if(count($group_sessions) > $max_group_options)
-        $group_sessions = array_slice($group_sessions, 0, $max_group_options);
-      $result["group_sessions"] = $group_sessions;
-    }
+            /* Trim down to max option size */
+            if(count($group_sessions) > $max_group_options)
+                $group_sessions = array_slice($group_sessions, 0, $max_group_options);
+            $result["group_sessions"] = $group_sessions;
+        }
+        $type = "potentialGroupInfo";
+        $groupInformation = [];
+        $studentInfo = ["Student" => $student->getId(), "Subject" => $session->issue_subject, "issue" => $session->issue];
+        array_push($groupInformation, $studentInfo);
+        foreach($result["group_sessions"] as $group_session){
+            $group_session_user = $dbsessusr->getSessionUserByRole($group_session->getId(), 'student');
+            if($group_session_user == null){
+                $result["success"] = "false";
+                $result["error"] = "ERROR: Session does not have any associated students when Logging";
+                return $result;
+            }
+            $studentInfo = ["Student" => $group_session_user->getUserId(), "Subject" => $group_session->issue_subject, "issue" => $group_session->issue];
+            array_push($groupInformation, $studentInfo);
+        }
+        $logAction = json_encode(["Group" => $groupInformation, "cosSim" => $usedCosSim, "ta" => $user_id, "session" => $session->id]);
+        #need to get this person and their problem, plus group members and their problems ;
+        $dbLogger->log($student->getId(), $type, $logAction);
+        
 
 
     return $result;
@@ -534,13 +558,14 @@ class ServerExecutor{
    */
   public function createGroup($ta_computing_id, $course_id, $session_id, $group_sessions, $location){
 
-    //DB objects we will be using
-    $dbsession = new \asci\server\database\DBSession($this->db);
-    $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
-    $dbgroupmap = new \asci\server\database\DBGroupMapping($this->db);
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+        $dbgroupmap = new \asci\server\database\DBGroupMapping($this->db);
+        $dbLogger = new \asci\server\database\DBLogs($this->db);
 
-    /* Grab the TA */
-    $taUser = $this->userStore->getUser($ta_computing_id);
+        /* Grab the TA */
+        $taUser = $this->userStore->getUser($ta_computing_id);
 
     /* First, set the main session to in_progress (easy part) */
     $mainSession = $dbsession->getSession($session_id);
@@ -550,8 +575,18 @@ class ServerExecutor{
     $mainSession->status = "in_progress";
     $result = $dbsession->update($mainSession);
     if(!$result) return $this->err("failure to update session to in_progress state");
+    $mainSessUsr = $dbsessusr->getSessionUserByRole($mainSession->id, "student");
+    
+    #currently if getSessioNUserByRole returns more than one user, throw error
+    if($mainSessUsr == null) return $this->err("failure to get main student Ta is working with");
 
+    /* Then, for each group session, check if still waiting */
+    /* If so, add a group mapping row to the main session and set to in progress */
+    $groupInformation = [];
+    $mainStudentInfo = ["Student" => $mainSessUsr->userId, "Subject" => $mainSession->issue_subject, "issue" => $mainSession->issue];      
+    array_push($groupInformation, $mainStudentInfo);
     /* if group_sessions has any actual sessions to group in, then remove TA from main session and create a TA session to mash all users into */
+    
     if(count($group_sessions) > 0){
 
       /* Remove the TA from the main session first!! */
@@ -569,12 +604,17 @@ class ServerExecutor{
       $result = $dbgroupmap->insert($gr_map);
       if(!$result) return $this->err("Error creating group session map");
 
-      /* Then, for each group session, check if still waiting */
-      /* If so, add a group mapping row to the main session and set to in progress */
+
+
+
       foreach($group_sessions as $gr_sess_id){
         /* gr_sess_id is just the id of the session, pull the session first */
         $gr_sess = $dbsession->getSession($gr_sess_id);
         if($gr_sess == null) return $this->err("Group sess id does not exist");
+        $sessUser = $dbsessusr->getSessionUserByRole($gr_sess->id, "student");
+        $studentInfo = ["Student" => $sessUser->userId, "Subject" => $gr_sess->issue_subject, "issue" => $gr_sess->issue];
+        array_push($groupInformation, $studentInfo);
+        
 
         /* If it is still waiting, change to in progress and write it */
         if($gr_sess->status == "waiting"){
@@ -596,7 +636,10 @@ class ServerExecutor{
         }
       }
     }
+    $type = "GroupCreation";
+    $logAction = json_encode(["Group" => $groupInformation, "ta" => $ta_computing_id, "session" => $session_id]);
 
+    $dbLogger->log($mainSessUsr->userId, $type, $logAction);
     $result = [];
     $result["success"] = "true";
     return $result;
