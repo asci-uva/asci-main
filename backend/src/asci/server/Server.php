@@ -133,7 +133,6 @@ class Server
     {
 
         //$this->logger->addDebug("Server starting to handle request", array("input" => $this->input));
-        $executor = new \asci\server\ServerExecutor();
 
         if ($this->input == null || empty($this->input)) {
             return;
@@ -142,7 +141,10 @@ class Server
         /* Grab the username from netbadge IF the server is in DEBUG mode */
         /* Otherwise, use the user provided by request */
         $user = $this->validateUsername($this->input);
-        
+
+        // Stand up the executor _after_ verifying the user so that we can pass the user
+        // object there. 
+        $executor = new \asci\server\ServerExecutor($user);
 
         /* This section acquires a lock for the given course IF a courseId was provided */
         /* ------------------------------------------------------------------ */
@@ -378,6 +380,12 @@ class Server
                 $newSettings = $this->input["settings"];
 
                 $this->setResponse($executor->setCourseSettings($courseId, $newSettings));
+                break;
+
+            case "getCourseStats":
+                $courseId = $this->input["courseId"];
+
+                $this->setResponse($executor->getCourseStats($courseId));
                 break;
 
             case "cancelGroup":

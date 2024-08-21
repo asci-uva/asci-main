@@ -10,7 +10,8 @@ function EditCourseInfo(props) {
   const { courseId } = useParams();
   const navigate = useNavigate();
 
-  const { refreshCourseList, user } = useUser();
+  const { user, getCourse, courseSettings, setCourseSettings, refreshCourseList } = useUser();
+  let course = getCourse();
 
   const [mnemonic, setMnemonic] = useState("");
   const [number, setNumber] = useState("");
@@ -74,40 +75,43 @@ function EditCourseInfo(props) {
     <>
     
       
-      <div className="card">
-        <h5 className="card-header">Edit Course Information</h5>
+      <div className="card mb-4">
+        <h4 className="card-header">Modify Course Identifiers</h4>
           <div className="card-body">
 
-            <form className="p-2">
+            <form className="">
 
+              <div className="input-group mb-3">
             <input
-              type="text" className="form-control mb-1"
+              type="text" className="form-control"
               value={mnemonic}
               onChange={(e) => setMnemonic(e.target.value)}
               placeholder="Mnemonic"></input>
            
             
             <input
-              type="text" className="form-control mb-1"
+              type="text" className="form-control"
               value={number}
               onChange={(e) => setNumber(e.target.value)}
               placeholder="Number" />
             
-            
             <input
-              type="text" className="form-control mb-1"
+              type="text" className="form-control"
+              value={semester}
+              onChange={(e) => setSemester(e.target.value)}
+              placeholder="Semester" />
+           
+               </div>
+
+            <input
+              type="text" className="form-control mb-3"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Name" />
             
             
-            <input
-              type="text" className="form-control mb-2"
-              value={semester}
-              onChange={(e) => setSemester(e.target.value)}
-              placeholder="Semester" />
             
-            <button type="button" className="btn btn-primary" onClick={handleSubmit}>Update Course</button>
+            <button type="button" className="btn btn-primary" onClick={handleSubmit}>Save Identifier</button>
 
             </form>
           </div>

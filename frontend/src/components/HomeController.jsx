@@ -4,6 +4,7 @@ import QueueController from "./QueueController";
 import ChatController from "./ChatController";
 import AdminController from "./AdminController";
 import PointsController from "./PointsController";
+import StatsController from "./StatsController";
 import { Home, Cards } from "./home";
 import { Login, Error, Navigation, Logout, SelectCourseHome } from "./utils";
 import { useUser } from "./context/UserContext";
@@ -65,6 +66,17 @@ const HomeController = (props) => {
               documentRoot={props.documentRoot + "/admin"}
               url={props.url}
               uploadurl={props.uploadurl}
+              debugMode={props.debugMode}
+            />
+          }
+        />
+        {/* Use StatsController for all stats related routes */}
+        <Route
+          path={"stats/*"}
+          element={
+            <StatsController
+              documentRoot={props.documentRoot + "/stats"}
+              url={props.url}
               debugMode={props.debugMode}
             />
           }

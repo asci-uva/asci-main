@@ -180,108 +180,108 @@ function TASurvey(props) {
             <p> Tell us about your meeting with {studFirstName} {studLastName} ({studId}).
             This meeting occured on {new Date(meetingDate).toLocaleString()}</p>
 
-            <p className="form-label"> Were you able to address the concerns of {studFirstName}? </p>
+            <p className="form-label"> Were you able to address the questions/concerns of the student? </p>
 
             <div className="mb-3">
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q1" value="1" className="form-check-input"
                 checked={q1Ans === "1"}
                 onChange={() => setQ1Ans("1")}
               />
-              it was very difficult
+              The student left more confused than when they arrived
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q1" value="2" className="form-check-input"
                 checked={q1Ans === "2"}
                 onChange={() => setQ1Ans("2")}
               />
-              it was a bit difficult
+              I was able to address none of the questions/concerns
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q1" value="3" className="form-check-input"
                 checked={q1Ans === "3"}
                 onChange={() => setQ1Ans("3")}
               />
-              neutral
+              I was able to address some of the questions/concerns
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q1" value="4" className="form-check-input"
                 checked={q1Ans === "4"}
                 onChange={() => setQ1Ans("4")}
               />
-              some concerns were addressed
+              I was able to address most of the questions/concerns
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q1" value="5" className="form-check-input"
                 checked={q1Ans === "5"}
                 onChange={() => setQ1Ans("5")}
               />
-              all concerns were addressed
+              I was able to address all of the questions/concerns
             </label>
             </div>
             </div>
 
-            <p className="form-label"> How satisfied were you with your meeting with {studFirstName}? </p>
+            <p className="form-label"> Overall, how satisfied were you with your office hours experience? </p>
 
             <div className="mb-3">
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q2" value="1" className="form-check-input"
                 checked={q2Ans === "1"}
                 onChange={() => setQ2Ans("1")}
               />
-              very unsatisfied
+              1 (very unsatisfied)
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q2" value="2" className="form-check-input"
                 checked={q2Ans === "2"}
                 onChange={() => setQ2Ans("2")}
               />
-              unsatisfied
+              2 (somewhat unsatisfied)
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q2" value="3" className="form-check-input"
                 checked={q2Ans === "3"}
                 onChange={() => setQ2Ans("3")}
               />
-              neutral
+              3 (neither satisfied nor unsatisfied)
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q2" value="4" className="form-check-input"
                 checked={q2Ans === "4"}
                 onChange={() => setQ2Ans("4")}
               />
-              satisfied
+              4 (somewhat satisfied)
             </label>
             </div>
-            <div className="form-check form-check-inline">
+            <div className="form-check">
             <label className="form-check-label">
               <input type="radio" name="q2" value="5" className="form-check-input"
                 checked={q2Ans === "5"}
                 onChange={() => setQ2Ans("5")}
               />
-              very satisfied
+              5 (very satisfied)
             </label>
             </div>
             </div>
 
             <div class="mb-3">
-            <p className="form-label">[Optional] Anything you would like us to know?</p>
+            <p className="form-label">Anything else you wish to add? (Optional)</p>
               <textarea className="form-control"
                 placeholder="Tell us about your experience..."
                 value = {feedback}

@@ -12,69 +12,79 @@ function Navigation(props) {
   return (
     <nav className="navbar navbar-expand-md navbar-dark bg-dark mb-4">
       <div className="container">
-          <NavLink className="navbar-brand" to="/asci">
+        <NavLink className="navbar-brand" to="/asci">
           ASCI@UVA
-          </NavLink>
-          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#ascinav" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
-              <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="ascinav"> 
-            <ul className="navbar-nav me-auto mb-2 mb-md-0">
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/asci/queue">
-                  <i className="bi-list-ol"></i> Queue
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/asci/chat">
-                  <i className="bi-chat-right-text"></i> BotChat
-                </NavLink>
-              </li>
-            { course.role == "instructor" ? (
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/asci/admin">
-                  <i className="bi-gear-wide-connected"></i> Admin
-                </NavLink>
-              </li>
-            ) : null }
+        </NavLink>
+        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#ascinav" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+          <span className="navbar-toggler-icon"></span>
+        </button>
+        <div className="collapse navbar-collapse" id="ascinav"> 
+          <ul className="navbar-nav me-auto mb-2 mb-md-0">
+            <li className="nav-item">
+              <NavLink className="nav-link" to="/asci/queue">
+                <i className="bi-list-ol"></i> Queue
+              </NavLink>
+            </li>
+            <li className="nav-item">
+              <NavLink className="nav-link" to="/asci/chat">
+                <i className="bi-chat-right-text"></i> BotChat
+              </NavLink>
+            </li>
             { false ? (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/asci/points">
                   <i className="bi-trophy-fill"></i> Earn Points
                 </NavLink>
               </li>
-              ) : null }
-      </ul>
-            <ul className="navbar-nav ms-auto mb-2 mb-md-0">
+            ) : null }
+          </ul>
+          <ul className="navbar-nav ms-auto mb-2 mb-md-0">
             <li className="nav-item dropdown">
               <a href="#" className="nav-link dropdown-toggle" data-bs-toggle="dropdown" area-expanded="false">
-      <i className="bi-mortarboard"></i> {course.mnemonic} {course.number} {course.name} ({course.semester}) 
+                <i className="bi-mortarboard"></i> {course.mnemonic} {course.number} {course.name} ({course.semester}) 
               </a>
-               <ul className="dropdown-menu">
-              <li>
-                <NavLink className="dropdown-item" to={docRoot + "/changeCourse"}>
-                  Change Course
-                </NavLink>
-              </li>
-               </ul>
-          </li>
+              <ul className="dropdown-menu">
+              { course.role == "instructor" ? (
+                <li className="">
+                  <NavLink className="dropdown-item" to="/asci/admin">
+                    <i className="bi-gear-wide-connected"></i> Admin
+                  </NavLink>
+                </li>
+              ) : null }
+              { course.role == "instructor" ? (
+                <li className="">
+                  <NavLink className="dropdown-item" to="/asci/stats">
+                    <i className="bi-bar-chart-line"></i> Statistics
+                  </NavLink>
+                </li>
+              ) : null }
+              { course.role == "instructor" ? (
+                <li><hr className="dropdown-divider"/></li>
+              ) : null }
+                <li>
+                  <NavLink className="dropdown-item" to={docRoot + "/changeCourse"}>
+                    Change Course
+                  </NavLink>
+                </li>
+              </ul>
+            </li>
 
             <li className="nav-item dropdown">
               <a href="#" className="nav-link dropdown-toggle" data-bs-toggle="dropdown" area-expanded="false">
-      <i className="bi-person-badge-fill"></i> {user.pname} {user.lname} ({user.userid}) 
+                <i className="bi-person-badge-fill"></i> {user.pname} {user.lname} ({user.userid}) 
               </a>
-               <ul className="dropdown-menu">
-              <li>
-                <NavLink className="dropdown-item" to={docRoot + "/logout"}>
-                  Logout
-                </NavLink>
-              </li>
-               </ul>
-          </li>
-      </ul>
+              <ul className="dropdown-menu">
+                <li>
+                  <NavLink className="dropdown-item" to={docRoot + "/logout"}>
+                    Logout
+                  </NavLink>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
       </div>
-      </div>
-      </nav>
+    </nav>
   );
 }
 

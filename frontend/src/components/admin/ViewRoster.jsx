@@ -90,11 +90,11 @@ function ViewRoster(props) {
   const RosterTable = ({data}) => {    
     if(data.length > 0){
       return (
-            <table id="rosterTable" className="table table-striped table-bordered table-hover table-sm">
+            <table id="rosterTable" className="table table-striped table-hover table-sm">
               <thead>
                 <RosterTableHeaderRow />
               </thead>
-              <tbody>
+              <tbody class="table-group-divider">
                 <RosterTableRow data={data} />
               </tbody>
             </table>
@@ -107,9 +107,9 @@ function ViewRoster(props) {
   }
 
   return (
-    <div className="container p-4">
-      <div className="row my-auto">        
-        <div className="col-md-12 my-auto">
+      <div className="card">
+        <h4 className="card-header">View Roster</h4>
+        <div className="card-body">
           <div>
             <input
               id="rosterSearchTextBox"
@@ -122,7 +122,6 @@ function ViewRoster(props) {
           </div>
         </div>
       </div>
-    </div>
   );
 }
 
