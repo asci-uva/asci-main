@@ -51,10 +51,6 @@ function ClearQueue(props) {
 
   }
 
-
-
-
-  //This gets a student
   const clearQueue = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
