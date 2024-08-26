@@ -26,7 +26,9 @@ class ServerExecutor{
   private $db = null;
   public $userStore = null; // The user storage 
   public $courseStore = null; // The course storage 
+  public $userCourseStore = null; // The UserCourse storage 
 
+  private $user = null;
   //Model state (NOT interacting with DB)
   //NONE YET BUT COMING SOON
 
@@ -55,13 +57,20 @@ class ServerExecutor{
    */
 
 
-  public function __construct(){
+  public function __construct($user=null){
     global $log;
 
     $this->db = new \asci\server\database\DatabaseConnector();
     $this->userStore = new \asci\server\database\DBUser($this->db);
     $this->courseStore = new \asci\server\database\DBCourse($this->db);
+    $this->userCourseStore = new \asci\server\database\DBUserCourse($this->db);
     // Check $_SERVER["uid"]; // their computing ID  (name and id can come from roster)
+
+    // This may need to change with other authentication types
+    if ($user == null)
+      throw new \asci\exceptions\ASCIPermissionException("User must be authenticated");
+
+    $this->user = $this->userStore->getUser($user);
 
     // create a log channel
     $this->logger = new \Monolog\Logger('ServerExecutor');
@@ -115,7 +124,7 @@ class ServerExecutor{
   public function getCoursesHandler($computing_id){
     $result = [];
 
-    $courses = (new \asci\server\database\DBUserCourse($this->db))->getCoursesForUser($computing_id);
+    $courses = $this->userCourseStore->getCoursesForUser($computing_id);
 
     $result["courses"] = [];
     foreach ($courses as $course){
@@ -134,7 +143,7 @@ class ServerExecutor{
   public function getCoursesByRoleHandler($computing_id, $role){
     $result = [];
 
-    $courses = (new \asci\server\database\DBUserCourse($this->db))->getCoursesForUserByRole($computing_id, $role);
+    $courses = $this->userCourseStore->getCoursesForUserByRole($computing_id, $role);
 
     $result["courses"] = [];
     foreach ($courses as $course){
@@ -155,7 +164,7 @@ class ServerExecutor{
     $user = $this->userStore->getUser($computing_id);
 
     //1: Get UserCourse (add function to get just one course)
-    $course = (new \asci\server\database\DBUserCourse($this->db))->getCourseForUser($user->getComputingId(), $course_id);
+    $course = $this->userCourseStore->getCourseForUser($user->getComputingId(), $course_id);
 
     //2: See if a session already exists for this person / course combo?
     $session = (new \asci\server\database\DBSession($this->db))->getSessionForUser($user->getId(), $course->getCourseId());
@@ -175,8 +184,11 @@ class ServerExecutor{
     $user = $this->userStore->getUser($computing_id);
 
     //1: Get UserCourse (add function to get just one course)
-    $course = (new \asci\server\database\DBUserCourse($this->db))->getCourseForUser($user->getComputingId(), $course_id);
+    $course = $this->userCourseStore->getCourseForUser($user->getComputingId(), $course_id);
 
+    //1.5: Check that they have permission to join the queue
+    if (!$this->userCourseStore->userHasPermission($user, $course_id, "join-queue"))
+      throw new \asci\exceptions\ASCIPermissionException("Not enrolled in course");
 
     //2: See if a session already exists for this person / course combo?
     $dbsession = new \asci\server\database\DBSession($this->db);
@@ -213,7 +225,7 @@ class ServerExecutor{
     $user = $this->userStore->getUser($computing_id);
 
     //1: Get UserCourse (add function to get just one course)
-    $course = (new \asci\server\database\DBUserCourse($this->db))->getCourseForUser($user->getComputingId(), $course_id);
+    $course = $this->userCourseStore->getCourseForUser($user->getComputingId(), $course_id);
 
 
     //2: See if a session already exists for this person / course combo?
@@ -273,6 +285,10 @@ class ServerExecutor{
 
     $result = [];
 
+    //1: Check that the user has permission to access queue
+    if (!$this->userCourseStore->userHasPermission($user, $course_id, "ta-queue"))
+      throw new \asci\exceptions\ASCIPermissionException("User is not enrolled as a TA in this course");
+
     //Grab the settings for this course
     $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
     $settings = $dbcrsset->getCourseSettings($course_id);
@@ -331,6 +347,10 @@ class ServerExecutor{
 
     //0: Grab the user
     $user = $this->userStore->getUser($computing_id);
+
+    //1: Check that the user has permission to access queue
+    if (!$this->userCourseStore->userHasPermission($user, $course_id, "ta-queue"))
+      throw new \asci\exceptions\ASCIPermissionException("User is not enrolled as a TA in this course");
 
     $result = [];
 
@@ -395,9 +415,16 @@ class ServerExecutor{
     //DB objects we will be using
     $dbsession = new \asci\server\database\DBSession($this->db);
     $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+    $dbLogger = new \asci\server\database\DBLogs($this->db);
 
     /* FIRST, GRAB JUST THE MAIN USER THE TA IS INTERACTING WITH */
     $user = $this->userStore->getUser($computing_id);
+
+    $user_id = $user->getId();
+
+    //1: Check that the user has permission to access queue
+    if (!$this->userCourseStore->userHasPermission($user, $course_id, "ta-queue"))
+      throw new \asci\exceptions\ASCIPermissionException("User is not enrolled as a TA in this course");
 
     $result = [];
 
@@ -414,7 +441,6 @@ class ServerExecutor{
       $result["error"] = "session is not in the grouping state (and it should be)";
       return $result;
     }
-
     //Ok, let's try to grab the student's information
     $sessUsr = $dbsessusr->getSessionUserByRole($session->getId(), 'student');
 
@@ -433,6 +459,7 @@ class ServerExecutor{
       return $result;
     }
 
+
     //Done. Set up the info to return
     $result["success"] = "true";
     $result["session"] = $session->toArray();
@@ -443,6 +470,9 @@ class ServerExecutor{
     /* Limit is 30 but we will trim that down to max group size */
     $group_sessions = $dbsession->getPotentialGroupSessions($course_id, 30);
     $max_group_options = 8;
+
+        //Logger information
+        $usedCosSim = False;
 
     /*  Grab the course settings */
     /* Database Object we are going to need */
@@ -487,15 +517,33 @@ class ServerExecutor{
         }
         $result["group_sessions"] = $group_sessions_ret;
       }
-
+$usedCosSim = True;
     }
     else{
 
-      /* Trim down to max option size */
-      if(count($group_sessions) > $max_group_options)
-        $group_sessions = array_slice($group_sessions, 0, $max_group_options);
-      $result["group_sessions"] = $group_sessions;
-    }
+            /* Trim down to max option size */
+            if(count($group_sessions) > $max_group_options)
+                $group_sessions = array_slice($group_sessions, 0, $max_group_options);
+            $result["group_sessions"] = $group_sessions;
+        }
+        $type = "potentialGroupInfo";
+        $groupInformation = [];
+        $studentInfo = ["Student" => $student->getId(), "Subject" => $session->issue_subject, "issue" => $session->issue];
+        array_push($groupInformation, $studentInfo);
+        foreach($result["group_sessions"] as $group_session){
+            $group_session_user = $dbsessusr->getSessionUserByRole($group_session->getId(), 'student');
+            if($group_session_user == null){
+                $result["success"] = "false";
+                $result["error"] = "ERROR: Session does not have any associated students when Logging";
+                return $result;
+            }
+            $studentInfo = ["Student" => $group_session_user->getUserId(), "Subject" => $group_session->issue_subject, "issue" => $group_session->issue];
+            array_push($groupInformation, $studentInfo);
+        }
+        $logAction = json_encode(["Group" => $groupInformation, "cosSim" => $usedCosSim, "ta" => $user_id, "session" => $session->id]);
+        #need to get this person and their problem, plus group members and their problems ;
+        $dbLogger->log($student->getId(), $type, $logAction);
+        
 
 
     return $result;
@@ -510,13 +558,14 @@ class ServerExecutor{
    */
   public function createGroup($ta_computing_id, $course_id, $session_id, $group_sessions, $location){
 
-    //DB objects we will be using
-    $dbsession = new \asci\server\database\DBSession($this->db);
-    $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
-    $dbgroupmap = new \asci\server\database\DBGroupMapping($this->db);
+        //DB objects we will be using
+        $dbsession = new \asci\server\database\DBSession($this->db);
+        $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+        $dbgroupmap = new \asci\server\database\DBGroupMapping($this->db);
+        $dbLogger = new \asci\server\database\DBLogs($this->db);
 
-    /* Grab the TA */
-    $taUser = $this->userStore->getUser($ta_computing_id);
+        /* Grab the TA */
+        $taUser = $this->userStore->getUser($ta_computing_id);
 
     /* First, set the main session to in_progress (easy part) */
     $mainSession = $dbsession->getSession($session_id);
@@ -526,8 +575,18 @@ class ServerExecutor{
     $mainSession->status = "in_progress";
     $result = $dbsession->update($mainSession);
     if(!$result) return $this->err("failure to update session to in_progress state");
+    $mainSessUsr = $dbsessusr->getSessionUserByRole($mainSession->id, "student");
+    
+    #currently if getSessioNUserByRole returns more than one user, throw error
+    if($mainSessUsr == null) return $this->err("failure to get main student Ta is working with");
 
+    /* Then, for each group session, check if still waiting */
+    /* If so, add a group mapping row to the main session and set to in progress */
+    $groupInformation = [];
+    $mainStudentInfo = ["Student" => $mainSessUsr->userId, "Subject" => $mainSession->issue_subject, "issue" => $mainSession->issue];      
+    array_push($groupInformation, $mainStudentInfo);
     /* if group_sessions has any actual sessions to group in, then remove TA from main session and create a TA session to mash all users into */
+    
     if(count($group_sessions) > 0){
 
       /* Remove the TA from the main session first!! */
@@ -545,12 +604,17 @@ class ServerExecutor{
       $result = $dbgroupmap->insert($gr_map);
       if(!$result) return $this->err("Error creating group session map");
 
-      /* Then, for each group session, check if still waiting */
-      /* If so, add a group mapping row to the main session and set to in progress */
+
+
+
       foreach($group_sessions as $gr_sess_id){
         /* gr_sess_id is just the id of the session, pull the session first */
         $gr_sess = $dbsession->getSession($gr_sess_id);
         if($gr_sess == null) return $this->err("Group sess id does not exist");
+        $sessUser = $dbsessusr->getSessionUserByRole($gr_sess->id, "student");
+        $studentInfo = ["Student" => $sessUser->userId, "Subject" => $gr_sess->issue_subject, "issue" => $gr_sess->issue];
+        array_push($groupInformation, $studentInfo);
+        
 
         /* If it is still waiting, change to in progress and write it */
         if($gr_sess->status == "waiting"){
@@ -572,7 +636,10 @@ class ServerExecutor{
         }
       }
     }
+    $type = "GroupCreation";
+    $logAction = json_encode(["Group" => $groupInformation, "ta" => $ta_computing_id, "session" => $session_id]);
 
+    $dbLogger->log($mainSessUsr->userId, $type, $logAction);
     $result = [];
     $result["success"] = "true";
     return $result;
@@ -714,6 +781,10 @@ class ServerExecutor{
 
     //0: Grab the user
     $user = $this->userStore->getUser($computing_id);
+
+    //1: Check that the user has permission to access queue
+    if (!$this->userCourseStore->userHasPermission($user, $course_id, "ta-queue"))
+      throw new \asci\exceptions\ASCIPermissionException("User is not enrolled as a TA in this course");
 
     $result = [];
 
@@ -863,18 +934,11 @@ class ServerExecutor{
     $result = [];
 
     //Get the UserCourse object
-    $userCourse = (new \asci\server\database\DBUserCourse($this->db))->getCourseForUser($user->getComputingId(), $course_id);
+    $userCourse = $this->userCourseStore->getCourseForUser($user->getComputingId(), $course_id);
 
-    if($userCourse == null){
-      $result["success"] = "false";
-      $result["error"] = "ERROR: This user not associated with this course";
-      return $result;
-    }
-    else if($userCourse->getRole() != "ta" && $userCourse->getRole() != "instructor"){
-      $result["success"] = "false";
-      $result["error"] = "ERROR: This user not a ta for this course";
-      return $result;
-    }
+    //1: Check that the user has permission to access queue
+    if (!$this->userCourseStore->userHasPermission($user, $course_id, "ta-queue"))
+      throw new \asci\exceptions\ASCIPermissionException("User is not enrolled as a TA in this course");
 
     //Ok, looks good. Grab the number of waiting students
     $waitingSessions = $dbsession->getWaitingSessions($course_id);
@@ -1212,12 +1276,10 @@ class ServerExecutor{
     $dbsession = new \asci\server\database\DBSession($this->db);
 
     /* Make sure user is TA for this course */
-    //Get the UserCourse object
-    $userCourse = (new \asci\server\database\DBUserCourse($this->db))->getCourseForUser($user->getComputingId(), $course_id);
 
-    if($userCourse == null) return $this->err("ERROR: This user not associated with this course");
-    else if($userCourse->getRole() != "ta") return $this->err("ERROR: This user not a ta for this course");
-
+    //1: Check that the user has permission to access queue
+    if (!$this->userCourseStore->userHasPermission($user, $course_id, "ta-queue"))
+      throw new \asci\exceptions\ASCIPermissionException("User is not enrolled as a TA in this course");
 
     $result = [];
 
@@ -1241,11 +1303,13 @@ class ServerExecutor{
 
     // Check for the user 
     $computing_id = $data["user"];
-    $user = $this->userStore->getUser($computing_id)->toArray();
-    if ($user == null || empty($user)) 
+    $user = $this->userStore->getUser($computing_id);
+    if ($user == null) 
       throw new \asci\exceptions\ASCIException("Unknown user");
 
-    $user_id = $user["id"];
+    //1: Check that the user has permission to access queue
+    if (!$this->userCourseStore->userHasPermission($user, $course["course_id"], "upload-llm"))
+      throw new \asci\exceptions\ASCIPermissionException("User does not have permission to upload llm data");
 
     // similar to $cosSim
     $chat = new \asci\util\LlmChat($course);
@@ -1264,11 +1328,13 @@ class ServerExecutor{
 
     // Check for the user 
     $computing_id = $data["user"];
-    $user = $this->userStore->getUser($computing_id)->toArray();
-    if ($user == null || empty($user)) 
+    $user = $this->userStore->getUser($computing_id);
+    if ($user == null) 
       throw new \asci\exceptions\ASCIException("Unknown user");
 
-    $user_id = $user["id"];
+    //1: Check that the user has permission to access queue
+    if (!$this->userCourseStore->userHasPermission($user, $course["course_id"], "upload-llm"))
+      throw new \asci\exceptions\ASCIPermissionException("User does not have permission to upload llm data");
 
     // similar to $cosSim
     $chat = new \asci\util\LlmChat($course);
@@ -1289,11 +1355,13 @@ class ServerExecutor{
 
     // Check for the user 
     $computing_id = $data["user"];
-    $user = $this->userStore->getUser($computing_id)->toArray();
-    if ($user == null || empty($user)) 
+    $user = $this->userStore->getUser($computing_id);
+    if ($user == null) 
       throw new \asci\exceptions\ASCIException("Unknown user");
-
-    $user_id = $user["id"];
+    
+    //1: Check that the user has permission to access queue
+    if (!$this->userCourseStore->userHasPermission($user, $course["course_id"], "llm-chat"))
+      throw new \asci\exceptions\ASCIPermissionException("User does not have permission to chat with llm");
 
     // similar to $cosSim
     $chat = new \asci\util\LlmChat();
@@ -1313,7 +1381,7 @@ class ServerExecutor{
     $type = $data["command"];
     $logString = json_encode(["role" => "user", "content" => $data["studentQuestion"], "response"=>$llmResponse, "course"=>$data["course"]]);
 
-    $dbLogger->log($user_id, $type, $logString);
+    $dbLogger->log($user->getId(), $type, $logString);
 
     $result = [];
     $result["response"] = $llmResponse;
@@ -1321,6 +1389,10 @@ class ServerExecutor{
   }
 
   public function getCourseStats($course_id) {
+    //1: Check that the current user has permission to access stats
+    if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-stats"))
+      throw new \asci\exceptions\ASCIPermissionException("User does not have permission to access course stats");
+
     $dbstat = new database\DBStats($this->db);
 
     $stats = $dbstat->getTAHelpStatsForCourse($course_id);
@@ -1334,6 +1406,9 @@ class ServerExecutor{
   }
 
     public function setCourseSettings($course_id, $settings){
+      //1: Check that the current user has permission to access stats
+      if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-settings"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to access course settings");
 
         /* Database Object we are going to need */
         $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
@@ -1353,6 +1428,10 @@ class ServerExecutor{
 
     // manually add student/ta to the course
     public function manuallyAddStudentHandler($fname, $lname, $pname, $computing_id, $role, $course_id) {
+        //1: Check that the current user has permission to access stats
+        if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-roster"))
+          throw new \asci\exceptions\ASCIPermissionException("User does not have permission to modify course roster");
+
         $user = [
             'fname' => $fname,
             'lname' => $lname,
@@ -1383,6 +1462,11 @@ class ServerExecutor{
     // upload roster
     public function uploadRosterHandler($users, $course_id) {
         // Note: $users should be an array of associative arrays, where each associative array represents a user with keys 'fname', 'lname', 'pname', 'computing_id', and 'role'.        
+      
+        //1: Check that the current user has permission to modify roster
+        if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-roster"))
+          throw new \asci\exceptions\ASCIPermissionException("User does not have permission to modify course roster");
+
         $results = (new \asci\server\database\DBUser($this->db))->ManuallyAddUsersForCourse($users, $course_id);
 
         // Here, $results is an associative array with computing_id as key and true/false as value indicating success/failure.
@@ -1399,22 +1483,10 @@ class ServerExecutor{
     }
 
     public function getCourseRosterHandler($computing_id, $course_id) {
-        
-        /* Grab the user first */
-        $user = $this->userStore->getUser($computing_id);
-
-        //Some DB objects we will be using
-        $dbsession = new \asci\server\database\DBSession($this->db);
-        $dbusrcourse = new \asci\server\database\DBUserCourse($this->db);
-
-
-        /* Make sure user is TA or Instructor for this course */
-        //Get the UserCourse object
-        $userCourse = $dbusrcourse->getCourseForUser($user->getComputingId(), $course_id);
-
-        if($userCourse == null) return $this->err("ERROR: This user not associated with this course");
-        else if($userCourse->getRole() != "ta" && $userCourse->getRole() != "instructor") return $this->err("ERROR: This user not a ta for this course");
-        
+      
+        //1: Check that the current user has permission to modify roster
+        if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-roster"))
+          throw new \asci\exceptions\ASCIPermissionException("User does not have permission to view course roster");
 
         $roster = $this->userStore->getRosterForCourse($course_id);
 
@@ -1463,6 +1535,10 @@ class ServerExecutor{
     }
 
     public function updateCourseInfoHandler($course_id, $mnemonic, $number, $name, $semester) {
+        //1: Check that the current user has permission to modify settings
+        if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-settings"))
+          throw new \asci\exceptions\ASCIPermissionException("User does not have permission to modify course info");
+        
         // Retrieve the original course data using the getCourseById method
         $originalCourse = (new \asci\server\database\DBCourse($this->db))->getCourseById($course_id);
 
@@ -1659,7 +1735,7 @@ class ServerExecutor{
         $courseQuestSuccess = (new \asci\server\database\DBCourseQuest($this->db))->addQuestToCourse($quest_id, $course_id);
         if ($courseQuestSuccess) {
             // get all users
-            $user_courses = (new \asci\server\database\DBUserCourse($this->db))->getStudentsForCourse($course_id);
+            $user_courses = $this->userCourseStore->getStudentsForCourse($course_id);
             // add the quest to each user in the course 
             foreach ($user_courses as $u_c) {
                 $user_id = ((new \asci\server\database\DBUser($this->db))->getUser($u_c -> getComputingId())) -> getId();
@@ -1682,7 +1758,7 @@ class ServerExecutor{
         $courseQuestSuccess = (new \asci\server\database\DBCourseQuest($this->db))->removeQuestFromCourse($quest_id, $course_id);
         if ($courseQuestSuccess) {
             // get all users
-            $user_courses = (new \asci\server\database\DBUserCourse($this->db))->getStudentsForCourse($course_id);
+            $user_courses = $this->userCourseStore->getStudentsForCourse($course_id);
             // remove the quest from users in the course 
             foreach ($user_courses as $u_c) {
                 $user_id = ((new \asci\server\database\DBUser($this->db))->getUser($u_c -> getComputingId())) -> getId();

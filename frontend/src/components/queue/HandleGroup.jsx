@@ -212,7 +212,11 @@ function HandleGroup(props) {
     if(otherSessions == null || otherSessions.length == 0){
       return(
         <div>
-          <h2>There are no potential group members right now. Please click Start Session to continue.</h2>
+          <h5>There are no potential group members right now. Please click Start Session to continue.</h5>
+          <div className="my-auto text-center">
+            <button className="btn btn-primary mx-3" onClick={createGroup}>Start Session</button>
+            <button className="btn btn-danger mx-3" onClick={cancelGroup}>Cancel</button>
+          </div>
         </div>
       );
     }
@@ -260,6 +264,9 @@ function HandleGroup(props) {
                 />
                 <button className="btn btn-primary" onClick={createGroup}>Start Session</button>
               </div>
+              <div className="my-auto text-center">
+                <button className="btn btn-danger mx-3" onClick={cancelGroup}>Cancel</button>
+              </div>
             </div>
           </form>
         </div>
@@ -297,11 +304,6 @@ function HandleGroup(props) {
 
             <div>
               {GroupPanel(null)}
-            </div>
-
-
-            <div className="my-auto text-center">
-              <button className="btn btn-danger mx-3" onClick={cancelGroup}>Cancel</button>
             </div>
           </div>
         </div>

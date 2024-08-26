@@ -91,6 +91,43 @@ class DBUserCourse
         return $toReturn;
     }
 
+    public function userHasPermission($user, $course_id, $permission=false) {
+
+      if ($permission === false)
+        return false;
+        
+      $usercourse = $this->getCourseForUser($user->getComputingId(), $course_id);
+
+      if ($usercourse == false)
+        return false;
+
+      $role = $usercourse->getRole();
+
+      switch($permission) {
+        case "join-queue":
+          if ($role == "student")
+            return true;
+          break;
+        case "ta-queue":
+          if ($role == "ta" || $role == "instructor")
+            return true;
+          break;
+        case "course-roster":
+        case "course-settings":
+        case "upload-llm":
+        case "course-stats":
+          if ($role == "instructor")
+            return true;
+          break;
+        case "llm-chat":
+          return true;
+        default:
+          return false;
+      }
+     
+      return false;
+    }
+
     // returns UserCourse objects for users in the course
     public function getStudentsForCourse($course_id)
     {
