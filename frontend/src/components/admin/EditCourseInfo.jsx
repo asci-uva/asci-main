@@ -20,7 +20,7 @@ function EditCourseInfo(props) {
 
   const handleSubmit = () => {
     const updatedCourse = {
-      course_id: courseId,
+      course_id: course.course_id,
       mnemonic,
       number,
       name,
@@ -43,7 +43,7 @@ function EditCourseInfo(props) {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
+        console.log("Update course info is: ", data);
         if (data.success) {
           toast.success("Course updated successfully!");
 

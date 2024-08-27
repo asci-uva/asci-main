@@ -44,6 +44,7 @@ class ASCIException extends \Exception {
     public function __toString() {
 
         $json = [
+            "success" => false,
             "error" => [
                 "type" => $this->type,
                 "message" => $this->message

@@ -93,6 +93,10 @@ class DBUserCourse
 
     public function userHasPermission($user, $course_id, $permission=false) {
 
+      $compId = $user->getComputingId();
+
+      $this->logger->debug("Requesting permission for $compId in $course_id ($permission)");
+
       if ($permission === false)
         return false;
         
@@ -102,6 +106,8 @@ class DBUserCourse
         return false;
 
       $role = $usercourse->getRole();
+
+      $this->logger->debug("Role is: $role");
 
       switch($permission) {
         case "join-queue":
