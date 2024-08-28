@@ -94,7 +94,7 @@ function ViewRoster(props) {
               <thead>
                 <RosterTableHeaderRow />
               </thead>
-              <tbody class="table-group-divider">
+              <tbody className="table-group-divider">
                 <RosterTableRow data={data} />
               </tbody>
             </table>

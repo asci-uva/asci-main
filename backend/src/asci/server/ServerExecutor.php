@@ -1479,6 +1479,7 @@ $usedCosSim = True;
             }
         }
 
+        $response["success"] = true;
         return $response;
     }
 

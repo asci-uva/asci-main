@@ -13,9 +13,9 @@ function AddStudent(props) {
   const [computingId, setComputingId] = useState("");
   const [role, setRole] = useState("student"); // default to 'student' / can be switched to ta
 
-    let {user, getCourse} = useUser();
-
-  const { course_id } = props;
+  let {user, getCourse, refreshCourseRoster} = useUser();
+  let course = getCourse();
+  
   const navigate = useNavigate();
   const docRoot = props.documentRoot;
 
@@ -27,8 +27,8 @@ function AddStudent(props) {
       pname,
       computingId,
       role,
-      course_id: course_id,
-      user: user,
+      course_id: course.course_id,
+      user: user.userid,
     };
 
     fetch(props.url, {
@@ -43,6 +43,7 @@ function AddStudent(props) {
         console.log(data);
         if (data.success) {
           toast.success("Student/TA added successfully!");
+          refreshCourseRoster();
         } else {
           toast.error("Error adding the student/TA");
         }

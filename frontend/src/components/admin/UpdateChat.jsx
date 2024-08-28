@@ -110,7 +110,7 @@ function UpdateChat(props) {
           <form className="mb-3">
             <p className="form-label">Piazza Export ZIP</p>
       
-            <div class="input-group mb-3"> 
+            <div className="input-group mb-3"> 
             <input className="form-control" type="file" onChange={handlePiazzaFileChange} accept=".zip" />
             <button type="button" disabled={uploadInProgress} className="btn btn-primary" onClick={uploadPiazza}>Upload</button>
             </div>

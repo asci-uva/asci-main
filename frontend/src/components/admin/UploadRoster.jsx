@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useUser } from "../context/UserContext";
 
 function UploadRoster(props) {
   const [rosterFile, setRosterFile] = useState(null);
-  const { course_id } = props;
+  const { user, getCourse, courseSettings, setCourseSettings, refreshCourseRoster, refreshCourseList } = useUser();
+  let course = getCourse();
 
   const handleFileChange = (event) => {
     setRosterFile(event.target.files[0]);
@@ -54,9 +56,11 @@ function UploadRoster(props) {
     const payload = {
       command: "uploadRoster",
       roster: rosterData,
-      user: localStorage.getItem("asci-user"),
-      course_id: course_id,
+      user: user.userid,
+      course_id: course.course_id,
     };
+
+    console.log("Upload roster payload: ", payload);
 
     fetch(props.url, {
       method: "POST",
@@ -67,10 +71,11 @@ function UploadRoster(props) {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
-        if (data) {
+        console.log("Upload roster respond: ", data);
+        if (data.success) {
           console.log("Roster uploaded successfully!");
           toast.success("Roster uploaded successfully!");
+          refreshCourseRoster();
         } else {
           console.error("Error uploading the roster");
           toast.error("Error uploading the roster");

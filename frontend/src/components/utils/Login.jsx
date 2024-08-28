@@ -5,29 +5,24 @@ import { useUser } from "../context/UserContext";
 
 //https://www.youtube.com/watch?v=IkMND33x0qQ
 function Login(props) {
-  const [username, setUsername] = useState(null);
+  const [username, setUsername] = useState("");
   const navigate = useNavigate();
   const { login } = useUser();
 
-  let url0 = props.url;
   let docRoot = props.documentRoot;
 
   let debugMode = props.debugMode;
 
   useEffect(() => {
-    console.log("Checking if user name already set");
 
-    //If username is set in browser, don't do anything and just route back to the homepage
-    if (localStorage.getItem("asci-user") !== null) {
-      console.log("it does, sending to home page");
-      navigate(docRoot);
-    } else {
-      //If debugMode enabled, ping the server to find out who this user is
-      if (!debugMode) {
-        handleLogin();
-      }
+    //If debugMode enabled, ping the server to find out who this user is
+    if (!debugMode) {
+      handleLogin();
+    }
+    else{
       //If netbadge not enabled, then just wait for user to type something into the box
     }
+    
   }, []);
 
   const handleLogin = () => {

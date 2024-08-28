@@ -89,7 +89,7 @@ function GradescopeSync(props) {
             <form className="">
 
 
-              <div class="mb-3">
+              <div className="mb-3">
               <label>Gradescope Course Number:</label>
               <input className="form-control"
                 type="text"
@@ -99,7 +99,7 @@ function GradescopeSync(props) {
               />
               </div>
 
-              <div class="mb-3">
+              <div className="mb-3">
               <label>Gradescope Account Username:</label>
               <input className="form-control mb-2"
                 type="text"
@@ -109,7 +109,7 @@ function GradescopeSync(props) {
               />
               </div>
 
-              <div class="mb-3">
+              <div className="mb-3">
               <label>Gradescope Account Passcode:</label>
               <input className="form-control mb-2"
                 type="password"
