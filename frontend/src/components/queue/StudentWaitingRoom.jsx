@@ -6,8 +6,9 @@ import Chat from "../chat/Chat";
 
 function StudentWaitingRoom(props) {
   const navigate = useNavigate();
-  let {user, getCourse} = useUser();
+  let {user, getCourse, getCourseSettings} = useUser();
   let course = getCourse();
+  let settings = getCourseSettings();
 
 
   const [position, setPosition] = useState(-1);
@@ -219,21 +220,30 @@ function StudentWaitingRoom(props) {
               Leave queue
             </button>
           </div>
-          <h4>While you wait...</h4>
-          <p>We've automatically sent your question to the course's TA bot.  It may be able to help you while you're waiting for the next available TA.  Use the interface below to chat.</p>
-          <div className="card">
-            <div className="card-body">
-          <Chat
-            url={url}
-            docRoot={docRoot}
-            issueSubject={issueSubject}
-            courseName={course.name}
-          />
-          </div>
-          </div>
+
+          
+          { settings!=null && settings.llm_enabled=="t" ? (
+            <>
+            <h4>While you wait...</h4>
+            <p>We've automatically sent your question to the course's TA bot.  It may be able to help you while you're waiting for the next available TA.  Use the interface below to chat.</p>
+            <div className="card">
+              <div className="card-body">
+            <Chat
+              url={url}
+              docRoot={docRoot}
+              issueSubject={issueSubject}
+              courseName={course.name}
+            />
+              </div>
+            </div>
+            </>
+          ) : null }
+          
+
         </div>
       </div>
     </div>
+
   );
 }
 

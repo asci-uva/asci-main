@@ -14,7 +14,9 @@ import { useUser } from "./context/UserContext";
 const ChatController = (props) => {
   const navigate = useNavigate();
     
-    const {user} = useUser();
+    const {user, getCourseSettings} = useUser();
+    let settings = getCourseSettings();
+
     return (
     <>
       <div className="container p-4">
@@ -29,8 +31,15 @@ const ChatController = (props) => {
             Please note: the bot may not always provide correct responses.  Use the information it gives you and follow the relevant links to learn more.
           </p>
         </div>
+
       <div className="col-md-8 my-auto">
-        <Chat {...props} />
+
+        { settings!=null && settings.llm_enabled=="t" ? (
+          <Chat {...props} />
+        
+        ) : (
+          <p>Sorry! It looks like the chat bot is not enabled for this course. Please contact your instructor.</p>
+        ) }
       </div>
     </div>
     </div>

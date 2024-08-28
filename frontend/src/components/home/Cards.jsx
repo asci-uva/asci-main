@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 
 function Cards(props) {
-  const {getCourse} = useUser();
+  const {getCourse, getCourseSettings} = useUser();
   let course = getCourse();
+  let settings = getCourseSettings();
+
+
   return (
     <div className="row">
       <div className="col-lg-4 col-md-6 mb-4">
@@ -17,6 +20,8 @@ function Cards(props) {
           </div>
         </div>
       </div>
+
+      { settings!=null && settings.llm_enabled=="t" ? (
       <div className="col-lg-4 col-md-6 mb-4">
         <div className="card p-3">
           <div className="card-img-top text-center">
@@ -27,6 +32,8 @@ function Cards(props) {
           </div>
         </div>
       </div>
+      ) : null }
+
       { course.role === "instructor" ? (
         <div className="col-lg-4 col-md-6 mb-4">
           <div className="card p-3">

@@ -28,21 +28,21 @@ class DBCourseSettings
      * Updates the course settings with the provided one
      */
     public function update($course_settings){
-        $this->logger->debug("updating course settings: ", array("settings" => $course_settings));
-        $this->logger->debug("smart grouping setting: ", array("setting" => $course_settings->smart_grouping));
 
         $query = 'UPDATE course_settings SET
             show_queue_list = $1,
             grouping_enabled = $2,
             smart_grouping = $3,
-            show_quests = $4
-            WHERE course_id = $5';
+            show_quests = $4,
+            llm_enabled = $5
+            WHERE course_id = $6';
 
         $result = $this->db->query($query, array(
             json_encode($course_settings->show_queue_list),
             json_encode($course_settings->grouping_enabled),
             json_encode($course_settings->smart_grouping),
             json_encode($course_settings->show_quests),
+            json_encode($course_settings->llm_enabled),
             $course_settings->course_id
         ));
 

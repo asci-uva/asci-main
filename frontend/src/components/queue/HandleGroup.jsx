@@ -241,8 +241,8 @@ function HandleGroup(props) {
                       onChange={handleCheck}
                     />
                   </div><div className="col-11">
-                    <label class="form-check-label stretched-link" htmlFor={"checkbox"+otherSessions[k]['id']}>{otherSessions[k]['issue']}</label>
-                    <p class="mb-1"><b>Location:</b> {otherSessions[k]['location']}</p>
+                    <label className="form-check-label stretched-link" htmlFor={"checkbox"+otherSessions[k]['id']}>{otherSessions[k]['issue']}</label>
+                    <p className="mb-1"><b>Location:</b> {otherSessions[k]['location']}</p>
                   </div></div>
                   </li>
                 );
@@ -294,7 +294,7 @@ function HandleGroup(props) {
               <h4 className="card-header">The following student is willing to be in a group</h4>
               <div className="card-body">
                 <h5>{primeSubject}</h5>
-                <p class="mb-0">{primeIssue}</p>
+                <p className="mb-0">{primeIssue}</p>
               </div>
               <div className="card-footer pb-0">
                 <p className="mb-2"><b>Location:</b> {primeLocation}</p>

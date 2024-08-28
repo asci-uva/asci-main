@@ -20,6 +20,9 @@ function EditCourseSettings(props) {
   const [groupingEnabled, setGroupingEnabled] = useState(courseSettings.grouping_enabled == "t");
   const [smartGrouping, setSmartGrouping] = useState(courseSettings.smart_grouping == "t");
 
+  /* AI Settings */
+  const [llmEnabled, setLlmEnabled] = useState(courseSettings.llm_enabled == "t");
+
   /* Quest Settings */
   const [showQuests, setShowQuests] = useState(courseSettings.show_quests == "t");
   
@@ -37,6 +40,7 @@ function EditCourseSettings(props) {
       show_queue_list: showQueueList,
       grouping_enabled: groupingEnabled,
       smart_grouping: smartGrouping,
+      llm_enabled: llmEnabled,
       show_quests: showQuests,     //this one cannot actually be changed
     };
 
@@ -94,6 +98,12 @@ function EditCourseSettings(props) {
       setSmartGrouping(element.checked);
   }
 
+  const handleLlmEnabledChange = (e) => {
+      const element = e.target;
+      console.log("changing boolean llmEnabled to " , element.checked);
+      setLlmEnabled(element.checked);
+  }
+
   return (
     <>
       <div className="card mb-4">
@@ -113,6 +123,13 @@ function EditCourseSettings(props) {
             <div className="form-check form-switch mb-3">
               <input className="form-check-input" type="checkbox" id="smartGrouping" checked={smartGrouping} onChange={ handleSmartGroupingChange }></input>
               <label className="form-check-label" htmlFor="smartGrouping"><b>Enable Smart Grouping: </b>Recommended student groups will be presented to TAs based on student issues</label>
+            </div>
+
+            <h5>AI Settings</h5>
+
+            <div className="form-check form-switch mb-3">
+              <input className="form-check-input" type="checkbox" id="llmEnabled" checked={llmEnabled} onChange={ handleLlmEnabledChange }></input>
+              <label className="form-check-label" htmlFor="llmEnabled"><b>Enable LLM Chat Bot: </b>The LLM Chat Bot will be available to students on main chat bot page and while waiting on the queue</label>
             </div>
 
             <h5>Quick Task Settings</h5>

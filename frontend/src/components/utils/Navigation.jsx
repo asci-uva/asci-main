@@ -6,8 +6,10 @@ import { useUser } from "../context/UserContext";
 function Navigation(props) {
   let docRoot = props.documentRoot;
   let debugMode = props.debugMode;
-  const {user, courseList, getCourse} = useUser();
+  const {user, courseList, getCourse, getCourseSettings} = useUser();
   let course = getCourse();
+  let settings = getCourseSettings();
+  console.log("navigation: ", settings);
 
   return (
     <nav className="navbar navbar-expand-md navbar-dark bg-dark mb-4">
@@ -25,11 +27,13 @@ function Navigation(props) {
                 <i className="bi-list-ol"></i> Queue
               </NavLink>
             </li>
+            { settings!=null && settings.llm_enabled=="t" ? (
             <li className="nav-item">
               <NavLink className="nav-link" to="/asci/chat">
                 <i className="bi-chat-right-text"></i> BotChat
               </NavLink>
             </li>
+            ) : null }
             { false ? (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/asci/points">

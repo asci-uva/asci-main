@@ -1412,9 +1412,9 @@ $usedCosSim = True;
 
         /* Database Object we are going to need */
         $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
-        $this->logger->debug("settings in executor 1: ", array("settings" => $settings));
+        
         $newSettings = (new \asci\data\CourseSettings())->fromArray($settings);
-        $this->logger->debug("settings in executor 2: ", array("newSettings" => $newSettings));
+        
 
         $result = $dbcrsset->update($newSettings);
         
