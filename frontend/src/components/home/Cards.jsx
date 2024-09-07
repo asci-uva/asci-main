@@ -58,7 +58,7 @@ function Cards(props) {
           </div>
         </div>
       ) : null }
-      { false ? (
+      { settings!=null && settings.show_quests=="t" && course.role === 'student' ? (
       <div className="col-lg-4 col-md-6 mb-4">
         <div className="card p-3">
           <div className="card-img-top text-center">

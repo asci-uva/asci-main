@@ -2,40 +2,33 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import QuestCard from "./QuestCard";
+import { useUser } from "../context/UserContext";
 
 function QuestList(props) {
+    let { user, getCourse } = useUser();
+    let course = getCourse();
+
     let docRoot = props.documentRoot;
-    let debugMode = props.debugMode;
     let url = props.url;
-    let root = "/asci";
 
     // const { courseId } = useParams();
     const navigate = useNavigate();
-    const [user, setUser] = useState(null);
+    // const [user, setUser] = useState(null);
     const [quests, setQuests] = useState({});
     const [pointCount, setPointCount] = useState(0);
 
     useEffect(() => {
-        //If token is set, kick to home screen to check validity of session
-        if (localStorage.getItem('asci-user') !== null) {
-            //try to get the user's quests
-            setUser(localStorage.getItem('asci-user'));
+        //setup json command
+        let request = {};
+        request.command = "getQuestsForUser";
+        request.user = user.userid;
+        request.courseId = course.course_id;
+        getQuests(request, url);
 
-            //setup json command
-            let request = {};
-            request.command = "getQuestsForUser";
-            request.user = localStorage.getItem('asci-user');
-            request.courseId = localStorage.getItem('asci-course');
-            getQuests(request, url);
-
-            request.command = "getPointsForUser";
-            request.user = localStorage.getItem('asci-user');
-            request.courseId = localStorage.getItem('asci-course');
-            getPoints(request, url);
-        }
-        else {
-            navigate(docRoot + "/login");
-        }
+        request.command = "getPointsForUser";
+        request.user = user.userid;
+        request.courseId = course.course_id;
+        getPoints(request, url);
     }, []);
 
     const getQuests = (json0, url0) => {
@@ -108,7 +101,7 @@ function QuestList(props) {
 
     return (
         <div>
-            <h1>All Quests for {user}</h1>
+            <h1>All Quests for {user.pname}</h1>
             <div className="pointCount">
                 <h5 className="card-title">Points Earned: {pointCount}</h5>
             </div>

@@ -9,6 +9,7 @@ import EditCourseSettings from "./EditCourseSettings";
 import CreateNewCourse from "./CreateNewCourse";
 import ViewRoster from "./ViewRoster";
 import UpdateChat from "./UpdateChat";
+import SelectQuests from "./SelectQuests";
 
 function Home(props) {
   let docRoot = props.documentRoot;
@@ -44,6 +45,9 @@ function Home(props) {
               </li>
               <li className="nav-item" role="presentation">
                 <button className="nav-link" id="pills-sync-tab" data-bs-toggle="pill" data-bs-target="#pills-sync" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Synchronization</button>
+              </li>
+              <li className="nav-item" role="presentation">
+                <button className="nav-link" id="pills-quests-tab" data-bs-toggle="pill" data-bs-target="#pills-quests" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Select Quests</button>
               </li>
             </ul>
               </div>
@@ -81,6 +85,14 @@ function Home(props) {
                 <div className="row">
                   <div className="col-md-12 my-auto">
                     <GradescopeSync course_id={courseList[course].course_id} {...props} />              
+                  </div>
+                </div>
+              </div>
+
+              <div className="tab-pane fade" id="pills-quests" role="tabpanel" aria-labelledby="pills-select-quests-tab">
+                <div className="row">
+                  <div className="col-md-12 my-auto">
+                    <SelectQuests course_id={courseList[course].course_id} {...props} />              
                   </div>
                 </div>
               </div>

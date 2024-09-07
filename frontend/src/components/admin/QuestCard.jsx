@@ -1,27 +1,28 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
 function QuestCard(props) {
+    let { user, getCourse } = useUser();
+    let course = getCourse();
+
     let docRoot = props.documentRoot;
-    let debugMode = props.debugMode;
-    let root = "/asci";
     let url = props.url;
     let questId = props.id;
-    let courseId = localStorage.getItem('asci-course');
 
     const navigate = useNavigate();
     const [currentQuest, setCurrentQuest] = useState(props.currentQuest);
 
-    // localStorage.removeItem("checkbox" + questId);
+    // localStorage.removeItem("checkbox-" + questId + "-" + course.course_id);
 
     // set the inital checkbox to be the localStorage value or false
-    const [isChecked, setIsChecked] = useState(localStorage.getItem("checkbox-" + questId + "-" + courseId) === 'true' ? true : false);
+    const [isChecked, setIsChecked] = useState(localStorage.getItem("checkbox-" + questId + "-" + course.course_id) === 'true' ? true : false);
     console.log("isChecked initial " + isChecked);
 
     const modifyCourseQuestHandler = () => {
         setIsChecked(!isChecked);
-        localStorage.setItem("checkbox-" + questId + "-" + courseId, document.getElementById(questId).checked);
+        localStorage.setItem("checkbox-" + questId + "-" + course.course_id, document.getElementById(questId).checked);
 
         //setup json command
         let request = {};
@@ -33,8 +34,9 @@ function QuestCard(props) {
             console.log("checkbox un-checked");
             request.command = "removeQuestForCourse";
         }
-        request.courseId = courseId;
         request.questId = questId;
+        request.courseId = course.course_id;
+        request.user = user.userid;
 
         modifyCourseQuest(request, url);
     };
