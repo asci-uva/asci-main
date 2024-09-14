@@ -280,7 +280,7 @@ function TASurvey(props) {
             </div>
             </div>
 
-            <div class="mb-3">
+            <div className="mb-3">
             <p className="form-label">Anything else you wish to add? (Optional)</p>
               <textarea className="form-control"
                 placeholder="Tell us about your experience..."

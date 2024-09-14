@@ -35,21 +35,37 @@ class QuestStatus
             $questId = $currQuest->getQuestId();
             $userId = $currQuest->getUserId();
 
-            $count = $this->OfficeHoursCount($userId, $this->courseId);
+            $OH_count = $this->officeHoursCount($userId, $this->courseId);
+            $onTimeCount = $this->onTimeGradescopeAssignmentCount($userId, $this->courseId);
 
             switch ($currQuest->getMnemonic()) {
                 case "OH1":
-                    if ($count >= 1) {
+                    if ($OH_count >= 1) {
                         (new \asci\server\database\DBUserQuest($this->db))->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
                         $currQuest->setQuestCompletionStatus('Completed');
                     }
                 case "OH3":
-                    if ($count >= 3) {
+                    if ($OH_count >= 3) {
                         (new \asci\server\database\DBUserQuest($this->db))->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
                         $currQuest->setQuestCompletionStatus('Completed');
                     }
                 case "OH10":
-                    if ($count >= 10) {
+                    if ($OH_count >= 10) {
+                        (new \asci\server\database\DBUserQuest($this->db))->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
+                        $currQuest->setQuestCompletionStatus('Completed');
+                    }
+                case "GS1":
+                    if ($onTimeCount >= 1) {
+                        (new \asci\server\database\DBUserQuest($this->db))->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
+                        $currQuest->setQuestCompletionStatus('Completed');
+                    }
+                case "GS3":
+                    if ($onTimeCount >= 3) {
+                        (new \asci\server\database\DBUserQuest($this->db))->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
+                        $currQuest->setQuestCompletionStatus('Completed');
+                    }
+                case "GS10":
+                    if ($onTimeCount >= 10) {
                         (new \asci\server\database\DBUserQuest($this->db))->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
                         $currQuest->setQuestCompletionStatus('Completed');
                     }
@@ -57,8 +73,13 @@ class QuestStatus
         }
     }
 
-    public function OfficeHoursCount($userId, $courseId)
+    public function officeHoursCount($userId, $courseId)
     {
         return (new \asci\server\database\DBSession($this->db))->getCompletedOfficehoursCount($userId, $courseId);
+    }
+
+    public function onTimeGradescopeAssignmentCount($userId, $courseId)
+    {
+        return (new \asci\server\database\DBSynchronization($this->db))->getOnTimeSubmissionCount($userId, $courseId);
     }
 }

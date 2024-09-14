@@ -64,7 +64,7 @@ class DBUserQuest
 
     public function updateQuestStatus($quest_id, $user_id, $course_id, $status)
     {
-        $query = 'update user_quests set status = $3 where quest_id = $1 and user_id = $2 and course_id = $3';
+        $query = 'update user_quests set status = $3 where quest_id = $1 and user_id = $2 and course_id = $4';
         $params = array($quest_id, $user_id, $status, $course_id);
 
         try {

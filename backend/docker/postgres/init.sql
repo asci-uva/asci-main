@@ -276,10 +276,19 @@ INSERT INTO quests (id, mnemonic, name, description , total_points)
 VALUES (1, 'OH1', 'Attend Office Hours One Time', 'Get help at office hours the one time, minimum 5 minutes', 10);
 
 INSERT INTO quests (id, mnemonic, name, description , total_points)
-VALUES (2, 'OH3', 'Attend Office Hours Three Times', 'Get help at office hours two times, each session minimum 5 minutes', 10);
+VALUES (2, 'OH3', 'Attend Office Hours Three Times', 'Get help at office hours two times, each session minimum 5 minutes', 30);
 
 INSERT INTO quests (id, mnemonic, name, description , total_points)
-VALUES (3, 'OH10', 'Attend Office Hours Ten Times', 'Get help at office hours ten times, each session minimum 5 minutes', 10);
+VALUES (3, 'OH10', 'Attend Office Hours Ten Times', 'Get help at office hours ten times, each session minimum 5 minutes', 100);
+
+INSERT INTO quests (id, mnemonic, name, description , total_points)
+VALUES (4, 'GS1', 'Turn Assignment in On Time One Time', 'Submit one assignment in to Gradescope before the due date', 10);
+
+INSERT INTO quests (id, mnemonic, name, description , total_points)
+VALUES (5, 'GS3', 'Turn Assignment in On Time Three Times', 'Submit three assignments in to Gradescope before the due date', 30);
+
+INSERT INTO quests (id, mnemonic, name, description , total_points)
+VALUES (6, 'GS10', 'Turn Assignment in On Time Ten Times', 'Submit ten assignments in to Gradescope before the due date', 100);
 
 ALTER TABLE user_quests ADD FOREIGN KEY (user_id) REFERENCES users (id);
 ALTER TABLE user_quests ADD FOREIGN KEY (quest_id) REFERENCES quests (id);

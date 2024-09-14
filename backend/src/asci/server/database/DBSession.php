@@ -319,8 +319,9 @@ class DBSession
         $result = $this->db->query($query, array($userId, $courseId));
         $row = $this->db->fetchrow($result);
 
-        return $row["count"];
+        $this->logger->addDebug("get completed office hours", array("count" => $row["count"]));
 
+        return $row["count"];
     }
    
 }

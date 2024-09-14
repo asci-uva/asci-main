@@ -160,4 +160,11 @@ class DBSynchronization
         return empty($missingStudents) ? ['no missing student'] : $missingStudents;
     }
 
+    public function getOnTimeSubmissionCount ($userId, $courseId) {
+        $query = 'SELECT COUNT(*) FROM (submissions S JOIN assignments A on S.assignment_id=A.id) where S.user_id=$1 and A.course_id=$2 and lateness=\'00:00:00\'';
+        $result = $this->db->query($query, array($userId, $courseId));
+        $row = $this->db->fetchrow($result);
+
+        return $row["count"];
+    }
 }
