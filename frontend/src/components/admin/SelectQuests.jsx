@@ -30,7 +30,7 @@ function SelectQuests(props) {
       body: JSON.stringify(json0),
     }).then(response => response.json())
       .then(data => {
-        console.log("Data is: ", data);
+        console.log("Admin quests are: ", data);
         let success = data.success;
 
         if (success === "true") {
