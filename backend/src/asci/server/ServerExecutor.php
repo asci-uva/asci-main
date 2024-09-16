@@ -1688,15 +1688,33 @@ $usedCosSim = True;
 
         foreach ($quests as $quest){
             // modify the quest status
-            $status -> changeStatus($quest);
+            $status -> changeQuestStatus($quest);
             $result["quests"][$quest->getQuestId()] = $quest->toArray();
         }
 
-        $this->logger->addDebug("Quest result", array("quests" => $quests));
+        $this->logger->addDebug("Update quest result", array("quests" => $quests));
 
         $result["success"] = "true";
 
         return $result;
+    }
+
+    public function getQuestsForUserWithStatusHandler($computing_id, $course_id, $status)
+    {
+      $result = [];
+  
+      $quests = (new \asci\server\database\DBUserQuest($this->db))->getQuestsForUserWithStatus($computing_id, $course_id, $status);
+      $result["quests"] = [];
+  
+      foreach ($quests as $quest) {
+        $result["quests"][$quest->getQuestId()] = $quest->toArray();
+      }
+  
+      $this->logger->addDebug("Quest result with status", array("quests" => $quests, "status" => $status));
+  
+      $result["success"] = "true";
+  
+      return $result;
     }
 
     public function getPointsForUserHandler($computing_id, $course_id){

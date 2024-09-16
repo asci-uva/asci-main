@@ -17,6 +17,7 @@ function QuestCard(props) {
                         {console.log("in quest card")}
                         <h5 className="card-title">{currentQuest["name"]}</h5>
                         <p className="card-text">Description: {currentQuest["description"]}</p>
+                        <p className="card-text">Prerequisites: {currentQuest["prerequisites"]}</p>
                         <p className="card-text">Total points: {currentQuest["total_points"]}</p>
                         <p className="card-text">Status: {currentQuest["completion-status"]}</p>
                     </div>

@@ -42,7 +42,28 @@ class DBUserQuest
         $toReturn = [];
         /* Loop through and make user quest objects for each */
         if (!empty($quests)) {
-            foreach ($quests as $quest){
+            foreach ($quests as $quest) {
+                $toAdd = new \asci\data\UserQuest();
+                $toAdd->fromArray($quest);
+                array_push($toReturn, $toAdd);
+            }
+        }
+
+        return $toReturn;
+    }
+
+    public function getQuestsForUserWithStatus($computing_id, $course_id, $status)
+    {
+        $query = 'select quest_id,user_id,course_id,status,mnemonic,name,description,total_points from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) where computing_id=$1 and course_id=$2 and status=$3';
+
+        $result = $this->db->query($query, array($computing_id, $course_id, $status));
+
+        $quests = $this->db->fetchAll($result);
+
+        $toReturn = [];
+        /* Loop through and make user quest objects for each */
+        if (!empty($quests)) {
+            foreach ($quests as $quest) {
                 $toAdd = new \asci\data\UserQuest();
                 $toAdd->fromArray($quest);
                 array_push($toReturn, $toAdd);
@@ -73,7 +94,7 @@ class DBUserQuest
                 return true;
             } else {
                 $this->logger->error("Failed to update status for user: $user_id , quest with ID: $quest_id");
-                return false; 
+                return false;
             }
         } catch (\Exception $e) {
             $this->logger->error("Error updating quest status: " . $e->getMessage());
@@ -83,7 +104,7 @@ class DBUserQuest
 
     public function addQuestToUser($quest_id, $user_id, $course_id)
     {
-        $query = 'insert into user_quests (quest_id, user_id, course_id, status) values ($1, $2, $3, \'Not started\')';
+        $query = 'insert into user_quests (quest_id, user_id, course_id, status) values ($1, $2, $3, \'Locked\')';
 
         $result = $this->db->query($query, array($quest_id, $user_id, $course_id));
 
@@ -105,5 +126,14 @@ class DBUserQuest
             return false;
         }
         return true;
+    }
+
+    public function checkQuestStatus($quest_mnemonic, $user_id, $course_id, $status)
+    {
+        $query = 'select count(*) from (quests Q JOIN user_quests U on Q.id = U.quest_id) where mnemonic=$1 and user_id=$2 and course_id=$3 and status=$4';
+        $result = $this->db->query($query, array($quest_mnemonic, $user_id, $course_id, $status));
+        $row = $this->db->fetchrow($result);
+
+        return $row["count"];
     }
 }

@@ -11,27 +11,51 @@ function QuestList(props) {
     let docRoot = props.documentRoot;
     let url = props.url;
 
-    // const { courseId } = useParams();
     const navigate = useNavigate();
-    // const [user, setUser] = useState(null);
     const [quests, setQuests] = useState({});
+    const [lockedQuests, setLockedQuests] = useState({});
+    const [inProgressQuests, setInProgressQuests] = useState({});
+    const [completedQuests, setCompletedQuests] = useState({});
     const [pointCount, setPointCount] = useState(0);
 
     useEffect(() => {
-        //setup json command
+        // Get all quests
         let request = {};
         request.command = "getQuestsForUser";
         request.user = user.userid;
         request.courseId = course.course_id;
-        getQuests(request, url);
+        getQuests(request, url, null);
 
+        // Get point count after updating
         request.command = "getPointsForUser";
         request.user = user.userid;
         request.courseId = course.course_id;
         getPoints(request, url);
+
+        // Get locked quests
+        request.command = "getQuestsForUserWithStatus";
+        request.user = user.userid;
+        request.courseId = course.course_id;
+        request.status = 'Locked';
+        getQuests(request, url, 'Locked');
+
+        // Get in progress quests
+        request.command = "getQuestsForUserWithStatus";
+        request.user = user.userid;
+        request.courseId = course.course_id;
+        request.status = 'In progress';
+        getQuests(request, url, 'In progress');
+
+        // Get completed quests
+        request.command = "getQuestsForUserWithStatus";
+        request.user = user.userid;
+        request.courseId = course.course_id;
+        request.status = 'Completed';
+        getQuests(request, url, 'Completed');
     }, []);
 
-    const getQuests = (json0, url0) => {
+    // Update the quest status
+    const getQuests = (json0, url0, status) => {
         fetch(url0, {
             method: 'POST', // or 'PUT'
             headers: {
@@ -44,11 +68,17 @@ function QuestList(props) {
                 let success = data.success;
 
                 if (success === "true") {
+                    console.log("Get Quests: Successfully fetched quests: " + status);
 
-                    console.log("Get Quests: Successfully fetched quests");
+                    // Update quests status and early return
+                    if (status === null) {
+                        console.log("Updated quest status");
+                        return;
+                    }
+
                     let questList = {}
+                    console.log("quest array");
                     for (var key in data.quests) {
-                        console.log("quest array");
                         console.log(data.quests[key]);
                         questList[key] = {};
                         // Add quest info
@@ -56,9 +86,15 @@ function QuestList(props) {
                         questList[key]["description"] = data.quests[key]["description"];
                         questList[key]["total_points"] = data.quests[key]["total_points"];
                         questList[key]["completion-status"] = data.quests[key]["status"];
+                        questList[key]["prerequisites"] = data.quests[key]["prerequisites"];
                     }
-
-                    setQuests(questList);
+                    if (status === 'Locked') {
+                        setLockedQuests(questList);
+                    } else if (status === 'In progress') {
+                        setInProgressQuests(questList);
+                    } else if (status === 'Completed') {
+                        setCompletedQuests(questList);
+                    }
                 }
                 else {
                     console.log("Get Quest: Server returned error");
@@ -105,10 +141,61 @@ function QuestList(props) {
             <div className="pointCount">
                 <h5 className="card-title">Points Earned: {pointCount}</h5>
             </div>
-            <div>
-                {Object.keys(quests).map((questId) => {
-                    return <QuestCard currentQuest={quests[questId]} key={questId} />
-                })}
+            <div className="accordion" id="accordionExample" style={ {marginTop: "30px" }}>
+                <div className="accordion-item">
+                    <h2 className="accordion-header" id="headingOne">
+                        <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            In Progress Quests
+                        </button>
+                    </h2>
+                    <div id="collapseOne" className="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                        <div className="accordion-body">
+                            {Object.keys(inProgressQuests).map((questId) => {
+                                if (inProgressQuests[questId] != null) {
+                                    return <QuestCard currentQuest={inProgressQuests[questId]} key={questId} />
+                                }
+                            })}
+                        </div>
+                    </div>
+                </div>
+                <div className="accordion-item">
+                    <h2 className="accordion-header" id="headingTwo">
+                        <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            Completed Quests
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" className="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                        <div className="accordion-body">
+                            <div>
+                                Complete quests to earn points
+                            </div>
+                            {Object.keys(completedQuests).map((questId) => {
+                                if (completedQuests[questId] != null) {
+                                    return <QuestCard currentQuest={completedQuests[questId]} key={questId} />
+                                }
+                            })}
+                        </div>
+                    </div>
+                </div>
+                <div className="accordion-item">
+                    <h2 className="accordion-header" id="headingThree">
+                        <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                            Locked Quests
+                        </button>
+                    </h2>
+                    <div id="collapseThree" className="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+                        <div className="accordion-body">
+                            <div>
+                                Meet the prerequisites to unlock the quests
+                            </div>
+                            {Object.keys(lockedQuests).map((questId) => {
+                                if (lockedQuests[questId] != null) {
+                                    return <QuestCard currentQuest={lockedQuests[questId]} key={questId} />
+                                }
+                            })}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

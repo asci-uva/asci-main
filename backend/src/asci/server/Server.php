@@ -102,18 +102,19 @@ class Server
      * by the request JSON. If not, returns an error.
      * If we are in debug mode, we just trust the username that the request provided.
      */
-    public function validateUsername($input){
+    public function validateUsername($input)
+    {
 
         /* Grab the username from netbadge IF the server is not in DEBUG mode */
         /* Otherwise, use the user provided by request */
         // Login is a special command that doesn't require this validation
         $user = null;
-        if(\asci\Config::$DEBUG_MODE){
+        if (\asci\Config::$DEBUG_MODE) {
             $user = $input["user"];
         } else { // netbadge
             $user = $_SERVER["uid"];
 
-            if($user == null || ($input["command"] != "login" && $user != $input["user"])){
+            if ($user == null || ($input["command"] != "login" && $user != $input["user"])) {
                 /* Request is invalid because username's don't match */
                 $result = ["success" => "false", "error" => "ERROR: Session userId does not match provided user id"];
                 $this->setResponse($result);
@@ -151,21 +152,21 @@ class Server
         $course_id = $this->input["courseId"] ?? null;
         $lock = null;
         $attempt_max = 40; //try to get the lock at most 10 times.
-        if($course_id != null && \asci\Config::$LOCKING_ENABLED){
+        if ($course_id != null && \asci\Config::$LOCKING_ENABLED) {
             /* acquire the lock */
             $lock_key = "course-" . $course_id;
             $lock = new ExclusiveLock($lock_key);
             $attempt = 0;
-            while($lock->lock() == False && $attempt<$attempt_max){
+            while ($lock->lock() == False && $attempt < $attempt_max) {
                 $attempt = $attempt + 1;
                 usleep(250000); // sleep for a quarter of a second
 
-              if($attempt >= $attempt_max){
-                  $this->setResponse([
-                      "error" => "Could not acquire lock after multiple attempts. Try again later."
-                  ]);
-                 return;
-              }
+                if ($attempt >= $attempt_max) {
+                    $this->setResponse([
+                        "error" => "Could not acquire lock after multiple attempts. Try again later."
+                    ]);
+                    return;
+                }
             }
         }
 
@@ -186,7 +187,7 @@ class Server
                 ]);
                 break;
             case "login":
-                
+
                 $this->setResponse($executor->loginHandler($user));
 
                 break;
@@ -197,10 +198,10 @@ class Server
             //e.g., currently on queue, being helped, etc.
             case "sessionPing":
 
-                
+
                 $courseId = $this->input["courseId"];
 
-                $this->setResponse($executor->sessionPingHandler($user,$courseId));
+                $this->setResponse($executor->sessionPingHandler($user, $courseId));
 
                 break;
 
@@ -208,7 +209,7 @@ class Server
             //return list of active course objects that student is enrolled in.
             case "getCourses":
 
-                
+
                 $this->setResponse($executor->getCoursesHandler($user));
 
                 break;
@@ -217,7 +218,7 @@ class Server
             //return list of active course objects that student is enrolled in.
             case "getCoursesByRole":
                 $role = $this->input["role"];
-                
+
                 $this->setResponse($executor->getCoursesByRoleHandler($user, $role));
 
                 break;
@@ -225,7 +226,7 @@ class Server
             //given student id, token, courseid. Join the queue
             //if student, token pair is valid and they can
             case "joinQueue":
-                
+
                 $courseId = $this->input["courseId"];
                 $question = $this->input["question"];
                 $subject = $this->input["subject"];
@@ -233,41 +234,41 @@ class Server
                 $groupOption = $this->input["groupOption"];
                 $this->setResponse($executor->joinQueueHandler($user, $courseId, $question, $subject, $location, $groupOption));
 
-                
+
                 break;
 
             //Updates student with queue status (still on queue)
             //what position, etc. 
             case "getQueueStatus":
-                
+
                 $courseId = $this->input["courseId"];
-                
+
                 $this->setResponse($executor->getQueueStatus($user, $courseId));
                 break;
 
             case "leaveQueue":
 
                 $courseId = $this->input["courseId"];
-                
+
                 $this->setResponse($executor->leaveQueue($user, $courseId));
-                
+
                 break;
 
             case "getMeetingDetails":
-                
+
                 $courseId = $this->input["courseId"];
-                
+
                 $this->setResponse($executor->getMeetingDetails($user, $courseId));
-                
+
                 break;
 
             case "leaveMeeting":
 
-                
+
                 $sessionId = $this->input["sessionId"];
-                
+
                 $this->setResponse($executor->endSession($user, $sessionId));
-                
+
                 break;
 
 
@@ -276,26 +277,26 @@ class Server
             case "getWaitingSessions":
 
                 $courseId = $this->input["courseId"];
-                
+
                 $this->setResponse($executor->getWaitingSessions($user, $courseId));
-                
+
                 break;
 
             case "getStudentForTA":
 
                 $courseId = $this->input["courseId"];
-                
+
                 $this->setResponse($executor->getStudentForTA($user, $courseId));
-                
+
                 break;
 
             case "takeSpecificStudentForTA":
 
                 $courseId = $this->input["courseId"];
                 $sessionId = $this->input["sessionId"];
-                
+
                 $this->setResponse($executor->takeSpecificStudentForTA($user, $courseId, $sessionId));
-                
+
                 break;
 
 
@@ -303,15 +304,15 @@ class Server
             case "getTAMeetingDetails":
 
                 $courseId = $this->input["courseId"];
-                
+
                 $this->setResponse($executor->getTAMeetingDetails($user, $courseId));
-                
+
                 break;
 
             case "TAEndMeeting":
 
                 $sessionId = $this->input["sessionId"];
-                
+
                 $this->setResponse($executor->endSession($user, $sessionId));
                 break;
 
@@ -319,9 +320,9 @@ class Server
 
                 $studId = $this->input["studentId"];
                 $sessionId = $this->input["sessionId"];
-                
+
                 $this->setResponse($executor->putStudentBackOnQueue($user, $studId, $sessionId));
-                break; 
+                break;
 
 
             case "GetSessionForSurvey":
@@ -341,7 +342,7 @@ class Server
                 break;
 
             case "SubmitSurvey":
-                
+
                 $surveyData = $this->input["surveyData"];
                 $session_id = $this->input["sessionId"];
 
@@ -352,9 +353,9 @@ class Server
             /* Get a list of potential group members to add to the TAs current session */
             case "getPotentialGroupInfo":
                 $courseId = $this->input["courseId"];
-                
+
                 $this->setResponse($executor->getPotentialGroupInfo($user, $courseId));
-                
+
                 break;
 
             /* Given a TA, main session they are helping, and other sessions */
@@ -366,7 +367,7 @@ class Server
                 $location = $this->input["location"];
 
                 $this->setResponse($executor->createGroup($user, $courseId, $sessionId, $groupSessions, $location));
-                
+
                 break;
 
             case "getCourseSettings":
@@ -393,16 +394,16 @@ class Server
                 $sessionId = $this->input["sessionId"];
 
                 $this->setResponse($executor->cancelGroup($user, $courseId, $sessionId));
-                
+
                 break;
 
             case "clearQueue":
                 $courseId = $this->input["courseId"];
 
                 $this->setResponse($executor->clearQueue($user, $courseId));
-                
+
                 break;
-            
+
             case "newLlmChat":
                 $result = $executor->llmChat($this->input);
                 $this->setResponse($result);
@@ -431,27 +432,27 @@ class Server
 
                 $this->setResponse($executor->createCourse($user, $mnemonic, $number, $name, $semester));
                 break;
-    
+
             case "updateCourseInfo":
                 $course_id = $this->input["course_id"];
                 $mnemonic = $this->input["mnemonic"];
                 $number = $this->input["number"];
                 $name = $this->input["name"];
                 $semester = $this->input["semester"];
-    
+
                 $this->setResponse($executor->updateCourseInfoHandler($course_id, $mnemonic, $number, $name, $semester));
                 break;
 
             case "uploadRoster":
                 $roster = $this->input["roster"];
                 $course_id = $this->input["course_id"];
-    
+
                 $this->setResponse($executor->uploadRosterHandler($roster, $course_id));
                 break;
 
-            case "getCourseRoster":                
+            case "getCourseRoster":
                 $course_id = $this->input["course_id"];
-    
+
                 $this->setResponse($executor->getCourseRosterHandler($user, $course_id));
                 break;
 
@@ -472,17 +473,24 @@ class Server
 
                 $this->setResponse($executor->getQuestsForUserHandler($user, $courseId));
                 break;
+                
+            case "getQuestsForUserWithStatus":
+                $courseId = $this->input["courseId"];
+                $status = $this->input['status'];
+
+                $this->setResponse($executor->getQuestsForUserWithStatusHandler($user, $courseId, $status));
+                break;
 
             case "getPointsForUser":
                 $courseId = $this->input["courseId"];
-                
+
                 $this->setResponse($executor->getPointsForUserHandler($user, $courseId));
-                break;    
+                break;
 
             case "getAllQuests":
-                    $this->setResponse($executor->getAllQuestsHandler());
-                    break;
-            
+                $this->setResponse($executor->getAllQuestsHandler());
+                break;
+
             case "addQuestForCourse":
                 $questId = $this->input["questId"];
                 $courseId = $this->input["courseId"];
@@ -496,7 +504,7 @@ class Server
 
                 $this->setResponse($executor->removeQuestForCourseHandler($questId, $courseId));
                 break;
-    
+
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/
 
@@ -508,7 +516,7 @@ class Server
 
                 $this->setResponse($executor->createUser($computing_id, $fname, $lname, $pname));
                 break;
-            
+
 
             case "register":
                 $result = $executor->registerUser($this->input);
@@ -531,14 +539,14 @@ class Server
                 $course_id = $this->input["course_id"];
                 $this->setResponse($executor->runGradescopeDataDownload($gradescope_username, $gradescope_password, $gradescope_courseNumber, $course_id));
                 break;
-            
+
 
             case "updateGradescopeDataByCourse":
                 $course_id = $this->input["course_id"];
                 $download_file_name = $this->input["download_file_name"];
                 $this->setResponse($executor->updateGradescopeDataByCourseHandler($course_id, $download_file_name));
                 break;
-                
+
             default:
                 $this->setResponse(["response" => "Hello world!"]);
 
@@ -546,13 +554,13 @@ class Server
 
         // /* Release the lock if we had one... */
         // /* ------------------------------------------------------------------ */
-        
+
         // if($lock != null && \asci\Config::$LOCKING_ENABLED){
         //     $lock->unlock();
         // }
 
         /* Lock acquired OR not necessary */
-        
+
         /* ------------------------------------------------------------------ */
 
         return;
