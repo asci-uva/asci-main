@@ -2,18 +2,22 @@
 
 namespace asci\data;
 
-class CourseQuest implements \Serializable {
+class CourseQuest implements \Serializable
+{
 
     private $quest_id;
+    private $mnemonic;
+    private $params;
     private $course_id;
     private $name;
     private $description;
     private $total_points;
+    private $prerequisites;
 
 
     public function __construct()
     {
-        
+
     }
 
     // Getters
@@ -27,7 +31,16 @@ class CourseQuest implements \Serializable {
         return $this->course_id;
     }
 
-    
+    public function getMnemonic()
+    {
+        return $this->mnemonic;
+    }
+
+    public function getParams()
+    {
+        return $this->params;
+    }
+
     public function getName()
     {
         return $this->name;
@@ -48,9 +61,12 @@ class CourseQuest implements \Serializable {
     {
         $this->quest_id = $data['quest_id'] ?? null;
         $this->course_id = $data['course_id'] ?? null;
+        $this->mnemonic = $data['mnemonic'] ?? null;
+        $this->params = $data['params'] ?? null;
         $this->name = $data['name'] ?? null;
         $this->description = $data['description'] ?? null;
         $this->total_points = $data['total_points'] ?? null;
+        $this->prerequisites = $data['prerequisites'] ?? null;
         return $this;
     }
 
@@ -60,19 +76,24 @@ class CourseQuest implements \Serializable {
         return array(
             "quest_id" => $this->quest_id,
             "course_id" => $this->course_id,
+            "mnemonic" => $this->mnemonic,
+            "params" => $this->params,
             "name" => $this->name,
             "description" => $this->description,
             "total_points" => $this->total_points,
+            "prerequisites" => $this->prerequisites,
         );
     }
 
     // Convert properties to JSON
-    public function toJSON() {
+    public function toJSON()
+    {
         return json_encode($this->toArray(), JSON_PRETTY_PRINT);
     }
 
     // Populate properties from JSON
-    public function fromJSON($json) {
+    public function fromJSON($json)
+    {
         $data = json_decode($json, true);
         $return = $this->fromArray($data);
         unset($data);
@@ -80,17 +101,20 @@ class CourseQuest implements \Serializable {
     }
 
     // Serialize to JSON
-    public function serialize() {
+    public function serialize()
+    {
         return $this->toJSON();
     }
 
     // Unserialize from JSON
-    public function unserialize($data) {
+    public function unserialize($data)
+    {
         $this->fromJSON($data);
     }
 
     // Optional: check if this is a valid assignment
-    public function isValid() {
+    public function isValid()
+    {
         return isset($this->id) && !empty($this->id);
     }
 }

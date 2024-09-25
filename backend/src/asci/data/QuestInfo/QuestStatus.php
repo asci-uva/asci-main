@@ -35,95 +35,62 @@ class QuestStatus
      * @param mixed $currQuest
      * @return void
      */
-    public function changeQuestStatus($currQuest)
+    public function changeQuestStatusToInProgress($currQuest)
     {
         if ($currQuest->getQuestCompletionStatus() === 'Completed') {
             return;
         }
-        
+
         $questId = $currQuest->getQuestId();
         $userId = $currQuest->getUserId();
+        $params = $currQuest->getParams();
 
-        $this->logger->addDebug("Change status to completed for quest", array("quest id:" => $questId, "user id:" => $userId, "course id" => $this->courseId));
+        $this->logger->addDebug("Change status to in progress for quest", array("quest id:" => $questId, "user id:" => $userId, "course id" => $this->courseId, "params" => $params));
 
         // Unlock quests that meet the prereqs
-        if ($currQuest->getQuestCompletionStatus() === 'Locked') {
-            switch ($currQuest->getMnemonic()) {
-                // Quests with no prereqs
-                case "OH1":
-                case "GS1":
+        switch ($currQuest->getMnemonic()) {
+            case "OH":
+            case "GS":
+                $prereqs = explode(" ", $currQuest->getPrerequisites());
+                $this->logger->addDebug("Prereqs for quests", array("prereqs" => $prereqs));
+
+                if ($prereqs[1] == 0 || $this->DBUserQuest->checkQuestStatus($prereqs[0], $prereqs[1], $userId, $this->courseId, 'Completed') == 1) {
                     $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'In progress');
-                    break;
-                case "OH3":
-                    if ($this->DBUserQuest->checkQuestStatus("OH1", $userId, $this->courseId, 'Completed') === 1) {
-                        $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'In progress');
-                    }
-                    break;
-                case "OH10":
-                    if ($this->DBUserQuest->checkQuestStatus("OH3", $userId, $this->courseId, 'Completed') === 1) {
-                        $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'In progress');
-                    }
-                    break;
-                case "GS3":
-                    if ($this->DBUserQuest->checkQuestStatus("GS1", $userId, $this->courseId, 'Completed') === 1) {
-                        $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'In progress');
-                    }
-                    break;
-                case "GS10":
-                    if ($this->DBUserQuest->checkQuestStatus("GS3", $userId, $this->courseId, 'Completed') === 1) {
-                        $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'In progress');
-                    }
-                    break;
-            }
+                    $this->changeQuestStatusToCompleted($currQuest);
+                }
+                break;
+        }
+    }
+
+    public function changeQuestStatusToCompleted($currQuest)
+    {
+        if ($currQuest->getQuestCompletionStatus() === 'Completed') {
+            return;
         }
 
-        // Complete quests if they meet the conditions
-        else if ($currQuest->getQuestCompletionStatus() === 'In progress') {
+        $questId = $currQuest->getQuestId();
+        $userId = $currQuest->getUserId();
+        $params = $currQuest->getParams();
 
-            $OH_count = $this->officeHoursCount($userId, $this->courseId);
-            $onTimeCount = $this->onTimeGradescopeAssignmentCount($userId, $this->courseId);
-            switch ($currQuest->getMnemonic()) {
-                case "OH1":
-                    if ($OH_count >= 1) {
-                        $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
-                        $currQuest->setQuestCompletionStatus('Completed');
-                        $this->logger->addDebug("OH1 true");
-                    }
-                    break;
-                case "OH3":
-                    if ($OH_count >= 3) {
-                        $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
-                        $currQuest->setQuestCompletionStatus('Completed');
-                        $this->logger->addDebug("OH count for quest", array("OH_count" => $OH_count, "quest id:" => $questId, "user id:" => $userId));
-                        $this->logger->addDebug("OH3 true");
-                    }
-                    break;
-                case "OH10":
-                    if ($OH_count >= 10) {
-                        $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
-                        $currQuest->setQuestCompletionStatus('Completed');
-                        $this->logger->addDebug("OH10 true");
-                    }
-                    break;
-                case "GS1":
-                    if ($onTimeCount >= 1) {
-                        $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
-                        $currQuest->setQuestCompletionStatus('Completed');
-                    }
-                    break;
-                case "GS3":
-                    if ($onTimeCount >= 3) {
-                        $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
-                        $currQuest->setQuestCompletionStatus('Completed');
-                    }
-                    break;
-                case "GS10":
-                    if ($onTimeCount >= 10) {
-                        $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
-                        $currQuest->setQuestCompletionStatus('Completed');
-                    }
-                    break;
-            }
+        $this->logger->addDebug("Change status to completed for quest", array("quest id:" => $questId, "user id:" => $userId, "course id" => $this->courseId));
+        
+        $OH_count = $this->officeHoursCount($userId, $this->courseId);
+        $onTimeCount = $this->onTimeGradescopeAssignmentCount($userId, $this->courseId);
+        // Complete quests if they meet the conditions
+        switch ($currQuest->getMnemonic()) {
+            case "OH":
+                if ($OH_count >= $params) {
+                    $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
+                    $currQuest->setQuestCompletionStatus('Completed');
+                    $this->logger->addDebug("OH1 true");
+                }
+                break;
+            case "GS":
+                if ($onTimeCount >= $params) {
+                    $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
+                    $currQuest->setQuestCompletionStatus('Completed');
+                }
+                break;
         }
     }
 

@@ -9,9 +9,11 @@ class UserQuest implements \Serializable {
     private $course_id;
     private $status;
     private $mnemonic;
+    private $params;
     private $name;
     private $description;
     private $total_points;
+    private $prerequisites;
 
 
     public function __construct()
@@ -35,15 +37,21 @@ class UserQuest implements \Serializable {
         return $this->course_id;
     }
 
-
     public function getQuestCompletionStatus()
     {
         return $this->status;
     }
+
     public function getMnemonic()
     {
         return $this->mnemonic;
     }
+
+    public function getParams()
+    {
+        return $this->params;
+    }
+    
     public function getName()
     {
         return $this->name;
@@ -57,6 +65,10 @@ class UserQuest implements \Serializable {
     public function getTotalPoints()
     {
         return $this->total_points;
+    }
+    public function getPrerequisites()
+    {
+        return $this->prerequisites;
     }
 
     public function setQuestCompletionStatus($status)
@@ -72,9 +84,11 @@ class UserQuest implements \Serializable {
         $this->course_id = $data['course_id'] ?? null;
         $this->status = $data['status'] ?? null;
         $this->mnemonic = $data['mnemonic'] ?? null;
+        $this->params = $data['params'] ?? null;
         $this->name = $data['name'] ?? null;
         $this->description = $data['description'] ?? null;
         $this->total_points = $data['total_points'] ?? null;
+        $this->prerequisites = $data['prerequisites'] ?? null;
         return $this;
     }
 
@@ -87,9 +101,11 @@ class UserQuest implements \Serializable {
             "course_id" => $this->course_id,
             "status" => $this->status,
             "mnemonic" => $this->mnemonic,
+            "params" => $this->params,
             "name" => $this->name,
             "description" => $this->description,
             "total_points" => $this->total_points,
+            "prerequisites" => $this->prerequisites,
         );
     }
 

@@ -1684,11 +1684,19 @@ $usedCosSim = True;
         $quests = (new \asci\server\database\DBUserQuest($this->db))->getQuestsForUser($computing_id, $course_id);
         $result["quests"] = [];
 
-        $status = new  \asci\data\QuestInfo\QuestStatus($this->db, $course_id);
+        $statusChanger = new  \asci\data\QuestInfo\QuestStatus($this->db, $course_id);
 
         foreach ($quests as $quest){
             // modify the quest status
-            $status -> changeQuestStatus($quest);
+            $this->logger->addDebug("Get all quests", array("quests status" => $quest->getQuestCompletionStatus()));
+            if ($quest->getQuestCompletionStatus() === 'Locked') {
+              $statusChanger -> changeQuestStatusToInProgress($quest);
+              $this->logger->addDebug("Get all quests change to in progress");
+            } else if ($quest->getQuestCompletionStatus() === 'In progress') {
+              $statusChanger -> changeQuestStatusToCompleted($quest);
+              $this->logger->addDebug("Get all quests change to completed");
+            }
+            
             $result["quests"][$quest->getQuestId()] = $quest->toArray();
         }
 
@@ -1702,8 +1710,8 @@ $usedCosSim = True;
     public function getQuestsForUserWithStatusHandler($computing_id, $course_id, $status)
     {
       $result = [];
-  
-      $quests = (new \asci\server\database\DBUserQuest($this->db))->getQuestsForUserWithStatus($computing_id, $course_id, $status);
+      $DBUserQuest = new \asci\server\database\DBUserQuest($this->db);
+      $quests = $DBUserQuest->getQuestsForUserWithStatus($computing_id, $course_id, $status);
       $result["quests"] = [];
   
       foreach ($quests as $quest) {

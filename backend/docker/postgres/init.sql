@@ -160,6 +160,7 @@ CREATE TYPE quest_completion_status AS ENUM (
 CREATE TABLE quests (
   id SERIAL PRIMARY KEY,
   mnemonic VARCHAR(10),
+  params TEXT,
   name TEXT,
   description TEXT,
   prerequisites TEXT,
@@ -273,23 +274,23 @@ VALUES
 (2, 3, NULL, 100, 'missing', NULL, 0, 0);
 
 -- Quest data
-INSERT INTO quests (id, mnemonic, name, description, prerequisites, total_points)
-VALUES (1, 'OH1', 'Attend Office Hours One Time', 'Get help at office hours the one time, minimum 5 minutes', 'No prerequisites', 10);
+INSERT INTO quests (id, mnemonic, params, name, description, prerequisites, total_points)
+VALUES (1, 'OH', '1', 'Attend Office Hours One Time', 'Get help at office hours the one time, minimum 5 minutes', 'OH 0', 10);
 
-INSERT INTO quests (id, mnemonic, name, description, prerequisites, total_points)
-VALUES (2, 'OH3', 'Attend Office Hours Three Times', 'Get help at office hours two times, each session minimum 5 minutes', 'Complete quest: Attend Office Hours One Time', 30);
+INSERT INTO quests (id, mnemonic, params, name, description, prerequisites, total_points)
+VALUES (2, 'OH', '3', 'Attend Office Hours Three Times', 'Get help at office hours two times, each session minimum 5 minutes', 'OH 1', 30);
 
-INSERT INTO quests (id, mnemonic, name, description, prerequisites, total_points)
-VALUES (3, 'OH10', 'Attend Office Hours Ten Times', 'Get help at office hours ten times, each session minimum 5 minutes',  'Complete quest: Attend Office Hours Three Times', 100);
+INSERT INTO quests (id, mnemonic, params, name, description, prerequisites, total_points)
+VALUES (3, 'OH', '10', 'Attend Office Hours Ten Times', 'Get help at office hours ten times, each session minimum 5 minutes',  'OH 3', 100);
 
-INSERT INTO quests (id, mnemonic, name, description, prerequisites, total_points)
-VALUES (4, 'GS1', 'Turn Assignment in On Time One Time', 'Submit one assignment in to Gradescope before the due date',  'No prerequisites', 10);
+INSERT INTO quests (id, mnemonic, params, name, description, prerequisites, total_points)
+VALUES (4, 'GS', '1', 'Turn Assignment in On Time One Time', 'Submit one assignment in to Gradescope before the due date',  'GS 0', 10);
 
-INSERT INTO quests (id, mnemonic, name, description, prerequisites, total_points)
-VALUES (5, 'GS3', 'Turn Assignment in On Time Three Times', 'Submit three assignments in to Gradescope before the due date',  'Complete quest: Turn Assignment in On Time One Time', 30);
+INSERT INTO quests (id, mnemonic, params, name, description, prerequisites, total_points)
+VALUES (5, 'GS', '3', 'Turn Assignment in On Time Three Times', 'Submit three assignments in to Gradescope before the due date',  'GS 1', 30);
 
-INSERT INTO quests (id, mnemonic, name, description, prerequisites, total_points)
-VALUES (6, 'GS10', 'Turn Assignment in On Time Ten Times', 'Submit ten assignments in to Gradescope before the due date',  'Complete quest: Turn Assignment in On Time Three Times', 100);
+INSERT INTO quests (id, mnemonic, params, name, description, prerequisites, total_points)
+VALUES (6, 'GS', '10', 'Turn Assignment in On Time Ten Times', 'Submit ten assignments in to Gradescope before the due date',  'GS 3', 100);
 
 ALTER TABLE user_quests ADD FOREIGN KEY (user_id) REFERENCES users (id);
 ALTER TABLE user_quests ADD FOREIGN KEY (quest_id) REFERENCES quests (id);

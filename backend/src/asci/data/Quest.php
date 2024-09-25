@@ -6,9 +6,11 @@ class Quest implements \Serializable
 {
     private $id;
     private $mnemonic;
+    private $params;
     private $name;
     private $description;
     private $total_points;
+    private $prerequisites;
 
     public function __construct()
     {
@@ -26,6 +28,10 @@ class Quest implements \Serializable
         return $this->mnemonic;
     }
 
+    public function getParams()
+    {
+        return $this->params;
+    }
 
     public function getName()
     {
@@ -42,14 +48,21 @@ class Quest implements \Serializable
         return $this->total_points;
     }
 
+    public function getPrerequisites()
+    {
+        return $this->prerequisites;
+    }
+
     // Populate properties from an array
     public function fromArray($data)
     {
         $this->id = $data['id'] ?? null;
         $this->mnemonic = $data['mnemonic'] ?? null;
+        $this->params = $data['params'] ?? null;
         $this->name = $data['name'] ?? null;
         $this->description = $data['description'] ?? null;
         $this->total_point = $data['total_points'] ?? null;
+        $this->prerequisites = $data['prerequisites'] ?? null;
         return $this;
     }
 
@@ -59,9 +72,11 @@ class Quest implements \Serializable
         return array(
             "id" => $this->id,
             "mnemonic" => $this->mnemonic,
+            "params" => $this->params,
             "name" => $this->name,
             "description" => $this->description,
             "total_points" => $this->total_points,
+            "prerequisites" => $this->prerequisites,
         );
     }
 

@@ -19,18 +19,13 @@ function QuestList(props) {
     const [pointCount, setPointCount] = useState(0);
 
     useEffect(() => {
-        // Get all quests
         let request = {};
+
+        // // Get all quests to update the status
         request.command = "getQuestsForUser";
         request.user = user.userid;
         request.courseId = course.course_id;
         getQuests(request, url, null);
-
-        // Get point count after updating
-        request.command = "getPointsForUser";
-        request.user = user.userid;
-        request.courseId = course.course_id;
-        getPoints(request, url);
 
         // Get locked quests
         request.command = "getQuestsForUserWithStatus";
@@ -52,6 +47,12 @@ function QuestList(props) {
         request.courseId = course.course_id;
         request.status = 'Completed';
         getQuests(request, url, 'Completed');
+
+        // Get point count after updating
+        request.command = "getPointsForUser";
+        request.user = user.userid;
+        request.courseId = course.course_id;
+        getPoints(request, url);
     }, []);
 
     // Update the quest status

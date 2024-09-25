@@ -33,7 +33,7 @@ class DBUserQuest
      */
     public function getQuestsForUser($computing_id, $course_id)
     {
-        $query = 'select quest_id,user_id,course_id,status,mnemonic,name,description,total_points from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) where computing_id=$1 and course_id=$2';
+        $query = 'select quest_id,user_id,course_id,status,mnemonic,params,name,description,total_points,prerequisites from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) where computing_id=$1 and course_id=$2';
 
         $result = $this->db->query($query, array($computing_id, $course_id));
 
@@ -54,7 +54,7 @@ class DBUserQuest
 
     public function getQuestsForUserWithStatus($computing_id, $course_id, $status)
     {
-        $query = 'select quest_id,user_id,course_id,status,mnemonic,name,description,total_points from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) where computing_id=$1 and course_id=$2 and status=$3';
+        $query = 'select quest_id,user_id,course_id,status,mnemonic,params,name,description,total_points,prerequisites from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) where computing_id=$1 and course_id=$2 and status=$3';
 
         $result = $this->db->query($query, array($computing_id, $course_id, $status));
 
@@ -85,6 +85,8 @@ class DBUserQuest
 
     public function updateQuestStatus($quest_id, $user_id, $course_id, $status)
     {
+        $this->logger->addDebug("Update quest status", array("quest id:" => $quest_id, "user id:" => $user_id, "course id" => $course_id, "status" => $status));
+
         $query = 'update user_quests set status = $4 where quest_id = $1 and user_id = $2 and course_id = $3';
         $params = array($quest_id, $user_id, $course_id, $status);
 
@@ -128,10 +130,10 @@ class DBUserQuest
         return true;
     }
 
-    public function checkQuestStatus($quest_mnemonic, $user_id, $course_id, $status)
+    public function checkQuestStatus($quest_mnemonic, $params, $user_id, $course_id, $status)
     {
-        $query = 'select count(*) from (quests Q JOIN user_quests U on Q.id = U.quest_id) where mnemonic=$1 and user_id=$2 and course_id=$3 and status=$4';
-        $result = $this->db->query($query, array($quest_mnemonic, $user_id, $course_id, $status));
+        $query = 'select count(*) from (quests Q JOIN user_quests U on Q.id = U.quest_id) where mnemonic=$1 and params = $2 and user_id=$3 and course_id=$4 and status=$5';
+        $result = $this->db->query($query, array($quest_mnemonic, $params, $user_id, $course_id, $status));
         $row = $this->db->fetchrow($result);
 
         return $row["count"];
