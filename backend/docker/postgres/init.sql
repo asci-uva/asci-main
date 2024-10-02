@@ -295,22 +295,3 @@ VALUES (6, 'GS', '10', 'Turn Assignment in On Time Ten Times', 'Submit ten assig
 ALTER TABLE user_quests ADD FOREIGN KEY (user_id) REFERENCES users (id);
 ALTER TABLE user_quests ADD FOREIGN KEY (quest_id) REFERENCES quests (id);
 ALTER TABLE user_quests ADD FOREIGN KEY (course_id) REFERENCES courses (id);
-
-INSERT INTO user_quests (quest_id, user_id, course_id, status)
-VALUES (1, 1, 1, 'In progress');
-
-INSERT INTO user_quests (quest_id, user_id, course_id, status)
-VALUES (2, 1, 1, 'In progress');
-
-
-INSERT INTO course_quests (quest_id, course_id)
-VALUES (1, 1);
-
-INSERT INTO course_quests (quest_id, course_id)
-VALUES (2, 1);
-
-INSERT INTO sessions (id, course_id, fulfillment_time, exit_time)
-VALUES (1, 1, '2024-01-08 04:05:00', '2024-01-08 04:10:00');
-
-INSERT INTO session_users (session_id, user_id)
-VALUES (1, 1);

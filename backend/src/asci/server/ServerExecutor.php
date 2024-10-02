@@ -1681,23 +1681,38 @@ $usedCosSim = True;
     public function getQuestsForUserHandler($computing_id, $course_id){
         $result = [];
 
-        $quests = (new \asci\server\database\DBUserQuest($this->db))->getQuestsForUser($computing_id, $course_id);
+        $DBUserQuest = new \asci\server\database\DBUserQuest($this->db);
         $result["quests"] = [];
 
         $statusChanger = new  \asci\data\QuestInfo\QuestStatus($this->db, $course_id);
 
-        foreach ($quests as $quest){
-            // modify the quest status
-            $this->logger->addDebug("Get all quests", array("quests status" => $quest->getQuestCompletionStatus()));
-            if ($quest->getQuestCompletionStatus() === 'Locked') {
-              $statusChanger -> changeQuestStatusToInProgress($quest);
-              $this->logger->addDebug("Get all quests change to in progress");
-            } else if ($quest->getQuestCompletionStatus() === 'In progress') {
-              $statusChanger -> changeQuestStatusToCompleted($quest);
-              $this->logger->addDebug("Get all quests change to completed");
-            }
-            
-            $result["quests"][$quest->getQuestId()] = $quest->toArray();
+        // Continue updating the quest status until no quest status changes
+        $continueChangingStatus = true;
+        while ($continueChangingStatus) {   
+          $continueChangingStatus = false; 
+
+          // Get the quests with updated status
+          $quests = $DBUserQuest->getQuestsForUser($computing_id, $course_id);
+
+          foreach ($quests as $quest) {
+              // modify the quest status
+              $this->logger->addDebug("Get all quests", array("quest id" => $quest->getQuestId(), "quest status" => $quest->getQuestCompletionStatus()));
+                        
+              if ($quest->getQuestCompletionStatus() === 'Locked') {
+                if($statusChanger -> changeQuestStatusToInProgress($quest)) {
+                  $continueChangingStatus = true;
+                }
+              } else if ($quest->getQuestCompletionStatus() === 'In progress') {
+                if ($statusChanger -> changeQuestStatusToCompleted($quest)) {
+                  $continueChangingStatus = true;
+                }
+              }
+          }
+        }
+
+        // Put updated quest results into result
+        foreach ($quests as $quest) {
+          $result["quests"][$quest->getQuestId()] = $quest->toArray();
         }
 
         $this->logger->addDebug("Update quest result", array("quests" => $quests));

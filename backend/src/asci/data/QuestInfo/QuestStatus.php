@@ -31,14 +31,15 @@ class QuestStatus
     }
 
     /**
-     * Change the quest status to Completed or In progress if it meets the completion condition
+     * Change the quest status to In progress if it meets the unlock condition
+     * Return true if a status changes
      * @param mixed $currQuest
      * @return void
      */
-    public function changeQuestStatusToInProgress($currQuest)
+    public function changeQuestStatusToInProgress($currQuest):bool
     {
         if ($currQuest->getQuestCompletionStatus() === 'Completed') {
-            return;
+            return false;
         }
 
         $questId = $currQuest->getQuestId();
@@ -56,16 +57,25 @@ class QuestStatus
 
                 if ($prereqs[1] == 0 || $this->DBUserQuest->checkQuestStatus($prereqs[0], $prereqs[1], $userId, $this->courseId, 'Completed') == 1) {
                     $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'In progress');
-                    $this->changeQuestStatusToCompleted($currQuest);
+                    return true;
+                } else {
+                    return false;
                 }
-                break;
+            default:
+                return false;
         }
     }
 
-    public function changeQuestStatusToCompleted($currQuest)
+    /**
+     * Change the quest status to Completed if it meets the completion condition
+     * Return true if a status changes
+     * @param mixed $currQuest
+     * @return void
+     */
+    public function changeQuestStatusToCompleted($currQuest): bool
     {
         if ($currQuest->getQuestCompletionStatus() === 'Completed') {
-            return;
+            return false;
         }
 
         $questId = $currQuest->getQuestId();
@@ -82,15 +92,20 @@ class QuestStatus
                 if ($OH_count >= $params) {
                     $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
                     $currQuest->setQuestCompletionStatus('Completed');
-                    $this->logger->addDebug("OH1 true");
+                    return true;
+                } else {
+                    return false;
                 }
-                break;
             case "GS":
                 if ($onTimeCount >= $params) {
                     $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'Completed');
                     $currQuest->setQuestCompletionStatus('Completed');
+                    return true;
+                } else {
+                    return false;
                 }
-                break;
+            default:
+                return false;
         }
     }
 

@@ -21,11 +21,11 @@ function QuestList(props) {
     useEffect(() => {
         let request = {};
 
-        // // Get all quests to update the status
+        // Get all quests to update the status
         request.command = "getQuestsForUser";
         request.user = user.userid;
         request.courseId = course.course_id;
-        getQuests(request, url, null);
+        getAllQuests(request, url);
 
         // Get locked quests
         request.command = "getQuestsForUserWithStatus";
@@ -55,6 +55,35 @@ function QuestList(props) {
         getPoints(request, url);
     }, []);
 
+
+    // Update the quest status
+    const getAllQuests = (json0, url0) => {
+        fetch(url0, {
+            method: 'POST', // or 'PUT'
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(json0),
+        }).then(response => response.json())
+            .then(data => {
+                console.log("Data is: ", data);
+                let success = data.success;
+
+                if (success === "true") {
+                    console.log("Get all quests: Successfully fetched all quests");
+                }
+                else {
+                    console.log("Get Quest: Server returned error");
+                    navigate(docRoot + "/error");
+                }
+            })
+            .catch((error) => {
+                console.log("Get Quest: There was an error:", error);
+                navigate(docRoot + "/error");
+
+            });
+    };
+
     // Update the quest status
     const getQuests = (json0, url0, status) => {
         fetch(url0, {
@@ -69,13 +98,7 @@ function QuestList(props) {
                 let success = data.success;
 
                 if (success === "true") {
-                    console.log("Get Quests: Successfully fetched quests: " + status);
-
-                    // Update quests status and early return
-                    if (status === null) {
-                        console.log("Updated quest status");
-                        return;
-                    }
+                    console.log("Get Quests: Successfully fetched quests with status: " + status);
 
                     let questList = {}
                     console.log("quest array");
