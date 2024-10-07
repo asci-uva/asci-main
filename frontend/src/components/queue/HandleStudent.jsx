@@ -23,6 +23,8 @@ function HandleStudent(props) {
   const [numWaiting, setNumWaiting] = useState("Loading...");
   const [courseName, setCourseName] = useState("Loading...");
   const [waitingSessions, setWaitingSessions] = useState([]);
+  const [activeTAs, setActiveTAs] = useState([]);
+  const [numTAs, setNumTAs] = useState(1);
 
   const [settings, setSettings] = useState(null);
 
@@ -112,7 +114,8 @@ function HandleStudent(props) {
         //if request succeeded
         if(data.success === "true"){
           setNumWaiting(data.waiting);
-
+          setNumTAs(data.tas.length);
+          setActiveTAs(data.tas);
           setWaitingSessions(data.sessions);
 
           if(polling == true){
@@ -220,6 +223,14 @@ function HandleStudent(props) {
     );
   }
 
+  const TARow = ({data}) => {
+    return Object.keys(data).map(k =>
+      <tr key={k}>
+        <td>{data[k].pname} {data[k].lname} ({data[k].computing_id})</td>
+      </tr>
+    );
+  }
+
   const WaitTable = ({data}) => {
     console.log("waittable: settings: " , courseSettings);
     if(data.length > 0 && courseSettings.show_queue_list == "t"){
@@ -249,6 +260,14 @@ function HandleStudent(props) {
           <h1><i className="bi-list-ol big-icon"></i></h1>
           <h2>Handle Queue</h2>
           <p>You are now handling students for <b>{course.name}</b>.</p>
+
+          <p>There are {numTAs} TAs active in the last 10 minutes:</p>
+            <table>
+              <tbody>
+                <TARow data={activeTAs} />
+              </tbody>
+            </table>
+
         </div>
         <div className="col-md-8 my-auto">
           <div className="row">

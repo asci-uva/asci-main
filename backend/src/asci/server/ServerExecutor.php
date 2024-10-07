@@ -944,9 +944,13 @@ $usedCosSim = True;
     $waitingSessions = $dbsession->getWaitingSessions($course_id);
 
 
+    $workingTAs = $dbsession->getRecentWorkingTAs($course_id);
+
+
     $result["success"] = "true";
     $result["waiting"] = count($waitingSessions);
     $result["sessions"] = $waitingSessions;
+    $result["tas"] = $workingTAs;
     $result["usercourse"] = $userCourse->toArray();
     return $result;
   }
