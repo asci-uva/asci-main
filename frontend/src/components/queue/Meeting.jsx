@@ -13,7 +13,10 @@ function Meeting(props) {
   const [student, setStudent] = useState(null);
   const [session, setSession] = useState(null);
   const [sessionId, setSessionId] = useState(null);
-
+  const [elapsedMin, setElapsedMin] = useState("00");
+  const [elapsedSec, setElapsedSec] = useState("00");
+  let mins = 0;
+  let secs = 0;
 
   /* Info regarding group (if applicable) */
   const [isGroup, setIsGroup] = useState(false);
@@ -29,6 +32,18 @@ function Meeting(props) {
 
   useEffect(() => {
     poll();
+
+    setInterval(() => {
+      if (secs == 59) {
+        setElapsedSec("00");
+        secs = 0;
+        mins = mins + 1;
+        setElapsedMin(String(mins).padStart(2, "0"));
+      } else {
+        secs = secs + 1;
+        setElapsedSec(String(secs).padStart(2, "0"));
+      }
+    }, 1000);
 
     return () => {
       console.log("Meeting room: Stopping polling");
@@ -223,7 +238,7 @@ function Meeting(props) {
           <div className="col-md-8 my-auto">
             <h3>You are currently helping...</h3>
             <div className="card my-3">
-              <h5 className="card-header"><b>{student.fname} {student.lname}</b> (<b>{student.computing_id}</b>)</h5>
+              <h5 className="card-header"><b>{student.fname} {student.lname}</b> (<b>{student.computing_id}</b>)  <span class="badge text-bg-secondary float-end"><i className="bi-clock"></i> {elapsedMin}:{elapsedSec}</span></h5>
               <div className="card-body">
                 <dl><dt>Subject</dt> <dd>{session.issue_subject}</dd>
                   <dt>Description</dt> <dd>{session.issue}</dd>
@@ -257,7 +272,7 @@ function Meeting(props) {
             <div className="col-md-8 my-auto">
               <h3>You are currently helping a group...</h3>
               <div className="card my-3">
-                <h5 className="card-header">Location: {session.location}</h5>
+                <h5 className="card-header">Location: {session.location}  <span class="badge text-bg-secondary float-end"><i className="bi-clock"></i> {elapsedMin}:{elapsedSec}</span></h5>
                 <ul className="list-group list-group-flush">
                   {Object.keys(groupSessions).map(k => { 
                     if(groupMembers[k] != null){
