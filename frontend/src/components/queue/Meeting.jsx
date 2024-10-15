@@ -17,6 +17,8 @@ function Meeting(props) {
   const [elapsedSec, setElapsedSec] = useState("00");
   let mins = 0;
   let secs = 0;
+  let origTitle = document.title;
+  let timeInterval = null;
 
   /* Info regarding group (if applicable) */
   const [isGroup, setIsGroup] = useState(false);
@@ -33,7 +35,7 @@ function Meeting(props) {
   useEffect(() => {
     poll();
 
-    setInterval(() => {
+    timeInterval = setInterval(() => {
       if (secs == 59) {
         setElapsedSec("00");
         secs = 0;
@@ -43,12 +45,15 @@ function Meeting(props) {
         secs = secs + 1;
         setElapsedSec(String(secs).padStart(2, "0"));
       }
+      document.title = "(" + String(mins).padStart(2, "0") + ":" + String(secs).padStart(2,"0") + ") -- " + origTitle;
     }, 1000);
 
     return () => {
       console.log("Meeting room: Stopping polling");
       clearTimeout(timeoutId);
+      clearInterval(timeInterval);
       polling = false;
+      document.title = origTitle;
     }
 
   }, []);
