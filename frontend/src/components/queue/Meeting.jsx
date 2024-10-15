@@ -19,6 +19,9 @@ function Meeting(props) {
   let secs = 0;
   let origTitle = document.title;
   let timeInterval = null;
+  
+  const [numWaiting, setNumWaiting] = useState("Loading...");
+  const [numTAs, setNumTAs] = useState(1);
 
   /* Info regarding group (if applicable) */
   const [isGroup, setIsGroup] = useState(false);
@@ -32,8 +35,14 @@ function Meeting(props) {
   let timeoutId = 0;
   let pollTime = 3000;
 
+  // variables for polling queue info from the server
+  let queueInterval = 0;
+  let queuePollTime = 15000; // 15 seconds
+  let queuePolling = true;
+
   useEffect(() => {
     poll();
+    pollNumWaiting();
 
     timeInterval = setInterval(() => {
       if (secs == 59) {
@@ -51,8 +60,10 @@ function Meeting(props) {
     return () => {
       console.log("Meeting room: Stopping polling");
       clearTimeout(timeoutId);
+      clearTimeout(queueInterval);
       clearInterval(timeInterval);
       polling = false;
+      queuePolling = false;
       document.title = origTitle;
     }
 
@@ -116,6 +127,47 @@ function Meeting(props) {
 
   }
 
+
+  function pollNumWaiting(){
+    //Get a student
+    let request = {};
+    request.command = "getWaitingSessions";
+    request.user = user.userid;
+    request.courseId = course.course_id;
+    getWaitingSessions(request, url); 
+  }
+
+  //This gets a student
+  const getWaitingSessions = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+      .then(data => {
+        console.log("Waiting sessions is: ", data);
+
+        //if request succeeded
+        if(data.success === "true"){
+          setNumWaiting(data.waiting);
+          setNumTAs(data.tas.length);
+
+          if(queuePolling == true){
+            queueInterval = setTimeout(pollNumWaiting, queuePollTime);
+          }
+        }
+        else{
+          console.log("Getting number waiting failed");
+        }
+
+      })
+      .catch((error) => {
+        console.log("HOME: There was an error:", error);
+      });
+
+  }
 
   const handleEndMeeting = (e) =>{
     if(sessionId === null){
@@ -241,9 +293,10 @@ function Meeting(props) {
             <p>Your current meeting information.</p>
           </div>
           <div className="col-md-8 my-auto">
+            <QueueInfo />
             <h3>You are currently helping...</h3>
             <div className="card my-3">
-              <h5 className="card-header"><b>{student.fname} {student.lname}</b> (<b>{student.computing_id}</b>)  <span class="badge text-bg-secondary float-end"><i className="bi-clock"></i> {elapsedMin}:{elapsedSec}</span></h5>
+              <h5 className="card-header"><b>{student.fname} {student.lname}</b> (<b>{student.computing_id}</b>)</h5>
               <div className="card-body">
                 <dl><dt>Subject</dt> <dd>{session.issue_subject}</dd>
                   <dt>Description</dt> <dd>{session.issue}</dd>
@@ -255,6 +308,38 @@ function Meeting(props) {
             <div className="text-center">
               <button onClick={handlePutBack} className="btn btn-danger">Put student(s) back in queue</button> &nbsp;
               <button onClick={handleEndMeeting} className="btn btn-primary">End Meeting</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+
+  const QueueInfo = () => {
+    return (
+      <div className="row my-auto">
+        <div className="col-md-4 my-auto">
+          <div className="card text-bg-warning mb-3">
+            <div class="card-header text-center"><i className="bi-clock"></i> Meeting Time</div>
+            <div className="card-body text-center">
+              <h2>{elapsedMin}:{elapsedSec}</h2>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-4 my-auto">
+          <div className="card text-bg-secondary mb-3">
+            <div class="card-header text-center"><i className="bi-list-ol"></i> Queue Length</div>
+            <div className="card-body text-center">
+              <h2>{numWaiting}</h2>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-4 my-auto">
+          <div className="card text-bg-secondary mb-3">
+            <div class="card-header text-center"><i className="bi-person-lines-fill"></i> Active TA(s)</div>
+            <div className="card-body text-center">
+              <h2>{numTAs}</h2>
             </div>
           </div>
         </div>
@@ -275,9 +360,10 @@ function Meeting(props) {
               <p>Your current meeting information.</p>
             </div>
             <div className="col-md-8 my-auto">
+              <QueueInfo />
               <h3>You are currently helping a group...</h3>
               <div className="card my-3">
-                <h5 className="card-header">Location: {session.location}  <span class="badge text-bg-secondary float-end"><i className="bi-clock"></i> {elapsedMin}:{elapsedSec}</span></h5>
+                <h5 className="card-header">Location: {session.location}</h5>
                 <ul className="list-group list-group-flush">
                   {Object.keys(groupSessions).map(k => { 
                     if(groupMembers[k] != null){
