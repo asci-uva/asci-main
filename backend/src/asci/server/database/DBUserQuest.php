@@ -69,13 +69,33 @@ class DBUserQuest
                 array_push($toReturn, $toAdd);
             }
         }
+        return $toReturn;
+    }
+
+    public function getQuestsForCourseWithStatusAndMnemonic($course_id, $status, $mnemonic)
+    {
+        $query = 'select quest_id,user_id,course_id,status,mnemonic,params,name,description,total_points,prerequisites from (quests Q JOIN user_quests U on Q.id = U.quest_id) where course_id=$1 and status=$2 and mnemonic=$3';
+
+        $result = $this->db->query($query, array($course_id, $status, $mnemonic));
+
+        $quests = $this->db->fetchAll($result);
+
+        $toReturn = [];
+        /* Loop through and make user quest objects for each */
+        if (!empty($quests)) {
+            foreach ($quests as $quest) {
+                $toAdd = new \asci\data\UserQuest();
+                $toAdd->fromArray($quest);
+                array_push($toReturn, $toAdd);
+            }
+        }
 
         return $toReturn;
     }
 
     public function getPointsForUser($computing_id, $course_id)
     {
-        $query = 'select sum(total_points) from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) where computing_id=$1 and course_id=$2 and status=\'Completed\'';
+        $query = 'select sum(total_points) from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) where computing_id=$1 and course_id=$2 and (status=\'Completed\' or status=\'Unverified\')';
 
         $result = $this->db->query($query, array($computing_id, $course_id));
         $row = $this->db->fetchrow($result);

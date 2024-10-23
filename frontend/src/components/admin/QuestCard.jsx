@@ -38,16 +38,12 @@ function QuestCard(props) {
         request.courseId = course.course_id;
         request.user = user.userid;
 
-        modifyCourseQuest(request, url);
-    };
-
-    const modifyCourseQuest = (json0, url0) => {
-        fetch(url0, {
+        fetch(props.url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(json0),
+            body: JSON.stringify(request),
         })
             .then((response) => response.json())
             .then((data) => {

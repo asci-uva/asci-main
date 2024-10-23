@@ -54,11 +54,61 @@ function GradescopeSync(props) {
                   "Here are the computing_ids for students whose data failed to be inserted into the database. Please check out the roster in the database to make sure they are included.",
                   data.missingStudents
                 );
+
+                // Store the information about the sync when it's a success
+                getSynchInformation();
               } else {
                 console.log(data.message);
                 toast.error(
                   data.message ||
                     "Failed to insert GradeScope downloaded data into the database."
+                );
+              }
+      })
+      .catch((error) => {
+        console.error("Error during synchronization:", error);
+        setDisabled(false);
+        toast.error("Error during synchronization.");
+      });
+  };
+
+  const getSynchInformation = () => {
+    console.log("Get sync information called");
+    setDisabled(true);
+    const payload = {
+      user: user.userid,
+      // this is the course id in database
+      courseId: course.course_id,
+      mnemonic: "GS",
+      command: "questSync",
+    };
+
+    fetch(props.url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          // If the HTTP status code is not 200-299, throw an error
+          setDisabled(false);
+          throw new Error("Network response was not ok");
+        }
+        return response.json(); // Parse the JSON of the response
+      })
+      .then((data) => {
+        console.log("data is: ", data);
+              setDisabled(false);
+              if (data.success) {
+                toast.success(data.message);
+                console.log(data.message);
+              } else {
+                console.log(data.message);
+                toast.error(
+                  data.message ||
+                    "Failed to insert new synchronization into the database."
                 );
               }
       })

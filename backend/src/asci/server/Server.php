@@ -473,7 +473,7 @@ class Server
 
                 $this->setResponse($executor->getQuestsForUserHandler($user, $courseId));
                 break;
-                
+
             case "getQuestsForUserWithStatus":
                 $courseId = $this->input["courseId"];
                 $status = $this->input['status'];
@@ -505,6 +505,20 @@ class Server
                 $this->setResponse($executor->removeQuestForCourseHandler($questId, $courseId));
                 break;
 
+            case "questSync":
+                $courseId = $this->input["courseId"];
+                $mnemonic = $this->input["mnemonic"];
+
+                $this->setResponse($executor->questSyncHandler($courseId, $mnemonic));
+                break;
+
+            case "changeUserQuestStatus":
+                $questId = $this->input["questId"];
+                $courseId = $this->input["courseId"];
+                $status = $this->input['newStatus'];
+
+                $this->setResponse($executor->changeUserQuestStatusHandler($user, $questId, $courseId, $status));
+                break;
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/
 

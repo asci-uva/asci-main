@@ -1696,7 +1696,7 @@ $usedCosSim = True;
 
           foreach ($quests as $quest) {
               // modify the quest status
-              $this->logger->addDebug("Get all quests", array("quest id" => $quest->getQuestId(), "quest status" => $quest->getQuestCompletionStatus()));
+              $this->logger->addDebug("Get all quests - current quest", array("quest id" => $quest->getQuestId(), "quest mnemonic" => $quest->getMnemonic(), "quest status" => $quest->getQuestCompletionStatus()));
                         
               if ($quest->getQuestCompletionStatus() === 'Locked') {
                 if($statusChanger -> changeQuestStatusToInProgress($quest)) {
@@ -1715,7 +1715,7 @@ $usedCosSim = True;
           $result["quests"][$quest->getQuestId()] = $quest->toArray();
         }
 
-        $this->logger->addDebug("Update quest result", array("quests" => $quests));
+        $this->logger->addDebug("Update all quests", array("quests" => $quests));
 
         $result["success"] = "true";
 
@@ -1733,7 +1733,7 @@ $usedCosSim = True;
         $result["quests"][$quest->getQuestId()] = $quest->toArray();
       }
   
-      $this->logger->addDebug("Quest result with status", array("quests" => $quests, "status" => $status));
+      $this->logger->addDebug("Update quests with status", array("quests" => $quests, "status" => $status));
   
       $result["success"] = "true";
   
@@ -1818,4 +1818,53 @@ $usedCosSim = True;
         return $result;
     }
 
+    // Add a new entry into the synchronizations table
+    public function questSyncHandler($course_id, $mnemonic) {
+      $this->logger->addDebug("Called questSyncHandler", array("course_id" => $course_id, "mnemonic" => $mnemonic));
+      $result = [];
+
+      // Add a new entry into sync table
+      $addSynchSuccess = (new \asci\server\database\DBSynchronization($this->db))->addNewSynchronization($course_id, "now()", $mnemonic);
+      if ($addSynchSuccess) {
+        $this->logger->addDebug("Added sync into table");
+        $statusChanger = new  \asci\data\QuestInfo\QuestStatus($this->db, $course_id);
+        // Get all quests that need to be checked
+        $quests = (new \asci\server\database\DBUserQuest($this->db))->getQuestsForCourseWithStatusAndMnemonic($course_id, "Unverified", $mnemonic);
+        $result["quests"] = [];
+
+        $this->logger->addDebug("Get unverified quests", array("quests" => $quests, "quest count" => count($quests)));
+
+        foreach ($quests as $quest) {
+          $this->logger->addDebug("Get all unverified quests for mnemonic - curr quests", array("quest id" => $quest->getQuestId(), "mnemonic" => $mnemonic));
+          $statusChanger -> confirmVerification($quest);
+        }
+        $result["success"] = true;
+        $this->logger->addDebug("Sync success is true");
+      }
+      else {
+          $result["success"] = false;
+          $this->logger->addDebug("Sync success is false");
+      }
+
+      return $result;
+    }
+
+    // Sets the status for a user quest
+    public function changeUserQuestStatusHandler($computing_id, $quest_id, $course_id, $status) {
+      $user = (new \asci\server\database\DBUSer($this->db))->getUser($computing_id);
+      if (!$user) {
+        $result["success"] = false;
+        return $result;
+      }
+
+      $userQuestSuccess = (new \asci\server\database\DBUserQuest($this->db))->updateQuestStatus($quest_id, $user->getId(), $course_id, $status);
+
+      if ($userQuestSuccess) {
+        $result["success"] = true;
+      } else {
+        $result["success"] = false;
+      }
+
+      return $result;
+    }
 }

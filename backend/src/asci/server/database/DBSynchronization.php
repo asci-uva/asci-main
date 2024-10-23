@@ -167,4 +167,16 @@ class DBSynchronization
 
         return $row["count"];
     }
+
+    public function addNewSynchronization ($courseId, $timestamp, $mnemonic) {
+        $query = 'insert into synchronizations (course_id, update_time, mnemonic) values ($1, $2, $3)';
+
+        $result = $this->db->query($query, array($courseId, $timestamp, $mnemonic));
+
+        if (!$result) {
+            $this->logger->error("Failed to insert new synchronization");
+            return false;
+        }
+        return true;
+    }
 }

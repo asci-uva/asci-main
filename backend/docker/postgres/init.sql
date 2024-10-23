@@ -152,7 +152,8 @@ CREATE TYPE quest_completion_status AS ENUM (
   'Locked',
   'Not started',
   'In progress',
-  'Completed'
+  'Completed',
+  'Unverified'
 );
 
 
@@ -179,6 +180,12 @@ CREATE TABLE course_quests (
   quest_id INT,
   course_id INT,
   PRIMARY KEY (course_id, quest_id)
+);
+
+CREATE TABLE synchronizations (
+  course_id INT,
+  update_time TIMESTAMP,
+  mnemonic TEXT
 );
 
 ALTER TABLE queue ADD FOREIGN KEY (user_id) REFERENCES users (id);
@@ -281,17 +288,21 @@ INSERT INTO quests (id, mnemonic, params, name, description, prerequisites, tota
 VALUES (2, 'OH', '3', 'Attend Office Hours Three Times', 'Get help at office hours two times, each session minimum 5 minutes', 'OH 1', 30);
 
 INSERT INTO quests (id, mnemonic, params, name, description, prerequisites, total_points)
-VALUES (3, 'OH', '10', 'Attend Office Hours Ten Times', 'Get help at office hours ten times, each session minimum 5 minutes',  'OH 3', 100);
+VALUES (3, 'OH', '10', 'Attend Office Hours Ten Times', 'Get help at office hours ten times, each session minimum 5 minutes', 'OH 3', 100);
 
 INSERT INTO quests (id, mnemonic, params, name, description, prerequisites, total_points)
-VALUES (4, 'GS', '1', 'Turn Assignment in On Time One Time', 'Submit one assignment in to Gradescope before the due date',  'GS 0', 10);
+VALUES (4, 'GS', '1', 'Turn Assignment in On Time One Time', 'Submit one assignment in to Gradescope before the due date', 'GS 0', 10);
 
 INSERT INTO quests (id, mnemonic, params, name, description, prerequisites, total_points)
-VALUES (5, 'GS', '3', 'Turn Assignment in On Time Three Times', 'Submit three assignments in to Gradescope before the due date',  'GS 1', 30);
+VALUES (5, 'GS', '3', 'Turn Assignment in On Time Three Times', 'Submit three assignments in to Gradescope before the due date', 'GS 1', 30);
 
 INSERT INTO quests (id, mnemonic, params, name, description, prerequisites, total_points)
-VALUES (6, 'GS', '10', 'Turn Assignment in On Time Ten Times', 'Submit ten assignments in to Gradescope before the due date',  'GS 3', 100);
+VALUES (6, 'GS', '10', 'Turn Assignment in On Time Ten Times', 'Submit ten assignments in to Gradescope before the due date', 'GS 3', 100);
+
+INSERT INTO quests (id, mnemonic, params, name, description, prerequisites, total_points)
+VALUES (7, 'GS', '100', 'Turn Assignment in On Time 100 Times', 'Submit 100 assigns in to Gradescope before the due date', 'GS 03', 100);
 
 ALTER TABLE user_quests ADD FOREIGN KEY (user_id) REFERENCES users (id);
 ALTER TABLE user_quests ADD FOREIGN KEY (quest_id) REFERENCES quests (id);
 ALTER TABLE user_quests ADD FOREIGN KEY (course_id) REFERENCES courses (id);
+ALTER TABLE synchronizations ADD FOREIGN KEY (course_id) REFERENCES courses (id);

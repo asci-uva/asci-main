@@ -36,7 +36,7 @@ class QuestStatus
      * @param mixed $currQuest
      * @return void
      */
-    public function changeQuestStatusToInProgress($currQuest):bool
+    public function changeQuestStatusToInProgress($currQuest): bool
     {
         if ($currQuest->getQuestCompletionStatus() === 'Completed') {
             return false;
@@ -46,7 +46,7 @@ class QuestStatus
         $userId = $currQuest->getUserId();
         $params = $currQuest->getParams();
 
-        $this->logger->addDebug("Change status to in progress for quest", array("quest id:" => $questId, "user id:" => $userId, "course id" => $this->courseId, "params" => $params));
+        $this->logger->addDebug("Change status to in progress for quest", array("quest id:" => $questId, "quest mnemonic" => $currQuest->getMnemonic(), "user id:" => $userId, "course id" => $this->courseId, "params" => $params));
 
         // Unlock quests that meet the prereqs
         switch ($currQuest->getMnemonic()) {
@@ -83,7 +83,7 @@ class QuestStatus
         $params = $currQuest->getParams();
 
         $this->logger->addDebug("Change status to completed for quest", array("quest id:" => $questId, "user id:" => $userId, "course id" => $this->courseId));
-        
+
         $OH_count = $this->officeHoursCount($userId, $this->courseId);
         $onTimeCount = $this->onTimeGradescopeAssignmentCount($userId, $this->courseId);
         // Complete quests if they meet the conditions
@@ -106,6 +106,24 @@ class QuestStatus
                 }
             default:
                 return false;
+        }
+    }
+
+    public function confirmVerification($currQuest)
+    {
+        if ($currQuest->getQuestCompletionStatus() !== 'Unverified') {
+            return false;
+        }
+        $questId = $currQuest->getQuestId();
+        $userId = $currQuest->getUserId();
+
+        // If the quest changes status to complete, it's verified. Else, if the status doesn't change it should go back to being in progress
+        if (!$this->changeQuestStatusToCompleted($currQuest)) {
+            $this->DBUserQuest->updateQuestStatus($questId, $userId, $this->courseId, 'In progress');
+            $currQuest->setQuestCompletionStatus('In progress');
+            $this->logger->addDebug("Verification was false, change status to in progress", array("quest id:" => $questId, "user id:" => $userId, "course id" => $this->courseId, "status" => $currQuest->getQuestCompletionStatus()));
+        } else {
+            $this->logger->addDebug("Verification was true, change status to completed", array("quest id:" => $questId, "user id:" => $userId, "course id" => $this->courseId, "status" => $currQuest->getQuestCompletionStatus()));
         }
     }
 
