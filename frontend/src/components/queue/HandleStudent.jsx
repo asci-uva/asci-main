@@ -213,11 +213,17 @@ function HandleStudent(props) {
     return <tr><th>No.</th><th className="waitTableIssue">Issue</th><th>Location</th><th>Options</th></tr>;
   }
 
+  const formatDate = (datestr) => {
+    let date = new Date(datestr);
+    return date.toLocaleTimeString() + ' - ' + date.toLocaleDateString();
+  }
 
   const WaitTableRow = ({data}) => {
     return Object.keys(data).map(k =>
       <tr key={k}>
-        <td>{k}</td><td><b>{data[k].issue_subject}</b><br/>{data[k].issue}</td><td>{data[k].location}</td>
+        <td>{k}</td>
+        <td><b>{data[k].issue_subject}</b><br/>{data[k].issue}<br/><small><i>Joined queue: {formatDate(data[k].entry_time)}</i></small></td>
+        <td>{data[k].location}</td>
         <td><button value={k} onClick={handleTake} className="btn btn-sm btn-danger">Take</button></td>
       </tr>
     );
