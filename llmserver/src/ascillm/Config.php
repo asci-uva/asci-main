@@ -31,7 +31,7 @@ class Config {
      * @var boolean Whether the system is in DEBUG mode
      */
     public static $DEBUG_MODE = true;
-    public static $FAKE_LLM_MODE = true;
+    public static $FAKE_LLM_MODE = false;
 
     // The path of the LLM chat script
     public static $LLM_CHAT_SCRIPT = '/opt/src/ascillm/python/llm_chat.py';

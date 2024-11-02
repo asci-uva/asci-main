@@ -20,15 +20,15 @@ RUN pip install pandas
 RUN pip install numpy
 RUN pip install -U scikit-learn
 
-
+RUN pip install 'accelerate>=0.26.0'
 RUN pip install -U openai
 RUN pip install -U python-dotenv 
 RUN pip install -U llama-index
 RUN pip install -U llama-index-core
 RUN pip install -U llama-index-readers-file
 RUN pip install -U llama-index-embeddings-huggingface
-RUN pip install -U install llama-index-llms-llamafile
-RUN pip install -U install llama-index-vector-stores-postgres 
+RUN pip install -U llama-index-llms-llamafile
+RUN pip install -U llama-index-vector-stores-postgres 
 
 
 RUN service apache2 restart

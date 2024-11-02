@@ -22,7 +22,7 @@ script_directory = os.path.abspath(os.path.dirname(__file__))
 if script_directory not in sys.path:
     sys.path.append(script_directory)
 
-DEV_MODE = False
+DEV_MODE = True
 
 
 Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")

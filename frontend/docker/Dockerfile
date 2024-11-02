@@ -10,7 +10,7 @@ WORKDIR /app
 
 # Copy app files here can also use . to replace /app 
 COPY ./package.json /app
-RUN npm install
+RUN npm install --force --verbose
 
 #optimization skip nstall if package unchanged
 #COPY . .
