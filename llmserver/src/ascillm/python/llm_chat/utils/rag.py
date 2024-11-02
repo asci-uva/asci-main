@@ -4,8 +4,7 @@ import traceback
 from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
-
-from llm_chat.constants import PERSIST_DIR, DATA_DIR 
+from llm_chat.constants import PERSIST_DIR, DATA_DIR, USE_FILE_STORAGE_RAG 
 from llama_index.core import (
     VectorStoreIndex,
     SimpleDirectoryReader,
@@ -37,22 +36,25 @@ def load_rag_index(course):
     dir = Path(realdir)
     dir_exists = os.path.exists(dir)
     doc_file_exists = os.path.exists(dir / "docstore.json")
-    
-    vector_store = PGVectorStore.from_params(
-        database="asci",
-        host="db",
-        password="asci",
-        port="5432",
-        user="asci",
-        table_name="rag_"+str(course),
-        embed_dim=384)
 
     if not (dir_exists):
         print("Cannot load RAG - Chatbot does not exist")
     else:
         # load the existing index
         try:
-            index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
+            if USE_FILE_STORAGE_RAG:
+                storage_context = StorageContext.from_defaults(persist_dir=realdir)
+                index = load_index_from_storage(storage_context)
+            else:
+                vector_store = PGVectorStore.from_params(
+                    database="asci",
+                    host="db",
+                    password="asci",
+                    port="5432",
+                    user="asci",
+                    table_name="rag_"+str(course),
+                    embed_dim=384)
+                index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
             return index
         except Exception as e:
             print(str(e))

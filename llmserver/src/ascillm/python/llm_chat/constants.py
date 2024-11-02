@@ -33,3 +33,5 @@ LLAMAFILE_BASE_URL_HOME = "http://titanx01.cs.virginia.edu:8080"
 
 PERSIST_DIR = "/opt/data/COURSEID/storage"
 DATA_DIR = "/opt/data/COURSEID/data"
+
+USE_FILE_STORAGE_RAG = True
