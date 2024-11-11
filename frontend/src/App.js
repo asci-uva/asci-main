@@ -18,6 +18,7 @@ const uploadurl = "http://localhost:8081/fileupload.php";
 
 const netbadgeEnabled = false; //if false, login page will have you type in a userId to use
 const debugMode = true; //if true, login page will have you type in a userId to use
+const passwordAuth = true; //if true, will use password authentication 
   return (
   <UserProvider>
     <ToastContainer />
@@ -31,6 +32,7 @@ const debugMode = true; //if true, login page will have you type in a userId to 
               url={url}
               uploadurl={uploadurl}
               debugMode={debugMode}
+              passwordAuth={passwordAuth}
             />
           }
         />

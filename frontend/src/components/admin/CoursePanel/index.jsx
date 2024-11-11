@@ -21,6 +21,7 @@ const CoursePanel = (props) => {
 
     fetch(props.url, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -91,6 +92,7 @@ const CoursePanel = (props) => {
 
     fetch(pythonEndpoint, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -110,6 +112,7 @@ const CoursePanel = (props) => {
           // After the Python script has successfully downloaded the CSV, trigger the PHP function to parse the download csv and store the data to the db
           fetch(props.url, {
             method: "POST",
+            credentials: "include",
             headers: {
               "Content-Type": "application/json",
             },

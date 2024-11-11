@@ -70,6 +70,7 @@ function StudentWaitingRoom(props) {
   const fetchTip = (json0, url0) => {
     fetch(url0, {
       method: "POST", // or 'PUT'
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -97,6 +98,7 @@ function StudentWaitingRoom(props) {
   const getStatus = (json0, url0) => {
     fetch(url0, {
       method: "POST", // or 'PUT'
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -176,6 +178,7 @@ function StudentWaitingRoom(props) {
   const reqLeaveQueue = (json0, url0) => {
     fetch(url0, {
       method: "POST", // or 'PUT'
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },

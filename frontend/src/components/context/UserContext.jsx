@@ -28,11 +28,13 @@ export const UserProvider = ({ children }) => {
     let json = {};
     json.command = "login";
     json.user = userInfo.user;
+    json.password = userInfo.password;
 
     let jsonString = JSON.stringify(json);
 
     fetch(url, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -55,7 +57,7 @@ export const UserProvider = ({ children }) => {
         } else {
           // fail to login
           console.log("login failed");
-          callback(false);
+          callback(false, data.error.message);
         }
       })
       .catch((error) => {
@@ -73,6 +75,7 @@ export const UserProvider = ({ children }) => {
 
     fetch(url, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -145,6 +148,7 @@ export const UserProvider = ({ children }) => {
 
     fetch(url, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },

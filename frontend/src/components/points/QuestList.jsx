@@ -41,6 +41,7 @@ function QuestList(props) {
     const getQuests = (json0, url0) => {
         fetch(url0, {
             method: 'POST', // or 'PUT'
+            credentials: "include",
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -82,6 +83,7 @@ function QuestList(props) {
     const getPoints = (json0, url0) => {
         fetch(url0, {
             method: 'POST', // or 'PUT'
+            credentials: "include",
             headers: {
                 'Content-Type': 'application/json',
             },

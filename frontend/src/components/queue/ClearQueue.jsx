@@ -57,6 +57,7 @@ function ClearQueue(props) {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: "include",
       body: JSON.stringify(json0),
     }).then(response => response.json())
       .then(data => {

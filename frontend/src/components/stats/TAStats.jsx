@@ -23,6 +23,7 @@ function TAStats(props) {
 
     fetch(url, {
       method: "POST", // or 'PUT'
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },

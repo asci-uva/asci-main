@@ -9,6 +9,7 @@ class User implements \Serializable {
     public $fname;
     public $lname;
     public $pname;
+    private $passwordHash;
 
 
     public function __construct()
@@ -17,12 +18,13 @@ class User implements \Serializable {
         
     }
 
-    public function fromData($id, $computing_id, $fname, $lname, $pname){
+    public function fromData($id, $computing_id, $fname, $lname, $pname, $passwordHash=null){
         $this->id = $id;
         $this->computing_id = $computing_id;
         $this->fname = $fname;
         $this->lname = $lname;
         $this->pname = $pname;
+        $this->passwordHash = $passwordHash;
     }
 
     public function fromArray($row){
@@ -31,6 +33,7 @@ class User implements \Serializable {
         $this->fname = $row['fname'] ?? null;
         $this->lname = $row['lname'] ?? null;
         $this->pname = $row['pname'] ?? null;
+        $this->passwordHash = $row['password'] ?? null;
         return $this;
     }
 
@@ -41,6 +44,7 @@ class User implements \Serializable {
             "fname" => $this->fname,
             "lname" => $this->lname,
             "pname" => $this->pname
+            // "passwordHash" => $this->passwordHash (do not put in the hash!)
         );
     }
 
@@ -71,6 +75,9 @@ class User implements \Serializable {
     }
 
 
+    public function getPasswordHash() {
+      return $this->passwordHash;
+    }
 
     
     public function toJSON() {

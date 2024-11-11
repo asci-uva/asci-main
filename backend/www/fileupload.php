@@ -20,6 +20,11 @@ header("Access-Control-Allow-Headers: Origin, Content-Type, Accept");
 include ("/opt/src/vendor/autoload.php");
 
 /**
+ * Join the session
+ */
+session_start();
+
+/**
  * If debug is on, turn on error reporting
  */
 if (\asci\Config::$DEBUG_MODE) {

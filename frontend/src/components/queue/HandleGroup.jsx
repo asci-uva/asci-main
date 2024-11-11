@@ -61,6 +61,7 @@ function HandleGroup(props) {
   const getMatchedInfo = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },
@@ -135,6 +136,7 @@ function HandleGroup(props) {
   const createGroupRequest = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },
@@ -182,6 +184,7 @@ function HandleGroup(props) {
   const cancelGroupRequest = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },

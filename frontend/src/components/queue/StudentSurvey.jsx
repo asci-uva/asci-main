@@ -60,6 +60,7 @@ function StudentSurvey(props) {
   const getSessionInfo = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },
@@ -136,6 +137,7 @@ function StudentSurvey(props) {
   const reqSubmitSurvey = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },

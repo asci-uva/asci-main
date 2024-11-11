@@ -83,6 +83,7 @@ const Chat = (props) => {
 
         const response = await fetch(apiEndpoint, {
             method: "POST",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },

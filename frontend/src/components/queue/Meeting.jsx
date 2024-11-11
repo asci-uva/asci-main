@@ -84,6 +84,7 @@ function Meeting(props) {
   const getMeetingDetails = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },
@@ -141,6 +142,7 @@ function Meeting(props) {
   const getWaitingSessions = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },
@@ -189,6 +191,7 @@ function Meeting(props) {
   const endMeeting = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },
@@ -241,6 +244,7 @@ function Meeting(props) {
   const putBack = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },

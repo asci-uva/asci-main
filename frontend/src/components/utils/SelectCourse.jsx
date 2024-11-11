@@ -43,6 +43,7 @@ function SelectCourse(props) {
   const getCourseSettings = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },

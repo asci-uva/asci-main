@@ -2,7 +2,8 @@
 header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
-header("Access-Control-Allow-Headers: Origin, Content-Type, Accept");
+header("Access-Control-Allow-Headers: Origin, Content-Type, Accept, X-Requested-With, X-CSRF-Token");
+header("Access-Control-Max-Age: 3600");
 /**
  * Landing page of internal server api
  *
@@ -18,6 +19,11 @@ header("Access-Control-Allow-Headers: Origin, Content-Type, Accept");
  * Load dependencies
  */
 include ("/opt/src/vendor/autoload.php");
+
+/**
+ * Join the session
+ */
+session_start();
 
 /**
  * If debug is on, turn on error reporting

@@ -108,9 +108,7 @@ class Server
         /* Otherwise, use the user provided by request */
         // Login is a special command that doesn't require this validation
         $user = null;
-        if(\asci\Config::$DEBUG_MODE){
-            $user = $input["user"];
-        } else { // netbadge
+        if(\asci\Config::$AUTH_MODE == "netbadge"){
             $user = $_SERVER["uid"];
 
             if($user == null || ($input["command"] != "login" && $user != $input["user"])){
@@ -118,6 +116,13 @@ class Server
                 $result = ["success" => "false", "error" => "ERROR: Session userId does not match provided user id"];
                 $this->setResponse($result);
                 return;
+            }
+        } else { // Default to password mode
+            // check if user has logged in. If so, use that user
+            // from the server-side session.  If not, then there is no user.
+          $this->logger->addDebug("SESSION variable in Server", $_SESSION);
+            if (isset($_SESSION["uid"])) { // && $_SESSION["uid"] == $input["user"]) {
+              $user = $_SESSION["uid"];
             }
         }
 
@@ -142,9 +147,17 @@ class Server
         /* Otherwise, use the user provided by request */
         $user = $this->validateUsername($this->input);
 
-        // Stand up the executor _after_ verifying the user so that we can pass the user
-        // object there. 
+        // Stand up the executor 
         $executor = new \asci\server\ServerExecutor($user);
+
+
+        // Limit user-less commands to "info" and "login"
+        if ($user == null && 
+          ($this->input["command"] != "info" && $this->input["command"] != "login")) {
+          $this->input["command"] = "info";
+        } else {
+          $executor->loadUser($user);
+        }
 
         /* This section acquires a lock for the given course IF a courseId was provided */
         /* ------------------------------------------------------------------ */
@@ -175,22 +188,19 @@ class Server
 
         // Decide what to do based on the command given to the server
         switch ($this->input["command"]) {
-            case "hello":
-                print_r($this->input);
-                $this->setResponse([
-                    "response" => "Hi, this works",
-                    "second" => [
-                        "more",
-                        "json"
-                    ]
-                ]);
-                break;
             case "login":
-                
-                $this->setResponse($executor->loginHandler($user));
-
+                $password = null;
+                if (isset($this->input["password"]))
+                  $password = $this->input["password"];
+                $this->setResponse($executor->loginHandler($this->input["user"], $password));
                 break;
 
+            case "logout":
+                session_destroy();
+                session_start();
+                $this->setResponse(["result" => "success"]);
+                break;
+    
             //given userId and courseId, 
             //sends back info about where in the "process" this student / ta
             //is for this particular "course"
@@ -540,7 +550,7 @@ class Server
                 break;
                 
             default:
-                $this->setResponse(["response" => "Hello world!"]);
+              throw new \asci\exceptions\ASCIException("Unknown command: {$this->input["command"]}"); 
 
         }
 

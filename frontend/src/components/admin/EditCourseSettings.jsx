@@ -53,6 +53,7 @@ function EditCourseSettings(props) {
   const updateSettings = (course) => {
     fetch(props.url, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },

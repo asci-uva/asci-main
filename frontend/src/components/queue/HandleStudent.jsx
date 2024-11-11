@@ -63,6 +63,7 @@ function HandleStudent(props) {
   const fetchSettings = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },
@@ -103,6 +104,7 @@ function HandleStudent(props) {
   const getWaitingSessions = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },
@@ -172,6 +174,7 @@ function HandleStudent(props) {
   const getStudent = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },

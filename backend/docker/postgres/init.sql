@@ -29,7 +29,8 @@ CREATE TABLE users (
   computing_id VARCHAR(12),
   fname TEXT,
   lname TEXT,
-  pname TEXT
+  pname TEXT,
+  password TEXT
 );
 
 CREATE TABLE user_courses (
@@ -89,6 +90,7 @@ CREATE TABLE course_settings (
   show_queue_list BOOL DEFAULT (true),
   grouping_enabled BOOL DEFAULT (true),
   smart_grouping BOOL DEFAULT (true),
+  self_grouping BOOL DEFAULT (true),
   show_quests BOOL DEFAULT (true),
   llm_enabled BOOL DEFAULT (true)
 );
@@ -208,17 +210,17 @@ ALTER TABLE group_mapping ADD FOREIGN KEY (to_session) REFERENCES sessions (id);
 -- insert mark and nada,
 -- make up two dummy courses. Make them student and TA in each 
 
-INSERT INTO users (id, computing_id, fname, lname , pname)
-VALUES (1, 'mrf8t', 'Mark', 'Floryan', 'Mark');
+INSERT INTO users (id, computing_id, fname, lname , pname, password)
+VALUES (1, 'mrf8t', 'Mark', 'Floryan', 'Mark', '$2y$10$qVG/HZRB4KXyd6eFkFc2hOXX0r2hyLYN3siL2XyxieChtRiBDUEMC');
 
-INSERT INTO users (id, computing_id, fname, lname , pname)
-VALUES (2, 'nb3f', 'Nada', 'Basit', 'Nada');
+INSERT INTO users (id, computing_id, fname, lname , pname, password)
+VALUES (2, 'nb3f', 'Nada', 'Basit', 'Nada', '$2y$10$qVG/HZRB4KXyd6eFkFc2hOXX0r2hyLYN3siL2XyxieChtRiBDUEMC');
 
-INSERT INTO users (id, computing_id, fname, lname , pname)
-VALUES (3, 'jh2jf', 'John', 'Hott', 'Robbie');
+INSERT INTO users (id, computing_id, fname, lname , pname, password)
+VALUES (3, 'jh2jf', 'John', 'Hott', 'Robbie', '$2y$10$qVG/HZRB4KXyd6eFkFc2hOXX0r2hyLYN3siL2XyxieChtRiBDUEMC');
 
-INSERT INTO users (id, computing_id, fname, lname , pname)
-VALUES (4, 'hz9xs', 'Hanzhang', 'Zhao', 'Hanzhang');
+INSERT INTO users (id, computing_id, fname, lname , pname, password)
+VALUES (4, 'hz9xs', 'Hanzhang', 'Zhao', 'Hanzhang', '$2y$10$qVG/HZRB4KXyd6eFkFc2hOXX0r2hyLYN3siL2XyxieChtRiBDUEMC');
 
 INSERT INTO courses (id, mnemonic, number, name, semester)
 VALUES (1, 'CS', '2130', 'CSO1', 'SP-23');

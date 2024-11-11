@@ -30,6 +30,7 @@ function CreateNewCourse(props) {
   const createCourse = (course) => {
     fetch(props.url, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },

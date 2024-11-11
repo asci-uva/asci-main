@@ -38,6 +38,7 @@ function StudentMeeting(props) {
   const getMeetingInfo = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },
@@ -90,6 +91,7 @@ function StudentMeeting(props) {
   const reqLeaveMeeting = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },

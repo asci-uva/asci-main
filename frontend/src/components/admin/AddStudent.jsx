@@ -33,6 +33,7 @@ function AddStudent(props) {
 
     fetch(props.url, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },

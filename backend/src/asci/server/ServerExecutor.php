@@ -67,14 +67,18 @@ class ServerExecutor{
     // Check $_SERVER["uid"]; // their computing ID  (name and id can come from roster)
 
     // This may need to change with other authentication types
-    if ($user == null)
-      throw new \asci\exceptions\ASCIPermissionException("User must be authenticated");
+    //if ($user == null)
+    //  throw new \asci\exceptions\ASCIPermissionException("User must be authenticated");
 
-    $this->user = $this->userStore->getUser($user);
+    //$this->user = $this->userStore->getUser($user);
 
     // create a log channel
     $this->logger = new \Monolog\Logger('ServerExecutor');
     $this->logger->pushHandler($log);
+  }
+
+  public function loadUser($uid) {
+    $this->user = $this->userStore->getUser($uid);
   }
 
 
@@ -98,21 +102,44 @@ class ServerExecutor{
    *
    * @return bool login success
    */
-  public function loginHandler($computing_id){
-    $user = $this->userStore->getUser($computing_id)->toArray();
+  public function loginHandler($computing_id, $password=null){
+    if (empty($computing_id))
+      throw new \asci\exceptions\ASCIAuthenticationException("Username not provided");
 
+    $user = $this->userStore->getUser($computing_id);
+    
+    // ensure the user was found
+    if($user == null || $user->getComputingId() == null){
+      throw new \asci\exceptions\ASCIAuthenticationException("User not found"); 
+    }
+    
     $result = [];
-    if($user == null || $user["computing_id"] == null){
-      $result["success"] = "false";
+    if (\asci\Config::$AUTH_MODE == "password") {
+      // password is required
+      if (empty($password))
+        throw new \asci\exceptions\ASCIAuthenticationException("Password not provided"); 
+      
+      // check the password
+      if (password_verify($password, $user->getPasswordHash()) == false) {
+        throw new \asci\exceptions\ASCIAuthenticationException("Invalid password");
+      } 
+
+    } else if (\asci\Config::$AUTH_MODE == "netbadge") {
+      // do nothing!
+    } else {
+        throw new \asci\exceptions\ASCIAuthenticationException("Authentication Mode not allowed by the system");
     }
-    else{
-      $result["user"] = $user;
-      $courses = $this->getCoursesHandler($computing_id);
-      if ($courses["success"] == "true") {
-        $result["courses"] = $courses["courses"];
-      }
-      $result["success"] = "true";
+
+    // Authentication checks were successful, so allow the user to continue
+    $result["user"] = $user->toArray();
+    $courses = $this->getCoursesHandler($computing_id);
+    if ($courses["success"] == "true") {
+      $result["courses"] = $courses["courses"];
     }
+    $result["success"] = "true";
+
+    $_SESSION["uid"] = $user->getComputingId();
+    $this->logger->addDebug("Set SESSION Variable for user {$user->getComputingId()}", $_SESSION);
 
     return $result;
   }
