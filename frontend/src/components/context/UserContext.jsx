@@ -177,6 +177,33 @@ export const UserProvider = ({ children }) => {
   };
 
   const logout = () => {
+    let json = {};
+    json.command = "logout";
+    json.user = userid;
+
+    let jsonString = JSON.stringify(json);
+
+    fetch(url, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonString,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success === "true") {
+          // successfully logout
+          console.log("Logout Success");
+        } else {
+          // fail to logout
+          console.log("logout failed");
+        }
+      })
+      .catch((error) => {
+        console.error("Error during logout:", error);
+      });
     setUserid(null);
     setFname(null);
     setLname(null);
