@@ -256,20 +256,22 @@ const Chat = (props) => {
         if (llmProcessing) {
             return (
                 <div>
-                    {chatHistoryRecords.map((el, i) =>
-                        displayChatHistoryRecord(el, i)
-                    )}
-                  <div className="row">
+                {chatHistoryRecords.map((el, i) => displayChatHistoryRecord(el, i))}
+                <div className="row">
                     <div className="col-8 card text-bg-success m-2 mb-1 p-0">
-                      <div className="card-header">TA Bot</div>
-                      <div className="card-body text-center">
-                        <div className="spinner-border" role="status">
-                          <span className="visually-hidden">Loading...</span>
+                        <div className="card-header">TA Bot</div>
+                        <div className="card-body text-center">
+                            <div className="typing-bubble">
+                                <div className="bubble">
+                                    <div className="dot"></div>
+                                    <div className="dot"></div>
+                                    <div className="dot"></div>
+                                </div>
+                            </div>
                         </div>
-                      </div>
                     </div>
-                  </div>
                 </div>
+            </div>
             );
         } else {
             return (

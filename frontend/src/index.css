@@ -55,4 +55,47 @@
   color: black;
 }
 
+.typing-bubble {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
 
+.bubble {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 30px;
+}
+
+.dot {
+  width: 10px;
+  height: 8px;
+  margin: 0 1px;
+  background-color: #ffff;
+  border-radius: 50%;
+  opacity: 0;
+  animation: bounce 1.5s infinite ease-in-out;
+}
+
+.dot:nth-child(1) {
+  animation-delay: 0s;
+}
+.dot:nth-child(2) {
+  animation-delay: 0.3s;
+}
+.dot:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+      opacity: 0;
+      transform: translateY(0);
+  }
+  40% {
+      opacity: 1;
+      transform: translateY(-4px);
+  }
+}
