@@ -121,6 +121,7 @@ class DBUserCourse
         case "course-roster":
         case "course-settings":
         case "upload-llm":
+        case "upload-piazza":
         case "course-stats":
           if ($role == "instructor")
             return true;
@@ -135,9 +136,9 @@ class DBUserCourse
     }
 
     // returns UserCourse objects for users in the course
-    public function getStudentsForCourse($course_id)
+    public function getParticipantsForCourse($course_id)
     {
-        $query = 'select computing_id,course_id,mnemonic,number,name,semester,role from (courses C JOIN user_courses U on C.id = U.course_id) J JOIN users Us on J.user_id = Us.id where course_id=$1 and role=\'student\'';
+        $query = 'select Us.id,computing_id,course_id,mnemonic,number,name,semester,role from (courses C JOIN user_courses U on C.id = U.course_id) J JOIN users Us on J.user_id = Us.id where course_id=$1';
 
         $result = $this->db->query($query, array($course_id));
 
@@ -152,6 +153,52 @@ class DBUserCourse
         }
 
         return $toReturn;
+    }
+
+    // returns UserCourse objects for users in the course
+    public function getStudentsForCourse($course_id)
+    {
+        $query = 'select Us.id,computing_id,course_id,mnemonic,number,name,semester,role from (courses C JOIN user_courses U on C.id = U.course_id) J JOIN users Us on J.user_id = Us.id where course_id=$1 and role=\'student\'';
+
+        $result = $this->db->query($query, array($course_id));
+
+        $courses = $this->db->fetchAll($result);
+
+        $toReturn = [];
+        /* Loop through and make user course objects for each */
+        foreach ($courses as $course){
+            $toAdd = new \asci\data\UserCourse();
+            $toAdd->fromArray($course);
+            array_push($toReturn, $toAdd);
+        }
+
+        return $toReturn;
+    }
+
+    // 
+    public function updatePiazzaStatsForCourse($courseId, $piazzaStats)
+    {
+      $selectquery = 'select * from piazza_raw_stats where user_id = $1 and course_id = $2;';
+      $this->db->prepare("selectPiazza", $selectquery);
+      $insertquery = 'insert into piazza_raw_stats (user_id, course_id, days, posts, asks, answers, views) values ($1, $2, $3, $4, $5, $6, $7);';
+      $this->db->prepare("insertPiazza", $insertquery);
+      $updatequery = 'update piazza_raw_stats set days = $3, posts = $4, asks = $5, answers = $6, views = $7 where user_id = $1 and course_id = $2;';
+      $this->db->prepare("updatePiazza", $updatequery);
+
+
+      foreach ($piazzaStats as $stat) {
+        $res = $this->db->execute("selectPiazza", [$stat["user"]->getUserId(), $courseId]); 
+        $rows = $this->db->fetchAll($res);
+
+        if (empty($rows)) {
+          // do insert
+          $this->db->execute("insertPiazza", [$stat["user"]->getUserId(), $courseId, $stat["stats"]["days"], $stat["stats"]["posts"], $stat["stats"]["asks"], $stat["stats"]["answers"], $stat["stats"]["views"]]);
+        } else {
+          // do update
+          $this->db->execute("updatePiazza", [$stat["user"]->getUserId(), $courseId, $stat["stats"]["days"], $stat["stats"]["posts"], $stat["stats"]["asks"], $stat["stats"]["answers"], $stat["stats"]["views"]]);
+        }
+      }
+      return true;
     }
    
 }

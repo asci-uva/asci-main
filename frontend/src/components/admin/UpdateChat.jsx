@@ -32,6 +32,7 @@ function UpdateChat(props) {
 
     fetch(props.uploadurl, {
       method: "POST",
+      credentials: "include",
       body: formData
     })
       .then((response) => response.json())
@@ -63,13 +64,15 @@ function UpdateChat(props) {
 
     var formData = new FormData();
 
-    formData.append("command", "createLlmPiazza");
+    formData.append("command", "uploadPiazza");
+    //formData.append("command", "createLlmPiazza");
     formData.append("user", user.userid);
     formData.append("courseid", course.course_id);
     formData.append('piazzacontent', piazzaFile);
 
     fetch(props.uploadurl, {
       method: "POST",
+      credentials: "include",
       body: formData
     })
       .then((response) => response.json())

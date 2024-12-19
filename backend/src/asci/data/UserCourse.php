@@ -4,6 +4,7 @@ namespace asci\data;
 
 class UserCourse implements \Serializable {
 
+    private $user_id;
     private $computing_id;
     private $course_id;
     private $mnemonic;
@@ -22,6 +23,7 @@ class UserCourse implements \Serializable {
 
     public function fromArray($row){
 
+        $this->user_id = $row['id'] ?? null;
         $this->computing_id = $row['computing_id'] ?? null;
         $this->course_id = $row['course_id'] ?? null;
         $this->mnemonic = $row['mnemonic'] ?? null;
@@ -34,6 +36,7 @@ class UserCourse implements \Serializable {
 
     public function toArray() {
         return array(
+            "id" => $this->user_id,
             "computing_id" => $this->computing_id,
             "course_id" => $this->course_id,
             "mnemonic" => $this->mnemonic,
@@ -48,6 +51,11 @@ class UserCourse implements \Serializable {
     public function getCourseId()
     {
         return $this->course_id;
+    }
+
+    public function getUserId()
+    {
+        return $this->user_id;
     }
 
     public function getComputingId()

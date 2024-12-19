@@ -1374,6 +1374,36 @@ $usedCosSim = True;
 
   }
 
+  public function uploadPiazza($data) {
+    $course = ["course_id" => $data["courseid"]];
+    if($this->courseStore->getCourseById($course["course_id"]) === false)
+      throw new \asci\exceptions\ASCIException("Unknown course");
+
+    // Check for the user 
+    $computing_id = $data["user"];
+    $user = $this->userStore->getUser($computing_id);
+    if ($user == null) 
+      throw new \asci\exceptions\ASCIException("Unknown user");
+
+    //1: Check that the user has permission to access queue
+    if (!$this->userCourseStore->userHasPermission($user, $course["course_id"], "upload-llm"))
+      throw new \asci\exceptions\ASCIPermissionException("User does not have permission to upload llm data");
+
+    $people = $this->userCourseStore->getParticipantsForCourse($course["course_id"]);
+
+    // similar to $cosSim
+    $piazza = new \asci\util\PiazzaHandler();
+
+    $piazzaStats = $piazza->parsePiazzaStats($people);
+    $this->userCourseStore->updatePiazzaStatsForCourse($course["course_id"], $piazzaStats);
+
+    $result = [
+      "success" => "true"
+    ];
+    return $result;
+
+  }
+
 
   public function llmChat($data) {
 

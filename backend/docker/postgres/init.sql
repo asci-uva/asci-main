@@ -150,6 +150,35 @@ CREATE TABLE submissions (
   FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
+-- Piazza Data
+CREATE TABLE piazza_stream (
+  id SERIAL PRIMARY KEY,
+  user_id INT,
+  course_id INT,
+  time timestamp,
+  submission text,
+  subject text,
+  action text,
+  FOREIGN KEY (course_id) REFERENCES courses (id),
+  FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE TABLE piazza_raw_stats (
+  id SERIAL PRIMARY KEY,
+  user_id INT,
+  course_id INT,
+  days int,
+  posts int,
+  asks int,
+  answers int,
+  views int,
+  FOREIGN KEY (course_id) REFERENCES courses (id),
+  FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+
+
+
 CREATE TYPE quest_completion_status AS ENUM (
   'Locked',
   'Not started',

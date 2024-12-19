@@ -429,6 +429,9 @@ class Server
                 break;
 
             case "createLlmPiazza":
+            case "uploadPiazza":
+                // todo: clean up the commands
+                $result = $executor->uploadPiazza($this->input);
                 $result = $executor->uploadPiazzaLLM($this->input);
                 $this->setResponse($result);
                 break;
