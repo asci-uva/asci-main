@@ -106,4 +106,53 @@ class PiazzaHandler {
     }
     return $piazzaData;
   }
+
+  private function cleanStreamUserId($email) {
+    if (strpos($email, "@") !== false) {
+      return $this->cleanUserId($email);
+    } 
+    return false;
+  }
+
+  public function parsePiazzaStream($participants = []) {
+
+    $piazzaRaw = $this->readPiazzaUploadFile("contributions.csv", false);
+
+    $piazzaData = [];
+
+    $indexPart = [];
+    // get participants indexed by computing id 
+    foreach($participants as $participant) {
+      $indexPart[$participant->getComputingId()] =  $participant;
+    }
+    
+    // Open a temporary memory stream
+    $handle = fopen('php://memory', 'r+');
+    fwrite($handle, $piazzaRaw);
+    rewind($handle);
+
+    $header = null;
+    while (($data = fgetcsv($handle, 0, ",")) !== false) {
+      if ($header == null) {
+        $header = $data;
+      }
+      
+      if (count($data) != 11)
+        continue; 
+      $userid = $this->cleanStreamUserId($data[9]);
+      if ($userid !== false && isset($indexPart[$userid])) {
+        array_push($piazzaData, [
+          "post_no" => $data[1],
+          "timestamp" => $data[3],
+          "subject" => $data[6],
+          "contents" => $data[5],
+          "type" => $data[7],
+          "user" => $indexPart[$userid]
+        ]);
+      }
+    }
+    fclose($handle);
+    
+    return $piazzaData;
+  }
 }

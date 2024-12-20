@@ -201,4 +201,25 @@ class DBUserCourse
       return true;
     }
    
+    public function updatePiazzaStreamForCourse($courseId, $piazzaStream)
+    {
+      $insertquery = 'insert into piazza_stream (user_id, course_id, time, submission, subject, action) values ($1, $2, $3, $4, $5, $6);';
+      $this->db->prepare("insertPiazzaStream", $insertquery);
+
+      $res = $this->db->query("select time from piazza_stream where course_id = $1 order by time desc limit 1;", [$courseId]);
+      $results = $this->db->fetchAll($res);
+      $date = null;
+      if (!empty($results))
+        $date = strtotime($results[0]["time"]);
+
+      foreach ($piazzaStream as $event) {
+        $ed = strtotime($event["timestamp"]);
+        if ($date == null || $ed > $date) {
+          $pgdate = date("Y-m-d H:i:s", $ed);
+          $this->db->execute("insertPiazzaStream", [$event["user"]->getUserId(), $courseId,$pgdate,$event["contents"],$event["subject"],$event["type"]  ]);
+        }
+      }
+      return true;
+    }
+   
 }

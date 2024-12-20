@@ -1397,6 +1397,10 @@ $usedCosSim = True;
     $piazzaStats = $piazza->parsePiazzaStats($people);
     $this->userCourseStore->updatePiazzaStatsForCourse($course["course_id"], $piazzaStats);
 
+
+    $piazzaStream = $piazza->parsePiazzaStream($people);
+    $this->userCourseStore->updatePiazzaStreamForCourse($course["course_id"], $piazzaStream);
+
     $result = [
       "success" => "true"
     ];
