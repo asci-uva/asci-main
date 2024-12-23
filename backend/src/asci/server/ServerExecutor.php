@@ -1842,4 +1842,24 @@ $usedCosSim = True;
         return $result;
     }
 
+    public function getStudentsFallingBehindHandler($user, $course_id){
+        
+        if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-roster"))
+          throw new \asci\exceptions\ASCIPermissionException("User does not have permission to view course roster so cannot get students falling behind");
+
+        $students = (new \asci\server\database\DBStudentTracking($this->db))->getStudentsFallingBehind($course_id);
+
+        $result = [];
+        $result["students"] = $students;
+
+        if (!$students) {
+            $result["success"] = false;
+        }
+        else{
+          $result["success"] = true;
+        }
+
+        return $result;
+    }
+
 }

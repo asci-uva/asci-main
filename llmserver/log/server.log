@@ -459,3 +459,5 @@
 [2024-08-28 19:23:47] ServerExecutor.DEBUG: Handling request {"course":"2","command":"llmchat","data":{"command":"newLlmChat","studentQuestion":"fdafdfasdfas: adfafasdfsda","assignmentName":""}} []
 [2024-08-28 19:24:10] ServerExecutor.DEBUG: Handling request {"course":"2","command":"llmchat","data":{"command":"newLlmChat","studentQuestion":"fdafdfasdfas: adfafasdfsda","assignmentName":""}} []
 [2024-08-28 19:28:34] ServerExecutor.DEBUG: Handling request {"course":"2","command":"llmchat","data":{"command":"newLlmChat","studentQuestion":"fdafdfasdfas: adfafasdfsda","assignmentName":""}} []
+[2024-12-22 15:38:21] ServerExecutor.DEBUG: Handling request {"course":"2","command":"llmchat","data":{"command":"newLlmChat","studentQuestion":"dddd: ddddd","assignmentName":""}} []
+[2024-12-22 15:39:41] ServerExecutor.DEBUG: Handling request {"course":"2","command":"llmchat","data":{"command":"newLlmChat","studentQuestion":"adfafddsfadsf: adsfdasfdsf","assignmentName":""}} []

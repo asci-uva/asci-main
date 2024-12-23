@@ -551,6 +551,11 @@ class Server
                 $download_file_name = $this->input["download_file_name"];
                 $this->setResponse($executor->updateGradescopeDataByCourseHandler($course_id, $download_file_name));
                 break;
+
+            case "getStudentsFallingBehind":
+                $course_id = $this->input["courseId"];
+                $this->setResponse($executor->getStudentsFallingBehindHandler($user, $course_id));
+                break;
                 
             default:
               throw new \asci\exceptions\ASCIException("Unknown command: {$this->input["command"]}"); 

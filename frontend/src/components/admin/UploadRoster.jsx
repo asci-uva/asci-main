@@ -57,7 +57,7 @@ function UploadRoster(props) {
       command: "uploadRoster",
       roster: rosterData,
       user: user.userid,
-      course_id: course.course_id,
+      course_id: course.course_id
     };
 
     console.log("Upload roster payload: ", payload);
@@ -67,6 +67,7 @@ function UploadRoster(props) {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(payload),
     })
       .then((response) => response.json())

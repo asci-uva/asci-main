@@ -58,9 +58,21 @@ class DBSynchronization
         // Cache for assignment IDs to minimize DB queries
         $assignmentIds = [];
 
+        /*Find column labeled "sections". Start at the column after that*/
+        $startVal = 4; //default if error occurs / not found
+        $sidCol = 0;
+        for ($i = 0; $i < count($header) - 1; $i += 1) {
+            if($header[$i] == "Sections"){
+                $startVal = $i + 1;
+            }
+            if($header[$i] == "SID"){
+                $sidCol = $i;
+            }
+        }
+
         // Process header to ensure all assignments are present in DB
         // and cache their IDs
-        for ($i = 4; $i < count($header) - 1; $i += 4) {
+        for ($i = $startVal; $i < count($header) - 1; $i += 4) {
             $assignmentName = $header[$i];
             $description = "Assignment description here";
             $type = "homework";
@@ -83,7 +95,7 @@ class DBSynchronization
         // handle the first row to extract the max_score of each assignments and update the assignments in the database
         $row = fgetcsv($handle);
         if($row){
-            for ($i = 4; $i < count($header) - 1; $i += 4) {
+            for ($i = $startVal; $i < count($header) - 1; $i += 4) {
                 $assignmentName = $header[$i];
                 $max_points = floatval($row[$i + 1]);
                 $description = "Assignment description here";
@@ -109,9 +121,8 @@ class DBSynchronization
         while ($row !== FALSE) {
             // Extract student information
             $studentInfo = [
-                'sid' => $row[1],
-                'email' => $row[2],
-                'name' => $row[0],
+                'sid' => $row[$sidCol],
+                'email' => $row[$sidCol+1]
             ];
 
             // Check if the student exists
@@ -128,7 +139,7 @@ class DBSynchronization
             $userId = $user['id'];
 
             // Iterate over assignments for the current student
-            for ($i = 4; $i < count($header) - 1; $i += 4) {
+            for ($i = $startVal; $i < count($header) - 1; $i += 4) {
                 $assignmentName = $header[$i];
                 $assignmentId = $assignmentIds[$assignmentName]; // Get cached assignment ID
                 $score = floatval($row[$i]);
