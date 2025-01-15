@@ -37,7 +37,8 @@ class DBStats {
           where s.id = su.session_id and su.user_id = u.user_id 
           and (u.role='instructor' or u.role='ta') 
           and s.status = 'completed' and fulfillment_time is not null
-          and u.course_id = $1 and ut.id = u.user_id $limit) s 
+          and u.course_id = $1 and s.course_id = $1
+          and ut.id = u.user_id $limit) s 
       group by user_id, pname, lname order by time desc;";
 
     $result = null;
