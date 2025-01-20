@@ -48,6 +48,14 @@ CREATE TABLE courses (
   semester TEXT
 );
 
+CREATE TABLE ta_activity (
+  id SERIAL,
+  user_id INT,
+  course_id INT,
+  entry_time timestamp default (now()),
+  exit_time timestamp default (now())
+);
+
 CREATE TABLE session_users (
   session_id SERIAL,
   user_id INT,

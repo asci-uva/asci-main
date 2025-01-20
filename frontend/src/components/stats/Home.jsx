@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import TAStats from "./TAStats";
+import TAWeek from "./TAWeek";
 
 function Home(props) {
   let docRoot = props.documentRoot;
@@ -27,13 +28,21 @@ function Home(props) {
               <div className="card-header">
                 <ul className="nav nav-tabs card-header-tabs" id="pills-tab" role="tablist">
                   <li className="nav-item" role="presentation">
-                    <button className="nav-link active" id="pills-general-tab" data-bs-toggle="pill" data-bs-target="#pills-general" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Help Time</button>
+                    <button className="nav-link active" id="ta-week-tab" data-bs-toggle="pill" data-bs-target="#ta-week" type="button" role="tab" aria-controls="pills-home" aria-selected="true">TA Weekly Activity</button>
+                  </li>
+                  <li className="nav-item" role="presentation">
+                    <button className="nav-link" id="ta-help-overall-tab" data-bs-toggle="pill" data-bs-target="#ta-help-overall" type="button" role="tab" aria-controls="pills-home" aria-selected="false">TA Leaderboards</button>
                   </li>
                 </ul>
               </div>
 
               <div className="tab-content card-body" id="pills-tabContent">
-                <div className="tab-pane fade show active" id="pills-general" role="tabpanel" aria-labelledby="pills-home-tab"> 
+                <div className="tab-pane fade show active" id="ta-week" role="tabpanel" aria-labelledby="ta-week-tab"> 
+                  <div className="col-md-12 my-auto">
+                    <TAWeek course_id={courseList[course].course_id} {...props} /> 
+                  </div>
+                </div>
+                <div className="tab-pane fade" id="ta-help-overall" role="tabpanel" aria-labelledby="ta-help-overall-tab"> 
                   <div className="col-md-12 my-auto">
                     <TAStats course_id={courseList[course].course_id} {...props} /> 
                   </div>

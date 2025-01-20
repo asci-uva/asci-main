@@ -946,6 +946,24 @@ $usedCosSim = True;
   }
 
 
+  public function updateTAStatus($computing_id, $course_id) {
+    //0: Grab the user
+    $user = $this->userStore->getUser($computing_id);
+
+    $result = [];
+
+    //Get the UserCourse object
+    $userCourse = $this->userCourseStore->getCourseForUser($user->getComputingId(), $course_id);
+
+    //1: Check that the user has permission to access queue
+    if (!$this->userCourseStore->userHasPermission($user, $course_id, "ta-queue"))
+      throw new \asci\exceptions\ASCIPermissionException("User is not enrolled as a TA in this course");
+
+    // Update the status in the database (i.e., that they are working)
+    $this->userCourseStore->updateTAStatus($user, $course_id);
+
+  }
+
   /*
    * Given computing id and course_id, return number of students
    * in queue iff user is ta for that course
@@ -1461,9 +1479,11 @@ $usedCosSim = True;
     $dbstat = new database\DBStats($this->db);
 
     $stats = $dbstat->getTAHelpStatsForCourse($course_id);
+    $details = $dbstat->getTAActiveQueueStatsForCourse($course_id);
 
     $result = [
       "stats" => $stats,
+      "details" => $details,
       "success" => "true"
     ];
     return $result;

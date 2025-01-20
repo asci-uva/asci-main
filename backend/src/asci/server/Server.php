@@ -286,7 +286,7 @@ class Server
             case "getWaitingSessions":
 
                 $courseId = $this->input["courseId"];
-                
+                $executor->updateTAStatus($user, $courseId); 
                 $this->setResponse($executor->getWaitingSessions($user, $courseId));
                 
                 break;
@@ -295,6 +295,7 @@ class Server
 
                 $courseId = $this->input["courseId"];
                 
+                $executor->updateTAStatus($user, $courseId); 
                 $this->setResponse($executor->getStudentForTA($user, $courseId));
                 
                 break;
@@ -304,6 +305,7 @@ class Server
                 $courseId = $this->input["courseId"];
                 $sessionId = $this->input["sessionId"];
                 
+                $executor->updateTAStatus($user, $courseId); 
                 $this->setResponse($executor->takeSpecificStudentForTA($user, $courseId, $sessionId));
                 
                 break;
@@ -314,6 +316,7 @@ class Server
 
                 $courseId = $this->input["courseId"];
                 
+                $executor->updateTAStatus($user, $courseId); 
                 $this->setResponse($executor->getTAMeetingDetails($user, $courseId));
                 
                 break;
@@ -322,6 +325,7 @@ class Server
 
                 $sessionId = $this->input["sessionId"];
                 
+                $executor->updateTAStatus($user, $courseId); 
                 $this->setResponse($executor->endSession($user, $sessionId));
                 break;
 
@@ -330,6 +334,7 @@ class Server
                 $studId = $this->input["studentId"];
                 $sessionId = $this->input["sessionId"];
                 
+                $executor->updateTAStatus($user, $courseId); 
                 $this->setResponse($executor->putStudentBackOnQueue($user, $studId, $sessionId));
                 break; 
 
@@ -363,6 +368,7 @@ class Server
             case "getPotentialGroupInfo":
                 $courseId = $this->input["courseId"];
                 
+                $executor->updateTAStatus($user, $courseId); 
                 $this->setResponse($executor->getPotentialGroupInfo($user, $courseId));
                 
                 break;
@@ -375,6 +381,7 @@ class Server
                 $groupSessions = $this->input["groupSessions"];
                 $location = $this->input["location"];
 
+                $executor->updateTAStatus($user, $courseId); 
                 $this->setResponse($executor->createGroup($user, $courseId, $sessionId, $groupSessions, $location));
                 
                 break;

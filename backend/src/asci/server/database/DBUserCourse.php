@@ -91,6 +91,28 @@ class DBUserCourse
         return $toReturn;
     }
 
+    public function updateTAStatus($user, $course_id) {
+
+        // check if activity session already exists
+      $query = "select * from ta_activity where user_id = $1 and course_id = $2 and entry_time > (now() - interval '30 minutes');";
+
+      $result = $this->db->query($query, array($user->getId(), $course_id));
+
+      $activity = $this->db->fetchAll($result);
+
+      if (!empty($activity) && isset($activity[0])) {
+        $this->db->query("update ta_activity set exit_time = now() where id = $1;", array($activity[0]["id"]));
+
+      } else {
+        $this->db->query("insert into ta_activity (user_id, course_id) values ($1, $2);", array($user->getId(), $course_id));
+
+      }
+
+
+      
+    }
+
+
     public function userHasPermission($user, $course_id, $permission=false) {
 
       $compId = $user->getComputingId();
