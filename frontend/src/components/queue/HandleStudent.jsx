@@ -18,6 +18,9 @@ function HandleStudent(props) {
 
   let url = props.url; 
   let docRoot = props.documentRoot;
+  let origTitle = document.title;
+  let chime = new Audio('/media/chime.mp3');
+  let chimeWaiting = 0;
 
   const [assign, setAssign] = useState(true);
   const [numWaiting, setNumWaiting] = useState("Loading...");
@@ -44,6 +47,7 @@ function HandleStudent(props) {
       console.log("HandleStudent: Stopping polling");
       clearTimeout(timeoutId);
       polling = false;
+      document.title = origTitle;
     }
 
 
@@ -115,10 +119,22 @@ function HandleStudent(props) {
 
         //if request succeeded
         if(data.success === "true"){
+          if (chimeWaiting < data.waiting) {
+            console.log("playing a sound");
+            console.log(numWaiting);
+            console.log(data.waiting);
+            chime.play();
+          }
           setNumWaiting(data.waiting);
           setNumTAs(data.tas.length);
           setActiveTAs(data.tas);
           setWaitingSessions(data.sessions);
+          chimeWaiting = data.waiting; 
+
+          if (data.waiting > 0)
+            document.title = "(" + String(data.waiting) + ") " + origTitle;
+          else
+            document.title = origTitle;
 
           if(polling == true){
             timeoutId = setTimeout(pollNumWaiting, pollTime);
