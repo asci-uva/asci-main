@@ -286,7 +286,7 @@ function HandleStudent(props) {
           <h2>Handle Queue</h2>
           <p>You are now handling students for <b>{course.name}</b>.</p>
 
-          <p>There are {numTAs} TAs active in the last 10 minutes:</p>
+          <p>There are {numTAs} TAs active:</p>
             <table>
               <tbody>
                 <TARow data={activeTAs} />

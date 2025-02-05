@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import TAStats from "./TAStats";
 import TAWeek from "./TAWeek";
+import TAList from "./TAList";
 import StudentsBehind from "./StudentsBehind";
 
 function Home(props) {
@@ -31,7 +32,10 @@ function Home(props) {
               <div className="card-header">
                 <ul className="nav nav-tabs card-header-tabs" id="pills-tab" role="tablist">
                   <li className="nav-item" role="presentation">
-                    <button className="nav-link active" id="ta-week-tab" data-bs-toggle="pill" data-bs-target="#ta-week" type="button" role="tab" aria-controls="pills-home" aria-selected="true">TA Weekly Activity</button>
+                    <button className="nav-link active" id="ta-week-tab" data-bs-toggle="pill" data-bs-target="#ta-week" type="button" role="tab" aria-controls="pills-home" aria-selected="true">TA Activity Calendar</button>
+                  </li>
+                  <li className="nav-item" role="presentation">
+                    <button className="nav-link" id="ta-list-tab" data-bs-toggle="pill" data-bs-target="#ta-list" type="button" role="tab" aria-controls="pills-home" aria-selected="true">TA Activity List</button>
                   </li>
                   <li className="nav-item" role="presentation">
                     <button className="nav-link" id="ta-help-overall-tab" data-bs-toggle="pill" data-bs-target="#ta-help-overall" type="button" role="tab" aria-controls="pills-home" aria-selected="false">TA Leaderboards</button>
@@ -46,6 +50,11 @@ function Home(props) {
                 <div className="tab-pane fade show active" id="ta-week" role="tabpanel" aria-labelledby="ta-week-tab"> 
                   <div className="col-md-12 my-auto">
                     <TAWeek course_id={courseList[course].course_id} {...props} /> 
+                  </div>
+                </div>
+                <div className="tab-pane fade" id="ta-list" role="tabpanel" aria-labelledby="ta-help-overall-tab"> 
+                  <div className="col-md-12 my-auto">
+                    <TAList course_id={courseList[course].course_id} {...props} /> 
                   </div>
                 </div>
                 <div className="tab-pane fade" id="ta-help-overall" role="tabpanel" aria-labelledby="ta-help-overall-tab"> 

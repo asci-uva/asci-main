@@ -9,6 +9,7 @@ import 'c3/c3.css';
 function TAWeek(props) {
   const [courseFile, setCourseFile] = useState(null);
   const [piazzaFile, setPiazzaFile] = useState(null);
+  const [view, setView] = useState("Day");
   const [intervals, setIntervals] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const {user, getCourse} = useUser();
@@ -67,25 +68,32 @@ function TAWeek(props) {
     return (
       <>
         <div className="card mb-4">
-        <h4 className="card-header">Week View</h4>
+        <h4 className="card-header">Calendar View</h4>
         <div className="card-body">
-          <p>
-            <a className="btn btn-primary" data-bs-toggle="collapse" href="#collapseSelect" role="button" aria-expanded="false" aria-controls="collapseSelect">
-                  Change Week 
-                </a>
-          </p>
-              <div className="collapse" id="collapseSelect">
-                  <div className="card-body">
+          <div className="btn-group me-4 my-2">
+             <button onClick={() => setView("Day")} className={ view === "Day" ? "btn btn-primary active" : "btn btn-primary"}>Day</button>
+             <button onClick={() => setView("Week")} className={ view === "Week" ? "btn btn-primary active" : "btn btn-primary"}>Week</button>
+           </div>
+           <button className="btn btn-info me-4 my-2" type="button" data-bs-toggle="collapse" data-bs-target="#smallCalendar" aria-expanded="false">Calendar</button>
+          <div className="collapse" id="smallCalendar">
+            <div class="card card-body">
           <DayPilotNavigator
-            selectMode={"Week"}
+            selectMode={view}
             onTimeRangeSelected={ args => {
               setStartDate(args.day);
             }}
           />
-                      </div>
-              </div>
+            </div>
+          </div>
+          <DayPilotCalendar
+            viewType = {"Day"}
+            visible={view === "Day"}
+            events = {intervals}
+            startDate={startDate}
+          />
           <DayPilotCalendar
             viewType = {"Week"}
+            visible={view === "Week"}
             events = {intervals}
             startDate={startDate}
           />

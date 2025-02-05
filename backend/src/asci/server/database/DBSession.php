@@ -324,7 +324,7 @@ class DBSession
     }
 
     public function getRecentWorkingTAs($courseId) {
-        $query = "SELECT distinct us.* from (sessions S JOIN session_users U on S.id=U.session_id), users us where S.course_id=$1 and (U.role = 'ta' or U.role = 'instructor') and S.fulfillment_time > (now() - interval '10 minutes') and U.user_id = us.id";
+        $query = "SELECT u.* from ta_activity t, users u where t.course_id=$1 and t.exit_time > (now() - interval '2 minutes') and t.user_id = u.id";
         $result = $this->db->query($query, array($courseId));
         $rows = $this->db->fetchall($result);
 
