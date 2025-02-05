@@ -60,11 +60,11 @@ function TAList(props) {
     return Object.keys(data).map(k =>
       <div className="accordion-item" key={k}>
         <h2 className="accordion-header">
-          <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{k}" aria-expanded="false" aria-controls="collapse{k}">
+          <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target={"#collapse"+k} aria-expanded="false" aria-controls={"collapse" + k}>
             {data[k].name} ({data[k].computing_id})
           </button>
         </h2>
-        <div id="collapse{k}" className="accordion-collapse collapse" aria-labeledby="heading{k}" data-bs-parent="#taAccordion">
+        <div id={"collapse"+k} className="accordion-collapse collapse" aria-labeledby={"heading"+k} data-bs-parent="#taAccordion">
           <div className="accordion-body">
             <table id="TATable" className="table table-striped table-hover table-sm">
               <thead>
