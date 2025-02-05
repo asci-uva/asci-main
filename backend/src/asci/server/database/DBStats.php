@@ -86,7 +86,7 @@ class DBStats {
     if ($end_time !== null)
       $limit .= "and s.fulfillment_time <= $3 ";
 
-    $query = "select su.user_id, s.fulfillment_time
+    $query = "select su.user_id, to_char(s.fulfillment_time, 'YYYY-MM-DD\"T\"HH24:MI:SS') as fulfillment_time
       from session_users su, sessions s 
       where s.course_id = $1 and s.id = su.session_id 
         and su.role in ('instructor', 'ta') $limit
@@ -103,7 +103,6 @@ class DBStats {
     $interactions = $this->db->fetchall($result);
 
     // Get a list of TAs from the database as an array
-    // todo
     $query = "select uc.user_id, u.pname || ' ' || u.lname as name, u.computing_id
       from users u, user_courses uc 
       where u.id = uc.user_id and uc.course_id = $1
