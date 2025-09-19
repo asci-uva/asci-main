@@ -77,6 +77,23 @@ class DBSession
     }
 
     /*
+     * Gets the summary for the session from the Session ID
+     */
+    public function getSessionSummary($session_id){
+        $query = 'select location from sessions where id=$1'; //change this to summary later
+
+        $result = $this->db->query($query, array($session_id));
+        $summary = $this->db->fetchrow($result);
+
+        if($summary == null){
+            return null;
+        }
+
+        return $summary["location"];
+        error_log(print_r("lemonade and $summary", true));
+    }
+
+    /*
      * Fetches the session object (with user role and id) by a specific session id.
      *
      * RETURNS: Session object (with user id and role filled in)

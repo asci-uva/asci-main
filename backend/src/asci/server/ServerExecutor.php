@@ -205,7 +205,7 @@ class ServerExecutor{
 
   }
 
-  public function joinQueueHandler($computing_id, $course_id, $question, $subject, $location, $groupOption){
+  public function joinQueueHandler($computing_id, $course_id, $question, $subject, $location, $groupOption){ //add code here later
 
     //0: Grab the user
     $user = $this->userStore->getUser($computing_id);
@@ -227,7 +227,7 @@ class ServerExecutor{
     //If no session yet, insert one and send the new one back
     if($session == null){
       //create a new one and return it back
-      $session = $dbsession->createNewSession($user->getId(), $course->getCourseId(), $course->getRole(), $question, $subject, $location, "waiting", $groupOption);
+      $session = $dbsession->createNewSession($user->getId(), $course->getCourseId(), $course->getRole(), $question, $subject, $location, "waiting", $groupOption); //add code here later
       $result["session"] = $session->toArray();
     }
     else{
@@ -430,6 +430,37 @@ class ServerExecutor{
 
     $result["success"] = "true";
     $result["error"] = "none";
+
+    return $result;
+  }
+
+  public function getAISummary($computing_id, $course_id, $session_id){
+    //DB objects we will be using
+    $dbsession = new \asci\server\database\DBSession($this->db);
+    $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+
+    $result = [];
+
+    $session = $dbsession->getSession($session_id);
+
+    if($session == null){
+      return $this->err("Could not find the given session");
+    }
+    if($session->course_id != $course_id){
+      return $this->err("Session is not in the given course!");
+    }
+
+    $sessionSummary = $dbsession->getSessionSummary($session->getId());
+
+    if($sessionSummary == null){
+      $result["success"] = "false";
+      $result["error"] = "ERROR: Session does not have a summary";
+      return $result;
+    }
+
+    $result["success"] = "true";
+    $result["error"] = "false";
+    $result["summary"] = $sessionSummary;
 
     return $result;
   }

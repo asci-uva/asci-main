@@ -11,6 +11,7 @@ function JoinQueue(props) {
   const [subject, setSubject] = useState("");
   const [location, setLocation] = useState("");
   const [details, setDetails] = useState("");
+  const [code, setCode] = useState("");
   const [courseName, setCourseName] = useState("");
   const [groupOption, setGroupOption] = useState(true);
 
@@ -94,8 +95,9 @@ function JoinQueue(props) {
       setErrorMessage("");
 
       console.log("User: ", user);
-      console.log("Course: ", course)
+      console.log("Course: ", course);
       console.log("Question: ", details);
+      console.log("Code: ", code);
 
       //JOIN THE QUEUE
       let request = {};
@@ -105,8 +107,8 @@ function JoinQueue(props) {
       request.subject = subject;
       request.question = details;
       request.location = location;
+      request.code = code;
       request.groupOption = groupOption.toString();
-
 
       //alert(groupoption);
       joinQueue(request, url); 
@@ -222,6 +224,19 @@ function JoinQueue(props) {
                 onChange={(e)=>setLocation(e.target.value)}
               />
               <p className="form-text">Where can the TA find you?</p>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Code</label>
+              <input
+                type = "text"
+                placeholder="Copy code here"
+                required
+                className="form-control"
+                value = {code}
+                onChange={(e)=>setCode(e.target.value)}
+              />
+              <p className="form-text">Copy and Paste the issue code to help the TA prepare</p>
             </div>
 
             <div className="mb-3">

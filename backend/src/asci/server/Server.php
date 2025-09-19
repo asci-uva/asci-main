@@ -240,8 +240,9 @@ class Server
                 $question = $this->input["question"];
                 $subject = $this->input["subject"];
                 $location = $this->input["location"];
+                $code = $this->input["code"];
                 $groupOption = $this->input["groupOption"];
-                $this->setResponse($executor->joinQueueHandler($user, $courseId, $question, $subject, $location, $groupOption));
+                $this->setResponse($executor->joinQueueHandler($user, $courseId, $question, $subject, $location, $code, $groupOption));
 
                 
                 break;
@@ -310,6 +311,17 @@ class Server
                 
                 break;
 
+            
+            case "getAISummary":
+
+                $courseId = $this->input["courseId"];
+                $sessionId = $this->input["sessionId"];
+            
+                $this->setResponse($executor->getAISummary($user, $courseId, $sessionId));
+
+                error_log("getAISummary called for course $courseId, session $sessionId");
+
+                break;
 
 
             case "getTAMeetingDetails":

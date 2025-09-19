@@ -301,11 +301,12 @@ function Meeting(props) {
             <h3>You are currently helping...</h3>
             <div className="card my-3">
               <h5 className="card-header"><b>{student.fname} {student.lname}</b> (<b>{student.computing_id}</b>)</h5>
-              <div className="card-body">
+              <div className="card-body" style={{display:"flex"}}>
                 <dl><dt>Subject</dt> <dd>{session.issue_subject}</dd>
                   <dt>Description</dt> <dd>{session.issue}</dd>
                   <dt>Location</dt> <dd>{session.location}</dd>
                 </dl>
+                <dl><dt>Summary</dt> <dd>{session.location}</dd></dl>
               </div>
             </div>
 
