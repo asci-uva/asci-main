@@ -205,7 +205,7 @@ class ServerExecutor{
 
   }
 
-  public function joinQueueHandler($computing_id, $course_id, $question, $subject, $location, $groupOption){ //add code here later
+  public function joinQueueHandler($computing_id, $course_id, $question, $subject, $location, $code, $groupOption){ //add code here later
 
     //0: Grab the user
     $user = $this->userStore->getUser($computing_id);
@@ -227,7 +227,7 @@ class ServerExecutor{
     //If no session yet, insert one and send the new one back
     if($session == null){
       //create a new one and return it back
-      $session = $dbsession->createNewSession($user->getId(), $course->getCourseId(), $course->getRole(), $question, $subject, $location, "waiting", $groupOption); //add code here later
+      $session = $dbsession->createNewSession($user->getId(), $course->getCourseId(), $course->getRole(), $question, $subject, $location, $code, "waiting", $groupOption); //add code here later
       $result["session"] = $session->toArray();
     }
     else{
@@ -614,7 +614,7 @@ $usedCosSim = True;
    * $session_id is the session of the main student TA is helping
    * $group_sessions is a list of the other sessions that should be joined with session_id
    */
-  public function createGroup($ta_computing_id, $course_id, $session_id, $group_sessions, $location){
+  public function createGroup($ta_computing_id, $course_id, $session_id, $group_sessions, $location, $code){
 
         //DB objects we will be using
         $dbsession = new \asci\server\database\DBSession($this->db);
@@ -652,7 +652,7 @@ $usedCosSim = True;
       if(!($dbsessusr->delete($taMainSessUsr))) return $this->err("Error deleting TA from main session");
 
       /* Now, create a new session for the TA to run for this group */
-      $newTASess = $dbsession->createNewSession($taUser->id, $course_id, "ta", "Group session", "Group session", $location, "in_progress", "true");
+      $newTASess = $dbsession->createNewSession($taUser->id, $course_id, "ta", "Group session", "Group session", $location, $code, "in_progress", "true");
 
       /* Link in the main session manually */
       $gr_map = new \asci\data\GroupMapping();

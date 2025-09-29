@@ -392,9 +392,10 @@ class Server
                 $sessionId = $this->input["sessionId"];
                 $groupSessions = $this->input["groupSessions"];
                 $location = $this->input["location"];
+                $code = $this->input["code"];
 
                 $executor->updateTAStatus($user, $courseId); 
-                $this->setResponse($executor->createGroup($user, $courseId, $sessionId, $groupSessions, $location));
+                $this->setResponse($executor->createGroup($user, $courseId, $sessionId, $groupSessions, $location, $code));
                 
                 break;
 

@@ -63,6 +63,8 @@ CREATE TABLE session_users (
   user_status session_user_status
 );
 
+DROP TABLE IF EXISTS sessions;
+
 CREATE TABLE sessions (
   id SERIAL PRIMARY KEY,
   course_id INT,
@@ -73,7 +75,9 @@ CREATE TABLE sessions (
   group_option TEXT,
   entry_time timestamp DEFAULT (now()),
   fulfillment_time timestamp,
-  exit_time timestamp
+  exit_time timestamp,
+  code TEXT,
+  llm_summary TEXT
 );
 
 CREATE TABLE group_mapping (

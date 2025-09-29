@@ -34,12 +34,14 @@ class DBSession
             issue = $3,
             issue_subject = $4,
             location = $5,
-            status = $6,
-            group_option = $7,
-            entry_time = $8,
-            fulfillment_time = $9,
-            exit_time = $10
-            WHERE id = $11';
+            code = $6,
+            llm_summary = $7,
+            status = $8,
+            group_option = $9,
+            entry_time = $10,
+            fulfillment_time = $11,
+            exit_time = $12,
+            WHERE id = $13';
 
         $result = $this->db->query($query, array(
             $session->getId(),
@@ -47,6 +49,8 @@ class DBSession
             $session->getIssue(),
             $session->getIssueSubject(),
             $session->getLocation(),
+            $session->getCode(),
+            $session->getSummary(),
             $session->getStatus(),
             $session->getGroupOption(),
             $session->getEntryTime(),
@@ -80,19 +84,18 @@ class DBSession
      * Gets the summary for the session from the Session ID
      */
     public function getSessionSummary($session_id){
-        $query = 'select location from sessions where id=$1'; //change this to summary later
+        $query = 'select code from sessions where id=$1'; 
 
         $result = $this->db->query($query, array($session_id));
-        $summary = $this->db->fetchrow($result);
+        $session = $this->db->fetchrow($result);
 
-        if($summary == null){
+        if($session == null){
+            error_log(("Session ID invalid"));
             return null;
         }
 
-        return $summary["location"];
-        error_log(print_r("lemonade and $summary", true));
+        return $session["code"];
     }
-
     /*
      * Fetches the session object (with user role and id) by a specific session id.
      *
@@ -152,14 +155,15 @@ class DBSession
      * 
      * Returns Session object of new session or null if none created
      */
-    public function createNewSession($user_id, $course_id, $role, $question, $subject, $location, $status, $groupOption){
+    public function createNewSession($user_id, $course_id, $role, $question, $subject, $location, $code, $status, $groupOption){
 
-        $query = 'insert into sessions (course_id, issue, issue_subject, location, status, group_option, entry_time, fulfillment_time, exit_time) values ($1, $2, $3, $4, $5, $6, now(), null, null) returning id';
+        $query = 'insert into sessions (course_id, issue, issue_subject, location, code, llm_summary, status, group_option, entry_time, fulfillment_time, exit_time) values ($1, $2, $3, $4, $5, null, $6, $7, now(), null, null) returning id';
 
-        $result = $this->db->query($query, array($course_id, $question, $subject, $location, $status, $groupOption));
+        $result = $this->db->query($query, array($course_id, $question, $subject, $location, $code, $status, $groupOption));
         $id = $this->db->fetchrow($result)["id"];
 
         if($id == null){
+            error_log(print_r("limes", true));
             return null;
         }
         else{

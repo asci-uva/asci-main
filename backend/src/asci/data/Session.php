@@ -9,6 +9,8 @@ class Session implements \Serializable {
     public $issue;
     public $issue_subject;
     public $location;
+    public $code;
+    public $llm_summary;
     public $status;  
     public $entry_time;
     public $fulfillment_time;
@@ -28,6 +30,8 @@ class Session implements \Serializable {
         $this->issue = $row['issue'] ?? null;
         $this->issue_subject = $row['issue_subject'] ?? null;
         $this->location = $row['location'] ?? null;
+        $this->code = $row['code'] ?? null;
+        $this->llm_summary = $row['llm_summary'] ?? null;
         $this->status = $row['status'] ?? null;
         $this->group_option = $row['group_option'] ?? null;
         $this->entry_time = $row['entry_time'] ?? null;
@@ -44,6 +48,8 @@ class Session implements \Serializable {
             "issue" => $this->issue,
             "issue_subject" => $this->issue_subject,
             "location" => $this->location,
+            "code" => $this->code,
+            "llm_summary" => $this->llm_summary,
             "status" => $this->status,
             "group_option" => $this->group_option,
             "entry_time" => $this->entry_time,
@@ -59,6 +65,7 @@ class Session implements \Serializable {
     public function getIssueSubject(){ return $this->issue_subject; }
     public function getLocation(){ return $this->location; }
     public function getCode(){ return $this->code; }
+    public function getSummary(){ return $this->code; }
     public function getStatus(){ return $this->status; }
     public function getEntryTime(){ return $this->entry_time; }
     public function getFulfillmentTime(){ return $this->fulfillment_time; }
