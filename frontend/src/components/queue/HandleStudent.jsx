@@ -410,12 +410,6 @@ function HandleStudent(props) {
           <div style={modalStyle}>
             <h2>Summary from AI Bot</h2>
             <p>{aiSummary}</p>
-            <Chat
-              url={url}
-              docRoot={docRoot}
-              issueSubject={"CS"}
-              courseName={getCourse().name}
-            />
             <button className="btn btn-danger btn-sm" onClick={closeModal}>Close</button>
           </div>
         </div>

@@ -40,7 +40,7 @@ class DBSession
             group_option = $9,
             entry_time = $10,
             fulfillment_time = $11,
-            exit_time = $12,
+            exit_time = $12
             WHERE id = $13';
 
         $result = $this->db->query($query, array(
@@ -58,6 +58,8 @@ class DBSession
             $session->getExitTime(),
             $session->getId(),
         ));
+
+        //error_log("result from update: " . print_r($session->getSummary()));
 
         if($result) return true;
         else return false;
@@ -84,7 +86,7 @@ class DBSession
      * Gets the summary for the session from the Session ID
      */
     public function getSessionSummary($session_id){
-        $query = 'select code from sessions where id=$1'; 
+        $query = 'select llm_summary from sessions where id=$1'; 
 
         $result = $this->db->query($query, array($session_id));
         $session = $this->db->fetchrow($result);
@@ -94,7 +96,7 @@ class DBSession
             return null;
         }
 
-        return $session["code"];
+        return $session["llm_summary"];
     }
     /*
      * Fetches the session object (with user role and id) by a specific session id.
@@ -163,7 +165,6 @@ class DBSession
         $id = $this->db->fetchrow($result)["id"];
 
         if($id == null){
-            error_log(print_r("limes", true));
             return null;
         }
         else{

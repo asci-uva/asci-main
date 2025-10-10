@@ -1457,6 +1457,68 @@ $usedCosSim = True;
 
   }
 
+  public function llmSummary($data) {
+    $this->logger->addDebug("Handling LLM request", $data);
+    //$arrayString = print_r($data, true);
+    //error_log("Request: " . $arrayString);
+
+    // retrieve course from request data and ensure the ID is known
+    $course = $data["course"];
+    if ($this -> courseStore -> getCourseById($course["course_id"]) === false) throw new \asci\exceptions\ASCIException("Unknown course");
+
+    // retrieve the user's id and ensure their computing ID is known
+    $computing_id = $data["user"];
+    $user = $this->userStore->getUser($computing_id);
+    if ($user == null) throw new \asci\exceptions\ASCIException("Unknown user");
+
+    // check permissions
+    if (!$this->userCourseStore->userHasPermission($user, $course["course_id"], "llm-summary")) throw new \asci\exceptions\ASCIPermissionException("User does not have permission to chat with llm");
+
+    // summary object -> get summary
+    $summary = new \asci\util\LlmChat();
+    $llmResponse = $summary->getLlmSummary($data, $course); // WILL: may need to use a separate (new) function instead of getLlmSummary
+    $this->logger->info("LLM Summary Buffer", array($llmResponse));
+    if($llmResponse == null) throw new \asci\exceptions\ASCIException("LLM Summary call failed");
+
+    // WILL: not sure what this section does
+    $dbLogger = new \asci\server\database\DBLogs($this->db);
+    $type = $data["command"];
+    $logString = json_encode(["role" => "user", "content" => $data["question"], "response"=>$llmResponse, "course"=>$data["course"]]);
+    $dbLogger->log($user->getId(), $type, $logString);
+
+    $result = [];
+    $result["response"] = $llmResponse;
+
+
+
+    // New database session and user
+    $dbsession = new \asci\server\database\DBSession($this->db);
+    $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+
+    $session = $dbsession->getSession($data["session_id"]);
+
+    //error_log("Session: " . print_r($session));
+
+    if($session == null){
+      return $this->err("Could not find the given session");
+    }
+    if($session->course_id != $course["course_id"]){
+      return $this->err("Session is not in the given course!");
+    }
+
+    // update the session with our newly generated summary
+    $session->llm_summary = $llmResponse;
+    $updateStatus = $dbsession->update($session);
+    if($updateStatus == false){
+      $result["success"] = "false";
+      $result["error"] = "ERROR: Session does not have a summary";
+      return $result;
+    }
+    $result["success"] = "true";
+    $result["error"] = "false";
+
+    return $result;
+  }
 
   public function llmChat($data) {
 

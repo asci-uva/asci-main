@@ -65,7 +65,7 @@ class Session implements \Serializable {
     public function getIssueSubject(){ return $this->issue_subject; }
     public function getLocation(){ return $this->location; }
     public function getCode(){ return $this->code; }
-    public function getSummary(){ return $this->code; }
+    public function getSummary(){ return $this->llm_summary; }
     public function getStatus(){ return $this->status; }
     public function getEntryTime(){ return $this->entry_time; }
     public function getFulfillmentTime(){ return $this->fulfillment_time; }

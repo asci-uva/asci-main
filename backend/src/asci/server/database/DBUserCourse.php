@@ -150,6 +150,8 @@ class DBUserCourse
           break;
         case "llm-chat":
           return true;
+        case "llm-summary":
+          return true;
         default:
           return false;
       }

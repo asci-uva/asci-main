@@ -76,6 +76,23 @@ class LlmChat
       return $response["response"];
     }
 
+    public function getLlmSummary($data, $course) {
+      // Build request object
+        $query = [
+          "course" => $course["course_id"],
+          "command" => "llmchat",
+          "data" => [
+            "command" => $data["command"],
+            "question" => $data["question"]
+          ]
+        ];
+
+        $response = $this->query($query);
+        $response = $response["response"];
+        //error_log("response: " . print_r($response, true));
+        return $response["content"];
+    }
+
     public function uploadContent($course) {
 
       $response = [

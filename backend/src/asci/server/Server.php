@@ -432,6 +432,11 @@ class Server
                 $this->setResponse($executor->clearQueue($user, $courseId));
                 
                 break;
+
+            case "llmSummary":
+                $result = $executor->llmSummary($this->input);
+                $this->setResponse($result);
+                break;
             
             case "newLlmChat":
                 $result = $executor->llmChat($this->input);
