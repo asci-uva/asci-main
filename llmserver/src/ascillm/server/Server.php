@@ -120,6 +120,10 @@ class Server
                 $result = $executor->llmChat($this->input);
                 $this->setResponse(["response" => $result]);
                 break;
+            case "llmsummary":
+                $result = $executor->llmSummary($this->input);
+                $this->setResponse(["response" => $result]);
+                break;
             case "uploadContent":
                 $result = $executor->createContentRAG($this->input);
                 $this->setResponse($result);

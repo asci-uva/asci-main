@@ -31,3 +31,13 @@ class OpenaiConnector:
             return res
         except Exception as e:
             raise ValueError(f"Error requesting GPT response in follow-up: {str(e)}")
+        
+    def create_summary(self, question: str, assignment: str = ""):
+        summary = self.prompt_builder.build_summary(question, assignment) 
+        try:
+            res = self.runner.get_summary(question, summary)
+            return res
+        except Exception as e:
+            traceback.print_exc()
+            #print(f"Error requesting GPT response (OpenAI connector): {str(e)}")
+            raise ValueError(f"Error requesting GPT response: {str(e)}")

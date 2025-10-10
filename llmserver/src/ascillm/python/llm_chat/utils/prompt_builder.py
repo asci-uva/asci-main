@@ -19,6 +19,17 @@ class PromptBuilder:
     def build_newchat_system_prompt(self) -> str:
         system_prompt = prompt_paths["new_chat"].system
         return self.file_handler.read_file(system_prompt)
+    
+    def build_summary_user_prompt(self, question: str, assignment: str) -> str:
+        handout = self.get_assignment_handout(assignment)
+        user_prompt = prompt_paths["summary"].user
+        user_prompt = self.file_handler.read_file(user_prompt)
+
+        return user_prompt.format(handout=handout, question=question)
+
+    def build_summary_system_prompt(self) -> str:
+        system_prompt = prompt_paths["summary"].system
+        return self.file_handler.read_file(system_prompt)
 
     def build_messages(self, system_prompt, user_prompt):
         messages = [
@@ -32,3 +43,13 @@ class PromptBuilder:
         user_prompt = self.build_newchat_user_prompt(question, assignment)
 
         return self.build_messages(system_prompt, user_prompt)
+    
+    def build_summary(self, question, assignment):
+        system_prompt = self.build_summary_system_prompt()
+        user_prompt = self.build_summary_ser_prompt(question, assignment)
+
+        summary_messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+        return summary_messages

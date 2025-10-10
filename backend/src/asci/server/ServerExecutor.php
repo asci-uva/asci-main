@@ -434,7 +434,7 @@ class ServerExecutor{
     return $result;
   }
 
-  public function getAISummary($computing_id, $course_id, $session_id){
+  public function getSummaryFromDB($computing_id, $course_id, $session_id){
     //DB objects we will be using
     $dbsession = new \asci\server\database\DBSession($this->db);
     $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
@@ -461,6 +461,8 @@ class ServerExecutor{
     $result["success"] = "true";
     $result["error"] = "false";
     $result["summary"] = $sessionSummary;
+
+    error_log("Summary array: " . print_r($sessionSummary,true));
 
     return $result;
   }
@@ -1476,7 +1478,7 @@ $usedCosSim = True;
 
     // summary object -> get summary
     $summary = new \asci\util\LlmChat();
-    $llmResponse = $summary->getLlmSummary($data, $course); // WILL: may need to use a separate (new) function instead of getLlmSummary
+    $llmResponse = $summary->getLlmSummary($data, $course); 
     $this->logger->info("LLM Summary Buffer", array($llmResponse));
     if($llmResponse == null) throw new \asci\exceptions\ASCIException("LLM Summary call failed");
 
@@ -1507,7 +1509,8 @@ $usedCosSim = True;
     }
 
     // update the session with our newly generated summary
-    $session->llm_summary = $llmResponse;
+    error_log("llm response: " . print_r($llmResponse,true));
+    $session->llm_summary = $llmResponse['content'];
     $updateStatus = $dbsession->update($session);
     if($updateStatus == false){
       $result["success"] = "false";

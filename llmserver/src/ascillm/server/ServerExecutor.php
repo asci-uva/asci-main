@@ -24,6 +24,7 @@ class ServerExecutor {
     global $log;
     
     $this->chat = new LlmChat();
+    $this->summary = new LlmSummary();
 
     // create a log channel
     $this->logger = new \Monolog\Logger('ServerExecutor');
@@ -35,6 +36,16 @@ class ServerExecutor {
 
     $this->logger->addDebug("Handling request", $input);
     $response = $this->chat->getLlmResponse($input["data"], $input["course"]);
+
+    if ($response === false)
+      throw new \ascillm\exceptions\ASCILLMException("Could not connect to LLM");
+
+    return $response;
+  }
+
+  public function llmSummary($input) {
+    $this->logger->addDebug("Handling request", $input);
+    $response = $this->summary->getLlmResponse($input["data"], $input["course"]);
 
     if ($response === false)
       throw new \ascillm\exceptions\ASCILLMException("Could not connect to LLM");

@@ -36,6 +36,7 @@ class Config {
     // The path of the LLM chat script
     public static $LLM_CHAT_SCRIPT = '/opt/src/ascillm/python/llm_chat.py';
     public static $LLM_RAG_SCRIPT = '/opt/src/ascillm/python/llm_chat/utils/rag_create.py';
+    public static $LLM_SUMMARY_SCRIPT = '/opt/src/ascillm/python/llm_summary.py';
 
     public static $LLM_DATA_DIR = '/opt/data/';
 

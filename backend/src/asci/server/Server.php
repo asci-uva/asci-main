@@ -317,7 +317,7 @@ class Server
                 $courseId = $this->input["courseId"];
                 $sessionId = $this->input["sessionId"];
             
-                $this->setResponse($executor->getAISummary($user, $courseId, $sessionId));
+                $this->setResponse($executor->getSummaryFromDB($user, $courseId, $sessionId));
 
                 error_log("getAISummary called for course $courseId, session $sessionId");
 

@@ -219,11 +219,7 @@ function HandleStudent(props) {
 
     openModal();
 
-    console.log("Handling specific student?");
-    console.log("e is: " + e);
-    console.log("value is: " + e.target.value);
-
-    //Get a student
+    // Make request from database for summary
     let request = {};
     request.command = "getAISummary";
     request.user = user.userid;
@@ -284,7 +280,7 @@ function HandleStudent(props) {
       console.log("Data is", data);
       //if request succeeded
       if(data.success === "true"){
-        console.log(data.summary);
+        console.log("Summary retrieved successfully: ", data.summary);
         setAiSummary(data.summary);
       }
       else{
