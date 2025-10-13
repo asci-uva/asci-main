@@ -4,7 +4,6 @@ sys.path.insert(0,'/usr/lib/python3.10/site-packages')
 from llm_chat.openai_connector import OpenaiConnector
 from llm_chat.constants import LLAMAFILE_KEY_PLACEHOLDER, LLAMAFILE_BASE_URL
 
-
 MOCKING_LLM_RESPONSE = False
 
 RUN_MAIN = False
@@ -22,9 +21,10 @@ def get_summary(input_object: dict[str, str], course):
         return MOCK_SUMMARY
     else:
         question = input_object["question"]
+        code = input_object["code"]
 
         connector = OpenaiConnector(LLAMAFILE_BASE_URL, LLAMAFILE_KEY_PLACEHOLDER, course)
-        response = connector.create_summary(question) 
+        response = connector.create_summary(question, code) 
         return response
     
 
@@ -60,6 +60,7 @@ if dataIn:
 if RUN_MAIN:
 
     print("run main")
+    sys.stdout.flush()  
     dataIn = [
         '{"command":"newLlmSummary","assignmentName":"","question":"hw2: homework help","user":"mrf8t"}',
         "-1",

@@ -2,6 +2,7 @@ import React from "react";
 import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 import { useUser } from "../context/UserContext";
+import Markdown from "react-markdown";
 
 function Meeting(props) {
 
@@ -29,6 +30,14 @@ function Meeting(props) {
   const [groupMembers, setGroupMembers] = useState(null);
 
   const navigate = useNavigate();
+
+  const summaryStyle = {
+    border: "1px solid #ddd",
+    padding: "10px",
+    borderRadius: "5px",
+    backgroundColor: "#f8f9fa",
+    whiteSpace: "pre-wrap",
+  };
 
   //variables for managing polling the server
   let polling = false;
@@ -302,12 +311,14 @@ function Meeting(props) {
             <div className="card my-3">
               <h5 className="card-header"><b>{student.fname} {student.lname}</b> (<b>{student.computing_id}</b>)</h5>
               <div className="card-body" style={{display:"flex"}}>
-                <dl><dt>Subject</dt> <dd>{session.issue_subject}</dd>
+                <dl style={{ minWidth:"150px" }}><dt>Subject</dt> <dd>{session.issue_subject}</dd>
                   <dt>Description</dt> <dd>{session.issue}</dd>
                   <dt>Location</dt> <dd>{session.location}</dd>
                 </dl>
-                <dl><dt>Summary</dt> <dd>{session.location}</dd></dl>
-              </div>
+                {session.llm_summary && (
+                  <dl style={{ marginLeft: "15px" }}><dt>Summary</dt> <dd><div style={summaryStyle}><Markdown>{session.llm_summary}</Markdown></div></dd></dl>
+                )}
+                </div>
             </div>
 
             <div className="text-center">

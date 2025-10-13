@@ -84,13 +84,14 @@ class LlmChat
           "command" => "llmsummary",
           "data" => [
             "command" => $data["command"],
-            "question" => $data["question"]
+            "question" => $data["question"],
+            "code" => $data["code"],
           ]
         ];
 
         $response = $this->query($query);;
         //error_log("response: " . print_r($response, true));
-        return $response["response"];
+        return $response;
     }
 
     public function uploadContent($course) {

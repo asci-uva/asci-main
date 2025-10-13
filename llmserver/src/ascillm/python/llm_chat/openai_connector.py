@@ -32,10 +32,10 @@ class OpenaiConnector:
         except Exception as e:
             raise ValueError(f"Error requesting GPT response in follow-up: {str(e)}")
         
-    def create_summary(self, question: str, assignment: str = ""):
-        summary = self.prompt_builder.build_summary(question, assignment) 
+    def create_summary(self, question: str, code: str = "", assignment: str = ""):
+        messages = self.prompt_builder.build_summary_messages(question, code, assignment) 
         try:
-            res = self.runner.get_summary(question, summary)
+            res = self.runner.get_summary_from_bot(messages)
             return res
         except Exception as e:
             traceback.print_exc()

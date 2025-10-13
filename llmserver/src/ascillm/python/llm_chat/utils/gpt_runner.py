@@ -1,6 +1,9 @@
 import re
 import sys
 import json
+import os
+os.environ["LLAMA_INDEX_CACHE_DIR"] = "/tmp/llama_index_cache"
+os.environ["HF_HOME"] = "/tmp/huggingface_cache"
 from llama_index.core.chat_engine import (
     CondensePlusContextChatEngine,
 )
@@ -172,3 +175,12 @@ class GPTRunner:
             return vars(response)
         except Exception as e:
             print(f"Error creating OpenAIResponse: {str(e)}")
+
+    def get_summary_from_bot(self, messages: str):
+        try:
+            summary = self.get_gpt_response(messages)
+            summary = summary.strip()
+            return summary
+    
+        except Exception as e:
+            print(f"Error in get_summary_from_bot: {str(e)}")

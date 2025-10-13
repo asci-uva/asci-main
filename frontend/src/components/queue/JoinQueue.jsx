@@ -98,6 +98,7 @@ function JoinQueue(props) {
       console.log("Course: ", course);
       console.log("Question: ", details);
       console.log("Code: ", code);
+      console.log("Group option: ", groupOption);
 
       //JOIN THE QUEUE
       let request = {};
@@ -114,7 +115,7 @@ function JoinQueue(props) {
       /* Makes post and checks success */
       const joinResponse = await joinQueue(request, url);
 
-      if (joinResponse.success) {
+      if (joinResponse.success && !groupOption) {
         navigate(docRoot + "/studentWaitingRoom");
         
         request = {};

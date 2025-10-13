@@ -462,8 +462,6 @@ class ServerExecutor{
     $result["error"] = "false";
     $result["summary"] = $sessionSummary;
 
-    error_log("Summary array: " . print_r($sessionSummary,true));
-
     return $result;
   }
 
@@ -1477,7 +1475,7 @@ $usedCosSim = True;
     if (!$this->userCourseStore->userHasPermission($user, $course["course_id"], "llm-summary")) throw new \asci\exceptions\ASCIPermissionException("User does not have permission to chat with llm");
 
     // summary object -> get summary
-    $summary = new \asci\util\LlmChat();
+    $summary = new \asci\util\llmChat();
     $llmResponse = $summary->getLlmSummary($data, $course); 
     $this->logger->info("LLM Summary Buffer", array($llmResponse));
     if($llmResponse == null) throw new \asci\exceptions\ASCIException("LLM Summary call failed");
@@ -1508,9 +1506,14 @@ $usedCosSim = True;
       return $this->err("Session is not in the given course!");
     }
 
-    // update the session with our newly generated summary
-    error_log("llm response: " . print_r($llmResponse,true));
-    $session->llm_summary = $llmResponse['content'];
+    // update the session with our newly generated summary (trimmed)
+    //error_log("llm response: " . print_r($llmResponse,true));
+    $session->llm_summary = trim(
+    preg_replace(
+        ['/\\<\\|eot_id\\|\\>/', '/\\\\n/'],
+        ['', "\n"],
+        $llmResponse['response']
+    ));
     $updateStatus = $dbsession->update($session);
     if($updateStatus == false){
       $result["success"] = "false";

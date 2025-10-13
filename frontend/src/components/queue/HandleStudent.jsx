@@ -2,6 +2,7 @@ import React from "react";
 import {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import { useUser } from "../context/UserContext";
+import Markdown from "react-markdown";
 import Chat from "../chat/Chat";
 
 import ClearQueue from "./ClearQueue";
@@ -58,7 +59,10 @@ function HandleStudent(props) {
     background: "#fff",
     padding: "20px",
     borderRadius: "8px",
-    minWidth: "300px"
+    minWidth: "300px",
+    maxWidth: "800px",
+    minHeight: "200px",
+    maxHeight: "500px",
   };
 
   useEffect(() => {
@@ -120,8 +124,6 @@ function HandleStudent(props) {
 
       });
   }
-
-
 
   function pollNumWaiting(){
     //Get a student
@@ -317,7 +319,9 @@ function HandleStudent(props) {
         <td><b>{data[k].issue_subject}</b><br/>{data[k].issue}<br/><small><i>Joined queue: {formatDate(data[k].entry_time)}</i></small></td>
         <td>{data[k].location}</td>
         <td><button value={k} onClick={handleTake} className="btn btn-sm btn-danger">Take</button></td>
-        <td><button value={k} onClick={handleSummary} className="btn btn-sm btn-danger">AI Summary</button></td>
+        {data[k].llm_summary && (
+          <td><button value={k} onClick={handleSummary} className="btn btn-sm btn-primary">AI Summary</button></td>
+        )}
       </tr>
     );
   }
@@ -405,7 +409,7 @@ function HandleStudent(props) {
         <div style={overlayStyle}>
           <div style={modalStyle}>
             <h2>Summary from AI Bot</h2>
-            <p>{aiSummary}</p>
+            <Markdown>{aiSummary}</Markdown>
             <button className="btn btn-danger btn-sm" onClick={closeModal}>Close</button>
           </div>
         </div>

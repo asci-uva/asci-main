@@ -136,22 +136,10 @@ class LlmSummary
         // Pause as if we're waiting for a reply
         sleep(5);
         // Reply with a canned answer
-          return [
-            "role" => "assistant",
-            "content" => "This is an example LLM summary for testing",
-            "questions" => ["One question", "A second question"],
-            "context" => [
-              [
-                "file_name" => "syllabus.md",
-                "text" => "A clip from the syllabus text."
-              ],
-              [
-                "file_name" => "day1-slides.pdf",
-                "page_label" => "21",
-                "text" => "text in the middle of the day 1 slides"
-              ]
-            ]
+          $response = [
+            "response" => "This is an example LLM summary for testing"
           ];
+          return $response['response'];
         }
 
       $llm_data = [
@@ -166,7 +154,7 @@ class LlmSummary
           return false;
 
         /* We made it, return the sessions (up to max) that we care about */
-        return $this->sanitize(json_decode($result["output"], true));
+        return $result['output'];
     }
 
     private function sanitize($data) {
