@@ -81,7 +81,7 @@ function HandleGroup(props) {
           setOtherSessions(data.group_sessions);
 
           for(var sess in data.group_sessions){
-            checked[data.group_sessions[sess].id] = true;
+            checked[data.group_sessions[sess].id] = false;
           }
 
           setChecked(checked);
