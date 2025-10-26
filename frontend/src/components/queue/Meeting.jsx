@@ -337,7 +337,7 @@ function Meeting(props) {
       <div className="row my-auto">
         <div className="col-md-4 my-auto">
           <div className="card text-bg-warning mb-3">
-            <div class="card-header text-center"><i className="bi-clock"></i> Meeting Time</div>
+            <div className="card-header text-center"><i className="bi-clock"></i> Meeting Time</div>
             <div className="card-body text-center">
               <h2>{elapsedMin}:{elapsedSec}</h2>
             </div>
@@ -345,7 +345,7 @@ function Meeting(props) {
         </div>
         <div className="col-md-4 my-auto">
           <div className="card text-bg-secondary mb-3">
-            <div class="card-header text-center"><i className="bi-list-ol"></i> Queue Length</div>
+            <div className="card-header text-center"><i className="bi-list-ol"></i> Queue Length</div>
             <div className="card-body text-center">
               <h2>{numWaiting}</h2>
             </div>
@@ -353,7 +353,7 @@ function Meeting(props) {
         </div>
         <div className="col-md-4 my-auto">
           <div className="card text-bg-secondary mb-3">
-            <div class="card-header text-center"><i className="bi-person-lines-fill"></i> Active TA(s)</div>
+            <div className="card-header text-center"><i className="bi-person-lines-fill"></i> Active TA(s)</div>
             <div className="card-body text-center">
               <h2>{numTAs}</h2>
             </div>
