@@ -11,6 +11,7 @@ function JoinQueue(props) {
   const [subject, setSubject] = useState("");
   const [location, setLocation] = useState("");
   const [details, setDetails] = useState("");
+  const [code, setCode] = useState("");
   const [courseName, setCourseName] = useState("");
   const [groupOption, setGroupOption] = useState(true);
 
@@ -73,7 +74,7 @@ function JoinQueue(props) {
     setGroupOption(!groupOption)
   }
 
-  const handleQuestion = (e) =>{
+  const handleQuestion = async (e) =>{
     e.preventDefault();
 
     if(subject === ""){
@@ -94,8 +95,10 @@ function JoinQueue(props) {
       setErrorMessage("");
 
       console.log("User: ", user);
-      console.log("Course: ", course)
+      console.log("Course: ", course);
       console.log("Question: ", details);
+      console.log("Code: ", code);
+      console.log("Group option: ", groupOption);
 
       //JOIN THE QUEUE
       let request = {};
@@ -105,16 +108,60 @@ function JoinQueue(props) {
       request.subject = subject;
       request.question = details;
       request.location = location;
+      request.code = code;
       request.groupOption = groupOption.toString();
 
-
       //alert(groupoption);
-      joinQueue(request, url); 
+      /* Makes post and checks success */
+      const joinResponse = await joinQueue(request, url);
+
+      if (joinResponse.success) {
+        navigate(docRoot + "/studentWaitingRoom");
+       
+        if (!groupOption) {
+          request = {};
+          request.command = "llmSummary";
+          request.user = user.userid;
+          request.course = course;
+          request.subject = subject;
+          request.question = details;
+          request.location = location;
+          request.code = code;
+          request.session_id = joinResponse.session.id;
+
+          callLLMSummary(request, url);
+        }
+      }
     }
 
   }
 
+  //this makes the call to the llm to summarize student issue
+  const callLLMSummary = async (json0, url0) =>{
+    const response = await fetch(url0, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    });
+    const data = await response.json();
+    
+    
+    if(data.success) {
+      console.log("Summary generated successfully");
+      console.log("Data is: ", data);
+    }
+    else {
+      console.log("Failed to generate summary");
+      console.log("Data is: ", data);
+    }
+  }
+
+
   //This function sends user to the queue
+  /*
   const joinQueue = (json0, url0) =>{
     fetch(url0, {
       method: 'POST', // or 'PUT'
@@ -126,7 +173,8 @@ function JoinQueue(props) {
     }).then(response => response.json())
       .then(data => {
         console.log("Data is: ", data);
-
+        return data;
+        
         //if request succeeded
         if(data.success === "true" && data.session != null){
           navigate(docRoot + "/studentWaitingRoom");
@@ -135,6 +183,7 @@ function JoinQueue(props) {
           console.log("JQ: Error, joining the queue didn't succeed");
           navigate(docRoot + "/error");
         }
+          
 
       })
       .catch((error) => {
@@ -144,6 +193,28 @@ function JoinQueue(props) {
       });
 
   }
+  */
+  const joinQueue = async (json0, url0) => {
+    try {
+      const response = await fetch(url0, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(json0),
+      });
+
+      const data = await response.json();
+      console.log("JoinQueue data:", data);
+      return data; // ✅ this is key — return the JSON so caller gets it
+
+    } catch (error) {
+      console.error("JQ: There was an error:", error);
+      return { success: "false", error: error.message };
+    }
+  };
+
 
   function GroupCheckBox(props){
 
@@ -225,12 +296,25 @@ function JoinQueue(props) {
             </div>
 
             <div className="mb-3">
+              <label className="form-label">Code and Context</label>
+              <input
+                type = "text"
+                placeholder="Paste code or relevant partial work here"
+                required
+                className="form-control"
+                value = {code}
+                onChange={(e)=>setCode(e.target.value)}
+              />
+              <p className="form-text">(Optional) Paste any code or relevant partial work related to your issue.</p>
+            </div>
+
+            <div className="mb-3">
               <GroupCheckBox />
             </div>
           </form>
 
           <div>
-            <button className="btn btn-primary" onClick={handleQuestion}>Join queue</button>
+            <button type="button" className="btn btn-primary" onClick={handleQuestion}>Join queue</button>
           </div>
 
           <div className="my-4 card">

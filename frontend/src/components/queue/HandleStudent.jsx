@@ -2,6 +2,8 @@ import React from "react";
 import {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import { useUser } from "../context/UserContext";
+import Markdown from "react-markdown";
+import Chat from "../chat/Chat";
 
 import ClearQueue from "./ClearQueue";
 
@@ -28,10 +30,40 @@ function HandleStudent(props) {
   const [waitingSessions, setWaitingSessions] = useState([]);
   const [activeTAs, setActiveTAs] = useState([]);
   const [numTAs, setNumTAs] = useState(1);
+  const [summaryModalOpen, setSummaryModalOpen] = useState(false);
+  const [aiSummary, setAiSummary] = useState("Loading...");
 
   const [settings, setSettings] = useState(null);
 
   const navigate = useNavigate();
+
+  const openModal = () => setSummaryModalOpen(true);
+  const closeModal = () => {
+    setSummaryModalOpen(false);
+    setAiSummary("Loading...");
+  }
+
+  const overlayStyle = {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: "rgba(0,0,0,0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center"
+  };
+  
+  const modalStyle = {
+    background: "#fff",
+    padding: "20px",
+    borderRadius: "8px",
+    minWidth: "300px",
+    maxWidth: "800px",
+    minHeight: "200px",
+    maxHeight: "500px",
+  };
 
   useEffect(() => {
     //Ping the server and make sure this person is actually a TA
@@ -92,8 +124,6 @@ function HandleStudent(props) {
 
       });
   }
-
-
 
   function pollNumWaiting(){
     //Get a student
@@ -186,6 +216,23 @@ function HandleStudent(props) {
 
   }
 
+  const handleSummary = (e) =>{
+    e.preventDefault();
+
+    openModal();
+
+    // Make request from database for summary
+    let request = {};
+    request.command = "getAISummary";
+    request.user = user.userid;
+    request.courseId = course.course_id;
+    request.sessionId = waitingSessions[e.target.value].id;
+
+    // AI summary should be stored in database if the bot is done running
+    getSummary(request, url); 
+
+  }
+
   //This gets a student
   const getStudent = (json0, url0) =>{
     fetch(url0, {
@@ -222,6 +269,34 @@ function HandleStudent(props) {
 
   }
 
+  const getSummary = (json0, url0) =>{
+    fetch(url0, {
+      method: 'POST',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(json0),
+    }).then(response => response.json())
+    .then(data => {
+      console.log("Data is", data);
+      //if request succeeded
+      if(data.success === "true"){
+        console.log("Summary retrieved successfully: ", data.summary);
+        setAiSummary(data.summary);
+      }
+      else{
+        console.log("Failed to retrieve AI Summary");
+        setAiSummary("Failed to retrieve AI Summary");
+      }
+    })
+    .catch((error) => {
+      console.log("HOME: There was an error:", error);
+      navigate(docRoot + "/error");
+    });
+
+  }
+
   const handleClearQueueCallback = () => {
     console.log("Received callback. Refreshing queue page");
     pollNumWaiting();
@@ -244,6 +319,9 @@ function HandleStudent(props) {
         <td><b>{data[k].issue_subject}</b><br/>{data[k].issue}<br/><small><i>Joined queue: {formatDate(data[k].entry_time)}</i></small></td>
         <td>{data[k].location}</td>
         <td><button value={k} onClick={handleTake} className="btn btn-sm btn-danger">Take</button></td>
+        {data[k].llm_summary && (
+          <td><button value={k} onClick={handleSummary} className="btn btn-sm btn-primary">AI Summary</button></td>
+        )}
       </tr>
     );
   }
@@ -327,6 +405,15 @@ function HandleStudent(props) {
 
         </div>
       </div>
+      {summaryModalOpen && (
+        <div style={overlayStyle}>
+          <div style={modalStyle}>
+            <h2>Summary from AI Bot</h2>
+            <Markdown>{aiSummary}</Markdown>
+            <button className="btn btn-danger btn-sm" onClick={closeModal}>Close</button>
+          </div>
+        </div>
+        )}
     </div>
   );
 }

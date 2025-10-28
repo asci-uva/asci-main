@@ -172,3 +172,12 @@ class GPTRunner:
             return vars(response)
         except Exception as e:
             print(f"Error creating OpenAIResponse: {str(e)}")
+
+    def get_summary_from_bot(self, messages: str):
+        try:
+            summary = self.get_gpt_response(messages)
+            summary = summary.strip()
+            return summary
+    
+        except Exception as e:
+            print(f"Error in get_summary_from_bot: {str(e)}")

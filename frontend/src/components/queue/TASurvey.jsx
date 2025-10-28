@@ -21,8 +21,9 @@ function TASurvey(props) {
   const [meetingDate, setMeetingDate] = useState("");
 
   /* Selected Likert Answers */
-  const [q1Ans, setQ1Ans] = useState("3");
+  const [q1Ans, setQ1Ans] = useState("3"); // I think we said we should get rid of this default value
   const [q2Ans, setQ2Ans] = useState("3");
+  const [q3Ans, setQ3Ans] = useState("0");
   const [feedback, setFeedback] = useState("");
   
   let url = props.url;
@@ -109,13 +110,14 @@ function TASurvey(props) {
       let surveyData = {};
       surveyData.q1_score = q1Ans;
       surveyData.q2_score = q2Ans;
-      surveyData.q3_score = -1; //no q3 through q5 at the moment
+      surveyData.q3_score = q3Ans; //no q3 through q5 at the moment
       surveyData.q4_score = -1;
       surveyData.q5_score = -1;
       surveyData.feedback = feedback;
 
       console.log("Selected option q1: " + q1Ans);
       console.log("Selected option q2: " + q2Ans);
+      console.log("Selected option q3: " + q3Ans);
       console.log("Feedback: " + feedback);
       
       /*TODO: Setup the survey data array!!*/
@@ -278,6 +280,65 @@ function TASurvey(props) {
                 onChange={() => setQ2Ans("5")}
               />
               5 (very satisfied)
+            </label>
+            </div>
+            </div>
+
+            <p className="form-label"> How helpful was the AI Summary? </p>
+
+            <div className="mb-3">
+            <div className="form-check">
+            <label className="form-check-label">
+              <input type="radio" name="q3" value="0" className="form-check-input"
+                checked={q3Ans === "0"}
+                onChange={() => setQ3Ans("0")}
+              />
+              I did not use the summary
+            </label>
+            </div>
+            <div className="form-check">
+            <label className="form-check-label">
+              <input type="radio" name="q3" value="1" className="form-check-input"
+                checked={q3Ans === "1"}
+                onChange={() => setQ3Ans("1")}
+              />
+              1 (very unhelpful)
+            </label>
+            </div>
+            <div className="form-check">
+            <label className="form-check-label">
+              <input type="radio" name="q3" value="2" className="form-check-input"
+                checked={q3Ans === "2"}
+                onChange={() => setQ3Ans("2")}
+              />
+              2 (somewhat unhelpful)
+            </label>
+            </div>
+            <div className="form-check">
+            <label className="form-check-label">
+              <input type="radio" name="q3" value="3" className="form-check-input"
+                checked={q3Ans === "3"}
+                onChange={() => setQ3Ans("3")}
+              />
+              3 (neither helpful nor unhelpful)
+            </label>
+            </div>
+            <div className="form-check">
+            <label className="form-check-label">
+              <input type="radio" name="q3" value="4" className="form-check-input"
+                checked={q3Ans === "4"}
+                onChange={() => setQ3Ans("4")}
+              />
+              4 (somewhat helpful)
+            </label>
+            </div>
+            <div className="form-check">
+            <label className="form-check-label">
+              <input type="radio" name="q3" value="5" className="form-check-input"
+                checked={q3Ans === "5"}
+                onChange={() => setQ3Ans("5")}
+              />
+              5 (very helpful)
             </label>
             </div>
             </div>

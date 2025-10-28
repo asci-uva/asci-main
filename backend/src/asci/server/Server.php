@@ -240,8 +240,9 @@ class Server
                 $question = $this->input["question"];
                 $subject = $this->input["subject"];
                 $location = $this->input["location"];
+                $code = $this->input["code"];
                 $groupOption = $this->input["groupOption"];
-                $this->setResponse($executor->joinQueueHandler($user, $courseId, $question, $subject, $location, $groupOption));
+                $this->setResponse($executor->joinQueueHandler($user, $courseId, $question, $subject, $location, $code, $groupOption));
 
                 
                 break;
@@ -310,6 +311,17 @@ class Server
                 
                 break;
 
+            
+            case "getAISummary":
+
+                $courseId = $this->input["courseId"];
+                $sessionId = $this->input["sessionId"];
+            
+                $this->setResponse($executor->getSummaryFromDB($user, $courseId, $sessionId));
+
+                error_log("getAISummary called for course $courseId, session $sessionId");
+
+                break;
 
 
             case "getTAMeetingDetails":
@@ -380,9 +392,10 @@ class Server
                 $sessionId = $this->input["sessionId"];
                 $groupSessions = $this->input["groupSessions"];
                 $location = $this->input["location"];
+                $code = $this->input["code"];
 
                 $executor->updateTAStatus($user, $courseId); 
-                $this->setResponse($executor->createGroup($user, $courseId, $sessionId, $groupSessions, $location));
+                $this->setResponse($executor->createGroup($user, $courseId, $sessionId, $groupSessions, $location, $code));
                 
                 break;
 
@@ -418,6 +431,11 @@ class Server
 
                 $this->setResponse($executor->clearQueue($user, $courseId));
                 
+                break;
+
+            case "llmSummary":
+                $result = $executor->llmSummary($this->input);
+                $this->setResponse($result);
                 break;
             
             case "newLlmChat":

@@ -1,0 +1,10 @@
+Please help me aid a student. The student’s task is in the assignment handout if that is included. The code included was written by the student and has errors that make it not function how it is supposed to. Please help with the following: Provide a helpful explanation to me to help me understand what the student is struggling with and what they will need help with.
+
+Guidelines for responding:
+1. Base your response solely on the "Student Question" if that's all you're given.
+2. Include information from the "Assignment Handout" in your response if available.
+3. Always use positive and encouraging language.
+
+Formatting guidelines:
+1. Use Markdown formatting.
+2. Keep responses under 150 words. If needed, provide a 120-word summary for longer responses.

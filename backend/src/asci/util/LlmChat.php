@@ -76,6 +76,24 @@ class LlmChat
       return $response["response"];
     }
 
+    public function getLlmSummary($data, $course) {
+      
+      // Build request object
+        $query = [
+          "course" => $course["course_id"],
+          "command" => "llmsummary",
+          "data" => [
+            "command" => $data["command"],
+            "question" => $data["question"],
+            "code" => $data["code"],
+          ]
+        ];
+
+        $response = $this->query($query);;
+        //error_log("response: " . print_r($response, true));
+        return $response;
+    }
+
     public function uploadContent($course) {
 
       $response = [
@@ -213,7 +231,7 @@ class LlmChat
     public function query($query) {
         $this->logger->addDebug("Sending the following server query to {$this->serverURL}", $query);
         // Encode the query as json
-        $data = json_encode($query);
+        $data = json_encode($query);;
 
         // Use CURL to send request to the internal server
         $ch = curl_init();

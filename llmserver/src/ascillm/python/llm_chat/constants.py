@@ -19,6 +19,10 @@ prompt_paths = {
         system=None,
         user="../llm_prompts/openai_condense_chat_history.txt",
     ),
+    "summary": PromptPath(
+        system="../llm_prompts/openai_summary_sys.txt",
+        user="../llm_prompts/openai_summary_user.txt",
+    ),
 }
 
 OPENAI_MODEL = "gpt-3.5-turbo"

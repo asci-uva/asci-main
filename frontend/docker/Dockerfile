@@ -10,6 +10,7 @@ WORKDIR /app
 
 # Copy app files here can also use . to replace /app 
 COPY ./package.json /app
+RUN echo "WATCHPACK_POLLING=true" >> /app/.env
 RUN npm install
 
 #optimization skip nstall if package unchanged

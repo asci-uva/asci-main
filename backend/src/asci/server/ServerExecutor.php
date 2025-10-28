@@ -205,7 +205,7 @@ class ServerExecutor{
 
   }
 
-  public function joinQueueHandler($computing_id, $course_id, $question, $subject, $location, $groupOption){
+  public function joinQueueHandler($computing_id, $course_id, $question, $subject, $location, $code, $groupOption){ //add code here later
 
     //0: Grab the user
     $user = $this->userStore->getUser($computing_id);
@@ -227,7 +227,7 @@ class ServerExecutor{
     //If no session yet, insert one and send the new one back
     if($session == null){
       //create a new one and return it back
-      $session = $dbsession->createNewSession($user->getId(), $course->getCourseId(), $course->getRole(), $question, $subject, $location, "waiting", $groupOption);
+      $session = $dbsession->createNewSession($user->getId(), $course->getCourseId(), $course->getRole(), $question, $subject, $location, $code, "waiting", $groupOption); //add code here later
       $result["session"] = $session->toArray();
     }
     else{
@@ -434,6 +434,37 @@ class ServerExecutor{
     return $result;
   }
 
+  public function getSummaryFromDB($computing_id, $course_id, $session_id){
+    //DB objects we will be using
+    $dbsession = new \asci\server\database\DBSession($this->db);
+    $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+
+    $result = [];
+
+    $session = $dbsession->getSession($session_id);
+
+    if($session == null){
+      return $this->err("Could not find the given session");
+    }
+    if($session->course_id != $course_id){
+      return $this->err("Session is not in the given course!");
+    }
+
+    $sessionSummary = $dbsession->getSessionSummary($session->getId());
+
+    if($sessionSummary == null){
+      $result["success"] = "false";
+      $result["error"] = "ERROR: Session does not have a summary";
+      return $result;
+    }
+
+    $result["success"] = "true";
+    $result["error"] = "false";
+    $result["summary"] = $sessionSummary;
+
+    return $result;
+  }
+
   /*
    * Get all the matched students' info and display it for the TA.
    */
@@ -583,7 +614,7 @@ $usedCosSim = True;
    * $session_id is the session of the main student TA is helping
    * $group_sessions is a list of the other sessions that should be joined with session_id
    */
-  public function createGroup($ta_computing_id, $course_id, $session_id, $group_sessions, $location){
+  public function createGroup($ta_computing_id, $course_id, $session_id, $group_sessions, $location, $code){
 
         //DB objects we will be using
         $dbsession = new \asci\server\database\DBSession($this->db);
@@ -621,7 +652,7 @@ $usedCosSim = True;
       if(!($dbsessusr->delete($taMainSessUsr))) return $this->err("Error deleting TA from main session");
 
       /* Now, create a new session for the TA to run for this group */
-      $newTASess = $dbsession->createNewSession($taUser->id, $course_id, "ta", "Group session", "Group session", $location, "in_progress", "true");
+      $newTASess = $dbsession->createNewSession($taUser->id, $course_id, "ta", "Group session", "Group session", $location, $code, "in_progress", "true");
 
       /* Link in the main session manually */
       $gr_map = new \asci\data\GroupMapping();
@@ -1426,6 +1457,74 @@ $usedCosSim = True;
 
   }
 
+  public function llmSummary($data) {
+    $this->logger->addDebug("Handling LLM request", $data);
+    //$arrayString = print_r($data, true);
+    //error_log("Request: " . $arrayString);
+
+    // retrieve course from request data and ensure the ID is known
+    $course = $data["course"];
+    if ($this -> courseStore -> getCourseById($course["course_id"]) === false) throw new \asci\exceptions\ASCIException("Unknown course");
+
+    // retrieve the user's id and ensure their computing ID is known
+    $computing_id = $data["user"];
+    $user = $this->userStore->getUser($computing_id);
+    if ($user == null) throw new \asci\exceptions\ASCIException("Unknown user");
+
+    // check permissions
+    if (!$this->userCourseStore->userHasPermission($user, $course["course_id"], "llm-summary")) throw new \asci\exceptions\ASCIPermissionException("User does not have permission to chat with llm");
+
+    // summary object -> get summary
+    $summary = new \asci\util\llmChat();
+    $llmResponse = $summary->getLlmSummary($data, $course); 
+    $this->logger->info("LLM Summary Buffer", array($llmResponse));
+    if($llmResponse == null) throw new \asci\exceptions\ASCIException("LLM Summary call failed");
+
+    // WILL: not sure what this section does
+    $dbLogger = new \asci\server\database\DBLogs($this->db);
+    $type = $data["command"];
+    $logString = json_encode(["role" => "user", "content" => $data["question"], "response"=>$llmResponse, "course"=>$data["course"]]);
+    $dbLogger->log($user->getId(), $type, $logString);
+
+    $result = [];
+    $result["response"] = $llmResponse;
+
+
+
+    // New database session and user
+    $dbsession = new \asci\server\database\DBSession($this->db);
+    $dbsessusr = new \asci\server\database\DBSessionUser($this->db);
+
+    $session = $dbsession->getSession($data["session_id"]);
+
+    //error_log("Session: " . print_r($session));
+
+    if($session == null){
+      return $this->err("Could not find the given session");
+    }
+    if($session->course_id != $course["course_id"]){
+      return $this->err("Session is not in the given course!");
+    }
+
+    // update the session with our newly generated summary (trimmed)
+    //error_log("llm response: " . print_r($llmResponse,true));
+    $session->llm_summary = trim(
+    preg_replace(
+        ['/\\<\\|eot_id\\|\\>/', '/\\\\n/'],
+        ['', "\n"],
+        $llmResponse['response']
+    ));
+    $updateStatus = $dbsession->update($session);
+    if($updateStatus == false){
+      $result["success"] = "false";
+      $result["error"] = "ERROR: Session does not have a summary";
+      return $result;
+    }
+    $result["success"] = "true";
+    $result["error"] = "false";
+
+    return $result;
+  }
 
   public function llmChat($data) {
 
