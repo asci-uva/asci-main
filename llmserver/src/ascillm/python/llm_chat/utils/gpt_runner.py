@@ -1,9 +1,6 @@
 import re
 import sys
 import json
-import os
-os.environ["LLAMA_INDEX_CACHE_DIR"] = "/tmp/llama_index_cache"
-os.environ["HF_HOME"] = "/tmp/huggingface_cache"
 from llama_index.core.chat_engine import (
     CondensePlusContextChatEngine,
 )

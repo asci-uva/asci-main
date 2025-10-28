@@ -27,7 +27,7 @@ if script_directory not in sys.path:
 DEV_MODE = False
 
 
-Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5", device = "cpu")
+Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5", model_kwargs={'device_map':'cuda'}, device="cuda")
 
 
 def load_rag_index(course):

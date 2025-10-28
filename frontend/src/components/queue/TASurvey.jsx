@@ -302,7 +302,7 @@ function TASurvey(props) {
                 checked={q3Ans === "1"}
                 onChange={() => setQ3Ans("1")}
               />
-              1 (very unsatisfied)
+              1 (very unhelpful)
             </label>
             </div>
             <div className="form-check">
@@ -311,7 +311,7 @@ function TASurvey(props) {
                 checked={q3Ans === "2"}
                 onChange={() => setQ3Ans("2")}
               />
-              2 (somewhat unsatisfied)
+              2 (somewhat unhelpful)
             </label>
             </div>
             <div className="form-check">
@@ -320,7 +320,7 @@ function TASurvey(props) {
                 checked={q3Ans === "3"}
                 onChange={() => setQ3Ans("3")}
               />
-              3 (neither satisfied nor unsatisfied)
+              3 (neither helpful nor unhelpful)
             </label>
             </div>
             <div className="form-check">
@@ -329,7 +329,7 @@ function TASurvey(props) {
                 checked={q3Ans === "4"}
                 onChange={() => setQ3Ans("4")}
               />
-              4 (somewhat satisfied)
+              4 (somewhat helpful)
             </label>
             </div>
             <div className="form-check">
@@ -338,7 +338,7 @@ function TASurvey(props) {
                 checked={q3Ans === "5"}
                 onChange={() => setQ3Ans("5")}
               />
-              5 (very satisfied)
+              5 (very helpful)
             </label>
             </div>
             </div>

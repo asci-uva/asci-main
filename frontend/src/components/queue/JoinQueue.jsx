@@ -115,20 +115,22 @@ function JoinQueue(props) {
       /* Makes post and checks success */
       const joinResponse = await joinQueue(request, url);
 
-      if (joinResponse.success && !groupOption) {
+      if (joinResponse.success) {
         navigate(docRoot + "/studentWaitingRoom");
-        
-        request = {};
-        request.command = "llmSummary";
-        request.user = user.userid;
-        request.course = course;
-        request.subject = subject;
-        request.question = details;
-        request.location = location;
-        request.code = code;
-        request.session_id = joinResponse.session.id;
+       
+        if (!groupOption) {
+          request = {};
+          request.command = "llmSummary";
+          request.user = user.userid;
+          request.course = course;
+          request.subject = subject;
+          request.question = details;
+          request.location = location;
+          request.code = code;
+          request.session_id = joinResponse.session.id;
 
-        callLLMSummary(request, url);
+          callLLMSummary(request, url);
+        }
       }
     }
 
