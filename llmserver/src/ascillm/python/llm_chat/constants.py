@@ -29,7 +29,7 @@ OPENAI_MODEL = "gpt-3.5-turbo"
 OPENAI_MAX_TOKENS = 300
 
 SHOWING_ONLY_ONE_CONTEXT = False
-RAG_DISABLED = FALSE
+RAG_DISABLED = False
 
 LLAMAFILE_KEY_PLACEHOLDER = "sk-no-key-required"
 LLAMAFILE_BASE_URL = "http://titanx01.cs.virginia.edu:8080/v1"

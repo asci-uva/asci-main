@@ -296,16 +296,16 @@ function JoinQueue(props) {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Code</label>
+              <label className="form-label">Code and Context</label>
               <input
                 type = "text"
-                placeholder="Copy code here"
+                placeholder="Paste code or relevant partial work here"
                 required
                 className="form-control"
                 value = {code}
                 onChange={(e)=>setCode(e.target.value)}
               />
-              <p className="form-text">Copy and Paste the issue code to help the TA prepare</p>
+              <p className="form-text">(Optional) Paste any code or relevant partial work related to your issue.</p>
             </div>
 
             <div className="mb-3">
