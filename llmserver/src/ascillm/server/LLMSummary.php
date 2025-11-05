@@ -137,7 +137,7 @@ class LlmSummary
         sleep(5);
         // Reply with a canned answer
           $response = [
-            "response" => "This is an example LLM summary for testing"
+            "response" => "This is an example LLM summary for testing This is an example LLM summary for testing \n \n This is an example LLM summary for testing This is an example LLM summary for testing \n \n This is an example LLM summary for testing This is an example LLM summary for testing \n \n This is an example LLM summary for testing This is an example LLM summary for testing \n \n This is an example LLM summary for testing This is an example LLM summary for testing \n \n This is an example LLM summary for testing This is an example LLM summary for testing \n \n This is an example LLM summary for testing This is an example LLM summary for testing \n \n This is an example LLM summary for testing This is an example LLM summary for testing \n \n This is an example LLM summary for testing This is an example LLM summary for testing \n \n This is an example LLM summary for testing This is an example LLM summary for testing \n \n"
           ];
           return $response['response'];
         }

@@ -63,6 +63,7 @@ function HandleStudent(props) {
     maxWidth: "800px",
     minHeight: "200px",
     maxHeight: "500px",
+    overflow: "auto",
   };
 
   useEffect(() => {
@@ -318,10 +319,14 @@ function HandleStudent(props) {
         <td>{k}</td>
         <td><b>{data[k].issue_subject}</b><br/>{data[k].issue}<br/><small><i>Joined queue: {formatDate(data[k].entry_time)}</i></small></td>
         <td>{data[k].location}</td>
-        <td><button value={k} onClick={handleTake} className="btn btn-sm btn-danger">Take</button></td>
-        {data[k].llm_summary && (
-          <td><button value={k} onClick={handleSummary} className="btn btn-sm btn-primary">AI Summary</button></td>
-        )}
+        <td class="">
+          <div class="d-flex flex-column gap-2">
+          <button value={k} onClick={handleTake} className="btn btn-sm btn-danger">Take</button>
+          {data[k].llm_summary && (
+            <button value={k} onClick={handleSummary} className="btn btn-sm btn-primary">AI Summary</button>
+          )}
+          </div>
+        </td>
       </tr>
     );
   }

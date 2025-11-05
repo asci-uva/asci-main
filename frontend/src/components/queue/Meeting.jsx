@@ -31,14 +31,6 @@ function Meeting(props) {
 
   const navigate = useNavigate();
 
-  const summaryStyle = {
-    border: "1px solid #ddd",
-    padding: "10px",
-    borderRadius: "5px",
-    backgroundColor: "#f8f9fa",
-    whiteSpace: "pre-wrap",
-  };
-
   //variables for managing polling the server
   let polling = false;
   let timeoutId = 0;
@@ -309,22 +301,26 @@ function Meeting(props) {
             <QueueInfo />
             <h3>You are currently helping...</h3>
             <div className="card my-3">
-              <h5 className="card-header"><b>{student.fname} {student.lname}</b> (<b>{student.computing_id}</b>)</h5>
+              <div className="card-header d-flex flex-row justify-content-between align-items-center">
+                <h5 className="m-0"><b>{student.fname} {student.lname}</b> (<b>{student.computing_id}</b>)</h5>
+                <div className="text-center">
+                  <button onClick={handlePutBack} className="btn btn-danger">Put student(s) back in queue</button> &nbsp;
+                  <button onClick={handleEndMeeting} className="btn btn-primary">End Meeting</button>
+                </div>
+              </div>
+              
               <div className="card-body" style={{display:"flex"}}>
                 <dl style={{ minWidth:"150px" }}><dt>Subject</dt> <dd>{session.issue_subject}</dd>
                   <dt>Description</dt> <dd>{session.issue}</dd>
                   <dt>Location</dt> <dd>{session.location}</dd>
                 </dl>
                 {session.llm_summary && (
-                  <dl style={{ marginLeft: "15px" }}><dt>Summary</dt> <dd><div style={summaryStyle}><Markdown>{session.llm_summary}</Markdown></div></dd></dl>
+                  <dl style={{ marginLeft: "15px" }}><dt>Summary</dt> <dd><div className="text-wrap"><Markdown>{session.llm_summary}</Markdown></div></dd></dl>
                 )}
                 </div>
             </div>
 
-            <div className="text-center">
-              <button onClick={handlePutBack} className="btn btn-danger">Put student(s) back in queue</button> &nbsp;
-              <button onClick={handleEndMeeting} className="btn btn-primary">End Meeting</button>
-            </div>
+            
           </div>
         </div>
       </div>

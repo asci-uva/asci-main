@@ -106,6 +106,7 @@ function StudentWaitingRoom(props) {
     })
       .then((response) => response.json())
       .then((data) => {
+        data.session.llm_summary = "";
         console.log("Status data is: ", data);
         const validData = Boolean(
           data && data.session && data.session.issue

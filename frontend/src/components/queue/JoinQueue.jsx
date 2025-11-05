@@ -151,6 +151,7 @@ function JoinQueue(props) {
     
     if(data.success) {
       console.log("Summary generated successfully");
+      data.response = "";
       console.log("Data is: ", data);
     }
     else {
@@ -207,7 +208,7 @@ function JoinQueue(props) {
 
       const data = await response.json();
       console.log("JoinQueue data:", data);
-      return data; // ✅ this is key — return the JSON so caller gets it
+      return data;
 
     } catch (error) {
       console.error("JQ: There was an error:", error);
