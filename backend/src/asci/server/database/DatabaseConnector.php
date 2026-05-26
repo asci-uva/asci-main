@@ -103,12 +103,25 @@ class DatabaseConnector {
      * @throws \asci\exceptions\ASCIDatabaseException
      */
     public function __construct() {
-        // Read the configuration file
-        $host = Config::$DATABASE["host"];
-        $port = Config::$DATABASE["port"];
-        $database = Config::$DATABASE["database"];
-        $password = Config::$DATABASE["password"];
-        $user = Config::$DATABASE["user"];
+        // On Heroku, the DATABASE_URL env var is set by the Postgres addon.
+        // It has the form: postgres://user:password@host:port/database
+        // When present it takes priority over the static Config values.
+        $dbUrl = getenv('DATABASE_URL');
+        if ($dbUrl) {
+            $parsed   = parse_url($dbUrl);
+            $host     = $parsed['host'];
+            $port     = $parsed['port'] ?? 5432;
+            $database = ltrim($parsed['path'], '/');
+            $user     = $parsed['user'];
+            $password = $parsed['pass'];
+        } else {
+            // Fall back to the values defined in Config.php (local/Docker dev)
+            $host     = Config::$DATABASE["host"];
+            $port     = Config::$DATABASE["port"];
+            $database = Config::$DATABASE["database"];
+            $password = Config::$DATABASE["password"];
+            $user     = Config::$DATABASE["user"];
+        }
 
         try {
             // Try to connect to the database

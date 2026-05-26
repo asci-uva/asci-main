@@ -10,7 +10,7 @@ function CreateNewCourse(props) {
 
   const navigate = useNavigate();
 
-  const { user, refreshCourseList, isInstructor } = useUser();
+  const { user, refreshCourseList, isInstructor, isAdmin } = useUser();
 
   /* This state variable changes how the component displays */
   const [state, setState] = useState(0); //0 just shows a link in text form (small). 1 shows form.
@@ -84,8 +84,8 @@ function CreateNewCourse(props) {
   };
 
 
-  /* If user is not an instructor in any course, do not show this panel */
-  if(!isInstructor()){
+  /* If user is not an instructor in any course or admin, do not show this panel */
+  if(!isInstructor() && !isAdmin()){
     return;
   }
 

@@ -105,22 +105,46 @@ export const UserProvider = ({ children }) => {
       });
   };
 
+  const isAdmin = () => {
+
+    if(userid == "admin") return true;
+
+    return false;
+  }
+
   const courseListString = () => {
           let cList = {};
             for(var key in courseList){
-              //Construct the course title from it's pieces
-              let courseName = "" 
+              if (isAdmin) {
+                let courseName = "" 
                                 + courseList[key]["mnemonic"]
                                 + courseList[key]["number"]
                                 + " "
                                 + courseList[key]["name"]
                                 + " - "
                                 + courseList[key]["semester"]
-                                + " ("
-                                + courseList[key]["role"]
-                                + ")";
-
-              cList[key] = courseName;
+                                + " (admin)";
+                if (courseList[key]["archived"] === "t") {
+                  courseName += " [Archived]";
+                }
+                cList[key] = courseName;
+              } else {
+                //Construct the course title from it's pieces
+                let courseName = "" 
+                                  + courseList[key]["mnemonic"]
+                                  + courseList[key]["number"]
+                                  + " "
+                                  + courseList[key]["name"]
+                                  + " - "
+                                  + courseList[key]["semester"]
+                                  + " ("
+                                  + courseList[key]["role"]
+                                  + ")";
+                if (courseList[key]["archived"] === "t") {
+                  courseName += " [Archived]";
+                }
+                cList[key] = courseName;
+              }
             }
         return cList;
   }
@@ -275,6 +299,7 @@ export const UserProvider = ({ children }) => {
       courseRoster,
       getCourseRoster,
       refreshCourseRoster,
+      isAdmin,
       isInstructor
   };
 

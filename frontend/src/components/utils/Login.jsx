@@ -30,7 +30,12 @@ function Login(props) {
   const handleLogin = () => {
     login({ user: username, password: password }, (success, message) => {
       if (success) {
-        navigate(docRoot);
+        console.log(docRoot);
+        if (username == "admin") {
+          navigate(docRoot + "/sys_admin")   
+        } else {
+          navigate(docRoot);
+        }
       } else {
         setErrorMessage(message);
       }

@@ -6,13 +6,20 @@
 
 ;(function () {
     const htmlElement = document.querySelector("html")
-    if(htmlElement.getAttribute("data-bs-theme") === 'auto') {
-        function updateTheme() {
-            document.querySelector("html").setAttribute("data-bs-theme",
-                window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
-        }
-
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme)
-        updateTheme()
+    
+    function updateTheme() {
+        // Use user preference or auto
+        const theme = localStorage.getItem("theme") || window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+        htmlElement.setAttribute("data-bs-theme", theme)
     }
+
+    // Listen for system preference changes
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+        // Only update if user hasn’t manually chosen
+        if (!localStorage.getItem("theme")) {
+            updateTheme()
+        }
+    })
+    
+    updateTheme()
 })()

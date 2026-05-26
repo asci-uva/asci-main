@@ -35,15 +35,16 @@ class UserQuest implements \Serializable {
         return $this->course_id;
     }
 
-
     public function getQuestCompletionStatus()
     {
         return $this->status;
     }
+    
     public function getMnemonic()
     {
         return $this->mnemonic;
     }
+    
     public function getName()
     {
         return $this->name;

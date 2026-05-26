@@ -31,10 +31,16 @@ class DBUserCourse
      */
     public function getCoursesForUser($computing_id)
     {
-        $query = 'select course_id,mnemonic,number,name,semester,role from (courses C JOIN user_courses U on C.id = U.course_id) J JOIN users Us on J.user_id = Us.id where computing_id=$1';
+        /* Get all courses if admin */
+        if ($computing_id == 'admin') {
+          $query = 'select id as course_id,mnemonic,number,name,semester,null as role from courses;';
+          $result = $this->db->query($query, []);
+        } else {
+          $query = 'select course_id,mnemonic,number,name,semester,role from (courses C JOIN user_courses U on C.id = U.course_id) J JOIN users Us on J.user_id = Us.id where computing_id=$1';
+          $result = $this->db->query($query, array($computing_id));
+        }
 
-        $result = $this->db->query($query, array($computing_id));
-
+        // $result = $this->db->query($query, array($computing_id));
         $courses = $this->db->fetchAll($result);
 
         $toReturn = [];
@@ -116,6 +122,11 @@ class DBUserCourse
     public function userHasPermission($user, $course_id, $permission=false) {
 
       $compId = $user->getComputingId();
+
+      # if admin, has permission
+      if ($compId == "admin") {
+        return true;
+      }
 
       $this->logger->debug("Requesting permission for $compId in $course_id ($permission)");
 

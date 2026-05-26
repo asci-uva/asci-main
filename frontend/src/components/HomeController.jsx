@@ -18,6 +18,11 @@ const HomeController = (props) => {
       <Login {...props} />
         )
     }
+    if (user.userid == "admin") {
+      return (
+        <SystemAdmin {...props} />
+      )
+    }
     if (!course) {
         return (
       <SelectCourseHome {...props} />

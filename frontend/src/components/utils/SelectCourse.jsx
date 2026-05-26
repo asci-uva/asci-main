@@ -98,7 +98,10 @@ function SelectCourse(props) {
           console.log("Course settings retrieved");
           setCourseSettings(data.settings);
           //navigate to the home page finally
-          navigate(docRoot + "/");          
+          //if admin don't redirect
+          if (!isAdmin()) {
+            navigate(docRoot + "/");
+          }          
         }
         else{
           console.log("FATAL ERROR: Failed to get course settings");

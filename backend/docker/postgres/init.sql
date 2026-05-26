@@ -64,8 +64,6 @@ CREATE TABLE session_users (
   user_status session_user_status
 );
 
-DROP TABLE IF EXISTS sessions;
-
 CREATE TABLE sessions (
   id SERIAL PRIMARY KEY,
   course_id INT,
@@ -256,16 +254,34 @@ ALTER TABLE group_mapping ADD FOREIGN KEY (to_session) REFERENCES sessions (id);
 -- make up two dummy courses. Make them student and TA in each 
 
 INSERT INTO users (id, computing_id, fname, lname , pname, password)
-VALUES (1, 'mrf8t', 'Mark', 'Floryan', 'Mark', '$2y$10$qVG/HZRB4KXyd6eFkFc2hOXX0r2hyLYN3siL2XyxieChtRiBDUEMC');
+VALUES (1, 'mrf8t', 'Mark', 'Floryan', 'Mark', '$2y$10$ola4oh4h2AxCVEIL.xczPOktNTylGrQRz8xTEBMi3gHyiWGTLD4Du');
 
 INSERT INTO users (id, computing_id, fname, lname , pname, password)
-VALUES (2, 'nb3f', 'Nada', 'Basit', 'Nada', '$2y$10$qVG/HZRB4KXyd6eFkFc2hOXX0r2hyLYN3siL2XyxieChtRiBDUEMC');
+VALUES (2, 'nb3f', 'Nada', 'Basit', 'Nada', '$2y$10$ola4oh4h2AxCVEIL.xczPOktNTylGrQRz8xTEBMi3gHyiWGTLD4Du');
 
 INSERT INTO users (id, computing_id, fname, lname , pname, password)
-VALUES (3, 'jh2jf', 'John', 'Hott', 'Robbie', '$2y$10$qVG/HZRB4KXyd6eFkFc2hOXX0r2hyLYN3siL2XyxieChtRiBDUEMC');
+VALUES (3, 'jh2jf', 'John', 'Hott', 'Robbie', '$2y$10$ola4oh4h2AxCVEIL.xczPOktNTylGrQRz8xTEBMi3gHyiWGTLD4Du');
 
 INSERT INTO users (id, computing_id, fname, lname , pname, password)
-VALUES (4, 'hz9xs', 'Hanzhang', 'Zhao', 'Hanzhang', '$2y$10$qVG/HZRB4KXyd6eFkFc2hOXX0r2hyLYN3siL2XyxieChtRiBDUEMC');
+VALUES (4, 'hz9xs', 'Hanzhang', 'Zhao', 'Hanzhang', '$2y$10$ola4oh4h2AxCVEIL.xczPOktNTylGrQRz8xTEBMi3gHyiWGTLD4Du');
+
+INSERT INTO users (id, computing_id, fname, lname , pname, password)
+VALUES (5, 'vzg5rc', 'Simone', 'Steverson', 'Simone', '$2y$10$ola4oh4h2AxCVEIL.xczPOktNTylGrQRz8xTEBMi3gHyiWGTLD4Du');
+
+INSERT INTO users (id, computing_id, fname, lname , pname, password)
+VALUES (6, 'tl3uk', 'Tommy', 'Le', 'Tommy', '$2y$10$ola4oh4h2AxCVEIL.xczPOktNTylGrQRz8xTEBMi3gHyiWGTLD4Du');
+
+INSERT INTO users (id, computing_id, fname, lname , pname, password)
+VALUES (7, 'hsr4ch', 'Kevin', 'Zheng', 'Kevin', '$2y$10$ola4oh4h2AxCVEIL.xczPOktNTylGrQRz8xTEBMi3gHyiWGTLD4Du');
+
+INSERT INTO users (id, computing_id, fname, lname , pname, password)
+VALUES (8, 'rcx2ya', 'Daniel', 'Jimenez-Palacios', 'Daniel', '$2y$10$ola4oh4h2AxCVEIL.xczPOktNTylGrQRz8xTEBMi3gHyiWGTLD4Du');
+
+INSERT INTO users (id, computing_id, fname, lname , pname, password)
+VALUES (9, 'mst3k', 'Student', 'Tester', 'Student', '$2y$10$ola4oh4h2AxCVEIL.xczPOktNTylGrQRz8xTEBMi3gHyiWGTLD4Du');
+
+INSERT INTO users (id, computing_id, fname, lname , pname, password)
+VALUES (10, 'admin', 'Admin', 'Account', 'Admin', '$2y$10$ola4oh4h2AxCVEIL.xczPOktNTylGrQRz8xTEBMi3gHyiWGTLD4Du');
 
 INSERT INTO courses (id, mnemonic, number, name, semester)
 VALUES (1, 'CS', '2130', 'CSO1', 'SP-23');
@@ -277,7 +293,7 @@ INSERT INTO courses (id, mnemonic, number, name, semester)
 VALUES (3, 'CS', '3120', 'DMT2', 'F-23');
 
 INSERT INTO user_courses (user_id, course_id, role)
-VALUES (1, 1, 'student');
+VALUES (1, 1, 'ta');
 
 INSERT INTO user_courses (user_id, course_id, role)
 VALUES (1, 2, 'ta');
@@ -290,6 +306,45 @@ VALUES (2, 2, 'student');
 
 INSERT INTO user_courses (user_id, course_id, role)
 VALUES (3, 1, 'student');
+
+INSERT INTO user_courses (user_id, course_id, role)
+VALUES (5, 1, 'student');
+
+INSERT INTO user_courses (user_id, course_id, role)
+VALUES (5, 2, 'ta');
+
+INSERT INTO user_courses (user_id, course_id, role)
+VALUES (5, 3, 'instructor');
+
+INSERT INTO user_courses (user_id, course_id, role)
+VALUES (6, 1, 'student');
+
+INSERT INTO user_courses (user_id, course_id, role)
+VALUES (6, 2, 'ta');
+
+INSERT INTO user_courses (user_id, course_id, role)
+VALUES (6, 3, 'instructor');
+
+INSERT INTO user_courses (user_id, course_id, role)
+VALUES (7, 1, 'student');
+
+INSERT INTO user_courses (user_id, course_id, role)
+VALUES (7, 2, 'instructor');
+
+INSERT INTO user_courses (user_id, course_id, role)
+VALUES (7, 3, 'instructor');
+
+INSERT INTO user_courses (user_id, course_id, role)
+VALUES (8, 1, 'student');
+
+INSERT INTO user_courses (user_id, course_id, role)
+VALUES (8, 2, 'ta');
+
+INSERT INTO user_courses (user_id, course_id, role)
+VALUES (8, 3, 'instructor');
+
+INSERT INTO user_courses (user_id, course_id, role)
+VALUES (9, 3, 'student');
 
 INSERT INTO course_settings (course_id, show_queue_list, grouping_enabled, smart_grouping, self_grouping)
 VALUES (1, true, true, true, true);
@@ -320,13 +375,22 @@ VALUES
 
 -- Quest data
 INSERT INTO quests (id, mnemonic, name, description , total_points)
-VALUES (1, 'OH1', 'Attend Office Hours One Time', 'Get help at office hours the one time, minimum 5 minutes', 10);
+VALUES (1, 'OH1', 'Attend Office Hours One Time', 'Get help at office hours the one time, minimum 5 minutes', 5);
 
 INSERT INTO quests (id, mnemonic, name, description , total_points)
-VALUES (2, 'OH3', 'Attend Office Hours Three Times', 'Get help at office hours two times, each session minimum 5 minutes', 10);
+VALUES (2, 'OH3', 'Attend Office Hours Three Times', 'Get help at office hours three times, each session minimum 5 minutes', 7);
 
 INSERT INTO quests (id, mnemonic, name, description , total_points)
 VALUES (3, 'OH10', 'Attend Office Hours Ten Times', 'Get help at office hours ten times, each session minimum 5 minutes', 10);
+
+INSERT INTO quests (id, mnemonic, name, description , total_points)
+VALUES (4, 'P2', 'Post Twice on Piazza', 'Create a post and/or respond to a post on Piazza two time.', 5);
+
+INSERT INTO quests (id, mnemonic, name, description , total_points)
+VALUES (5, 'P3', 'Post on Piazza Three TImes', 'Create or respond to three posts on Piazza ', 7);
+
+INSERT INTO quests (id, mnemonic, name, description , total_points)
+VALUES (6, 'GS1', 'Attend Guest Speaker Chat', 'Attend a Guest Speaker chat outside of class and submit extra credit reflection.', 10);
 
 ALTER TABLE user_quests ADD FOREIGN KEY (user_id) REFERENCES users (id);
 ALTER TABLE user_quests ADD FOREIGN KEY (quest_id) REFERENCES quests (id);
@@ -338,6 +402,96 @@ VALUES (1, 1, 1, 'Not started');
 INSERT INTO user_quests (quest_id, user_id, course_id, status)
 VALUES (2, 1, 1, 'Not started');
 
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (1, 3, 1, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (2, 3, 1, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (1, 5, 1, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (2, 5, 1, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (1, 6, 1, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (2, 6, 1, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (1, 7, 1, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (2, 7, 1, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (1, 8, 1, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (2, 8, 1, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (1, 2, 2, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (2, 2, 2, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (3, 2, 2, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (4, 2, 2, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (5, 2, 2, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (1, 9, 3, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (2, 9, 3, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (3, 9, 3, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (4, 9, 3, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (6, 9, 3, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (1, 3, 3, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (2, 3, 3, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (3, 3, 3, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (4, 3, 3, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (6, 3, 3, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (1, 2, 3, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (2, 2, 3, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (3, 2, 3, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (4, 2, 3, 'Not started');
+
+INSERT INTO user_quests (quest_id, user_id, course_id, status)
+VALUES (6, 2, 3, 'Not started');
+
 
 INSERT INTO course_quests (quest_id, course_id)
 VALUES (1, 1);
@@ -345,8 +499,39 @@ VALUES (1, 1);
 INSERT INTO course_quests (quest_id, course_id)
 VALUES (2, 1);
 
+INSERT INTO course_quests (quest_id, course_id)
+VALUES (1, 2);
+
+INSERT INTO course_quests (quest_id, course_id)
+VALUES (2, 2);
+
+INSERT INTO course_quests (quest_id, course_id)
+VALUES (3, 2);
+
+INSERT INTO course_quests (quest_id, course_id)
+VALUES (4, 2);
+
+INSERT INTO course_quests (quest_id, course_id)
+VALUES (5, 2);
+
+INSERT INTO course_quests (quest_id, course_id)
+VALUES (1, 3);
+
+INSERT INTO course_quests (quest_id, course_id)
+VALUES (2, 3);
+
+INSERT INTO course_quests (quest_id, course_id)
+VALUES (3, 3);
+
+INSERT INTO course_quests (quest_id, course_id)
+VALUES (4, 3);
+
+INSERT INTO course_quests (quest_id, course_id)
+VALUES (6, 3);
+
 INSERT INTO sessions (id, course_id, fulfillment_time, exit_time)
 VALUES (1, 1, '2024-01-08 04:05:00', '2024-01-08 04:10:00');
 
 INSERT INTO session_users (session_id, user_id)
 VALUES (1, 1);
+
