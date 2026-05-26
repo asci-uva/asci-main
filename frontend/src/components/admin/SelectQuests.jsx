@@ -2,6 +2,9 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import QuestCard from "./QuestCard";
+import { useUser } from "../context/UserContext";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function SelectQuests(props) {
   let docRoot = props.documentRoot;
@@ -9,52 +12,34 @@ function SelectQuests(props) {
   let url = props.url;
   let root = "/asci";
 
-  // const { courseId } = useParams();
   const navigate = useNavigate();
-  let [user, setUser] = useState(null);
+  const {user, getCourse} = useUser();
+  let course = getCourse();
   const [quests, setQuests] = useState({});
-  const [settings, setSettings] = useState(null);
   const [showQuests, setShowQuests] = useState(false);
+  const [mnemonic, setMnemonic] = useState("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [total_pts, setTotalPts] = useState("");
+  const [filteredData, setFilteredData] = useState(null);
 
-  useEffect(() => {
-    //If token is set, kick to home screen to check validity of session
-    if (localStorage.getItem('asci-user') !== null) {
-      setUser(localStorage.getItem('asci-user'));
-
-      getSettings();
-      //setup json command
-      let request = {};
-      request.command = "getAllQuests";
-      getQuests(request, url);
-    }
-    else {
-      navigate(docRoot + "/login");
-    }
-  }, []);
-
-  function getSettings() {
-    /* Also get course settings */
-    let request2 = {};
-    request2.command = "getCourseSettings";
-    request2.user = localStorage.getItem('asci-user');
-    request2.courseId = localStorage.getItem('asci-course');
-    fetchSettings(request2, url);
-  }
-
-  const fetchSettings = (json0, url0) => {
-    fetch(url0, {
+  const getSettings = () => {
+    let request = {
+      command: "getCourseSettings",
+      user: user.userid,
+      courseId: course.course_id
+    };
+    
+    fetch(url, {
       method: 'POST', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(json0),
+      credentials: "include",
+      body: JSON.stringify(request),
     }).then(response => response.json())
       .then(data => {
-        console.log("Data is: ", data);
-        let success = data.success;
-        if (success === "true") {
-
-          setSettings(data.settings);
+        if (data.success === "true") {
           if(data.settings.show_quests == "t"){
             setShowQuests(true);
           }
@@ -62,35 +47,34 @@ function SelectQuests(props) {
         }
         else {
           console.log("HOME: Server returned error");
-          navigate(docRoot + "/error");
+          navigate(root + "/error");
         }
       })
       .catch((error) => {
         console.log("HOME: There was an error:", error);
-        navigate(docRoot + "/error");
+        navigate(root + "/error");
 
       });
   }
 
-  const getQuests = (json0, url0) => {
-    fetch(url0, {
+  const getQuests = () => {
+    let request = {
+      command: "getAllQuests",
+      user: user.userid
+    };
+
+    fetch(url, {
       method: 'POST', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(json0),
+      credentials: "include",
+      body: JSON.stringify(request),
     }).then(response => response.json())
       .then(data => {
-        console.log("Data is: ", data);
-        let success = data.success;
-
-        if (success === "true") {
-
-          console.log("Get Quests: Successfully fetched quests");
+        if (data.success === "true") {
           let questList = {}
           for (var key in data.quests) {
-            console.log("quest array");
-            console.log(data.quests[key]);
             questList[key] = {};
             // Add quest info
             questList[key]["name"] = data.quests[key]["name"];
@@ -102,35 +86,214 @@ function SelectQuests(props) {
         }
         else {
           console.log("Get Quest: Server returned error");
-          navigate(docRoot + "/error");
+          navigate(root + "/error");
         }
       })
       .catch((error) => {
         console.log("Get Quest: There was an error:", error);
-        navigate(docRoot + "/error");
+        navigate(root + "/error");
       });
   };
 
-  const ShowQuests = () => {
-    console.log("settings: " + settings);
-    if (showQuests) {
+  const handleSubmit = () => {
+    const newQuest = {
+      mnemonic: mnemonic,
+      name: name,
+      description: description,
+      total_points: total_pts,
+      command: "addQuest"
+    };
+
+    // Call the backend API to create the quest
+    createQuest(newQuest);
+  };
+  
+  const createQuest = (questData) => {
+    fetch(props.url, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(questData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          toast.success("Quest created successfully!");  
+          getQuests();
+        } else {
+          toast.error("Error adding the new quest");
+          navigate(root + "/error");
+        }
+      })
+      .catch((e) => {
+        console.log("Error", e.stack);
+        console.log("Error", e.name);
+        console.log("Error", e.message);
+        toast.error("Error adding the quest");
+        navigate(root + "/error");
+      });
+  };
+
+  const handleDelete = (ID) => {
+    const request = {
+      command: "deleteQuest",
+      questId: ID
+    };
+
+    fetch(props.url, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+        "Content-Type": "application/json",
+    },
+    body: JSON.stringify(request),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.success) {
+        toast.success("Quest deleted successfully!"); 
+        getQuests();
+        } else {
+        toast.error("Error deleting the quest");
+        navigate(root + "/error");
+        }
+    })
+    .catch((e) => {
+        console.log("Error", e.stack);
+        console.log("Error", e.name);
+        console.log("Error", e.message);
+        toast.error("Error deleting the quest");
+        navigate(root + "/error");
+    });
+  };
+
+  useEffect(() => {
+    //If token is set, kick to home screen to check validity of session
+    if (user) {
+      getSettings();
+      getQuests();
+    }
+    else {
+      navigate(root + "/login");
+    }
+  }, []);
+
+  const onSearchBarChange = (e) => {
+    console.log("searching!");
+    const value = e.target.value.toLowerCase();
+
+    if (value === "") {
+      setFilteredData(null);
+      return;
+    }
+
+    const filteredQuests = Object.keys(quests).filter(k => {
+      const q = quests[k];
       return (
-        <div>
-          <h1>All Quests Options</h1>
-          <div>
-            {Object.keys(quests).map((questId) => {
-              return <QuestCard currentQuest={quests[questId]} id={questId} url={props.url} key={questId} />
-            })}
+        q.name.toLowerCase().includes(value) ||
+        q.description.toLowerCase().includes(value)
+      );
+    }).reduce((q, k) => {
+      q[k] = quests[k];
+      return q;
+    }, {});
+
+    setFilteredData(filteredQuests);
+  }
+
+  const ShowQuests = () => {
+    if (showQuests) {
+      var qData = quests;
+      if(filteredData != null)
+      {
+        qData = filteredData;
+      }
+
+      return (
+        <div className="container p-4">
+          <div className="row">
+            <h1>All Quests Options</h1>
+            <div>
+              <input
+                id="QuestSearchTextBox"
+                type="text" className="mb-1 mt-2"
+                onChange={onSearchBarChange}
+                placeholder="Search..." />
+            </div>
+            <div className="col-md-8">  
+              <div>
+                {Object.keys(qData).map((questId) => {
+                  return <div>
+                    <QuestCard currentQuest={quests[questId]} id={questId} url={props.url} key={questId} showAddToCourse={true} showDelete={true} onDelete={handleDelete}/>
+                    </div>
+                })}  
+              </div>
+            </div>
+            
+            <div className="col-md-4">
+              <h4 className="card-header">Create New Quest</h4>
+              <div className="card-body">
+
+                <form className="">
+
+                  <div className="input-group mb-1">
+                    <input
+                      type="text" className="form-control"
+                      value={mnemonic}
+                      onChange={(e) => setMnemonic(e.target.value)}
+                      placeholder="Mnemonic"></input>
+                  </div>
+
+                  <div className="input-group mb-1"> 
+                    <input
+                      type="text" className="form-control"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Name" />
+                  </div>
+                  
+                  <div className="input-group mb-1"> 
+                      <textarea className="form-control"
+                      rows="5" cols="33" 
+                      value={description} 
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Description"></textarea>
+                  </div>
+
+                  <div className="input-group mb-1"> 
+                    <input
+                      type="text" className="form-control mb-3"
+                      value={total_pts}
+                      onChange={(e) => setTotalPts(e.target.value)}
+                      placeholder="Total Points" />
+                  </div>
+
+                  <button type="button" className="btn btn-primary" onClick={handleSubmit}>Add Quest</button>
+                </form>
+                <p className="p-2"><b>Note: </b>Quests for office hour frequency and Piazza post frequency have automated status updates. To ensure proper automation, set mnemonics are follows:
+                  <ul>
+                    <li><b>OH#</b> (e.g. OH4 or OH10) for office hours of # visits</li>
+                    <li><b>P#</b> (e.g. P3 or P12) <b>and</b> ensure "Piazza" is in the quest name for Piazza posts of # amount</li>
+                  </ul>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       );
     }
-    else return;
+    else return (
+      <div>
+        <h4>Quests are disabled for this course. Enable them in Admin.</h4>
+      </div>
+    );
   }
 
   return (
     <div>
-      <ShowQuests />
+      {ShowQuests()}
     </div>
   )
 

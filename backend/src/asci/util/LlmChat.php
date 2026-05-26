@@ -49,7 +49,9 @@ class LlmChat
         $this->logger = new \Monolog\Logger('LLMChat');
         $this->logger->pushHandler($log);
 
-        $this->serverURL = \asci\Config::$LLM_SERVER_URL;
+        // LLM_SERVER_URL env var takes priority (set on Heroku to the chat app URL).
+        // Falls back to the static Config value for local/Docker dev.
+        $this->serverURL = getenv('LLM_SERVER_URL') ?: \asci\Config::$LLM_SERVER_URL;
     }
 
     public function getLlmResponse($data, $course) {
@@ -74,6 +76,35 @@ class LlmChat
       $response = $this->query($query);
 
       return $response["response"];
+    }
+
+    /**
+     * Streaming version: forwards SSE events from the LLM server to the client.
+     */
+    public function getLlmResponseStreaming($data, $course) {
+        // Map streaming command names back to the original names for the Python script
+        $commandMap = [
+          "newLlmChatStream" => "newLlmChat",
+          "followupLlmChatStream" => "followupLlmChat",
+        ];
+        $innerCommand = $commandMap[$data["command"]] ?? $data["command"];
+
+        $query = [
+          "course" => $course["course_id"],
+          "command" => "llmchat",
+          "stream" => true,
+          "data" => [
+            "command" => $innerCommand,
+            "studentQuestion" => $data["studentQuestion"]
+          ]
+        ];
+        if (isset($data["assignmentName"]))
+         $query["data"]["assignmentName"] = $data["assignmentName"];
+
+        if (isset($data["chatHistory"]))
+         $query["data"]["chatHistory"] = $data["chatHistory"];
+
+        $this->queryStreaming($query);
     }
 
     public function getLlmSummary($data, $course) {
@@ -122,10 +153,18 @@ class LlmChat
             }
 
             $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->file($_FILES['coursecontent']['tmp_name']);
             if (false === $ext = array_search(
-                $finfo->file($_FILES['coursecontent']['tmp_name']),
+                $mimeType,
+                //allow for various file type uploads
                 array(
-                    'zip' => 'application/zip'
+                    'zip' => 'application/zip',
+                    'pdf' => 'application/pdf',
+                    'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                    'png' => 'image/png',
+                    'jpg' => 'image/jpeg',
+                    'txt' => 'text/plain'
                 ),
                 true
             )) {
@@ -145,7 +184,8 @@ class LlmChat
           "course" => $course["course_id"],
           "command" => "uploadContent",
           "file" => [
-            "mime-type" => "application/zip",
+            "mime-type" => $mimeType,
+            "name" => $_FILES['coursecontent']['name'],
             "content" => $file
           ]
         ];
@@ -263,6 +303,41 @@ class LlmChat
         $this->logger->addDebug("Got the following server response", $return);
 
         return $return;
+    }
+
+    /**
+     * Streaming CURL query: forwards SSE events from the LLM server directly to the client.
+     */
+    public function queryStreaming($query) {
+        $this->logger->addDebug("Sending streaming query to {$this->serverURL}");
+        $data = json_encode($query);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->serverURL);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($data)
+        ));
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        // Forward each chunk to the client as it arrives
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($ch, $chunk) {
+            echo $chunk;
+            ob_flush();
+            flush();
+            return strlen($chunk);
+        });
+
+        curl_exec($ch);
+
+        if ($errno = curl_errno($ch)) {
+            $error_message = curl_strerror($errno);
+            $this->logger->addError("Streaming cURL error ({$errno}):\n {$error_message}");
+            echo "data: " . json_encode(["type" => "error", "message" => "Connection to LLM server failed"]) . "\n\n";
+            flush();
+        }
+        curl_close($ch);
     }
 
 

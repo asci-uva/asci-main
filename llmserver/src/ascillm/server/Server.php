@@ -132,12 +132,43 @@ class Server
                 $result = $executor->createPiazzaRAG($this->input);
                 $this->setResponse($result);
                 break;
+            case "getCourseContent":
+                $result = $executor->getCourseContent($this->input);
+                $this->setResponse(["files" => $result]);
+                break;
+            case "removeCourseContent":
+                $result = $executor->removeCourseContent($this->input);
+                $this->setResponse(["success" => $result]);
+                break;
             default:
                 $this->setResponse(["response" => "Hello world!"]);
 
         }
 
         return;
+    }
+
+    /**
+     * Run Streaming Method
+     *
+     * Handles streaming SSE requests. Outputs directly to the response stream.
+     */
+    public function runStreaming()
+    {
+        $executor = new \ascillm\server\ServerExecutor();
+
+        if ($this->input == null || empty($this->input)) {
+            return;
+        }
+
+        switch ($this->input["command"]) {
+            case "llmchat":
+                $executor->llmChatStreaming($this->input);
+                break;
+            default:
+                echo "data: " . json_encode(["type" => "error", "message" => "Streaming not supported for this command"]) . "\n\n";
+                flush();
+        }
     }
 
     /**

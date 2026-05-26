@@ -5,6 +5,7 @@ import ChatController from "./ChatController";
 import AdminController from "./AdminController";
 import PointsController from "./PointsController";
 import StatsController from "./StatsController";
+import SystemAdmin from "./SystemAdmin";
 import { Home, Cards } from "./home";
 import { Login, Error, Navigation, Logout, SelectCourseHome } from "./utils";
 import { useUser } from "./context/UserContext";
@@ -29,7 +30,7 @@ const HomeController = (props) => {
         documentRoot={props.documentRoot}
         debugMode={props.debugMode}
       />
-      <div className="container">
+      <div className="container-fluid">
       <Routes>
         <Route path="/" element={<Home {...props} />} />
         <Route path="changeCourse" element={<SelectCourseHome {...props} />} />
@@ -93,7 +94,7 @@ const HomeController = (props) => {
           }
         />
       </Routes>
-            </div>
+      </div>
     </>
   );
 };

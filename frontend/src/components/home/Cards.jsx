@@ -58,7 +58,7 @@ function Cards(props) {
           </div>
         </div>
       ) : null }
-      { false ? (
+      { settings!=null && settings.show_quests=="t" && course.role === "student" ? (
       <div className="col-lg-4 col-md-6 mb-4">
         <div className="card p-3">
           <div className="card-img-top text-center">
@@ -66,6 +66,30 @@ function Cards(props) {
           </div>
           <div className="card-body">
             <p className="card-text text-center"><Link to="points" className="btn btn-primary">Earn Points</Link></p>
+          </div>
+        </div>
+      </div>
+      ) : null }
+      { course.role === "instructor" ? (
+      <div className="col-lg-4 col-md-6 mb-4">
+        <div className="card p-3">
+          <div className="card-img-top text-center">
+            <i className="bi-trophy home-icon"></i>
+          </div>
+          <div className="card-body">
+            <p className="card-text text-center"><Link to="admin/SelectQuests" className="btn btn-primary">Quests</Link></p>
+          </div>
+        </div>
+      </div>
+      ) : null }
+      { course.role === "instructor" || course.role === "ta" ? (
+      <div className="col-lg-4 col-md-6 mb-4">
+        <div className="card p-3">
+          <div className="card-img-top text-center">
+            <i className="bi-clipboard-data home-icon"></i>
+          </div>
+          <div className="card-body">
+            <p className="card-text text-center"><Link to="admin/PointsHome" className="btn btn-primary">Student Points</Link></p>
           </div>
         </div>
       </div>

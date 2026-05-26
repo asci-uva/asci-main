@@ -81,6 +81,41 @@ class ServerExecutor{
     $this->user = $this->userStore->getUser($uid);
   }
 
+  /*
+   * Enforces archived-course access policy at the API boundary.
+   * Archived courses are instructor-only; non-instructors are denied direct access.
+   */
+  public function denyArchivedCourseForStudents($computing_id, $course_id, $command = null) {
+    if ($computing_id == null || $course_id == null) {
+      return;
+    }
+
+    $courses = $this->userCourseStore->getCoursesForUser($computing_id);
+    $roles = [];
+    foreach ($courses as $course) {
+      if ($course->getCourseId() == $course_id) {
+        $roles[] = strtolower((string)$course->getRole());
+      }
+    }
+
+    // User is not enrolled in this course; defer to normal permission checks.
+    if (count($roles) == 0) {
+      return;
+    }
+
+    // Instructors can access archived courses for management/restoration.
+    if (in_array("instructor", $roles, true)) {
+      return;
+    }
+
+    $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
+    $settings = $dbcrsset->getCourseSettings($course_id);
+
+    if ($settings != null && $settings->archived == "t") {
+      throw new \asci\exceptions\ASCIPermissionException("Course is archived and unavailable to non-instructors");
+    }
+  }
+
 
 
   /*
@@ -154,8 +189,24 @@ class ServerExecutor{
     $courses = $this->userCourseStore->getCoursesForUser($computing_id);
 
     $result["courses"] = [];
+
+    /* Database Object we are going to need */
+    $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
+
     foreach ($courses as $course){
-      $result["courses"][$course->getCourseId()] = $course->toArray();
+      $settings = $dbcrsset->getCourseSettings($course->getCourseId());
+      if($settings == null) continue;
+
+      $isArchived = ($settings->archived == "t");
+      $role = strtolower((string)$course->getRole());
+      $isInstructor = ($role == "instructor");
+
+      // Archived courses are only visible to instructors for management/restoration.
+      if($isArchived && !$isInstructor) continue;
+
+      $courseArray = $course->toArray();
+      $courseArray["archived"] = $settings->archived;
+      $result["courses"][$course->getCourseId()] = $courseArray;
     }
 
     $result["success"] = "true";
@@ -988,11 +1039,10 @@ $usedCosSim = True;
 
     //1: Check that the user has permission to access queue
     if (!$this->userCourseStore->userHasPermission($user, $course_id, "ta-queue"))
-      throw new \asci\exceptions\ASCIPermissionException("User is not enrolled as a TA in this course");
+      throw new \asci\exceptions\ASCIPermissionException("User is not enrolled as a TA in this course", $role);
 
     // Update the status in the database (i.e., that they are working)
-    $this->userCourseStore->updateTAStatus($user, $course_id);
-
+      $this->userCourseStore->updateTAStatus($user, $course_id);
   }
 
   /*
@@ -1457,6 +1507,23 @@ $usedCosSim = True;
 
   }
 
+  public function scrapeURL($url) {
+    if (!isset($url)) {
+      die("Missing URL");
+    }
+    
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+      die("Invalid URL");
+    }
+
+    $script = __DIR__ . "/scraper.py";
+    $command =  escapeshellcmd("python3 $script " . escapeshellarg($url) . " 2>&1");
+    $output = shell_exec($command);
+
+    echo json_encode(["content" => $output]);
+    exit();
+  }
+
   public function llmSummary($data) {
     $this->logger->addDebug("Handling LLM request", $data);
     //$arrayString = print_r($data, true);
@@ -1568,6 +1635,28 @@ $usedCosSim = True;
     $result = [];
     $result["response"] = $llmResponse;
     return $result;
+  }
+
+  /**
+   * Streaming version of llmChat: validates auth then streams SSE from LLM server.
+   */
+  public function llmChatStreaming($data) {
+    $this->logger->addDebug("Handling streaming LLM request", $data);
+
+    $course = $data["course"];
+    if($this->courseStore->getCourseById($course["course_id"]) === false)
+      throw new \asci\exceptions\ASCIException("Unknown course");
+
+    $computing_id = $data["user"];
+    $user = $this->userStore->getUser($computing_id);
+    if ($user == null)
+      throw new \asci\exceptions\ASCIException("Unknown user");
+
+    if (!$this->userCourseStore->userHasPermission($user, $course["course_id"], "llm-chat"))
+      throw new \asci\exceptions\ASCIPermissionException("User does not have permission to chat with llm");
+
+    $chat = new \asci\util\LlmChat();
+    $chat->getLlmResponseStreaming($data, $course);
   }
 
   public function getCourseStats($course_id) {
@@ -1691,8 +1780,8 @@ $usedCosSim = True;
      *
      * @return bool login success
      */
-    public function createUser($computing_id, $fname, $lname, $pname) {
-        $success = (new \asci\server\database\DBUser($this->db))->createUser($computing_id, $fname, $lname, $pname);
+    public function createUser($computing_id, $fname, $lname, $pname, $password) {
+        $success = (new \asci\server\database\DBUser($this->db))->createUser($computing_id, $fname, $lname, $pname, $password);
         $result = [];
         if ($success) {
             $result["success"] = true;
@@ -1883,6 +1972,47 @@ $usedCosSim = True;
         return $result;
     }
 
+    public function getQuestsByStatusHandler($user_id, $course_id, $status){
+        $result = [];
+
+        $quests = (new \asci\server\database\DBUserQuest($this->db))->getQuestsByStatus($user_id, $course_id, $status);
+        $result["quests"] = [];
+
+        $status = new  \asci\data\QuestInfo\QuestStatus($this->db, $course_id);
+
+        foreach ($quests as $quest){
+            // modify the quest status
+            $status -> changeStatus($quest);
+            $result["quests"][$quest->getQuestId()] = $quest->toArray();
+        }
+
+        $this->logger->addDebug("Quest result", array("quests" => $quests));
+
+        $result["success"] = "true";
+
+        return $result;
+    }
+
+    public function updateQuestStatusHandler($quest_id, $user_id, $course_id, $status){
+        $user = ((new \asci\server\database\DBUser($this->db))->getUser($user_id)) -> getId();
+        $success = (new \asci\server\database\DBUserQuest($this->db))->updateQuestStatus($quest_id, $user, $course_id, $status);
+        
+        // foreach ($quests as $quest){
+        //     // modify the quest status
+        //     $status -> changeStatus($quest);
+        //     $result["quests"][$quest->getQuestId()] = $quest->toArray();
+        // }
+      
+        $result = [];
+        if ($success) {
+            $result["success"] = true;
+        } else {
+            $result["success"] = false;
+        }
+
+        return $result;
+    }
+
     public function getPointsForUserHandler($computing_id, $course_id){
         $result = [];
 
@@ -1911,6 +2041,47 @@ $usedCosSim = True;
         $this->logger->addDebug("Quest result", array("quests" => $quests[0]));
 
         $result["success"] = "true";
+
+        return $result;
+    }
+
+    public function getCourseQuestsHandler($course){
+        $result = [];
+
+        $quests = (new \asci\server\database\DBCourseQuest($this->db))->getQuestsForCourse($course);
+        $result["quests"] = [];
+
+        foreach ($quests as $quest){
+          $result["quests"][$quest->getQuestId()] = $quest->toArray();
+        }
+
+        $this->logger->addDebug("Quest result", array("quests" => $quests[0]));
+
+        $result["success"] = "true";
+
+        return $result;
+    }
+
+    public function addQuestHandler($mnemonic, $name, $description, $total_points){
+        $success = (new \asci\server\database\DBQuest($this->db))->createQuest($mnemonic, $name, $description, $total_points);
+        $result = [];
+        if ($success) {
+            $result["success"] = true;
+        } else {
+            $result["success"] = false;
+        }
+
+        return $result;
+    }
+
+    public function deleteQuestHandler($quest){
+        $success = (new \asci\server\database\DBQuest($this->db))->deleteQuest($quest);
+        $result = [];
+        if ($success) {
+            $result["success"] = true;
+        } else {
+            $result["success"] = false;
+        }
 
         return $result;
     }
@@ -1981,4 +2152,419 @@ $usedCosSim = True;
         return $result;
     }
 
+    public function getCourseContentHandler($user, $course_id){
+      //permissions?
+      $this->serverURL = \asci\Config::$LLM_SERVER_URL;
+
+      $request = [
+          "course" => $course_id,
+          "command" => "getCourseContent"
+      ];
+
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, $this->serverURL);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array ('Content-Type: application/json'));
+      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      $response = curl_exec($ch);
+      if($errno = curl_errno($ch)) {
+        $error_message = curl_strerror($errno);
+        $this->logger->addError("cURL error ({$errno}):\n {$error_message}");
+      }
+      curl_close($ch);
+      return json_decode($response, true);
+    }
+
+    public function removeCourseContentHandler($user, $course_id, $filename){
+      //permissions?
+      $this->serverURL = \asci\Config::$LLM_SERVER_URL;
+
+      $request = [
+          "course" => $course_id,
+          "filename" => $filename,
+          "command" => "removeCourseContent"
+      ];
+
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, $this->serverURL);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array ('Content-Type: application/json'));
+      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      $response = curl_exec($ch);
+      if($errno = curl_errno($ch)) {
+        $error_message = curl_strerror($errno);
+        $this->logger->addError("cURL error ({$errno}):\n {$error_message}");
+      }
+      curl_close($ch);
+      return json_decode($response, true);
+    }
+
+    /**
+     * Fetches the list of text channels for a Discord guild.
+     * Requires \asci\Config::$DISCORD_BOT_TOKEN to be set.
+     */
+    public function getDiscordChannelsHandler($user, $course_id, $guild_id) {
+        if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-stats"))
+            throw new \asci\exceptions\ASCIPermissionException("User does not have permission to access course stats");
+
+        $token = \asci\Config::$DISCORD_BOT_TOKEN;
+        if (empty($token))
+            return ["success" => "false", "error" => "Discord bot token is not configured on the server."];
+
+        // Sanitize guild_id: must be a snowflake (numeric string)
+        if (!preg_match('/^\d{1,20}$/', $guild_id))
+            return ["success" => "false", "error" => "Invalid Guild ID format."];
+
+        $api_url = "https://discord.com/api/v10/guilds/" . $guild_id . "/channels";
+
+        $ch = curl_init($api_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Authorization: Bot " . $token,
+            "Content-Type: application/json",
+            "User-Agent: ASCI-App (https://github.com/uva-cs3240, 1.0)"
+        ]);
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code !== 200)
+            return ["success" => "false", "error" => "Discord API returned HTTP $http_code. Check your bot token and server ID."];
+
+        $data = json_decode($response, true);
+        if ($data === null)
+            return ["success" => "false", "error" => "Invalid response from Discord API."];
+
+        // Filter to text channels only (type 0 = GUILD_TEXT)
+        $text_channels = array_values(array_filter($data, fn($c) => isset($c["type"]) && $c["type"] === 0));
+
+        // Sort alphabetically by name
+        usort($text_channels, fn($a, $b) => strcmp($a["name"], $b["name"]));
+
+        $channels = array_map(fn($c) => [
+            "id"   => $c["id"],
+            "name" => $c["name"],
+        ], $text_channels);
+
+        return ["success" => "true", "channels" => $channels];
+    }
+
+    /**
+     * For a given Discord channel, fetches messages and returns every message
+     * ending in '?' along with the response time of the first reply from another user.
+     */
+    public function getDiscordActivityHandler($user, $course_id, $channel_id) {
+        if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-stats"))
+            throw new \asci\exceptions\ASCIPermissionException("User does not have permission to access course stats");
+
+        $token = \asci\Config::$DISCORD_BOT_TOKEN;
+        if (empty($token))
+            return ["success" => "false", "error" => "Discord bot token is not configured on the server."];
+
+        // Sanitize channel_id: must be a snowflake (numeric string)
+        if (!preg_match('/^\d{1,20}$/', $channel_id))
+            return ["success" => "false", "error" => "Invalid Channel ID format."];
+
+        // Fetch up to 100 messages (Discord's per-request max)
+        $api_url = "https://discord.com/api/v10/channels/" . $channel_id . "/messages?limit=100";
+
+        $ch = curl_init($api_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Authorization: Bot " . $token,
+            "Content-Type: application/json",
+            "User-Agent: ASCI-App (https://github.com/uva-cs3240, 1.0)"
+        ]);
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code !== 200)
+            return ["success" => "false", "error" => "Discord API returned HTTP $http_code for channel. Check bot permissions."];
+
+        $messages = json_decode($response, true);
+        if ($messages === null)
+            return ["success" => "false", "error" => "Invalid response from Discord API."];
+
+        // Discord returns messages newest-first; reverse to chronological order
+        $messages = array_reverse($messages);
+
+        // Build a resolver: lowercase discord_username -> "First Last (discord_name)"
+        $mapping = $this->userStore->getDiscordMappingForCourse($course_id);
+        $resolveName = function(string $discordName) use ($mapping): string {
+            $key = strtolower($discordName);
+            if (isset($mapping[$key])) {
+                $s = $mapping[$key];
+                return trim(($s['pname'] ?? $s['fname'] ?? '') . ' ' . ($s['lname'] ?? '')) . ' (' . $discordName . ')';
+            }
+            return $discordName;
+        };
+
+        $questions = [];
+
+        foreach ($messages as $idx => $msg) {
+            $content = trim($msg["content"] ?? "");
+            // A question: non-empty message ending with '?'
+            if ($content === "" || substr($content, -1) !== "?")
+                continue;
+
+            $asker_id = $msg["author"]["id"] ?? null;
+            $asker    = $resolveName($msg["author"]["global_name"] ?? ($msg["author"]["username"] ?? "Unknown"));
+            $asked_at = $msg["timestamp"] ?? null;
+            $t_asked  = $asked_at !== null ? strtotime($asked_at) : null;
+
+            // Collect ALL responses from different users, stopping at the next question
+            $responses = [];
+            $seen_responders = []; // track by user id to avoid duplicate entries per user
+            for ($j = $idx + 1; $j < count($messages); $j++) {
+                $reply = $messages[$j];
+                $reply_content = trim($reply["content"] ?? "");
+
+                // Stop collecting once we hit the next question from anyone
+                if ($reply_content !== "" && substr($reply_content, -1) === "?")
+                    break;
+
+                $reply_author_id = $reply["author"]["id"] ?? null;
+
+                // Skip the original asker and skip empty/bot messages
+                if ($reply_author_id === null || $reply_author_id === $asker_id)
+                    continue;
+
+                // Only record each responder's FIRST reply
+                if (isset($seen_responders[$reply_author_id]))
+                    continue;
+
+                $seen_responders[$reply_author_id] = true;
+
+                $responder = $resolveName($reply["author"]["global_name"] ?? ($reply["author"]["username"] ?? "Unknown"));
+                $response_time_seconds = null;
+                if ($t_asked !== null && isset($reply["timestamp"])) {
+                    $t_replied = strtotime($reply["timestamp"]);
+                    if ($t_replied !== false && $t_replied >= $t_asked)
+                        $response_time_seconds = $t_replied - $t_asked;
+                }
+
+                $responses[] = [
+                    "responder"             => $responder,
+                    "response_time_seconds" => $response_time_seconds,
+                ];
+            }
+
+            $questions[] = [
+                "question_text" => $content,
+                "asker"         => $asker,
+                "asked_at"      => $asked_at,
+                "responses"     => $responses,
+            ];
+        }
+
+        return ["success" => "true", "questions" => $questions];
+    }
+
+    /**
+     * For every text channel in a guild, computes per-member stats:
+     *   - questions_asked : how many messages ending in '?' they sent
+     *   - responses_given : how many times they were first to reply to someone else's question
+     *   - avg_response_seconds : average time (seconds) to their first reply across all questions they answered
+     *
+     * Returns:
+     *   { success: "true", channels: [ { channel_id, channel_name, members: [ { name, questions_asked, responses_given, avg_response_seconds } ] } ] }
+     */
+    public function getDiscordServerSummaryHandler($user, $course_id, $guild_id, $max_response_seconds = null) {
+        if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-stats"))
+            throw new \asci\exceptions\ASCIPermissionException("User does not have permission to access course stats");
+
+        $token = \asci\Config::$DISCORD_BOT_TOKEN;
+        if (empty($token))
+            return ["success" => "false", "error" => "Discord bot token is not configured on the server."];
+
+        if (!preg_match('/^\d{1,20}$/', $guild_id))
+            return ["success" => "false", "error" => "Invalid Guild ID format."];
+
+        // --- Step 1: fetch all text channels ---
+        $ch = curl_init("https://discord.com/api/v10/guilds/" . $guild_id . "/channels");
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                "Authorization: Bot " . $token,
+                "Content-Type: application/json",
+                "User-Agent: ASCI-App (https://github.com/uva-cs3240, 1.0)"
+            ]
+        ]);
+        $response  = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code !== 200)
+            return ["success" => "false", "error" => "Discord API returned HTTP $http_code fetching channels."];
+
+        $all_channels = json_decode($response, true);
+        if ($all_channels === null)
+            return ["success" => "false", "error" => "Invalid response from Discord API (channels)."];
+
+        // Text channels only (type 0), sorted alphabetically
+        $text_channels = array_values(array_filter($all_channels, fn($c) => isset($c["type"]) && $c["type"] === 0));
+        usort($text_channels, fn($a, $b) => strcmp($a["name"], $b["name"]));
+
+        // Build a resolver: lowercase discord_username -> "First Last (discord_name)"
+        $mapping = $this->userStore->getDiscordMappingForCourse($course_id);
+        $resolveName = function(string $discordName) use ($mapping): string {
+            $key = strtolower($discordName);
+            if (isset($mapping[$key])) {
+                $s = $mapping[$key];
+                return trim(($s['pname'] ?? $s['fname'] ?? '') . ' ' . ($s['lname'] ?? '')) . ' (' . $discordName . ')';
+            }
+            return $discordName;
+        };
+
+        $result_channels = [];
+
+        // --- Step 2: for each channel fetch messages and compute stats ---
+        foreach ($text_channels as $channel) {
+            $channel_id = $channel["id"];
+
+            $ch2 = curl_init("https://discord.com/api/v10/channels/" . $channel_id . "/messages?limit=100");
+            curl_setopt_array($ch2, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => [
+                    "Authorization: Bot " . $token,
+                    "Content-Type: application/json",
+                    "User-Agent: ASCI-App (https://github.com/uva-cs3240, 1.0)"
+                ]
+            ]);
+            $msg_response  = curl_exec($ch2);
+            $msg_http_code = curl_getinfo($ch2, CURLINFO_HTTP_CODE);
+            curl_close($ch2);
+
+            // Skip channels we can't read (no permission, etc.)
+            if ($msg_http_code !== 200) continue;
+
+            $messages = json_decode($msg_response, true);
+            if ($messages === null || count($messages) === 0) continue;
+
+            // Chronological order
+            $messages = array_reverse($messages);
+
+            // Per-user aggregates: [ user_id => [ name, questions_asked, total_response_seconds, responses_given ] ]
+            $members = [];
+
+            $ensure = function($uid, $name) use (&$members) {
+                if (!isset($members[$uid]))
+                    $members[$uid] = ["name" => $name, "questions_asked" => 0, "responses_given" => 0, "total_response_seconds" => 0];
+            };
+
+            foreach ($messages as $idx => $msg) {
+                $content     = trim($msg["content"] ?? "");
+                $author_id   = $msg["author"]["id"] ?? null;
+                $author_name = $resolveName($msg["author"]["global_name"] ?? ($msg["author"]["username"] ?? "Unknown"));
+
+                if ($author_id === null) continue;
+
+                $ensure($author_id, $author_name);
+
+                // Count as a question if it ends with '?'
+                if ($content === "" || substr($content, -1) !== "?") continue;
+
+                $members[$author_id]["questions_asked"]++;
+                $asked_at = $msg["timestamp"] ?? null;
+                $t_asked  = $asked_at !== null ? strtotime($asked_at) : null;
+
+                // Find all unique responders before the next question
+                $seen = [];
+                for ($j = $idx + 1; $j < count($messages); $j++) {
+                    $reply         = $messages[$j];
+                    $reply_content = trim($reply["content"] ?? "");
+
+                    // Stop at the next question
+                    if ($reply_content !== "" && substr($reply_content, -1) === "?") break;
+
+                    $rid   = $reply["author"]["id"] ?? null;
+                    $rname = $resolveName($reply["author"]["global_name"] ?? ($reply["author"]["username"] ?? "Unknown"));
+
+                    if ($rid === null || $rid === $author_id || isset($seen[$rid])) continue;
+                    $seen[$rid] = true;
+
+                    $ensure($rid, $rname);
+
+                    if ($t_asked !== null && isset($reply["timestamp"])) {
+                        $t_replied = strtotime($reply["timestamp"]);
+                        if ($t_replied !== false && $t_replied >= $t_asked) {
+                            $elapsed = $t_replied - $t_asked;
+                            // Skip this response if it exceeds the outlier cutoff
+                            if ($max_response_seconds !== null && $elapsed > $max_response_seconds)
+                                continue;
+                            $members[$rid]["responses_given"]++;
+                            $members[$rid]["total_response_seconds"] += $elapsed;
+                        }
+                    } else {
+                        $members[$rid]["responses_given"]++;
+                    }
+                }
+            }
+
+            // Build the output member list (only include users who participated)
+            $member_list = [];
+            foreach ($members as $uid => $m) {
+                $avg = $m["responses_given"] > 0
+                    ? round($m["total_response_seconds"] / $m["responses_given"])
+                    : null;
+                $member_list[] = [
+                    "name"                 => $m["name"],
+                    "questions_asked"      => $m["questions_asked"],
+                    "responses_given"      => $m["responses_given"],
+                    "avg_response_seconds" => $avg,
+                ];
+            }
+
+            // Sort by avg response time ascending (non-responders last)
+            usort($member_list, function($a, $b) {
+                if ($a["avg_response_seconds"] === null && $b["avg_response_seconds"] === null) return 0;
+                if ($a["avg_response_seconds"] === null) return 1;
+                if ($b["avg_response_seconds"] === null) return -1;
+                return $a["avg_response_seconds"] <=> $b["avg_response_seconds"];
+            });
+
+            // Only include channels that had at least one message from a real user
+            if (count($member_list) > 0) {
+                $result_channels[] = [
+                    "channel_id"   => $channel_id,
+                    "channel_name" => $channel["name"],
+                    "members"      => $member_list,
+                ];
+            }
+        }
+
+        return ["success" => "true", "channels" => $result_channels];
+    }
+
+    /**
+     * Sets the Discord username for a given computing_id.
+     * A student may update their own; instructors/TAs require course-manage permission.
+     */
+    public function setDiscordUsernameHandler($user, $course_id, $computing_id, $discord_username) {
+        if ($this->user->computing_id !== $computing_id) {
+            if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-manage"))
+                throw new \asci\exceptions\ASCIPermissionException("Not authorized to update this user's Discord username");
+        }
+
+        $success = $this->userStore->setDiscordUsername($computing_id, $discord_username);
+        return ["success" => $success ? "true" : "false"];
+    }
+
+    /**
+     * Returns the Discord username → student mapping for every enrolled user
+     * in the given course who has set a Discord username.
+     * Requires course-stats permission.
+     */
+    public function getDiscordMappingHandler($user, $course_id) {
+        if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-stats"))
+            throw new \asci\exceptions\ASCIPermissionException("User does not have permission to access course stats");
+
+        $mapping = $this->userStore->getDiscordMappingForCourse($course_id);
+        return ["success" => "true", "mapping" => $mapping];
+    }
+
 }
+

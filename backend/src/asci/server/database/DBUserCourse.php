@@ -141,6 +141,9 @@ class DBUserCourse
             return true;
           break;
         case "course-roster":
+          if ($role == "ta" || $role == "instructor")
+            return true;
+          break;
         case "course-settings":
         case "upload-llm":
         case "upload-piazza":

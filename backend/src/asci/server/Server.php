@@ -57,6 +57,11 @@ class Server
     private $timing = 0;
 
     /**
+     * @var bool Whether this request used streaming output
+     */
+    public $streaming = false;
+
+    /**
      * @var \Monolog\Logger $logger the logger for this server
      */
     private $logger;
@@ -108,21 +113,32 @@ class Server
         /* Otherwise, use the user provided by request */
         // Login is a special command that doesn't require this validation
         $user = null;
+        $command = $input["command"] ?? null;
+        $requestedUser = $input["user"] ?? null;
+        $tabId = $input["_tab_id"] ?? null;
+
         if(\asci\Config::$AUTH_MODE == "netbadge"){
             $user = $_SERVER["uid"];
 
-            if($user == null || ($input["command"] != "login" && $user != $input["user"])){
+            if($user == null || ($command != "login" && $user != $requestedUser)){
                 /* Request is invalid because username's don't match */
-                $result = ["success" => "false", "error" => "ERROR: Session userId does not match provided user id"];
-                $this->setResponse($result);
-                return;
+                throw new \asci\exceptions\ASCIAuthenticationException("Session userId does not match provided user id", 401);
             }
         } else { // Default to password mode
             // check if user has logged in. If so, use that user
             // from the server-side session.  If not, then there is no user.
-          $this->logger->addDebug("SESSION variable in Server", $_SESSION);
-            if (isset($_SESSION["uid"])) { // && $_SESSION["uid"] == $input["user"]) {
-              $user = $_SESSION["uid"];
+            $this->logger->addDebug("SESSION variable in Server", $_SESSION);
+
+            if ($tabId !== null && isset($_SESSION["uid_by_tab"]) && is_array($_SESSION["uid_by_tab"])) {
+                if (array_key_exists($tabId, $_SESSION["uid_by_tab"])) {
+                    $user = $_SESSION["uid_by_tab"][$tabId];
+                }
+            } else if (isset($_SESSION["uid"])) {
+                $user = $_SESSION["uid"];
+            }
+
+            if ($user !== null && $command !== "login" && $command !== "logout" && $requestedUser !== null && $user !== $requestedUser) {
+                throw new \asci\exceptions\ASCIAuthenticationException("Session userId does not match provided user id", 401);
             }
         }
 
@@ -153,10 +169,17 @@ class Server
 
         // Limit user-less commands to "info" and "login"
         if ($user == null && 
-          ($this->input["command"] != "info" && $this->input["command"] != "login")) {
+          ($this->input["command"] != "info" && $this->input["command"] != "login" && $this->input["command"] != "createUser")) {
           $this->input["command"] = "info";
         } else {
           $executor->loadUser($user);
+
+                    // Strict archive enforcement: block student access to archived courses even for direct API calls.
+                    $requested_course_id = $this->input["courseId"] ?? $this->input["course_id"] ?? $this->input["course"] ?? null;
+                    if (is_array($requested_course_id)) {
+                        $requested_course_id = $requested_course_id["course_id"] ?? null;
+                    }
+                    $executor->denyArchivedCourseForStudents($user, $requested_course_id, $this->input["command"]);
         }
 
         /* This section acquires a lock for the given course IF a courseId was provided */
@@ -192,13 +215,39 @@ class Server
                 $password = null;
                 if (isset($this->input["password"]))
                   $password = $this->input["password"];
-                $this->setResponse($executor->loginHandler($this->input["user"], $password));
+                $loginResponse = $executor->loginHandler($this->input["user"], $password);
+
+                $tabId = $this->input["_tab_id"] ?? null;
+                if (($loginResponse["success"] ?? "false") === "true" && $tabId !== null) {
+                    if (!isset($_SESSION["uid_by_tab"]) || !is_array($_SESSION["uid_by_tab"])) {
+                        $_SESSION["uid_by_tab"] = array();
+                    }
+                    $loggedInUser = $loginResponse["user"]["computing_id"] ?? $this->input["user"];
+                    $_SESSION["uid_by_tab"][$tabId] = $loggedInUser;
+                }
+
+                $this->setResponse($loginResponse);
                 break;
 
             case "logout":
-                session_destroy();
-                session_start();
-                $this->setResponse(["result" => "success"]);
+                $tabId = $this->input["_tab_id"] ?? null;
+
+                if ($tabId !== null && isset($_SESSION["uid_by_tab"]) && is_array($_SESSION["uid_by_tab"])) {
+                    unset($_SESSION["uid_by_tab"][$tabId]);
+
+                    if (count($_SESSION["uid_by_tab"]) > 0) {
+                        $remainingUser = reset($_SESSION["uid_by_tab"]);
+                        $_SESSION["uid"] = $remainingUser;
+                    } else {
+                        session_destroy();
+                        session_start();
+                    }
+                } else {
+                    session_destroy();
+                    session_start();
+                }
+
+                $this->setResponse(["result" => "success", "success" => "true"]);
                 break;
     
             //given userId and courseId, 
@@ -336,8 +385,11 @@ class Server
             case "TAEndMeeting":
 
                 $sessionId = $this->input["sessionId"];
-                
-                $executor->updateTAStatus($user, $courseId); 
+                $courseId = $this->input["courseId"] ?? null;
+
+                if ($courseId !== null) {
+                    $executor->updateTAStatus($user, $courseId);
+                }
                 $this->setResponse($executor->endSession($user, $sessionId));
                 break;
 
@@ -345,8 +397,11 @@ class Server
 
                 $studId = $this->input["studentId"];
                 $sessionId = $this->input["sessionId"];
-                
-                $executor->updateTAStatus($user, $courseId); 
+
+                $courseId = $this->input["courseId"] ?? null;
+                if ($courseId !== null) {
+                    $executor->updateTAStatus($user, $courseId);
+                }
                 $this->setResponse($executor->putStudentBackOnQueue($user, $studId, $sessionId));
                 break; 
 
@@ -448,6 +503,13 @@ class Server
                 $this->setResponse($result);
                 break;
 
+            case "newLlmChatStream":
+            case "followupLlmChatStream":
+                // Streaming mode: output SSE directly, no setResponse needed
+                $executor->llmChatStreaming($this->input);
+                $this->streaming = true;
+                break;
+
             case "createLlm":
                 $result = $executor->uploadContentLLM($this->input);
                 $this->setResponse($result);
@@ -460,7 +522,9 @@ class Server
                 $result = $executor->uploadPiazzaLLM($this->input);
                 $this->setResponse($result);
                 break;
-
+            case "scrapeURL":
+                $executor->scrapeURL($this->input['URL']);
+                return;
             case "createCourse":
                 $mnemonic = $this->input["mnemonic"];
                 $number = $this->input["number"];
@@ -511,15 +575,71 @@ class Server
                 $this->setResponse($executor->getQuestsForUserHandler($user, $courseId));
                 break;
 
+            case "getQuestsByStatus":
+                $courseId = $this->input["courseId"];
+                $status = $this->input["status"];
+
+                $this->setResponse($executor->getQuestsByStatusHandler($user, $courseId, $status));
+                break;
+
+            case "getStudentQuests":
+                $student = $this->input["student"];
+                $course = $this->input["course"];
+
+                $this->setResponse($executor->getQuestsForUserHandler($student, $course));
+                break;
+            
+            case "getPendingQuests":
+                $student = $this->input["student"];
+                $course = $this->input["course"];
+                $status = "Completed - Pending Approval";
+
+                $this->setResponse($executor->getQuestsByStatusHandler($student, $course, $status));
+                break;
+
+            case "updateQuestStatus":
+                $student = $this->input["student"];
+                $course = $this->input["course"];
+                $questId = $this->input["questId"];
+                $status = $this->input["status"];
+
+                $this->setResponse($executor->updateQuestStatusHandler($questId, $student, $course, $status));
+                break;
+
             case "getPointsForUser":
                 $courseId = $this->input["courseId"];
                 
                 $this->setResponse($executor->getPointsForUserHandler($user, $courseId));
+                break;  
+                
+            case "getPointsForStudent":
+                $student = $this->input["student"];
+                $course = $this->input["course"];
+                
+                $this->setResponse($executor->getPointsForUserHandler($student, $course));
                 break;    
 
             case "getAllQuests":
-                    $this->setResponse($executor->getAllQuestsHandler());
-                    break;
+                $this->setResponse($executor->getAllQuestsHandler());
+                break;
+
+            case "addQuest":
+                $mnemonic = $this->input["mnemonic"];
+                $name = $this->input["name"];
+                $description = $this->input["description"];
+                $total_points = $this->input["total_points"];
+                $this->setResponse($executor->addQuestHandler($mnemonic, $name, $description, $total_points));
+                break;
+            
+            case "deleteQuest":
+                $quest = $this->input["questId"];
+                $this->setResponse($executor->deleteQuestHandler($quest));
+                break;
+            
+            case "getCourseQuests":
+                $course = $this->input["course"];
+                $this->setResponse($executor->getCourseQuestsHandler($course));
+                break;
             
             case "addQuestForCourse":
                 $questId = $this->input["questId"];
@@ -534,7 +654,17 @@ class Server
 
                 $this->setResponse($executor->removeQuestForCourseHandler($questId, $courseId));
                 break;
-    
+            
+            case "getCourseContent":
+                $course_id = $this->input["course"];
+                $this->setResponse($executor->getCourseContentHandler($user, $course_id));
+                break;
+
+            case "removeCourseContent":
+                $course_id = $this->input["course"];
+                $filename = $this->input["filename"];
+                $this->setResponse($executor->removeCourseContentHandler($user, $course_id, $filename));
+                break;
 
             /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/
 
@@ -543,10 +673,12 @@ class Server
                 $fname = $this->input["fname"];
                 $lname = $this->input["lname"];
                 $pname = $this->input["pname"];
+                $password = $this->input["password"];
 
-                $this->setResponse($executor->createUser($computing_id, $fname, $lname, $pname));
+                $this->setResponse($executor->createUser($computing_id, $fname, $lname, $pname, $password));
                 break;
-            
+
+            /*FRONT END IS NOT YET USING ANYTHING BELOW THIS POINT*/
 
             case "register":
                 $result = $executor->registerUser($this->input);
@@ -581,7 +713,38 @@ class Server
                 $course_id = $this->input["courseId"];
                 $this->setResponse($executor->getStudentsFallingBehindHandler($user, $course_id));
                 break;
-                
+
+            case "getDiscordChannels":
+                $guild_id = $this->input["guildId"];
+                $course_id = $this->input["courseId"];
+                $this->setResponse($executor->getDiscordChannelsHandler($user, $course_id, $guild_id));
+                break;
+
+            case "getDiscordActivity":
+                $channel_id = $this->input["channelId"];
+                $course_id = $this->input["courseId"];
+                $this->setResponse($executor->getDiscordActivityHandler($user, $course_id, $channel_id));
+                break;
+
+            case "getDiscordServerSummary":
+                $guild_id = $this->input["guildId"];
+                $course_id = $this->input["courseId"];
+                $max_response_seconds = isset($this->input["maxResponseSeconds"]) ? (int)$this->input["maxResponseSeconds"] : null;
+                $this->setResponse($executor->getDiscordServerSummaryHandler($user, $course_id, $guild_id, $max_response_seconds));
+                break;
+
+            case "setDiscordUsername":
+                $computing_id = $this->input["computingId"];
+                $discord_username = $this->input["discordUsername"] ?? null;
+                $course_id = $this->input["courseId"] ?? null;
+                $this->setResponse($executor->setDiscordUsernameHandler($user, $course_id, $computing_id, $discord_username));
+                break;
+
+            case "getDiscordMapping":
+                $course_id = $this->input["courseId"];
+                $this->setResponse($executor->getDiscordMappingHandler($user, $course_id));
+                break;
+
             default:
               throw new \asci\exceptions\ASCIException("Unknown command: {$this->input["command"]}"); 
 

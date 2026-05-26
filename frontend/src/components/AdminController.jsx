@@ -9,6 +9,8 @@ import {
   UpdateChat,
   EditCourse,
   SelectQuests,
+  ManagePoints,
+  PointsHome
 } from "./admin";
 import {
   Login,
@@ -51,6 +53,14 @@ const AdminController = (props) => {
         <Route
           path="selectQuests"
           element={<SelectQuests {...props} />}
+        />
+        {/* <Route
+          path="managePoints"
+          element={<ManagePoints {...props} />}
+        /> */}
+        <Route
+          path="pointsHome"
+          element={<PointsHome {...props} />}
         />
       </Routes>
     </>

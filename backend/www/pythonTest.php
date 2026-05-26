@@ -1,5 +1,6 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:3000");
+$allowedOrigin = getenv('FRONTEND_URL') ?: 'http://localhost:3000';
+header("Access-Control-Allow-Origin: $allowedOrigin");
 //header("Access-Control-Allow-Credentials ")
 
 

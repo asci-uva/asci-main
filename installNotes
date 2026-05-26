@@ -51,9 +51,18 @@ asci
 
 #test table:
 select username from test_table where username='mrf8t';
-
 #Getting the backend to work
 might need to remove the db folder before building
+
+
+These are the steps i ran to rebuild the db if changes are made to the database:
+
+docker compose down
+docker volume rm asci-main_db-data
+docker compose build db
+docker compose up
+
+
 docker compose build --no-cache
 
 #Getting the frontend to work

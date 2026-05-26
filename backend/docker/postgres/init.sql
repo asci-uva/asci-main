@@ -30,6 +30,7 @@ CREATE TABLE users (
   fname TEXT,
   lname TEXT,
   pname TEXT,
+  discord_username VARCHAR(30),
   password TEXT
 );
 
@@ -99,12 +100,14 @@ CREATE TABLE survey (
 
 CREATE TABLE course_settings (
   course_id INT,
+  discord_server_id TEXT,
   show_queue_list BOOL DEFAULT (true),
   grouping_enabled BOOL DEFAULT (true),
   smart_grouping BOOL DEFAULT (true),
   self_grouping BOOL DEFAULT (true),
   show_quests BOOL DEFAULT (true),
-  llm_enabled BOOL DEFAULT (true)
+  llm_enabled BOOL DEFAULT (true),
+  archived BOOL DEFAULT (false)
 );
 
 CREATE TABLE logs (
@@ -195,7 +198,8 @@ CREATE TYPE quest_completion_status AS ENUM (
   'Locked',
   'Not started',
   'In progress',
-  'Completed'
+  'Completed',
+  'Completed - Pending Approval'
 );
 
 
@@ -213,7 +217,7 @@ CREATE TABLE user_quests (
   user_id INT,
   course_id INT,
   status quest_completion_status,
-  PRIMARY KEY (user_id, quest_id)
+  PRIMARY KEY (user_id, quest_id, course_id)
 );
 
 CREATE TABLE course_quests (

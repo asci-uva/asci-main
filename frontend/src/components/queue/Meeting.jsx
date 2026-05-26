@@ -190,6 +190,7 @@ function Meeting(props) {
       let request = {};
       request.command = "TAEndMeeting";
       request.user = user.userid;
+      request.courseId = course.course_id;
       request.sessionId = sessionId;
 
       endMeeting(request, url);
@@ -243,6 +244,7 @@ function Meeting(props) {
       request.command = "PutStudentBackOnQueue";
       request.user = user.userid;
       request.studentId = student.computing_id;
+      request.courseId = course.course_id;
       request.sessionId = sessionId;
 
       putBack(request, url);

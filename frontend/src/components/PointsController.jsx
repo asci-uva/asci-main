@@ -18,7 +18,6 @@ const PointsController = (props) => {
     }
   return (
     <>
-  
       <Routes>
         <Route path="/" element={<Home {...props} />} />
         <Route path="error" element={<Error {...props} />} />

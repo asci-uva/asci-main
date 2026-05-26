@@ -43,6 +43,11 @@ class ServerExecutor {
     return $response;
   }
 
+  public function llmChatStreaming($input) {
+    $this->logger->addDebug("Handling streaming request", $input);
+    $this->chat->getLlmResponseStreaming($input["data"], $input["course"]);
+  }
+
   public function llmSummary($input) {
     $this->logger->addDebug("Handling request", $input);
     $response = $this->summary->getLlmResponse($input["data"], $input["course"]);
@@ -68,54 +73,70 @@ class ServerExecutor {
       mkdir($dir);
     if (!is_dir($dir."data"))
       mkdir($dir."data");
-    if (is_dir($dir."data/content"))
-      $this->delTree($dir."data/content");
-    mkdir($dir."data/content");
+    //to ensure there is a data/content directory
+    if (!is_dir($dir."data/content"))
+    {
+      mkdir($dir."data/content");
+    }
+
+    //*dont remove current content in the directory
+    // if (is_dir($dir."data/content"))
+    //   $this->delTree($dir."data/content");
+    // mkdir($dir."data/content");
 
     // get the file contents
     $file = base64_decode($input["file"]["content"]);
+    $mimeType = $input["file"]["mime-type"];
 
+    //Edit this to check for file type since more than just zip files can be uploaded
+    if($mimeType === "application/zip")
+    {
+      // Unzip the file
+      $tmpfile = $dir."__tempzip.zip";
+      file_put_contents($tmpfile, $file);
+      $zip = new \ZipArchive();
 
-    // Unzip the file
-    $tmpfile = $dir."__tempzip.zip";
-    file_put_contents($tmpfile, $file);
-    $zip = new \ZipArchive();
-
-    // NOTE: Mac OS Zip files seem to fail consistency checks
-    // It works to ignore this check, but we should NOT let everyone upload
-    // files -- only trusted sources!
-    $result = $zip->open($tmpfile, \ZipArchive::CHECKCONS);
-    if ($result !== true) {
-      switch($result) {
-      case \ZipArchive::ER_NOZIP:
-        throw new \ascillm\exceptions\ASCILLMException('Uploaded file is not a zip archive.');
-      case \ZipArchive::ER_INCONS :
-        // Workaround for Mac zip files -- if they are inconsistent, that's okay
-        $result = $zip->open($tmpfile);
-        if ($result === true)
-          break;
-        throw new \ascillm\exceptions\ASCILLMException('Uploaded file failed consistency check.');
-      case \ZipArchive::ER_CRC :
-        throw new \ascillm\exceptions\ASCILLMException('Uploaded file failed checksum.');
-      default:
-        throw new \ascillm\exceptions\ASCILLMException('An error occurred: ' . $result);
+      // NOTE: Mac OS Zip files seem to fail consistency checks
+      // It works to ignore this check, but we should NOT let everyone upload
+      // files -- only trusted sources!
+      $result = $zip->open($tmpfile, \ZipArchive::CHECKCONS);
+      if ($result !== true) {
+        switch($result) {
+        case \ZipArchive::ER_NOZIP:
+          throw new \ascillm\exceptions\ASCILLMException('Uploaded file is not a zip archive.');
+        case \ZipArchive::ER_INCONS :
+          // Workaround for Mac zip files -- if they are inconsistent, that's okay
+          $result = $zip->open($tmpfile);
+          if ($result === true)
+            break;
+          throw new \ascillm\exceptions\ASCILLMException('Uploaded file failed consistency check.');
+        case \ZipArchive::ER_CRC :
+          throw new \ascillm\exceptions\ASCILLMException('Uploaded file failed checksum.');
+        default:
+          throw new \ascillm\exceptions\ASCILLMException('An error occurred: ' . $result);
+        }
       }
+
+      // Loop through all files in the zip
+      for($i = 0; $i < $zip->numFiles; $i++) {
+        $innerPath = $zip->getNameIndex($i);
+        $fileinfo = pathinfo($innerPath);
+
+        // check for MACOSX folder, too.
+        if (strpos($innerPath, 'MACOSX') === false)
+          file_put_contents($dir."data/content/".$fileinfo['basename'], $zip->getFromIndex($i));
+      }
+
+      $zip->close();
+      unlink($tmpfile);
+    }
+    else
+    {
+      $filename = $input["file"]["name"] ?? ("upload_" . time());
+      file_put_contents($dir."data/content/".basename($filename), $file);
     }
 
-    // Loop through all files in the zip
-    for($i = 0; $i < $zip->numFiles; $i++) {
-      $innerPath = $zip->getNameIndex($i);
-      $fileinfo = pathinfo($innerPath);
-
-      // check for MACOSX folder, too.
-      if (strpos($innerPath, 'MACOSX') === false)
-        file_put_contents($dir."data/content/".$fileinfo['basename'], $zip->getFromIndex($i));
-    }
-
-    $zip->close();
-
-    unlink($tmpfile);
-
+    
     if (is_dir($dir."storage"))
       $this->delTree($dir."storage");
     mkdir($dir."storage");
@@ -198,4 +219,36 @@ class ServerExecutor {
     return rmdir($dir);
   }
 
+
+  public function getCourseContent($input){
+    if (!isset($input["course"]) || !is_numeric($input["course"]))
+      throw new \ascillm\exceptions\ASCILLMException("Course not provided");
+
+    $dir = \ascillm\Config::$LLM_DATA_DIR.$input["course"]."/data/content/";
+    $files = [];
+    if (is_dir($dir)) {
+      $scanned = scandir($dir);
+      if ($scanned !== false) {
+        foreach ($scanned as $file) {
+          if ($file !== "." && $file !== "..") {
+            $files[] = $file;
+          }
+        }
+      }
+    }
+    return $files;
+  }
+
+  public function removeCourseContent($input){
+    if (!isset($input["course"]) || !is_numeric($input["course"]))
+      throw new \ascillm\exceptions\ASCILLMException("Course not provided");
+
+    if (!isset($input["filename"]))
+      throw new \ascillm\exceptions\ASCILLMException("File not provided");
+    
+    $file = $input["filename"];
+    $dir = \ascillm\Config::$LLM_DATA_DIR.$input["course"]."/data/content/";
+    
+    return unlink("$dir/$file");
+  }
 }

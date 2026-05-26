@@ -52,6 +52,48 @@ class DBUserQuest
         return $toReturn;
     }
 
+    //for automation
+    public function getOHQuests($computing_id, $course_id)
+    {
+        $query = "select quest_id,user_id,course_id,status,mnemonic,name,description,total_points from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) where computing_id=$1 and course_id=$2 and mnemonic ILIKE 'OH%'";
+
+        $result = $this->db->query($query, array($computing_id, $course_id));
+
+        $quests = $this->db->fetchAll($result);
+
+        $toReturn = [];
+        /* Loop through and make user quest objects for each */
+        if (!empty($quests)) {
+            foreach ($quests as $quest){
+                $toAdd = new \asci\data\UserQuest();
+                $toAdd->fromArray($quest);
+                array_push($toReturn, $toAdd);
+            }
+        }
+
+        return $toReturn;
+    }
+
+    public function getPiazzaQuests($computing_id, $course_id)
+    {
+        $query = "select quest_id,user_id,course_id,status,mnemonic,name,description,total_points from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) where computing_id=$1 and course_id=$2 and mnemonic ILIKE 'P%' and name ILIKE '%piazza%'";
+
+        $result = $this->db->query($query, array($computing_id, $course_id));
+
+        $quests = $this->db->fetchAll($result);
+        $toReturn = [];
+        /* Loop through and make user quest objects for each */
+        if (!empty($quests)) {
+            foreach ($quests as $quest){
+                $toAdd = new \asci\data\UserQuest();
+                $toAdd->fromArray($quest);
+                array_push($toReturn, $toAdd);
+            }
+        }
+
+        return $toReturn;
+    }
+
     public function getPointsForUser($computing_id, $course_id)
     {
         $query = 'select sum(total_points) from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) where computing_id=$1 and course_id=$2 and status=\'Completed\'';
@@ -64,7 +106,7 @@ class DBUserQuest
 
     public function updateQuestStatus($quest_id, $user_id, $course_id, $status)
     {
-        $query = 'update user_quests set status = $3 where quest_id = $1 and user_id = $2 and course_id = $3';
+        $query = 'update user_quests set status = $3 where quest_id = $1 and user_id = $2 and course_id = $4';
         $params = array($quest_id, $user_id, $status, $course_id);
 
         try {
@@ -105,5 +147,33 @@ class DBUserQuest
             return false;
         }
         return true;
+    }
+
+    public function getQuestsByStatus($user_id, $course_id, $status)
+    {
+        if($status == "Completed")
+        {
+            $query = 'select quest_id,user_id,course_id,status,mnemonic,name,description,total_points from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) where computing_id=$1 and course_id=$2 and status in ($3, $4)';
+            $result = $this->db->query($query, array($user_id, $course_id, $status, "Completed - Pending Approval"));
+        }
+        else
+        {
+            $query = 'select quest_id,user_id,course_id,status,mnemonic,name,description,total_points from ((quests Q JOIN user_quests U on Q.id = U.quest_id) J JOIN users Us on J.user_id = Us.id) where computing_id=$1 and course_id=$2 and status=$3';
+            $result = $this->db->query($query, array($user_id, $course_id, $status));   
+        }
+
+        $quests = $this->db->fetchAll($result);
+
+        $toReturn = [];
+        /* Loop through and make user quest objects for each */
+        if (!empty($quests)) {
+            foreach ($quests as $quest){
+                $toAdd = new \asci\data\UserQuest();
+                $toAdd->fromArray($quest);
+                array_push($toReturn, $toAdd);
+            }
+        }
+
+        return $toReturn;
     }
 }

@@ -7,3 +7,6 @@ export { default as EditCourse } from "./EditCourse";
 export { default as AddStudent } from "./AddStudent";
 export { default as SelectQuests } from "./SelectQuests";
 export { default as QuestCard } from "./QuestCard";
+export { default as ManagePoints } from "./ManagePoints";
+export { default as PointsHome } from "./PointsHome";
+export { default as ViewRoster } from "./ViewRoster"

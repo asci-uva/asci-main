@@ -12,10 +12,10 @@ function Navigation(props) {
   console.log("navigation: ", settings);
 
   return (
-    <nav className="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+    <nav className="navbar navbar-expand-md navbar-dark bg-dark">
       <div className="container">
         <NavLink className="navbar-brand" to="/asci">
-          ASCI@UVA
+          ASCI
         </NavLink>
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#ascinav" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
           <span className="navbar-toggler-icon"></span>
@@ -27,20 +27,48 @@ function Navigation(props) {
                 <i className="bi-list-ol"></i> Queue
               </NavLink>
             </li>
-            { settings!=null && settings.llm_enabled=="t" ? (
+            { settings!=null && settings.llm_enabled=="t" && settings.archived!="t" ? (
             <li className="nav-item">
               <NavLink className="nav-link" to="/asci/chat">
                 <i className="bi-chat-right-text"></i> BotChat
               </NavLink>
             </li>
             ) : null }
-            { false ? (
+            { settings!=null && settings.show_quests=="t" && course.role === "student" ? (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/asci/points">
                   <i className="bi-trophy-fill"></i> Earn Points
                 </NavLink>
               </li>
             ) : null }
+            { course.role == "instructor" ? (
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/asci/admin" end>
+                    <i className="bi-gear-wide-connected"></i> Admin
+                  </NavLink>
+                </li>
+              ) : null }
+              { course.role == "instructor" ? (
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/asci/stats">
+                    <i className="bi-bar-chart-line"></i> Statistics
+                  </NavLink>
+                </li>
+              ) : null }
+              { course.role == "instructor" ? (
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/asci/admin/SelectQuests">
+                    <i className="bi-trophy"></i> Quests
+                  </NavLink>
+                </li>
+              ) : null }
+              { course.role == "instructor" || course.role == "ta" ? (
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/asci/admin/PointsHome">
+                    <i className="bi-clipboard-data"></i> Student Points
+                  </NavLink>
+                </li>
+              ) : null }
           </ul>
           <ul className="navbar-nav ms-auto mb-2 mb-md-0">
             <li className="nav-item dropdown">
@@ -50,7 +78,7 @@ function Navigation(props) {
               <ul className="dropdown-menu">
               { course.role == "instructor" ? (
                 <li className="">
-                  <NavLink className="dropdown-item" to="/asci/admin">
+                  <NavLink className="dropdown-item" to="/asci/admin" end>
                     <i className="bi-gear-wide-connected"></i> Admin
                   </NavLink>
                 </li>
@@ -59,6 +87,20 @@ function Navigation(props) {
                 <li className="">
                   <NavLink className="dropdown-item" to="/asci/stats">
                     <i className="bi-bar-chart-line"></i> Statistics
+                  </NavLink>
+                </li>
+              ) : null }
+              { course.role == "instructor" ? (
+                <li className="">
+                  <NavLink className="dropdown-item" to="/asci/admin/SelectQuests">
+                    <i className="bi-trophy"></i> Quests
+                  </NavLink>
+                </li>
+              ) : null }
+              { course.role == "instructor" || course.role == "ta" ? (
+                <li className="">
+                  <NavLink className="dropdown-item" to="/asci/admin/PointsHome">
+                    <i className="bi-clipboard-data"></i> Student Points
                   </NavLink>
                 </li>
               ) : null }

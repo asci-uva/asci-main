@@ -66,10 +66,10 @@ class DBQuest
 
     public function createQuest($mnemonic, $name, $description, $total_points) {
          // check if the quest is already in the database or not
-         $checkQuestQuery = 'SELECT id FROM courses WHERE mnemonic = $1 AND name = $2 AND description = $3 AND total_points = $4';
+         $checkQuestQuery = 'SELECT id FROM quests WHERE mnemonic = $1 AND name = $2 AND description = $3 AND total_points = $4';
          $result = $this->db->query($checkQuestQuery, array($mnemonic, $name, $description, $total_points));
  
-         // if the course has been created, do not create it twice!
+         // if the quest has been created, do not create it twice!
          $row = $this->db->fetchrow($result);
          if ($row) {
              $this->logger->error("Quest already exists with ID: " . $row['id']);
@@ -77,7 +77,7 @@ class DBQuest
          }
 
         // Insert the new quest into the 'quests' table
-        $insertQuestQuery = 'insert into quests (mnemonic, name, description, total_points) values ($1, $2, $3, $4, $5) returning id';
+        $insertQuestQuery = 'insert into quests (mnemonic, name, description, total_points) values ($1, $2, $3, $4) returning id';
         $params = array($mnemonic, $name, $description, $total_points);
     
         $result = $this->db->query($insertQuestQuery, $params);
@@ -95,7 +95,7 @@ class DBQuest
 
     public function getAllQuests()
     {
-        $query = 'select * from quests';
+        $query = 'select id,mnemonic,name,description,total_points from quests';
 
         $result = $this->db->query($query, array());
 
@@ -110,5 +110,29 @@ class DBQuest
         }
 
         return $toReturn;
+    }
+
+    public function deleteQuest($quest_id)
+    {
+        //delete from each of the user_quests, to avoid FK conflict
+        $query = 'delete from user_quests where quest_id=$1';
+        $result = $this->db->query($query, array($quest_id));
+
+        //delete from each of the course_quests, to avoid FK conflict
+        $query = 'delete from course_quests where quest_id=$1';
+        $result = $this->db->query($query, array($quest_id));
+
+        if (!$result) {
+            $this->logger->error("Failed to delete quest from course quest");
+        }
+        
+        $query = 'delete from quests where id=$1';
+        $result = $this->db->query($query, array($quest_id));
+
+        if (!$result) {
+            $this->logger->error("Failed to delete quest");
+            return false;
+        }
+        return true;
     }
 }

@@ -17,8 +17,6 @@ const Chat = (props) => {
     let {user, getCourse} = useUser();
     let course = getCourse();
 
-    console.log("course in Chat: ", course);
-
     const isValidIssueSubject = (issueSubject) => {
         return (
             issueSubject &&
@@ -30,7 +28,6 @@ const Chat = (props) => {
     const navigate = useNavigate();
 
     const [isVisible, setIsVisible] = useState(false);
-    const [notFoundError, setNotFoundError] = useState(false);
 
     const slideIn = useSpring({
         opacity: isVisible ? 1 : 0,
@@ -48,6 +45,18 @@ const Chat = (props) => {
     const [conversationStarted, setConversationStarted] = useState(false);
     const [llmProcessing, setLlmProcessing] = useState(false);
     const [chatHistory, setChatHistory] = useState([]);
+    const [chatErrorMessage, setChatErrorMessage] = useState("");
+
+    const defaultChatErrorMessage =
+        "Sorry, something went wrong while contacting the TA bot. Please try again.";
+
+    const clearChatErrors = () => {
+        setChatErrorMessage("");
+    };
+
+    const showChatError = (message = defaultChatErrorMessage) => {
+        setChatErrorMessage(message);
+    };
 
     React.useEffect(() => {
         if (isValidIssueSubject(issueSubject)) {
@@ -56,8 +65,9 @@ const Chat = (props) => {
                 studentQuestion: issueSubject,
             };
             setNewChatQuestion(autofilledQuestion);
+            clearChatErrors();
             const apiInput = { command: "newLlmChat", ...autofilledQuestion };
-            getLlmResponse(apiInput, url);
+            getLlmResponseStreaming(apiInput, url);
             setConversationStarted(true);
         }
     }, [issueSubject]);
@@ -77,31 +87,195 @@ const Chat = (props) => {
 
     const getLlmResponse = async (question, apiEndpoint) => {
         setLlmProcessing(true);
+        clearChatErrors();
 
         question.user = user.userid;
         question.course = course;
 
-        const response = await fetch(apiEndpoint, {
-            method: "POST",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(question),
-        });
-        const data = await response.json();
-       console.log(data);
-        let chatbotResponse = data.response;
+        try {
+            const response = await fetch(apiEndpoint, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(question),
+            });
 
-        if (response.ok && chatbotResponse) {
-            console.log(chatbotResponse);
-            appendToChatHistory(chatbotResponse);
+            let data = {};
+            try {
+                data = await response.json();
+            } catch (e) {
+                data = {};
+            }
+
+            console.log(data);
+            const chatbotResponse = data.response;
+
+            if (response.ok && chatbotResponse) {
+                console.log(chatbotResponse);
+                appendToChatHistory(chatbotResponse);
+                return;
+            }
+
+            if (response.status === 401) {
+                navigate(`/`);
+                return;
+            }
+
+            if (response.status === 404) {
+                showChatError(
+                    "Sorry, the TA bot service is unavailable for this course. Please contact your instructor."
+                );
+                return;
+            }
+
+            showChatError(
+                data?.error?.message || data?.message || defaultChatErrorMessage
+            );
+        } catch (err) {
+            console.error("Non-streaming fetch failed:", err);
+            showChatError(defaultChatErrorMessage);
+        } finally {
             setLlmProcessing(false);
-        } else if (response.status === 401) {
-            navigate(`/`);
-        } else if (response.status === 404) {
-            setNotFoundError(true);
-        } else {
+        }
+    };
+
+    const getLlmResponseStreaming = async (question, apiEndpoint) => {
+        setLlmProcessing(true);
+        clearChatErrors();
+
+        question.user = user.userid;
+        question.course = course;
+
+        // Use streaming command variant
+        const streamCommand = question.command === "newLlmChat"
+            ? "newLlmChatStream"
+            : "followupLlmChatStream";
+        const streamQuestion = { ...question, command: streamCommand };
+
+        try {
+            const response = await fetch(apiEndpoint, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(streamQuestion),
+            });
+
+            if (response.status === 401) {
+                navigate(`/`);
+                return;
+            }
+            if (response.status === 404) {
+                showChatError(
+                    "Sorry, the TA bot service is unavailable for this course. Please contact your instructor."
+                );
+                return;
+            }
+            if (!response.ok || !response.body) {
+                // Fallback to non-streaming
+                return await getLlmResponse(question, apiEndpoint);
+            }
+
+            // Add a placeholder message for the streaming response
+            const placeholderMsg = { role: "assistant", content: "", questions: [], context: [] };
+            appendToChatHistory(placeholderMsg);
+
+            let streamHadError = false;
+            let streamReturnedContent = false;
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let streamedContent = "";
+            let buffer = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split("\n");
+                // Keep the last partial line in the buffer
+                buffer = lines.pop() || "";
+
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (!trimmed.startsWith("data: ")) continue;
+
+                    try {
+                        const event = JSON.parse(trimmed.slice(6));
+
+                        if (event.type === "token") {
+                            streamedContent += event.content;
+                            streamReturnedContent = true;
+                            setChatHistory((prev) => {
+                                const updated = [...prev];
+                                updated[updated.length - 1] = {
+                                    ...updated[updated.length - 1],
+                                    content: streamedContent,
+                                };
+                                return updated;
+                            });
+                        } else if (event.type === "status") {
+                            // Optional: could display status message
+                        } else if (event.type === "done" && event.data) {
+                            // Replace with the final response (includes context, questions, cleaned content)
+                            streamReturnedContent = true;
+                            setChatHistory((prev) => {
+                                const updated = [...prev];
+                                updated[updated.length - 1] = event.data;
+                                return updated;
+                            });
+                        } else if (event.type === "error") {
+                            console.error("LLM streaming error:", event.message);
+                            streamHadError = true;
+                            const errorMessage = event.message || defaultChatErrorMessage;
+                            showChatError(errorMessage);
+                            setChatHistory((prev) => {
+                                const updated = [...prev];
+                                if (updated.length > 0) {
+                                    updated[updated.length - 1] = {
+                                        role: "assistant",
+                                        content: errorMessage,
+                                        questions: [],
+                                        context: [],
+                                    };
+                                }
+                                return updated;
+                            });
+                            break;
+                        }
+                    } catch (e) {
+                        // Skip malformed JSON lines
+                    }
+                }
+
+                if (streamHadError) {
+                    break;
+                }
+            }
+
+            if (!streamHadError && !streamReturnedContent) {
+                setChatHistory((prev) => {
+                    if (prev.length > 0 && prev[prev.length - 1].content === "") {
+                        return prev.slice(0, -1);
+                    }
+                    return prev;
+                });
+                return await getLlmResponse(question, apiEndpoint);
+            }
+        } catch (err) {
+            console.error("Streaming fetch failed, falling back:", err);
+            // Remove the placeholder if it was added
+            setChatHistory((prev) => {
+                if (prev.length > 0 && prev[prev.length - 1].content === "") {
+                    return prev.slice(0, -1);
+                }
+                return prev;
+            });
+            return await getLlmResponse(question, apiEndpoint);
+        } finally {
+            setLlmProcessing(false);
         }
     };
 
@@ -122,7 +296,7 @@ const Chat = (props) => {
             studentQuestion: followupQuestion,
             chatHistory: formatChatHistory(chatHistory),
         };
-        return getLlmResponse(apiInput, url);
+        return getLlmResponseStreaming(apiInput, url);
     };
 
     const handleFollowupChatSubmit = (e) => {
@@ -137,8 +311,10 @@ const Chat = (props) => {
     };
 
     const getNewChatResponse = () => {
+        appendToChatHistory({ role: "user", content: newChatQuestion.studentQuestion });
+
         const apiInput = { command: "newLlmChat", ...newChatQuestion };
-        return getLlmResponse(apiInput, url);
+        return getLlmResponseStreaming(apiInput, url);
     };
 
     const handleNewChatSubmit = (e) => {
@@ -150,8 +326,18 @@ const Chat = (props) => {
 
     const handleNewChatKeyDown = (e) => {
         // Check for Command (Mac) or Ctrl (Windows) key + Enter
-        if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-            handleNewChatSubmit(e);
+        //if ((e.metaKey || e.ctrlKey) && e.key === "Enter")
+        //if Enter command is pressed on its own (no Ctrl or Command) submit chat
+        if (e.key === "Enter") {
+            if(!conversationStarted)
+            {
+                handleNewChatSubmit(e);
+            }
+            else
+            {
+                handleFollowupChatSubmit(e);
+            }
+            
         }
     };
 
@@ -169,7 +355,7 @@ const Chat = (props) => {
     };
 
     const displayFollowupQuestionChips = (chatHistoryRecord, index) => {
-        const questionsExist = chatHistoryRecord.questions.length > 0;
+        const questionsExist = chatHistoryRecord.questions && chatHistoryRecord.questions.length > 0;
         const latestMessage = index === chatHistory.length - 1;
         if (questionsExist && latestMessage) {
             return chatHistoryRecord.questions
@@ -180,7 +366,7 @@ const Chat = (props) => {
     };
 
     const displayContextList = (contextList) => {
-        if (contextList.length > 0) {
+        if (contextList && contextList.length > 0) {
           return (<div className="card-footer">
             <p className="mb-1" >This answer came from the following course documents:</p>
             <dl>
@@ -208,13 +394,15 @@ const Chat = (props) => {
 
     const displayChatHistoryRecord = (chatHistoryRecord, index) => {
         if (chatHistoryRecord.role === "assistant") {
+            // Skip rendering empty placeholder messages (used during streaming startup)
+            if (!chatHistoryRecord.content && llmProcessing) return null;
             return (
                 <div
                     id={index}
                     key={index}
                     className="row"
                 >
-                  <div className="col-8 card text-bg-success m-2 mb-1 p-0">
+                  <div className="col-10 card text-bg-success m-2 mb-1 p-0">
                     <div className="card-header">TA Bot</div>
                     <div className="card-body">
                         <Markdown
@@ -226,7 +414,7 @@ const Chat = (props) => {
                     </div>
                         {displayContextList(chatHistoryRecord.context)}
                   </div>
-                    <div className="col-8 p-0 m-2">
+                    <div className="col-10 p-0 m-2">
                         {displayFollowupQuestionChips(chatHistoryRecord, index)}
                     </div>
                 </div>
@@ -238,7 +426,7 @@ const Chat = (props) => {
                     key={index}
                     className="row justify-content-end"
                 >
-                    <div className="col-4 card text-bg-primary m-2  mb-1">
+                    <div className="col-5 card text-bg-primary m-2  mb-1">
                       <div className="card-body">
                         <Markdown
                             remarkPlugins={[remarkGfm]}
@@ -254,14 +442,20 @@ const Chat = (props) => {
     };
 
     const displayChatHistoryRecords = (chatHistoryRecords) => {
-        if (llmProcessing) {
+        const hasStreamingContent = llmProcessing &&
+            chatHistoryRecords.length > 0 &&
+            chatHistoryRecords[chatHistoryRecords.length - 1].role === "assistant" &&
+            chatHistoryRecords[chatHistoryRecords.length - 1].content !== "";
+
+        if (llmProcessing && !hasStreamingContent) {
+            // Waiting for first token - show spinner
             return (
                 <div>
                     {chatHistoryRecords.map((el, i) =>
                         displayChatHistoryRecord(el, i)
                     )}
                   <div className="row">
-                    <div className="col-8 card text-bg-success m-2 mb-1 p-0">
+                    <div className="col-10 card text-bg-success m-2 mb-1 p-0">
                       <div className="card-header">TA Bot</div>
                       <div className="card-body text-center">
                         <div className="spinner-border" role="status">
@@ -278,6 +472,14 @@ const Chat = (props) => {
                     {chatHistoryRecords.map((el, i) =>
                         displayChatHistoryRecord(el, i)
                     )}
+                    {llmProcessing && hasStreamingContent && (
+                        <div className="row">
+                            <div className="col-10 m-2 mb-1 p-0 text-muted small">
+                                <span className="spinner-border spinner-border-sm me-1" role="status"></span>
+                                Generating response...
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -286,7 +488,13 @@ const Chat = (props) => {
     const displayChatHistory = (chatHistoryRecords) => {
         return (
             <div className="">
-                {displayNewChatQuestions(true)}
+                {/* do not display initial question above chat interface */}
+                {/* {displayNewChatQuestions(true)} */}
+                {chatErrorMessage ? (
+                        <div className="alert alert-danger" role="alert">
+                                {chatErrorMessage}
+                        </div>
+                ) : null}
                 <div className="my-4 chathistory card">
                   <div className="card-body">
                     {displayChatHistoryRecords(chatHistoryRecords)}
@@ -363,6 +571,7 @@ const Chat = (props) => {
         return (
             <form
                 onSubmit={handleFollowupChatSubmit}
+                onKeyDown={handleNewChatKeyDown}
                 className=""
             >
               <div className="mb-3">

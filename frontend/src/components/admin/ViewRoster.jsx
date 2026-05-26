@@ -12,16 +12,10 @@ function ViewRoster(props) {
   let docRoot = props.documentRoot;
 
   useEffect(() => {
-    // setCourseRoster(
-    // [
-    //   {computing_id: "mrf8t", fname: "Mark", lname: "Floryan", pname: "Mark", role: "instructor"}
-    // ]
-    //);
-
-    refreshCourseRoster();
-  
-
-  }, []);
+    if (course) {
+      refreshCourseRoster();
+    }
+  }, [course]);
 
   /* Handle searching through the table */
   /* ---------------------------------- */

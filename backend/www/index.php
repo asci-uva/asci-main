@@ -1,9 +1,18 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:3000");
+// On Heroku set the FRONTEND_URL config var to your frontend app's URL.
+// Falls back to localhost:3000 for local development.
+$allowedOrigin = getenv('FRONTEND_URL') ?: 'http://localhost:3000';
+header("Access-Control-Allow-Origin: $allowedOrigin");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
-header("Access-Control-Allow-Headers: Origin, Content-Type, Accept, X-Requested-With, X-CSRF-Token");
+header("Access-Control-Allow-Headers: Origin, Content-Type, Accept, X-Requested-With, X-CSRF-Token, X-ASCI-Tab-Id");
 header("Access-Control-Max-Age: 3600");
+
+// Handle CORS preflight before session/database work.
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 /**
  * Landing page of internal server api
  *
@@ -58,18 +67,45 @@ try {
     if ($jsonInput == null) {
         throw new \asci\exceptions\ASCIException("Could not parse input");
     }
+
+    // Attach a per-tab id (if present) so auth can stay isolated across tabs.
+    $tabId = $_SERVER['HTTP_X_ASCI_TAB_ID'] ?? null;
+    if ($tabId !== null && preg_match('/^[A-Za-z0-9._:-]{1,128}$/', $tabId)) {
+        $jsonInput['_tab_id'] = $tabId;
+    }
+
+    // Check if this is a streaming request
+    $isStreaming = (isset($jsonInput["command"]) &&
+        ($jsonInput["command"] === "newLlmChatStream" || $jsonInput["command"] === "followupLlmChatStream"));
+
+    if ($isStreaming) {
+        // Set SSE headers before processing
+        header('Content-Type: text/event-stream');
+        header('Cache-Control: no-cache');
+        header('Connection: keep-alive');
+        header('X-Accel-Buffering: no');
+
+        // Disable output buffering for real-time streaming
+        while (ob_get_level() > 0) {
+            ob_end_flush();
+        }
+        ob_implicit_flush(true);
+    }
     
     // Instantiate and run the server
     $server = new Server($jsonInput);
     $server->run();
-    
-    // Return the content type and output of the server
-    foreach ($server->getResponseHeaders() as $header)
-        header($header);
-    
-    echo $server->getResponse();
+
+    if (!$isStreaming) {
+        // Standard JSON response
+        foreach ($server->getResponseHeaders() as $header)
+            header($header);
+        echo $server->getResponse();
+    }
 } catch (Exception $e) {
-    header("Content-Type: application/json");
+    if (!headers_sent()) {
+        header("Content-Type: application/json");
+    }
     if ($e->getCode() > 0)
         http_response_code($e->getCode());
     die($e);

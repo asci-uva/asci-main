@@ -1,44 +1,84 @@
 import React from "react";
-import {useState, useEffect} from "react";
+import {useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import { useUser } from "../context/UserContext";
 
 function SelectCourse(props) {
-  // const [title, setTitle] = useState("question overview");
-  // const [details, setDetails] = useState("question details");
-  // const [purpose, setPurpose] = useState("");
   const navigate = useNavigate();
-  
-  const [purpose, setPurpose] = useState(0);
-  
-    let url = props.url;
-    let docRoot = props.documentRoot; 
-    const {user, courseListString, setCourse, setCourseSettings} = useUser();
-  
-    let courseList = courseListString();
-    courseList[0] = "Select a course";
-  const handleSelectCourse = (e) =>{
-    e.preventDefault();
 
-    //if user didn't select a course
-    if (purpose !== 0){
-      
-      console.log("Course id: ", purpose);
-      console.log("Course name: ", courseList[purpose])
+  const [activePurpose, setActivePurpose] = useState("0");
+  const [archivedPurpose, setArchivedPurpose] = useState("0");
+  
+  let url = props.url;
+  let docRoot = props.documentRoot; 
+  const {user, courseList, setCourse, setCourseSettings, isAdmin} = useUser();
+  let activeCourseList = {
+    0: "Select a course",
+  };
 
-      //Set the local storage item
-      setCourse(purpose);
+  let archivedCourseList = {
+    0: "Select an archived course",
+  };
 
-      /* Get the course settings out of the DB */
-      //Call the clear queue method
+  let hasInstructorRole = false;
+
+  if (courseList != null) {
+    for (var key in courseList) {
+      let course = courseList[key];
+
+      if (course["role"] === "instructor") {
+        hasInstructorRole = true;
+      }
+
+      let courseName =
+        "" +
+        course["mnemonic"] +
+        course["number"] +
+        " " +
+        course["name"] +
+        " - " +
+        course["semester"];
+      if (isAdmin()) {
+        courseName += " (admin)"
+      } else {
+        courseName += " (" + course["role"] +")";
+      }
+      if (course["archived"] === "t") {
+        archivedCourseList[key] = courseName + " [Archived]";
+      } else {
+        activeCourseList[key] = courseName;
+      }
+    }
+  }
+
+  const selectCourse = (courseId, courseName) => {
+      console.log("Course id: ", courseId);
+      console.log("Course name: ", courseName);
+
+      setCourse(courseId);
+
       let request = {};
       request.command = "getCourseSettings";
       request.user = user.userid;
-      request.courseId = purpose;
-      getCourseSettings(request, url); 
+      request.courseId = courseId;
+      getCourseSettings(request, url);
+  };
 
+  const handleSelectCourse = (e) =>{
+    e.preventDefault();
+
+    if (activePurpose !== "0") {
+      selectCourse(activePurpose, activeCourseList[activePurpose]);
     }
-  }
+  };
+
+  const handleSelectArchivedCourse = (e) => {
+    e.preventDefault();
+
+    if (archivedPurpose !== "0") {
+      selectCourse(archivedPurpose, archivedCourseList[archivedPurpose]);
+    }
+  };
 
   const getCourseSettings = (json0, url0) =>{
     fetch(url0, {
@@ -73,20 +113,24 @@ function SelectCourse(props) {
 
   }
 
-    console.log("Courses", courseList);
+    console.log("Courses", activeCourseList, archivedCourseList);
     return (
       <div className="container p-4">
-        
-        <form>
+        <div>
+          <h1>ASCI</h1>
+          <h5>AI-Smart Classroom Initiative</h5>
+        </div>
+
+        <form className="mb-3">
             <div className="mb-3">
               <label className="form-label">Please select your course below.</label>
               <select className="form-select" 
-                value={purpose}
-                onChange={(e)=>setPurpose(e.target.value)}>
-                {Object.keys(courseList).map(
+                value={activePurpose}
+                onChange={(e)=>setActivePurpose(e.target.value)}>
+                {Object.keys(activeCourseList).map(
                       k => (
                       <option key={k} value={k}>
-                          {courseList[k]}
+                          {activeCourseList[k]}
                       </option>
                       )
                 )}
@@ -94,10 +138,31 @@ function SelectCourse(props) {
           </div>
             <button className="btn btn-primary" onClick={handleSelectCourse}>Select Course</button>
         </form>
+
+        {hasInstructorRole && Object.keys(archivedCourseList).length > 1 ? (
+          <form>
+            <div className="mb-3">
+              <label className="form-label">Archived courses (instructor only).</label>
+              <select
+                className="form-select"
+                value={archivedPurpose}
+                onChange={(e) => setArchivedPurpose(e.target.value)}
+              >
+                {Object.keys(archivedCourseList).map(
+                  k => (
+                    <option key={k} value={k}>
+                      {archivedCourseList[k]}
+                    </option>
+                  )
+                )}
+              </select>
+            </div>
+            <button className="btn btn-primary" onClick={handleSelectArchivedCourse}>Open Archived Course</button>
+          </form>
+        ) : null}
       
       </div>
     );
 }
 
 export default SelectCourse;
-
