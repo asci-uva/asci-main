@@ -32,8 +32,7 @@ def get_newchat_response(input_object: dict[str, str], course, stream=False):
     else:
         question = input_object["studentQuestion"]
 
-        # connector = OpenaiConnector(LLAMAFILE_BASE_URL, LLAMAFILE_KEY_PLACEHOLDER, course)
-        connector = OpenaiConnector(course)
+        connector = OpenaiConnector(LLAMAFILE_BASE_URL, LLAMAFILE_KEY_PLACEHOLDER, course)
         if stream:
             return connector.create_newchat_streaming(question)
         response = connector.create_newchat(question)
@@ -48,8 +47,7 @@ def get_followup_response(input_object: dict[str, str], course, stream=False):
     else:
         question = input_object["studentQuestion"]
         chat_history = input_object["chatHistory"]
-        # connector = OpenaiConnector(LLAMAFILE_BASE_URL, LLAMAFILE_KEY_PLACEHOLDER, course)
-        connector = OpenaiConnector(course)
+        connector = OpenaiConnector(LLAMAFILE_BASE_URL, LLAMAFILE_KEY_PLACEHOLDER, course)
         if stream:
             return connector.create_followup_streaming(question, chat_history)
         response = connector.create_followup(question, chat_history)
