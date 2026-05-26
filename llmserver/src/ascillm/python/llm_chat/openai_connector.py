@@ -31,6 +31,24 @@ class OpenaiConnector:
             return res
         except Exception as e:
             raise ValueError(f"Error requesting GPT response in follow-up: {str(e)}")
+
+    def create_newchat_streaming(self, question: str, assignment: str = ""):
+        """Streaming version of create_newchat."""
+        messages = self.prompt_builder.build_newchat_messages(question, assignment)
+        try:
+            self.runner.get_response_from_question_and_history_streaming(question, messages)
+        except Exception as e:
+            traceback.print_exc()
+            raise ValueError(f"Error requesting streaming GPT response: {str(e)}")
+
+    def create_followup_streaming(self, question: str, messages: list):
+        """Streaming version of create_followup."""
+        try:
+            messages = self.formatter.format_openai_messages(messages)
+            messages = self.formatter.append_user_message_to_history(question, messages)
+            self.runner.get_response_from_question_and_history_streaming(question, messages)
+        except Exception as e:
+            raise ValueError(f"Error requesting streaming GPT response in follow-up: {str(e)}")
         
     def create_summary(self, question: str, code: str = "", assignment: str = ""):
         messages = self.prompt_builder.build_summary_messages(question, code, assignment) 
