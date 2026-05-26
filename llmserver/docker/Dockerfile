@@ -1,4 +1,5 @@
-FROM php:7.4-apache
+# FROM php:7.4-apache
+FROM php:8.2-apache
 
 RUN echo "THIS IS THE DOCKERFILE"
 
