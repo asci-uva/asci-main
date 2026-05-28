@@ -31,7 +31,7 @@ git clone http://github.com/asci-uva/asci-main
 
 ### Build the images
 
-Navigate intot the root directory of this repository and use docker-compose to build the images (you only have to do this once, and again if you change any of the custom Dockerfiles)
+Navigate into the root directory of this repository and use docker-compose to build the images (you only have to do this once, and again if you change any of the custom Dockerfiles)
 
 ```
 docker compose build

@@ -1,4 +1,4 @@
-FROM php:7.4-apache
+FROM php:8.5-apache
 
 RUN echo "THIS IS THE DOCKERFILE"
 
@@ -20,11 +20,11 @@ RUN composer dump-autoload --optimize --apcu --no-dev
 
 RUN apt update
 RUN echo "Y" | apt install python3-pip
-RUN pip install pandas
-RUN pip install numpy
-RUN pip install -U scikit-learn
+RUN pip install --break-system-packages pandas
+RUN pip install --break-system-packages numpy
+RUN pip install --break-system-packages -U scikit-learn
 
-RUN pip install selenium
+RUN pip install --break-system-packages selenium
 
 
 RUN service apache2 restart
