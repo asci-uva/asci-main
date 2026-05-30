@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -7,31 +7,7 @@ function CanvasLMSSync(props) {
     const [canvasCourseId, setCanvasCourseId] = useState("");
     const [accessToken, setAccessToken] = useState("");
     const [disabled, setDisabled] = useState(false);
-    const [synced, setSynced] = useState(false);
-
-    useEffect(() => {
-        const payload = {
-            courseId: props.course_id,
-            command: "getCanvasLMSSyncStatus",
-        };
-
-        fetch(props.url, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                console.log("sync status reponse:", data);
-                if (data.success === "true") {
-                    setSynced(data.synced);
-                }
-            })
-            .catch((error) => {
-                console.error("Error checking Canvas sync status:", error);
-            });
-    }, []);
+    const synced = props.canvasLMSSynced;
 
     const handleSynchronize = () => {
         setDisabled(true);
@@ -63,9 +39,7 @@ function CanvasLMSSync(props) {
                 setDisabled(false);
                 if (data.success === "true") {
                     toast.success(data.message);
-                    setSynced(true);
-                    console.log(data.message);
-                    console.log("Missing students:", data.missingStudents);
+                    props.setCanvasLMSSynced(true);
                 } else {
                     console.log(data.message);
                     toast.error(
@@ -114,7 +88,7 @@ function CanvasLMSSync(props) {
                         data.message || "Failed to desynchronize from Canvas LMS."
                     );
                 }
-                setSynced(false);
+                props.setCanvasLMSSynced(false);
                 setCanvasCourseId("");
                 setAccessToken("");
             })

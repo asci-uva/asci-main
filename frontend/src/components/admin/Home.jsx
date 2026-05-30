@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import UploadRoster from "./UploadRoster";
@@ -20,6 +20,7 @@ function Home(props) {
   const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible");
   const [sidebarCol, setSidebarCol] = useState("col-md-3");
   const [contentCol, setContentCol] = useState("page-container content col-md-9 my-auto");
+  const [canvasLMSSynced, setCanvasLMSSynced] = useState(false);
 
   const handleCollapse = () => {
     if(sidebarOpen === "sidebar-visible")
@@ -39,6 +40,26 @@ function Home(props) {
   const refreshContent = () => {
     setRefresh(prev => prev + 1);
   };
+
+  useEffect(() => {
+      const payload = {
+          courseId: courseList[course].course_id,
+          command: "getCanvasLMSSyncStatus",
+      };
+
+      fetch(props.url, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+      })
+          .then((response) => response.json())
+          .then((data) => {
+              if (data.success === "true") {
+                  setCanvasLMSSynced(data.synced);
+              }
+          });
+  }, [courseList, course]);
 
   return (
     <>
@@ -98,7 +119,7 @@ function Home(props) {
 
               <div className="tab-pane fade" id="pills-roster" role="tabpanel" aria-labelledby="pills-profile-tab">
                 <div className="col-md-12 my-auto mb-2">
-                    <UploadRoster course_id={courseList[course].course_id} {...props} />                                
+                    <UploadRoster course_id={courseList[course].course_id} canvasLMSSynced={canvasLMSSynced} {...props} />                                
                 </div>
                 <div className="col-md-12 my-auto">
                     <AddStudent course_id={courseList[course].course_id} {...props} />                                
@@ -114,7 +135,7 @@ function Home(props) {
               <div className="tab-pane fade" id="pills-sync" role="tabpanel" aria-labelledby="pills-contact-tab">
                 <div className="row">
                   <div className="col-md-12 my-auto">
-                    <CanvasLMSSync course_id={courseList[course].course_id} {...props} />
+                    <CanvasLMSSync course_id={courseList[course].course_id} canvasLMSSynced={canvasLMSSynced} setCanvasLMSSynced={setCanvasLMSSynced} {...props} />
                   </div>
                   <div className="col-md-12 my-auto">
                     <GradescopeSync course_id={courseList[course].course_id} {...props} />              
