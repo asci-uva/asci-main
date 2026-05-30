@@ -744,6 +744,12 @@ class Server
                 $course_id = $this->input["courseId"];
                 $this->setResponse($executor->getDiscordMappingHandler($user, $course_id));
                 break;
+            
+            case "setCanvasLMSAccessToken":
+                $course_id = $this->input["course_id"];
+                $access_token = $this->input["accessToken"];
+                $this->setResponse($executor->setCanvasLMSAccessToken($course_id, $access_token));
+                break;
 
             default:
               throw new \asci\exceptions\ASCIException("Unknown command: {$this->input["command"]}"); 

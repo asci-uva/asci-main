@@ -2566,5 +2566,11 @@ $usedCosSim = True;
         return ["success" => "true", "mapping" => $mapping];
     }
 
+    public function setCanvasLMSAccessToken($course_id, $access_token) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to set Canvas LMS access token");
+
+      return ["success" => "true"];
+    }
 }
 

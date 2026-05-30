@@ -1,14 +1,11 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useUser } from "../context/UserContext";
 
 
 function CanvasLMSSync(props) {
     const [accessToken, setAccessToken] = useState("");
     const [disabled, setDisabled] = useState(false);
-
-    let { user } = useUser();
 
     const handleSynchronize = () => {
         setDisabled(true);
@@ -16,8 +13,7 @@ function CanvasLMSSync(props) {
         const payload = {
             accessToken: accessToken,
             course_id: props.course_id,
-            command: "syncCanvasLMSData",
-            user: user.userid,
+            command: "setCanvasLMSAccessToken",
         };
 
         fetch(props.url, {
@@ -45,7 +41,7 @@ function CanvasLMSSync(props) {
                 } else {
                     console.log(data.message);
                     toast.error(
-                        data.message || "Failed to insert GradeScope downloaded data into the database."
+                        data.message || "Failed to connect to Canvas LMS."
                     );
                 }
             })
