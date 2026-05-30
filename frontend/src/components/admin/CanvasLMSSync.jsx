@@ -107,10 +107,6 @@ function CanvasLMSSync(props) {
                 console.log("data is: ", data);
                 setDisabled(false);
                 if (data.success === "true") {
-                    toast.success(data.message);
-                    setSynced(false);
-                    setCanvasCourseId("");
-                    setAccessToken("");
                     console.log(data.message);
                 } else {
                     console.log(data.message);
@@ -118,6 +114,9 @@ function CanvasLMSSync(props) {
                         data.message || "Failed to desynchronize from Canvas LMS."
                     );
                 }
+                setSynced(false);
+                setCanvasCourseId("");
+                setAccessToken("");
             })
             .catch((error) => {
                 console.error("Error during desynchronization:", error);
