@@ -4,15 +4,18 @@ import "react-toastify/dist/ReactToastify.css";
 
 
 function CanvasLMSSync(props) {
+    const [canvasCourseID, setCanvasCourseID] = useState("");
     const [accessToken, setAccessToken] = useState("");
     const [disabled, setDisabled] = useState(false);
+    const [synced, setSynced] = useState(false);
 
     const handleSynchronize = () => {
         setDisabled(true);
 
         const payload = {
+            canvasCourseID: canvasCourseID,
             accessToken: accessToken,
-            course_id: props.course_id,
+            courseId: props.course_id,
             command: "setCanvasLMSAccessToken",
         };
 
@@ -68,6 +71,16 @@ function CanvasLMSSync(props) {
             <h4 className="card-header">Canvas LMS Synchronization</h4>
             <div className="card-body">
                 <form className="">
+                    <div className="mb-3">
+                        <label>Canvas LMS Course ID</label>
+                        <input className="form-control"
+                            type="text"
+                            value={canvasCourseID}
+                            onChange={(e) => setCanvasCourseID(e.target.value)}
+                            required
+                        />
+                    </div>
+
                     <div className="mb-3">
                         <label>Canvas LMS Access Token:</label>
                         <input className="form-control"

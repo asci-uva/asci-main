@@ -2566,9 +2566,35 @@ $usedCosSim = True;
         return ["success" => "true", "mapping" => $mapping];
     }
 
-    public function setCanvasLMSAccessToken($course_id, $access_token) {
+    public function setCanvasLMSAccessToken($course_id, $canvas_course_id, $access_token) {
       if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to set Canvas LMS access token");
+
+      $canvas_domain = "https://canvas.its.virginia.edu";
+
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, "$canvas_domain/api/v1/courses/$canvas_course_id");
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array ( "Authorization: Bearer $access_token" ));
+      $response = curl_exec($ch);
+      $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+      if($errno = curl_errno($ch)) {
+        $error_message = curl_strerror($errno);
+        $this->logger->addError("cURL error ({$errno}):\n {$error_message}");
+        curl_close($ch);
+        return ["success" => "false", "error" => "cURL error ({$errno}):\n {$error_message}"];
+      }
+
+      if ($http_code !== 200) {
+        $this->logger->addError("HTTP error: " . $http_code);
+        curl_close($ch);
+        return ["success" => "false", "error" => "Cavas LMS returned HTTP $http_code."];
+      }
+      
+      curl_close($ch);
+
+      (new \asci\server\database\DBSynchronization($this->db))->setCanvasLMSAccessToken($course_id, $canvas_course_id, $access_token);
 
       return ["success" => "true"];
     }

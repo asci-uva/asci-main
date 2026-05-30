@@ -171,4 +171,19 @@ class DBSynchronization
         return empty($missingStudents) ? ['no missing student'] : $missingStudents;
     }
 
+    public function setCanvasLMSAccessToken($course_id, $canvas_course_id, $access_token) {
+        $key = getenv("CANVAS_ENCRYPTION_KEY");
+        $iv = openssl_random_pseudo_bytes(16);
+        $encrypted = openssl_encrypt($access_token, 'AES-256-CBC', $key, 0, $iv);
+        $iv_base64 = base64_encode($iv);
+
+        $this->db->beginTransaction();
+
+        $this->db->prepare('insertCanvasStmt',
+            'INSERT INTO course_settings_canvas (course_id, canvas_course_id, canvas_access_token, canvas_access_token_iv) VALUES ($1, $2, $3, $4)');
+        $this->db->execute('insertCanvasStmt', [$course_id, $canvas_course_id, $encrypted, $iv_base64]);
+
+        $this->db->commit();
+        return ["success" => "true"];
+    }
 }

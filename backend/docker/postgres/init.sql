@@ -226,6 +226,15 @@ CREATE TABLE course_quests (
   PRIMARY KEY (course_id, quest_id)
 );
 
+-- Canvas LMS Data
+CREATE TABLE course_settings_canvas (
+  course_id INT PRIMARY KEY,
+  canvas_course_id TEXT,
+  canvas_access_token TEXT,
+  canvas_access_token_iv TEXT,
+  FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+
 ALTER TABLE queue ADD FOREIGN KEY (user_id) REFERENCES users (id);
 
 ALTER TABLE queue ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
