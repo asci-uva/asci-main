@@ -179,9 +179,18 @@ class DBSynchronization
 
         $this->db->beginTransaction();
 
-        $this->db->prepare('insertCanvasStmt',
-            'INSERT INTO course_settings_canvas (course_id, canvas_course_id, canvas_access_token, canvas_access_token_iv) VALUES ($1, $2, $3, $4)');
-        $this->db->execute('insertCanvasStmt', [$course_id, $canvas_course_id, $encrypted, $iv_base64]);
+        $this->db->prepare('canvasCheckStmt', 'SELECT course_id FROM course_settings_canvas WHERE course_id = $1');
+        $result = $this->db->fetchrow($this->db->execute('canvasCheckStmt', [$course_id]));
+
+        if ($result) {
+            $this->db->prepare('updateCanvasStmt',
+                'UPDATE course_settings_canvas SET canvas_course_id = $1, canvas_access_token = $2, canvas_access_token_iv = $3 WHERE course_id = $4');
+            $this->db->execute('updateCanvasStmt', [$canvas_course_id, $encrypted, $iv_base64, $course_id]);
+        } else {
+            $this->db->prepare('insertCanvasStmt',
+                'INSERT INTO course_settings_canvas (course_id, canvas_course_id, canvas_access_token, canvas_access_token_iv) VALUES ($1, $2, $3, $4)');
+            $this->db->execute('insertCanvasStmt', [$course_id, $canvas_course_id, $encrypted, $iv_base64]);
+        }
 
         $this->db->commit();
         return ["success" => "true"];
