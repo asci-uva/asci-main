@@ -222,4 +222,22 @@ class DBSynchronization
             return ["success" => "true", "synced" => false];
         }
     }
+
+    public function getCanvasLMSAccessToken($course_id) {
+        $this->db->prepare('canvasCheckStmt',
+            'SELECT canvas_course_id, canvas_access_token, canvas_access_token_iv FROM course_settings_canvas WHERE course_id = $1');
+        $result = $this->db->fetchrow($this->db->execute('canvasCheckStmt', [$course_id]));
+
+        if (!$result)
+            return null;
+
+        $key = getenv("CANVAS_ENCRYPTION_KEY");
+        $iv = base64_decode($result["canvas_access_token_iv"]);
+        $decrypted = openssl_decrypt($result["canvas_access_token"], 'AES-256-CBC', $key, 0, $iv);
+
+        if ($decrypted === false)
+            return null;
+
+        return ["canvasCourseId" => $result["canvas_course_id"], "accessToken" => $decrypted];
+    }
 }

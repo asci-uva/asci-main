@@ -2610,5 +2610,54 @@ $usedCosSim = True;
 
       return (new \asci\server\database\DBSynchronization($this->db))->getCanvasLMSSyncStatus($course_id);
     }
+
+    public function getCanvasLMSCourseInfo($course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS course info");
+
+      $data = (new \asci\server\database\DBSynchronization($this->db))->getCanvasLMSAccessToken($course_id);
+
+      if ($data === null) {
+        return ["success" => false, "error" => "Missing or invalid Canvas credentials"];
+      }
+
+      $canvas_course_id = $data["canvasCourseId"];
+      $access_token = $data["accessToken"];
+
+      $canvas_domain = "https://canvas.its.virginia.edu";
+
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, "$canvas_domain/api/v1/courses/$canvas_course_id");
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array ( "Authorization: Bearer $access_token" ));
+      $response = curl_exec($ch);
+      $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+      if($errno = curl_errno($ch)) {
+        $error_message = curl_strerror($errno);
+        $this->logger->addError("cURL error ({$errno}):\n {$error_message}");
+        curl_close($ch);
+        return ["success" => "false", "error" => "cURL error ({$errno}):\n {$error_message}"];
+      }
+
+      if ($http_code !== 200) {
+        $this->logger->addError("HTTP error: " . $http_code);
+        curl_close($ch);
+        return ["success" => "false", "error" => "Cavas LMS returned HTTP $http_code."];
+      }
+      
+      curl_close($ch);
+
+      $data = json_decode($response, true);
+
+      return array_merge(["success" => "true"], $data);
+    }
+
+    public function getCanvasLMSCourseRoster($course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS course roster");
+      //TODO
+      return ["success" => "false"];
+    }
 }
 

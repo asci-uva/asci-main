@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useUser } from "../context/UserContext";
@@ -9,6 +9,37 @@ function UploadRoster(props) {
   const canvasLMSSynced = props.canvasLMSSynced;
   const [canvasCourseName, setCanvasCourseName] = useState("");
   
+  useEffect(() => {
+    if (!canvasLMSSynced) {
+      setCanvasCourseName("");
+      return;
+    }
+
+    const payload = {
+      command: "getCanvasLMSCourseInfo",
+      courseId: props.course_id,
+    };
+
+    fetch(props.url, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("data is: ", data);
+        if (data.success === "true") {
+          setCanvasCourseName(data.name);
+        } else {
+          setCanvasCourseName("Unable to load Canvas course name");
+        }
+      })
+      .catch(() => {
+        setCanvasCourseName("Error loading Canvas course name");
+      });
+  }, [canvasLMSSynced, props.course_id]);
+
   let course = getCourse();
 
   const handleFileChange = (event) => {
