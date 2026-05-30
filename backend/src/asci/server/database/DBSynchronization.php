@@ -217,9 +217,9 @@ class DBSynchronization
         $result = $this->db->fetchrow($this->db->execute('canvasCheckStmt', [$course_id]));
 
         if ($result) {
-            return ["success" => "true"];
+            return ["success" => "true", "synced" => "true"];
         } else {
-            return ["success" => "false"];
+            return ["success" => "true", "synced" => "false"];
         }
     }
 }

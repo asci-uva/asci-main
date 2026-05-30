@@ -23,6 +23,7 @@ function CanvasLMSSync(props) {
         })
             .then((response) => response.json())
             .then((data) => {
+                console.log("sync status reponse:", data);
                 if (data.success === "true") {
                     setSynced(data.synced);
                 }
