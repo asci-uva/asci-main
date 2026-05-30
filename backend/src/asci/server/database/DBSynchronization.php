@@ -195,4 +195,19 @@ class DBSynchronization
         $this->db->commit();
         return ["success" => "true"];
     }
+
+    public function removeCanvasLMSAccessToken($course_id) {
+        $this->db->prepare('canvasCheckStmt',
+            'SELECT course_id FROM course_settings_canvas WHERE course_id = $1');
+        $result = $this->db->fetchrow($this->db->execute('canvasCheckStmt', [$course_id]));
+
+        if ($result) {
+            $this->db->prepare('deleteCanvasStmt',
+                'DELETE FROM course_settings_canvas WHERE course_id = $1');
+            $this->db->execute('deleteCanvasStmt', [$course_id]);
+            return ["success" => "true"];
+        } else {
+            return ["success" => "false", "message" => "No Canvas LMS Access Token found for this course"];
+        }
+    }
 }

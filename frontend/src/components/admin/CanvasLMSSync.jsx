@@ -4,7 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 
 function CanvasLMSSync(props) {
-    const [canvasCourseID, setCanvasCourseID] = useState("");
+    const [canvasCourseId, setCanvasCourseId] = useState("");
     const [accessToken, setAccessToken] = useState("");
     const [disabled, setDisabled] = useState(false);
     const [synced, setSynced] = useState(false);
@@ -13,7 +13,7 @@ function CanvasLMSSync(props) {
         setDisabled(true);
 
         const payload = {
-            canvasCourseID: canvasCourseID,
+            canvasCourseId: canvasCourseId,
             accessToken: accessToken,
             courseId: props.course_id,
             command: "setCanvasLMSAccessToken",
@@ -63,13 +63,13 @@ function CanvasLMSSync(props) {
                     <button type="button" className="btn btn-primary" disabled>Desynchronizing (Please Wait)</button>    
                 );
             return (
-                <button type="button" className="btn btn-primary">Desynchronize Canvas LMS</button>  
+                <button type="button" className="btn btn-primary" onClick={handleDesynchronize}>Desynchronize Canvas LMS</button>  
             );
         }
 
         if (disabled)
             return (
-                <button type="button" className="btn btn-primary" onClick={handleSynchronize} disabled>Synchronizing (Please Wait)</button>    
+                <button type="button" className="btn btn-primary" disabled>Synchronizing (Please Wait)</button>    
             );
         return (
             <button type="button" className="btn btn-primary" onClick={handleSynchronize}>Synchronize Canvas LMS</button>
@@ -91,8 +91,8 @@ function CanvasLMSSync(props) {
                 <label>Canvas LMS Course ID</label>
                 <input className="form-control"
                 type="text"
-                value={canvasCourseID}
-                onChange={(e) => setCanvasCourseID(e.target.value)}
+                value={canvasCourseId}
+                onChange={(e) => setCanvasCourseId(e.target.value)}
                 required
                 />
             </div>

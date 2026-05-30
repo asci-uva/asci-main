@@ -2594,9 +2594,14 @@ $usedCosSim = True;
       
       curl_close($ch);
 
-      (new \asci\server\database\DBSynchronization($this->db))->setCanvasLMSAccessToken($course_id, $canvas_course_id, $access_token);
+      return (new \asci\server\database\DBSynchronization($this->db))->setCanvasLMSAccessToken($course_id, $canvas_course_id, $access_token);
+    }
 
-      return ["success" => "true"];
+    public function removeCanvasLMSAccessToken($course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to remove Canvas LMS access token");
+
+      return (new \asci\server\database\DBSynchronization($this->db))->removeCanvasLMSAccessToken($course_id);
     }
 }
 

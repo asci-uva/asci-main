@@ -747,9 +747,14 @@ class Server
             
             case "setCanvasLMSAccessToken":
                 $course_id = $this->input["courseId"];
-                $canvas_course_id = $this->input["canvasCourseID"];
+                $canvas_course_id = $this->input["canvasCourseId"];
                 $access_token = $this->input["accessToken"];
                 $this->setResponse($executor->setCanvasLMSAccessToken($course_id, $canvas_course_id, $access_token));
+                break;
+            
+            case "removeCanvasLMSAccessToken":
+                $course_id = $this->input["courseId"];
+                $this->setResponse($executor->removeCanvasLMSAccessToken($course_id));
                 break;
 
             default:
