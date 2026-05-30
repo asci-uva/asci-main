@@ -756,6 +756,11 @@ class Server
                 $course_id = $this->input["courseId"];
                 $this->setResponse($executor->removeCanvasLMSAccessToken($course_id));
                 break;
+            
+            case "getCanvasLMSSyncStatus":
+                $courseId = $this->input["courseId"];
+                $this->setResponse($executor->getCanvasLMSSyncStatus($course_id));
+                break;
 
             default:
               throw new \asci\exceptions\ASCIException("Unknown command: {$this->input["command"]}"); 

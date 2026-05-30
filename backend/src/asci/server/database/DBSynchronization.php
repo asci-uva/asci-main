@@ -210,4 +210,16 @@ class DBSynchronization
             return ["success" => "false", "message" => "No Canvas LMS Access Token found for this course"];
         }
     }
+
+    public function getCanvasLMSSyncStatus($course_id) {
+        $this->db->prepare('canvasCheckStmt',
+            'SELECT course_id FROM course_settings_canvas WHERE course_id = $1');
+        $result = $this->db->fetchrow($this->db->execute('canvasCheckStmt', [$course_id]));
+
+        if ($result) {
+            return ["success" => "true"];
+        } else {
+            return ["success" => "false"];
+        }
+    }
 }

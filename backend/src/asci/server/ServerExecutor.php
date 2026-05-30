@@ -2603,5 +2603,12 @@ $usedCosSim = True;
 
       return (new \asci\server\database\DBSynchronization($this->db))->removeCanvasLMSAccessToken($course_id);
     }
+
+    public function getCanvasLMSSyncStatus($course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS sync status");
+
+      return (new \asci\server\database\DBSynchronization($this->db))->getCanvasLMSSyncStatus($course_id);
+    }
 }
 

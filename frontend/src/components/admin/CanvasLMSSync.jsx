@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -8,6 +8,29 @@ function CanvasLMSSync(props) {
     const [accessToken, setAccessToken] = useState("");
     const [disabled, setDisabled] = useState(false);
     const [synced, setSynced] = useState(false);
+
+    useEffect(() => {
+        const payload = {
+            courseId: props.course_id,
+            command: "getCanvasLMSSyncStatus",
+        };
+
+        fetch(props.url, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success === "true") {
+                    setSynced(data.synced);
+                }
+            })
+            .catch((error) => {
+                console.error("Error checking Canvas sync status:", error);
+            });
+    }, []);
 
     const handleSynchronize = () => {
         setDisabled(true);
@@ -56,6 +79,52 @@ function CanvasLMSSync(props) {
             });
     };
 
+    const handleDesynchronize = () => {
+        setDisabled(true);
+
+        const payload = {
+            courseId: props.course_id,
+            command: "removeCanvasLMSAccessToken",
+        };
+
+        fetch(props.url, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    setDisabled(false);
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log("data is: ", data);
+                setDisabled(false);
+                if (data.success === "true") {
+                    toast.success(data.message);
+                    setSynced(false);
+                    setCanvasCourseId("");
+                    setAccessToken("");
+                    console.log(data.message);
+                } else {
+                    console.log(data.message);
+                    toast.error(
+                        data.message || "Failed to desynchronize from Canvas LMS."
+                    );
+                }
+            })
+            .catch((error) => {
+                console.error("Error during desynchronization:", error);
+                setDisabled(false);
+                toast.error("Error during desynchronization.")
+            });
+    };
+
     function getButton() {
         if (synced) {
             if (disabled)
@@ -69,7 +138,7 @@ function CanvasLMSSync(props) {
 
         if (disabled)
             return (
-                <button type="button" className="btn btn-primary" disabled>Synchronizing (Please Wait)</button>    
+                <button type="button" className="btn btn-primary" onClick={handleSynchronize} disabled>Synchronizing (Please Wait)</button>    
             );
         return (
             <button type="button" className="btn btn-primary" onClick={handleSynchronize}>Synchronize Canvas LMS</button>
@@ -86,7 +155,7 @@ function CanvasLMSSync(props) {
             {getButton()}
             </div>
         ) : (
-            <form>
+            <form key={synced}>
             <div className="mb-3">
                 <label>Canvas LMS Course ID</label>
                 <input className="form-control"
