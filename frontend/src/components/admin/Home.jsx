@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import UploadRoster from "./UploadRoster";
 import AddStudent from "./AddStudent";
+import CanvasLMSSync from "./CanvasLMSSync";
 import GradescopeSync from "./GradescopeSync";
 import EditCourseInfo from "./EditCourseInfo";
 import EditCourseSettings from "./EditCourseSettings";
@@ -112,6 +113,9 @@ function Home(props) {
 
               <div className="tab-pane fade" id="pills-sync" role="tabpanel" aria-labelledby="pills-contact-tab">
                 <div className="row">
+                  <div className="col-md-12 my-auto">
+                    <CanvasLMSSync course_id={courseList[course].course_id} {...props} />
+                  </div>
                   <div className="col-md-12 my-auto">
                     <GradescopeSync course_id={courseList[course].course_id} {...props} />              
                   </div>
