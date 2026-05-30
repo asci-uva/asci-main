@@ -38,11 +38,9 @@ function SelectCourse(props) {
         course["name"] +
         " - " +
         course["semester"];
-      if (isAdmin()) {
-        courseName += " (admin)"
-      } else {
-        courseName += " (" + course["role"] +")";
-      }
+
+      courseName += " (" + course["role"] +")";
+
       if (course["archived"] === "t") {
         archivedCourseList[key] = courseName + " [Archived]";
       } else {

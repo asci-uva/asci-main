@@ -1,4 +1,5 @@
-FROM php:7.4-apache
+# FROM php:7.4-apache
+FROM php:8.2-apache
 
 RUN echo "THIS IS THE DOCKERFILE"
 
@@ -15,16 +16,19 @@ ENV PATH $CHROMEDRIVER_DIR:$PATH
 
 WORKDIR /opt/src/
 COPY ../src/composer.json composer.json
+# Invesigate this audit.block-insure false
+# RUN composer config --global audit.block-insecure false
 RUN composer install --no-interaction --no-plugins --no-scripts --no-dev --prefer-dist
 RUN composer dump-autoload --optimize --apcu --no-dev
 
 RUN apt update
 RUN echo "Y" | apt install python3-pip
-RUN pip install pandas
-RUN pip install numpy
-RUN pip install -U scikit-learn
+RUN apt install -y python3-pandas python3-numpy python3-sklearn python3-selenium
+# RUN pip install pandas
+# RUN pip install numpy
+# RUN pip install -U scikit-learn
 
-RUN pip install selenium
+# RUN pip install selenium
 
 
 RUN service apache2 restart
