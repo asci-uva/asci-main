@@ -6,6 +6,9 @@ import { useUser } from "../context/UserContext";
 function UploadRoster(props) {
   const [rosterFile, setRosterFile] = useState(null);
   const { user, getCourse, courseSettings, setCourseSettings, refreshCourseRoster, refreshCourseList } = useUser();
+  const canvasLMSSynced = props.canvasLMSSynced;
+  const [canvasCourseName, setCanvasCourseName] = useState("");
+  
   let course = getCourse();
 
   const handleFileChange = (event) => {
@@ -91,15 +94,25 @@ function UploadRoster(props) {
   return (
 
     <div className="card mb-4">
+      {canvasLMSSynced ? (
+        <>
+        <h4 className="card-header">Synchronize Roster from Canvas LMS</h4>
+        <div className="card-body">
+          <p>Canvas Course Name: {canvasCourseName}</p>
+          <button type="button" className="btn btn-primary" >Synchronize with Course Roster</button>
+        </div>
+        </>
+      ) : (
+        <>
         <h4 className="card-header">Upload Roster</h4>
-          <form className="p-3">
-      
-            <div className="input-group">
-            <input className="form-control" type="file" onChange={handleFileChange} accept=".csv" />
-            <button type="button" className="btn btn-primary" onClick={uploadRoster}>Upload</button>
-            </div>
-          </form>
-
+        <form className="p-3">
+          <div className="input-group">
+          <input className="form-control" type="file" onChange={handleFileChange} accept=".csv" />
+          <button type="button" className="btn btn-primary" onClick={uploadRoster}>Upload</button>
+          </div>
+        </form>
+        </>
+      )}
     </div>
   );
 }
