@@ -6,39 +6,6 @@ import { useUser } from "../context/UserContext";
 function UploadRoster(props) {
   const [rosterFile, setRosterFile] = useState(null);
   const { user, getCourse, courseSettings, setCourseSettings, refreshCourseRoster, refreshCourseList } = useUser();
-  const canvasLMSSynced = props.canvasLMSSynced;
-  const [canvasCourseName, setCanvasCourseName] = useState("");
-  
-  useEffect(() => {
-    if (!canvasLMSSynced) {
-      setCanvasCourseName("");
-      return;
-    }
-
-    const payload = {
-      command: "getCanvasLMSCourseInfo",
-      courseId: props.course_id,
-    };
-
-    fetch(props.url, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("data is: ", data);
-        if (data.success === "true") {
-          setCanvasCourseName(data.name);
-        } else {
-          setCanvasCourseName("Unable to load Canvas course name");
-        }
-      })
-      .catch(() => {
-        setCanvasCourseName("Error loading Canvas course name");
-      });
-  }, [canvasLMSSynced, props.course_id]);
 
   let course = getCourse();
 
@@ -125,11 +92,11 @@ function UploadRoster(props) {
   return (
 
     <div className="card mb-4">
-      {canvasLMSSynced ? (
+      {props.canvasLmsSynced ? (
         <>
         <h4 className="card-header">Synchronize Roster from Canvas LMS</h4>
         <div className="card-body">
-          <p>Canvas Course Name: {canvasCourseName}</p>
+          <p>Course Name: {props.canvasCourseName}</p>
           <button type="button" className="btn btn-primary" >Synchronize with Course Roster</button>
         </div>
         </>

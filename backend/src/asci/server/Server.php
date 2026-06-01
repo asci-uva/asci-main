@@ -744,27 +744,30 @@ class Server
                 $course_id = $this->input["courseId"];
                 $this->setResponse($executor->getDiscordMappingHandler($user, $course_id));
                 break;
+
+            case "fetchCanvasLmsCourseName":
+                $courseId = $this->input["courseId"];
+                $canvasCourseId = $this->input["canvasCourseId"];
+                $accessToken = $this->input["accessToken"];
+                $this->setResponse($executor->fetchCanvasLmsCourseName($courseId, $canvasCourseId, $accessToken));
+                break;
             
-            case "setCanvasLMSAccessToken":
+            case "setCanvasLmsCourse":
                 $course_id = $this->input["courseId"];
                 $canvas_course_id = $this->input["canvasCourseId"];
+                $canvas_course_name = $this->input["canvasCourseName"];
                 $access_token = $this->input["accessToken"];
-                $this->setResponse($executor->setCanvasLMSAccessToken($course_id, $canvas_course_id, $access_token));
+                $this->setResponse($executor->setCanvasLmsCourse($course_id, $canvas_course_id, $canvas_course_name, $access_token));
                 break;
             
-            case "removeCanvasLMSAccessToken":
+            case "removeCanvasLmsCourse":
                 $course_id = $this->input["courseId"];
-                $this->setResponse($executor->removeCanvasLMSAccessToken($course_id));
+                $this->setResponse($executor->removeCanvasLmsCourse($course_id));
                 break;
             
-            case "getCanvasLMSSyncStatus":
-                $courseId = $this->input["courseId"];
-                $this->setResponse($executor->getCanvasLMSSyncStatus($course_id));
-                break;
-            
-            case "getCanvasLMSCourseInfo":
-                $courseId = $this->input["courseId"];
-                $this->setResponse($executor->getCanvasLMSCourseInfo($course_id));
+            case "getCanvasLmsSyncStatus":
+                $course_id = $this->input["courseId"];
+                $this->setResponse($executor->getCanvasLmsSyncStatus($course_id));
                 break;
             
             case "getCanvasLMSCourseRoster":

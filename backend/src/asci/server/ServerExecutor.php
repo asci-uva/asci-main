@@ -2566,64 +2566,10 @@ $usedCosSim = True;
         return ["success" => "true", "mapping" => $mapping];
     }
 
-    public function setCanvasLMSAccessToken($course_id, $canvas_course_id, $access_token) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
-        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to set Canvas LMS access token");
-
-      $canvas_domain = "https://canvas.its.virginia.edu";
-
-      $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, "$canvas_domain/api/v1/courses/$canvas_course_id");
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($ch, CURLOPT_HTTPHEADER, array ( "Authorization: Bearer $access_token" ));
-      $response = curl_exec($ch);
-      $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-      if($errno = curl_errno($ch)) {
-        $error_message = curl_strerror($errno);
-        $this->logger->addError("cURL error ({$errno}):\n {$error_message}");
-        curl_close($ch);
-        return ["success" => "false", "error" => "cURL error ({$errno}):\n {$error_message}"];
-      }
-
-      if ($http_code !== 200) {
-        $this->logger->addError("HTTP error: " . $http_code);
-        curl_close($ch);
-        return ["success" => "false", "error" => "Cavas LMS returned HTTP $http_code."];
-      }
-      
-      curl_close($ch);
-
-      return (new \asci\server\database\DBSynchronization($this->db))->setCanvasLMSAccessToken($course_id, $canvas_course_id, $access_token);
-    }
-
-    public function removeCanvasLMSAccessToken($course_id) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
-        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to remove Canvas LMS access token");
-
-      return (new \asci\server\database\DBSynchronization($this->db))->removeCanvasLMSAccessToken($course_id);
-    }
-
-    public function getCanvasLMSSyncStatus($course_id) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
-        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS sync status");
-
-      return (new \asci\server\database\DBSynchronization($this->db))->getCanvasLMSSyncStatus($course_id);
-    }
-
-    public function getCanvasLMSCourseInfo($course_id) {
+    public function fetchCanvasLmsCourseName($course_id, $canvas_course_id, $access_token) {
       if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS course info");
-
-      $data = (new \asci\server\database\DBSynchronization($this->db))->getCanvasLMSAccessToken($course_id);
-
-      if ($data === null) {
-        return ["success" => false, "error" => "Missing or invalid Canvas credentials"];
-      }
-
-      $canvas_course_id = $data["canvasCourseId"];
-      $access_token = $data["accessToken"];
-
+      
       $canvas_domain = "https://canvas.its.virginia.edu";
 
       $ch = curl_init();
@@ -2650,10 +2596,31 @@ $usedCosSim = True;
 
       $data = json_decode($response, true);
 
-      return array_merge(["success" => "true"], $data);
+      return ["success" => "true", "courseName" => $data["name"]];
     }
 
-    public function getCanvasLMSCourseRoster($course_id) {
+    public function setCanvasLmsCourse($course_id, $canvas_course_id, $canvas_course_name, $access_token) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to syncrhonize with a Canvas LMS course");
+
+      return (new \asci\server\database\DBSynchronization($this->db))->setCanvasLmsCourse($course_id, $canvas_course_id, $canvas_course_name, $access_token);
+    }
+
+    public function removeCanvasLmsCourse($course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to remove Canvas LMS access token");
+
+      return (new \asci\server\database\DBSynchronization($this->db))->removeCanvasLmsCourse($course_id);
+    }
+
+    public function getCanvasLmsSyncStatus($course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS sync status");
+
+      return (new \asci\server\database\DBSynchronization($this->db))->getCanvasLmsSyncStatus($course_id);
+    }
+
+    public function getCanvasLmsCourseRoster($course_id) {
       if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS course roster");
       //TODO

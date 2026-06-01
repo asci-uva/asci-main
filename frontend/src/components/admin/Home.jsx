@@ -20,7 +20,8 @@ function Home(props) {
   const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible");
   const [sidebarCol, setSidebarCol] = useState("col-md-3");
   const [contentCol, setContentCol] = useState("page-container content col-md-9 my-auto");
-  const [canvasLMSSynced, setCanvasLMSSynced] = useState(false);
+  const [canvasLmsSynced, setCanvasLmsSynced] = useState(false);
+  const [canvasCourseName, setCanvasCourseName] = useState("");
 
   const handleCollapse = () => {
     if(sidebarOpen === "sidebar-visible")
@@ -44,7 +45,7 @@ function Home(props) {
   useEffect(() => {
       const payload = {
           courseId: courseList[course].course_id,
-          command: "getCanvasLMSSyncStatus",
+          command: "getCanvasLmsSyncStatus",
       };
 
       fetch(props.url, {
@@ -56,7 +57,9 @@ function Home(props) {
           .then((response) => response.json())
           .then((data) => {
               if (data.success === "true") {
-                  setCanvasLMSSynced(data.synced);
+                  setCanvasLmsSynced(data.synced);
+                  if (data.synced)
+                    setCanvasCourseName(data.courseName);
               }
           });
   }, [courseList, course]);
@@ -119,7 +122,7 @@ function Home(props) {
 
               <div className="tab-pane fade" id="pills-roster" role="tabpanel" aria-labelledby="pills-profile-tab">
                 <div className="col-md-12 my-auto mb-2">
-                    <UploadRoster course_id={courseList[course].course_id} canvasLMSSynced={canvasLMSSynced} {...props} />                                
+                    <UploadRoster course_id={courseList[course].course_id} canvasLmsSynced={canvasLmsSynced} canvasCourseName={canvasCourseName} {...props} />                                
                 </div>
                 <div className="col-md-12 my-auto">
                     <AddStudent course_id={courseList[course].course_id} {...props} />                                
@@ -135,7 +138,14 @@ function Home(props) {
               <div className="tab-pane fade" id="pills-sync" role="tabpanel" aria-labelledby="pills-contact-tab">
                 <div className="row">
                   <div className="col-md-12 my-auto">
-                    <CanvasLMSSync course_id={courseList[course].course_id} canvasLMSSynced={canvasLMSSynced} setCanvasLMSSynced={setCanvasLMSSynced} {...props} />
+                    <CanvasLMSSync 
+                      course_id={courseList[course].course_id} 
+                      canvasLmsSynced={canvasLMSSynced} 
+                      setcanvasLmsSynced={setCanvasLMSSynced} 
+                      canvasCourseName={canvasCourseName}
+                      setCanvasCourseName={setCanvasCourseName}
+                      {...props} 
+                    />
                   </div>
                   <div className="col-md-12 my-auto">
                     <GradescopeSync course_id={courseList[course].course_id} {...props} />              

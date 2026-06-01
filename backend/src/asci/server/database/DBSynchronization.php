@@ -171,7 +171,7 @@ class DBSynchronization
         return empty($missingStudents) ? ['no missing student'] : $missingStudents;
     }
 
-    public function setCanvasLMSAccessToken($course_id, $canvas_course_id, $access_token) {
+    public function setCanvasLmsCourse($course_id, $canvas_course_id, $canvas_course_name, $access_token) {
         $key = getenv("CANVAS_ENCRYPTION_KEY");
         $iv = openssl_random_pseudo_bytes(16);
         $encrypted = openssl_encrypt($access_token, 'AES-256-CBC', $key, 0, $iv);
@@ -184,19 +184,19 @@ class DBSynchronization
 
         if ($result) {
             $this->db->prepare('updateCanvasStmt',
-                'UPDATE course_settings_canvas SET canvas_course_id = $1, canvas_access_token = $2, canvas_access_token_iv = $3 WHERE course_id = $4');
-            $this->db->execute('updateCanvasStmt', [$canvas_course_id, $encrypted, $iv_base64, $course_id]);
+                'UPDATE course_settings_canvas SET canvas_course_id = $1, canvas_course_name = $2, canvas_access_token = $3, canvas_access_token_iv = $4 WHERE course_id = $5');
+            $this->db->execute('updateCanvasStmt', [$canvas_course_id, $canvas_course_name, $encrypted, $iv_base64, $course_id]);
         } else {
             $this->db->prepare('insertCanvasStmt',
-                'INSERT INTO course_settings_canvas (course_id, canvas_course_id, canvas_access_token, canvas_access_token_iv) VALUES ($1, $2, $3, $4)');
-            $this->db->execute('insertCanvasStmt', [$course_id, $canvas_course_id, $encrypted, $iv_base64]);
+                'INSERT INTO course_settings_canvas (course_id, canvas_course_id, canvas_course_name, canvas_access_token, canvas_access_token_iv) VALUES ($1, $2, $3, $4, $5)');
+            $this->db->execute('insertCanvasStmt', [$course_id, $canvas_course_id, $canvas_course_name, $encrypted, $iv_base64]);
         }
 
         $this->db->commit();
         return ["success" => "true", "message" => "Successfully synced with Canvas LMS"];
     }
 
-    public function removeCanvasLMSAccessToken($course_id) {
+    public function removeCanvasLmsCourse($course_id) {
         $this->db->prepare('canvasCheckStmt',
             'SELECT course_id FROM course_settings_canvas WHERE course_id = $1');
         $result = $this->db->fetchrow($this->db->execute('canvasCheckStmt', [$course_id]));
@@ -211,13 +211,13 @@ class DBSynchronization
         }
     }
 
-    public function getCanvasLMSSyncStatus($course_id) {
+    public function getCanvasLmsSyncStatus($course_id) {
         $this->db->prepare('canvasCheckStmt',
-            'SELECT course_id FROM course_settings_canvas WHERE course_id = $1');
+            'SELECT canvas_course_name FROM course_settings_canvas WHERE course_id = $1');
         $result = $this->db->fetchrow($this->db->execute('canvasCheckStmt', [$course_id]));
 
         if ($result) {
-            return ["success" => "true", "synced" => true];
+            return ["success" => "true", "synced" => true, "courseName" => $result["canvas_course_name"]];
         } else {
             return ["success" => "true", "synced" => false];
         }
