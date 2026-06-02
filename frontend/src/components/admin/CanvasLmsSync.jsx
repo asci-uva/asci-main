@@ -74,7 +74,7 @@ function CanvasLMSSync(props) {
                 setDisabled(false);
                 if (data.success === "true") {
                     toast.success(data.message);
-                    props.setCanvasLMSSynced(true);
+                    props.setCanvasLmsSynced(true);
                 } else {
                     console.log(data.message);
                     toast.error(
