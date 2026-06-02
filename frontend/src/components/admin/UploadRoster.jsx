@@ -89,6 +89,35 @@ function UploadRoster(props) {
       });
   };
 
+  const getCanvasLmsCourseUsers = () => {
+    const payload = {
+      command: "getCanvasLmsCourseUsers",
+      course_id: course.course_id,
+    };
+
+    fetch(props.url, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Fetched Canvas LMS course users:", data);
+        if (data.success) {
+          console.log("TODO: add users to db");
+          toast.success("TODO: add users to db");
+        } else {
+          console.log("There was an error syncing Canvas LMS course users");
+          toast.error("There was an error syncing Canvas LMS course users");
+        }
+      })
+      .catch((error) => {
+        console.error("There was an error while fetching Canvas LMS course users:", error);
+        toast.error("There was an error while fetching Canvas LMS course users");
+      })
+  };
+
   return (
 
     <div className="card mb-4">
@@ -97,7 +126,7 @@ function UploadRoster(props) {
         <h4 className="card-header">Synchronize Roster from Canvas LMS</h4>
         <div className="card-body">
           <p>Course Name: {props.canvasCourseName}</p>
-          <button type="button" className="btn btn-primary" >Synchronize with Course Roster</button>
+          <button type="button" className="btn btn-primary" onClick={getCanvasLmsCourseUsers}>Synchronize with Course Roster</button>
         </div>
         </>
       ) : (

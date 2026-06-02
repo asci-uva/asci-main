@@ -770,9 +770,9 @@ class Server
                 $this->setResponse($executor->getCanvasLmsSyncStatus($course_id));
                 break;
             
-            case "getCanvasLMSCourseRoster":
-                $courseId = $this->input["courseId"];
-                //TODO
+            case "getCanvasLmsCourseUsers":
+                $course_id = $this->input["course_id"];
+                $this->setResponse($executor->getCanvasLmsCourseUsers($course_id));
                 break;
 
             default:

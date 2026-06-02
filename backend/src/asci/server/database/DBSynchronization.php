@@ -223,7 +223,7 @@ class DBSynchronization
         }
     }
 
-    public function getCanvasLMSAccessToken($course_id) {
+    public function getCanvasLmsAccessToken($course_id) {
         $this->db->prepare('canvasCheckStmt',
             'SELECT canvas_course_id, canvas_access_token, canvas_access_token_iv FROM course_settings_canvas WHERE course_id = $1');
         $result = $this->db->fetchrow($this->db->execute('canvasCheckStmt', [$course_id]));
@@ -238,6 +238,6 @@ class DBSynchronization
         if ($decrypted === false)
             return null;
 
-        return ["canvasCourseId" => $result["canvas_course_id"], "accessToken" => $decrypted];
+        return ["canvas_course_id" => $result["canvas_course_id"], "access_token" => $decrypted];
     }
 }
