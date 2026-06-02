@@ -8,7 +8,7 @@ function CanvasLMSSync(props) {
     const [accessToken, setAccessToken] = useState("");
     const [disabled, setDisabled] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    const synced = props.canvasLMSSynced;
+    const synced = props.canvasLmsSynced;
 
     const handleSynchronize = () => {
         setDisabled(true);
