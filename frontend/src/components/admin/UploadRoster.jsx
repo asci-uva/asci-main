@@ -6,6 +6,8 @@ import { useUser } from "../context/UserContext";
 function UploadRoster(props) {
   const [rosterFile, setRosterFile] = useState(null);
   const { user, getCourse, courseSettings, setCourseSettings, refreshCourseRoster, refreshCourseList } = useUser();
+  const [disabled, setDisabled] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   let course = getCourse();
 
@@ -54,6 +56,9 @@ function UploadRoster(props) {
   };
 
   const sendRosterToBackend = (rosterData) => {
+    if (props.canvasLmsSynced)
+      setDisabled(false);
+
     const payload = {
       command: "uploadRoster",
       roster: rosterData,
@@ -89,7 +94,14 @@ function UploadRoster(props) {
       });
   };
 
-  const getCanvasLmsCourseUsers = () => {
+  const handleGetCanvasLmsCourseUsers = () => {
+    setShowModal(true);
+  };
+
+  const confirmGetCanvasLmsCourseUsers = () => {
+    setShowModal(false);
+    setDisabled(true);
+
     const payload = {
       command: "getCanvasLmsCourseUsers",
       course_id: course.course_id,
@@ -105,18 +117,58 @@ function UploadRoster(props) {
       .then((data) => {
         console.log("Fetched Canvas LMS course users:", data);
         if (data.success) {
-          console.log("TODO: add users to db");
-          toast.success("TODO: add users to db");
+          const rosterData = parseCanvasLmsResponse(data.users);
+          console.log(rosterData);
+          sendRosterToBackend(rosterData);
         } else {
           console.log("There was an error syncing Canvas LMS course users");
           toast.error("There was an error syncing Canvas LMS course users");
         }
       })
       .catch((error) => {
+        setDisabled(false);
         console.error("There was an error while fetching Canvas LMS course users:", error);
         toast.error("There was an error while fetching Canvas LMS course users");
       })
   };
+
+  const parseCanvasLmsResponse = (users) => {
+    const parsed_users = [];
+
+    Object.entries(users).forEach(([role, userList]) => {
+      if (role === "instructor")
+        return;
+      
+      userList.forEach((user) => {
+        let f_name = "";
+        let l_name = "";
+
+        const name_parts = user.sortable_name.split(",");
+        l_name = name_parts[0]?.trim() || "";
+        f_name = name_parts[1]?.trim() || "";
+
+        parsed_users.push({
+          fname: f_name,
+          lname: l_name,
+          pname: f_name,
+          computing_id: user.sis_user_id,
+          role: role,
+        });
+      });
+    });
+
+    return parsed_users;
+  };
+
+  function getSyncButton() {
+    if (disabled)
+        return (
+        <button type="button" className="btn btn-primary" disabled>Fetching course roster (Please Wait)</button>
+      );
+    return (
+      <button type="button" className="btn btn-primary" onClick={handleGetCanvasLmsCourseUsers}>Synchronize with Course Roster</button>
+    );
+  }
 
   return (
 
@@ -126,8 +178,26 @@ function UploadRoster(props) {
         <h4 className="card-header">Synchronize Roster from Canvas LMS</h4>
         <div className="card-body">
           <p>Course Name: {props.canvasCourseName}</p>
-          <button type="button" className="btn btn-primary" onClick={getCanvasLmsCourseUsers}>Synchronize with Course Roster</button>
+          {getSyncButton()}
         </div>
+        {showModal && (
+            <div className="modal show d-block" tabIndex="-1">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Confirm Canvas Roster Fetch</h5>
+                        </div>
+                        <div className="modal-body">
+                            <p>Are you sure you want to fetch the roster from <strong>{props.canvasCourseName}</strong> on Canvas LMS?</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-secondary" onClick={() => {setShowModal(false); setDisabled(false)}}>Cancel</button>
+                            <button className="btn btn-primary" onClick={confirmGetCanvasLmsCourseUsers}>Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
         </>
       ) : (
         <>

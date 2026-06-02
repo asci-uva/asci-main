@@ -2677,14 +2677,16 @@ $usedCosSim = True;
               }
           }
 
-          $results[$type . "s"] = $users;
+          $results[$type] = $users;
       }
 
       return [
           "success" => "true",
-          "students" => $results["students"],
-          "teachers" => $results["teachers"],
-          "tas" => $results["tas"]
+          "users" => [
+            "student" => $results["student"],
+            "instructor" => $results["teacher"],
+            "ta" => $results["ta"]
+          ]
       ];
   }
 }
