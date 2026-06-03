@@ -11,8 +11,6 @@ function CanvasLMSSync(props) {
     const synced = props.canvasLmsSynced;
 
     const handleSynchronize = () => {
-        setDisabled(true);
-
         const payload = {
             canvasCourseId: canvasCourseId,
             accessToken: accessToken,
@@ -28,17 +26,18 @@ function CanvasLMSSync(props) {
         })
             .then((response) => response.json())
             .then((data) => {
-                setDisabled(false);
                 if (data.success === "true") {
                     console.log("Retrieved Canvas LMS course name successfully");
                     props.setCanvasCourseName(data.courseName);
                     setShowModal(true);
                 } else {
-                    toast.error("Failed to get course name from Canvas LMS");
+                    console.log(data.error);
+                    toast.error(data.error);
                 }
             })
             .catch((error) => {
                 setDisabled(false);
+                console.log("Error during fetching course info");
                 toast.error("Error during fetching course info");
             });
     };
@@ -63,29 +62,22 @@ function CanvasLMSSync(props) {
             },
             body: JSON.stringify(payload),
         })
-            .then((response) => {
-                if (!response.ok) {
-                    setDisabled(false);
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
+            .then((response) => response.json())
             .then((data) => {
                 setDisabled(false);
                 if (data.success === "true") {
+                    console.log(data.message);
                     toast.success(data.message);
                     props.setCanvasLmsSynced(true);
                 } else {
-                    console.log(data.message);
-                    toast.error(
-                        data.message || "Failed to connect to Canvas LMS."
-                    );
+                    console.log(data.error);
+                    toast.error(data.error);
                 }
             })
             .catch((error) => {
                 setDisabled(false);
                 console.error("Error during synchronization:", error);
-                toast.error("Error during synchronization.")
+                toast.error("Error during synchronization:", error)
             });
     };
 
@@ -105,32 +97,24 @@ function CanvasLMSSync(props) {
             },
             body: JSON.stringify(payload),
         })
-            .then((response) => {
-                if (!response.ok) {
-                    setDisabled(false);
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
+            .then((response) => response.json())
             .then((data) => {
-                console.log("data is: ", data);
                 setDisabled(false);
                 if (data.success === "true") {
                     console.log(data.message);
+                    toast.success(data.message);
                 } else {
-                    console.log(data.message);
-                    toast.error(
-                        data.message || "Failed to desynchronize from Canvas LMS."
-                    );
+                    console.log(data.error);
+                    toast.error(data.error);
                 }
-                props.setCanvasLMSSynced(false);
+                props.setCanvasLmsSynced(false);
                 setCanvasCourseId("");
                 setAccessToken("");
             })
             .catch((error) => {
-                console.error("Error during desynchronization:", error);
                 setDisabled(false);
-                toast.error("Error during desynchronization.")
+                console.error("Error during desynchronization:", error);
+                toast.error("Error during desynchronization:", error)
             });
     };
 

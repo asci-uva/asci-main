@@ -64,6 +64,7 @@ class ServerExecutor{
     $this->userStore = new \asci\server\database\DBUser($this->db);
     $this->courseStore = new \asci\server\database\DBCourse($this->db);
     $this->userCourseStore = new \asci\server\database\DBUserCourse($this->db);
+    $this->synchronizationStore = new \asci\server\database\DBSynchronization($this->db);
     // Check $_SERVER["uid"]; // their computing ID  (name and id can come from roster)
 
     // This may need to change with other authentication types
@@ -2566,7 +2567,7 @@ $usedCosSim = True;
         return ["success" => "true", "mapping" => $mapping];
     }
 
-    public function fetchCanvasLmsCourseName($course_id, $canvas_course_id, $access_token) {
+    public function fetchCanvasLmsCourseNameHandler($course_id, $canvas_course_id, $access_token) {
       if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS course info");
       
@@ -2575,21 +2576,22 @@ $usedCosSim = True;
       $ch = curl_init();
       curl_setopt($ch, CURLOPT_URL, "$canvas_domain/api/v1/courses/$canvas_course_id");
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($ch, CURLOPT_HTTPHEADER, array ( "Authorization: Bearer $access_token" ));
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer $access_token"));
       $response = curl_exec($ch);
       $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
       if($errno = curl_errno($ch)) {
-        $error_message = curl_strerror($errno);
-        $this->logger->addError("cURL error ({$errno}):\n {$error_message}");
+        $errorText = "cURL error ({$errno}): " . curl_strerror($errno);
+        $this->logger->addError($errorText);
         curl_close($ch);
-        return ["success" => "false", "error" => "cURL error ({$errno}):\n {$error_message}"];
+        return err($errorText);
       }
 
       if ($http_code !== 200) {
-        $this->logger->addError("HTTP error: " . $http_code);
+        $errorText = "HTTP error: " . $http_code;
+        $this->logger->addError($errorText);
         curl_close($ch);
-        return ["success" => "false", "error" => "Cavas LMS returned HTTP $http_code."];
+        return err($errorText);
       }
       
       curl_close($ch);
@@ -2599,95 +2601,111 @@ $usedCosSim = True;
       return ["success" => "true", "courseName" => $data["name"]];
     }
 
-    public function setCanvasLmsCourse($course_id, $canvas_course_id, $canvas_course_name, $access_token) {
+    public function setCanvasLmsCourseHandler($course_id, $canvas_course_id, $canvas_course_name, $access_token) {
       if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to syncrhonize with a Canvas LMS course");
 
-      return (new \asci\server\database\DBSynchronization($this->db))->setCanvasLmsCourse($course_id, $canvas_course_id, $canvas_course_name, $access_token);
+      return $this->synchronizationStore->setCanvasLmsCourse($course_id, $canvas_course_id, $canvas_course_name, $access_token);
     }
 
-    public function removeCanvasLmsCourse($course_id) {
+    public function removeCanvasLmsCourseHandler($course_id) {
       if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to remove Canvas LMS access token");
 
-      return (new \asci\server\database\DBSynchronization($this->db))->removeCanvasLmsCourse($course_id);
+      $removed_course = $this->synchronizationStore->removeCanvasLmsCourse($course_id);
+
+      if ($removed_course) {
+        return ["success" => "true", "removeddCanvasLmsCourse" => $removed_course];
+      } else {
+        return err("No Canvas LMS course found associated with ASCI course");
+      }
     }
 
-    public function getCanvasLmsSyncStatus($course_id) {
+    public function getCanvasLmsSyncStatusHandler($course_id) {
       if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS sync status");
 
-      return (new \asci\server\database\DBSynchronization($this->db))->getCanvasLmsSyncStatus($course_id);
+      $courseName = $this->synchronizationStore->getCanvasLmsCourseName($course_id);
+
+      if ($courseName) {
+        return ["success" => "true", "synced" => true, "courseName" => $courseName];
+      } else {
+        return ["success" => "true", "synced" => false];
+      }
     }
 
-    public function getCanvasLmsCourseUsers($course_id) {
+    public function getCanvasLmsCourseUsersHandler($course_id) {
       if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
-          throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS course roster");
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS course roster");
+      
+      $canvas_course_id = $this->synchronizationStore->getCanvasLmsCourseId($course_id);
+      $access_token = $this->synchronizationStore->getCanvasLmsAccessToken($course_id);
 
-      $tokenResult = (new \asci\server\database\DBSynchronization($this->db))->getCanvasLmsAccessToken($course_id);
+      if (!$canvas_course_id || !$access_token)
+        return err("No Canvas LMS course found associated with ASCI course");
+
       $canvas_domain = "https://canvas.its.virginia.edu";
-      $canvas_course_id = $tokenResult["canvas_course_id"];
-      $access_token = $tokenResult["access_token"];
       $enrollment_types = ["student", "teacher", "ta"];
       $results = [];
 
       foreach ($enrollment_types as $type) {
-          $url = "$canvas_domain/api/v1/courses/$canvas_course_id/users?enrollment_type[]=$type&per_page=100";
-          $users = [];
+        $url = "$canvas_domain/api/v1/courses/$canvas_course_id/users?enrollment_type[]=$type&per_page=100";
+        $users = [];
 
-          while ($url) {
-              $ch = curl_init();
-              curl_setopt($ch, CURLOPT_URL, $url);
-              curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-              curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer $access_token"]);
-              curl_setopt($ch, CURLOPT_HEADER, true);
+        while ($url) {
+          $ch = curl_init();
+          curl_setopt($ch, CURLOPT_URL, $url);
+          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+          curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer $access_token"));
+          curl_setopt($ch, CURLOPT_HEADER, true);
 
-              $response = curl_exec($ch);
+          $response = curl_exec($ch);
 
-              if ($errno = curl_errno($ch)) {
-                  $error_message = curl_strerror($errno);
-                  $this->logger->addError("cURL error ({$errno}):\n {$error_message}");
-                  curl_close($ch);
-                  return ["success" => "false", "error" => "cURL error ({$errno}): {$error_message}"];
-              }
-
-              $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-              $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+          if ($errno = curl_errno($ch)) {
+              $errorText = "cURL error ({$errno}): " . curl_strerror($errno);
+              $this->logger->addError($errorText);
               curl_close($ch);
-
-              if ($http_code !== 200) {
-                  $this->logger->addError("HTTP error: " . $http_code);
-                  return ["success" => "false", "error" => "Canvas LMS returned HTTP $http_code."];
-              }
-
-              $headers = substr($response, 0, $header_size);
-              $body = substr($response, $header_size);
-              $users = array_merge($users, json_decode($body, true));
-
-              $url = null;
-              foreach (explode("\n", $headers) as $header) {
-                  if (stripos($header, 'Link:') === 0) {
-                      foreach (explode(",", $header) as $part) {
-                          if (strpos($part, 'rel="next"') !== false) {
-                              preg_match('/<(.+?)>/', $part, $matches);
-                              if ($matches) $url = trim($matches[1]);
-                          }
-                      }
-                  }
-              }
+              return err($errorText);
           }
 
-          $results[$type] = $users;
+          $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+          $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+          curl_close($ch);
+
+          if ($http_code !== 200) {
+            $errorText = "HTTP error: " . $http_code;
+            $this->logger->addError($errorText);
+            return err($errorText);
+          }
+
+          $headers = substr($response, 0, $header_size);
+          $body = substr($response, $header_size);
+          $users = array_merge($users, json_decode($body, true));
+
+          $url = null;
+          foreach (explode("\n", $headers) as $header) {
+            if (stripos($header, 'Link:') === 0) {
+              foreach (explode(",", $header) as $part) {
+                if (strpos($part, 'rel="next"') !== false) {
+                  preg_match('/<(.+?)>/', $part, $matches);
+                  if ($matches) $url = trim($matches[1]);
+                }
+              }
+            }
+          }
+        }
+
+        $results[$type] = $users;
       }
 
-      return [
-          "success" => "true",
-          "users" => [
-            "student" => $results["student"],
-            "instructor" => $results["teacher"],
-            "ta" => $results["ta"]
-          ]
-      ];
+    return [
+      "success" => "true",
+      "users" => [
+        "student" => $results["student"],
+        "instructor" => $results["teacher"],
+        "ta" => $results["ta"]
+      ]
+    ];
   }
 }
 

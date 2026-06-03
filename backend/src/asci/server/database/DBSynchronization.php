@@ -198,35 +198,38 @@ class DBSynchronization
 
     public function removeCanvasLmsCourse($course_id) {
         $this->db->prepare('canvasCheckStmt',
-            'SELECT course_id FROM course_settings_canvas WHERE course_id = $1');
+            'SELECT canvas_course_id, canvas_course_name FROM course_settings_canvas WHERE course_id = $1');
         $result = $this->db->fetchrow($this->db->execute('canvasCheckStmt', [$course_id]));
 
         if ($result) {
             $this->db->prepare('deleteCanvasStmt',
                 'DELETE FROM course_settings_canvas WHERE course_id = $1');
             $this->db->execute('deleteCanvasStmt', [$course_id]);
-            return ["success" => "true"];
-        } else {
-            return ["success" => "false", "message" => "No Canvas LMS Access Token found for this course"];
         }
+
+        return $result;
     }
 
-    public function getCanvasLmsSyncStatus($course_id) {
-        $this->db->prepare('canvasCheckStmt',
-            'SELECT canvas_course_name FROM course_settings_canvas WHERE course_id = $1');
-        $result = $this->db->fetchrow($this->db->execute('canvasCheckStmt', [$course_id]));
+    public function getCanvasLmsCourseId($course_id) {
+        $this->db->prepare('canvasGetCourseIdStmt',
+            'SELECT canvas_course_id FROM course_settings_canvas WHERE course_id = $1');
+        $result =  $this->db->fetchrow($this->db->execute('canvasGetCourseIdStmt', [$course_id]));
 
-        if ($result) {
-            return ["success" => "true", "synced" => true, "courseName" => $result["canvas_course_name"]];
-        } else {
-            return ["success" => "true", "synced" => false];
-        }
+        return $result["canvas_course_id"];
+    }
+
+    public function getCanvasLmsCourseName($course_id) {
+        $this->db->prepare('canvasGetCourseNameStmt',
+            'SELECT canvas_course_name FROM course_settings_canvas WHERE course_id = $1');
+        $result = $this->db->fetchrow($this->db->execute('canvasGetCourseNameStmt', [$course_id]));
+
+        return $result["canvas_course_name"];
     }
 
     public function getCanvasLmsAccessToken($course_id) {
-        $this->db->prepare('canvasCheckStmt',
-            'SELECT canvas_course_id, canvas_access_token, canvas_access_token_iv FROM course_settings_canvas WHERE course_id = $1');
-        $result = $this->db->fetchrow($this->db->execute('canvasCheckStmt', [$course_id]));
+        $this->db->prepare('canvasGetAccessTokenStmt',
+            'SELECT canvas_access_token, canvas_access_token_iv FROM course_settings_canvas WHERE course_id = $1');
+        $result = $this->db->fetchrow($this->db->execute('canvasGetAccessTokenStmt', [$course_id]));
 
         if (!$result)
             return null;
@@ -235,9 +238,6 @@ class DBSynchronization
         $iv = base64_decode($result["canvas_access_token_iv"]);
         $decrypted = openssl_decrypt($result["canvas_access_token"], 'AES-256-CBC', $key, 0, $iv);
 
-        if ($decrypted === false)
-            return null;
-
-        return ["canvas_course_id" => $result["canvas_course_id"], "access_token" => $decrypted];
+        return $decrypted;
     }
 }

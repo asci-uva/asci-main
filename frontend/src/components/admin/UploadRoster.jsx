@@ -115,14 +115,15 @@ function UploadRoster(props) {
     })
       .then((response) => response.json())
       .then((data) => {
+        setDisabled(false);
         console.log("Fetched Canvas LMS course users:", data);
         if (data.success) {
           const rosterData = parseCanvasLmsResponse(data.users);
           console.log(rosterData);
           sendRosterToBackend(rosterData);
         } else {
-          console.log("There was an error syncing Canvas LMS course users");
-          toast.error("There was an error syncing Canvas LMS course users");
+          console.log(data.error || "There was an error syncing Canvas LMS course users");
+          toast.error(data.error || "There was an error syncing Canvas LMS course users");
         }
       })
       .catch((error) => {

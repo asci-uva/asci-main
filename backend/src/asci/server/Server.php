@@ -749,30 +749,30 @@ class Server
                 $courseId = $this->input["courseId"];
                 $canvasCourseId = $this->input["canvasCourseId"];
                 $accessToken = $this->input["accessToken"];
-                $this->setResponse($executor->fetchCanvasLmsCourseName($courseId, $canvasCourseId, $accessToken));
+                $this->setResponse($executor->fetchCanvasLmsCourseNameHandler($courseId, $canvasCourseId, $accessToken));
                 break;
             
             case "setCanvasLmsCourse":
-                $course_id = $this->input["courseId"];
-                $canvas_course_id = $this->input["canvasCourseId"];
-                $canvas_course_name = $this->input["canvasCourseName"];
-                $access_token = $this->input["accessToken"];
-                $this->setResponse($executor->setCanvasLmsCourse($course_id, $canvas_course_id, $canvas_course_name, $access_token));
+                $courseId = $this->input["courseId"];
+                $canvasCourseId = $this->input["canvasCourseId"];
+                $canvasCourseName = $this->input["canvasCourseName"];
+                $accessToken = $this->input["accessToken"];
+                $this->setResponse($executor->setCanvasLmsCourseHandler($courseId, $canvasCourseId, $canvasCourseName, $accessToken));
                 break;
             
             case "removeCanvasLmsCourse":
                 $course_id = $this->input["courseId"];
-                $this->setResponse($executor->removeCanvasLmsCourse($course_id));
+                $this->setResponse($executor->removeCanvasLmsCourseHandler($course_id));
                 break;
             
             case "getCanvasLmsSyncStatus":
                 $course_id = $this->input["courseId"];
-                $this->setResponse($executor->getCanvasLmsSyncStatus($course_id));
+                $this->setResponse($executor->getCanvasLmsSyncStatusHandler($course_id));
                 break;
             
             case "getCanvasLmsCourseUsers":
                 $course_id = $this->input["course_id"];
-                $this->setResponse($executor->getCanvasLmsCourseUsers($course_id));
+                $this->setResponse($executor->getCanvasLmsCourseUsersHandler($course_id));
                 break;
 
             default:
