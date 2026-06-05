@@ -12,8 +12,8 @@ function CanvasLMSSync(props) {
 
     const handleSynchronize = () => {
         const payload = {
-            canvasCourseId: canvasCourseId,
-            accessToken: accessToken,
+            canvasCourseId: canvasCourseId.trim(),
+            accessToken: accessToken.trim(),
             courseId: props.course_id,
             command: "fetchCanvasLmsCourseName",
         };
