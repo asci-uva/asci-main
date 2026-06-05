@@ -88,6 +88,10 @@ function CanvasLmsSync(props) {
     };
 
     const handleDesynchronize = () => {
+        setShowModal(true);
+    };
+
+    const handleConfirmDesynchronize = () => {
         setDisabled(true);
 
         const payload = {
@@ -106,6 +110,7 @@ function CanvasLmsSync(props) {
             .then((response) => response.json())
             .then((data) => {
                 setDisabled(false);
+                setShowModal(false);
                 if (data.success === "true") {
                     console.log(data.message);
                     toast.success(data.message);
@@ -177,7 +182,7 @@ function CanvasLmsSync(props) {
             </form>
         )}
         </div>
-        {showModal && (
+        {showModal && !synced && (
             <div className="modal show d-block" tabIndex="-1">
                 <div className="modal-dialog">
                     <div className="modal-content">
@@ -190,6 +195,24 @@ function CanvasLmsSync(props) {
                         <div className="modal-footer">
                             <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
                             <button className="btn btn-primary" onClick={handleConfirmSynchronize}>Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
+        {showModal && synced && (
+            <div className="modal show d-block" tabIndex="-1">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Confirm Canvas Desync</h5>
+                        </div>
+                        <div className="modal-body">
+                            <p>Are you sure you want to desync from <strong>{props.canvasCourseName}</strong> on Canvas LMS?</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                            <button className="btn btn-primary" onClick={handleConfirmDesynchronize}>Confirm</button>
                         </div>
                     </div>
                 </div>
