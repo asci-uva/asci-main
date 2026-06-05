@@ -193,7 +193,7 @@ class DBSynchronization
         }
 
         $this->db->commit();
-        return ["success" => "true", "message" => "Successfully synced with Canvas LMS"];
+        return ["courseId" => $course_id, "canvasCourseId" => $canvas_course_id];
     }
 
     public function removeCanvasLmsCourse($course_id) {

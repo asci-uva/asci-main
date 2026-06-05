@@ -2605,7 +2605,12 @@ $usedCosSim = True;
       if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to syncrhonize with a Canvas LMS course");
 
-      return $this->synchronizationStore->setCanvasLmsCourse($course_id, $canvas_course_id, $canvas_course_name, $access_token);
+      $set_canvas_course = $this->synchronizationStore->setCanvasLmsCourse($course_id, $canvas_course_id, $canvas_course_name, $access_token);
+
+      if ($set_canvas_course)
+        return ["success" => "true", "message" => "Successfully synced with Canvas LMS", "courseSettingsCanvasIds" => $set_canvas_course];
+      else
+        return err("Failed to set Canvas LMS Course in database");
     }
 
     public function removeCanvasLmsCourseHandler($course_id) {
@@ -2615,7 +2620,7 @@ $usedCosSim = True;
       $removed_course = $this->synchronizationStore->removeCanvasLmsCourse($course_id);
 
       if ($removed_course) {
-        return ["success" => "true", "removeddCanvasLmsCourse" => $removed_course];
+        return ["success" => "true", "message" => "Successfully desynchronized from Canvas LMS course", "removeddCanvasLmsCourse" => $removed_course];
       } else {
         return err("No Canvas LMS course found associated with ASCI course");
       }
