@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 
-function CanvasLMSSync(props) {
+function CanvasLmsSync(props) {
     const [canvasCourseId, setCanvasCourseId] = useState("");
     const [accessToken, setAccessToken] = useState("");
     const [disabled, setDisabled] = useState(false);
@@ -199,4 +199,4 @@ function CanvasLMSSync(props) {
     );
 }
 
-export default CanvasLMSSync;
+export default CanvasLmsSync;
