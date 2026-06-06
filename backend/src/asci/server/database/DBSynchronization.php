@@ -171,6 +171,37 @@ class DBSynchronization
         return empty($missingStudents) ? ['no missing student'] : $missingStudents;
     }
 
+    public function addCanvasLmsAccessToken($userId, $canvas_lms_access_token) {
+        $key = getenv("CANVAS_ENCRYPTION_KEY");
+        $iv = openssl_random_pseudo_bytes(16);
+        $encrypted = openssl_encrypt($canvas_lms_access_token, 'AES-256-CBC', $key, 0, $iv);
+        $iv_base64 = base64_encode($iv);
+
+        $this->db->beginTransaction();
+
+        $this->db->prepare('canvasCheckAccessTokenStmt', 'SELECT * FROM canvas_lms_access_tokens WHERE user_id = $1');
+        $result = $this->db->fetchrow($this->db->execute('canvasCheckAccessTokenStmt', [$userId]));
+
+        if ($result) {
+            $this->db->prepare('updateCanvasAccessTokenStmt',
+                'UPDATE canvas_lms_access_tokens SET access_token = $1, access_token_iv = $2 WHERE user_id = $3');
+            $this->db->execute('updateCanvasAccessTokenStmt', [$encrypted, $iv_base64, $userId]);
+        } else {
+            $this->db->prepare('addCanvasAccessTokenStmt', 
+                'INSERT INTO canvas_lms_access_tokens (user_id, access_token, access_token_iv) VALUES ($1, $2, $3)');
+            $this->db->execute('addCanvasAccessTokenStmt', [$userId, $encrypted, $iv_base64]);
+        }
+
+        $this->db->commit();
+        return true;
+    }
+
+    public function getCanvasLmsSyncStatus($userId) {
+        $this->db->beginTransaction();
+        $this->db->prepare('canvasCheckAccessTokenStmt', 'SELECT user_id FROM canvas_lms_access_tokens WHERE user_id = $1');
+        return $this->db->fetchrow($this->db->execute('canvasCheckAccessTokenStmt', [$userId]));
+    }
+
     public function setCanvasLmsCourse($course_id, $canvas_course_id, $canvas_course_name, $access_token) {
         $key = getenv("CANVAS_ENCRYPTION_KEY");
         $iv = openssl_random_pseudo_bytes(16);

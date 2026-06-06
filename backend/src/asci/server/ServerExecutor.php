@@ -2567,6 +2567,113 @@ $usedCosSim = True;
         return ["success" => "true", "mapping" => $mapping];
     }
 
+    public function validateCanvasLmsAccessTokenHandler($asci_course_id, $canvas_lms_access_token) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to validate Canvas LMS access token");
+
+      $canvas_domain = "https://canvas.its.virginia.edu";
+
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, "$canvas_domain/api/v1/users/self");
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer $canvas_lms_access_token"));
+      $response = curl_exec($ch);
+      $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+      if($errno = curl_errno($ch)) {
+        $errorText = "cURL error ({$errno}): " . curl_strerror($errno);
+        $this->logger->addError($errorText);
+        curl_close($ch);
+        return err($errorText);
+      }
+
+      if ($http_code !== 200) {
+        $errorText = "HTTP error: " . $http_code;
+        $this->logger->addError($errorText);
+        curl_close($ch);
+        return err($errorText);
+      }
+
+      curl_close($ch);
+
+      $this->synchronizationStore->addCanvasLmsAccessToken($this->user->id, $canvas_lms_access_token);
+
+      return ["success" => "true"];
+    }
+
+    public function fetchCanvasLmsEnrollmentTermsHandler($asci_course_id, $canvas_access_token) {
+      if (!this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS enrollment terms");
+
+      $canvas_domain = "https://canvas.its.virginia.edu";
+      $url = "$canvas_domain/api/v1/accounts/self/terms?per_page=100";
+      $results=[];
+
+      while ($url) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer $canvas_access_token"));
+        curl_setopt($ch, CURLOPT_HEADER, true);
+
+        $response = curl_exec($ch);
+
+        if ($errno = curl_errno($ch)) {
+          $errorText = "cURL error ({$errno}): " . curl_strerror($errno);
+          $this->logger->addError($errorText);
+          curl_close($ch);
+          return err($errorText);
+        }
+
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        curl_close($ch);
+
+        if ($http_code !== 200) {
+          $errorText = "HTTP error: " . $http_code;
+          $this->logger->addError($errorText);
+          return err($errorText);
+        }
+
+        $headers = substr($response, 0, $header_size);
+        $body = substr($response, $header_size);
+        $data = json_decode($body, true);
+
+        foreach ($data['enrollment_terms'] as $term) {
+          if (preg_match('/^\d{4} (Fall|Spring|Summer)$/', $term['name'])) {
+            $results[$term['name']] = $term['id'];
+          }
+        }
+
+        $url = null;
+        foreach (explode("\n", $headers) as $header) {
+          if (stripos($header, 'Link:') === 0) {
+            foreach (explode(",", $header) as $part) {
+              if (strpos($part, 'rel="next"') !== false) {
+                preg_match('/<(.+?)>/', $part, $matches);
+                if ($matches) $url = trim($matches[1]);
+              }
+            }
+          }
+        }
+      }
+
+      return ["success" => "true", "terms" => $results];
+    }
+
+    public function getCanvasLmsSyncStatusHandler($course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS sync status");
+
+      $courseName = $this->synchronizationStore->getCanvasLmsCourseName($course_id);
+
+      if ($courseName) {
+        return ["success" => "true", "synced" => true];
+      } else {
+        return ["success" => "true", "synced" => false];
+      }
+    }
+
     public function fetchCanvasLmsCourseNameHandler($course_id, $canvas_course_id, $access_token) {
       if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS course info");
@@ -2623,19 +2730,6 @@ $usedCosSim = True;
         return ["success" => "true", "message" => "Successfully desynchronized from Canvas LMS course", "removeddCanvasLmsCourse" => $removed_course];
       } else {
         return err("No Canvas LMS course found associated with ASCI course");
-      }
-    }
-
-    public function getCanvasLmsSyncStatusHandler($course_id) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "canvas-lms-sync"))
-        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS sync status");
-
-      $courseName = $this->synchronizationStore->getCanvasLmsCourseName($course_id);
-
-      if ($courseName) {
-        return ["success" => "true", "synced" => true, "courseName" => $courseName];
-      } else {
-        return ["success" => "true", "synced" => false];
       }
     }
 

@@ -151,6 +151,10 @@ class DBUserCourse
           if ($role == "instructor")
             return true;
           break;
+        case "sync-canvas-lms-course":
+          if ($role == "instructor")
+            return true;
+          break;
         case "canvas-lms-sync":
           if ($role == "instructor")
             return true;

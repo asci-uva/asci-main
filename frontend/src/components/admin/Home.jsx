@@ -58,8 +58,6 @@
             .then((data) => {
                 if (data.success === "true") {
                     setCanvasLmsSynced(data.synced);
-                    if (data.synced)
-                      setCanvasCourseName(data.courseName);
                 }
             });
     }, [courseList, course]);

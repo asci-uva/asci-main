@@ -744,7 +744,19 @@ class Server
                 $course_id = $this->input["courseId"];
                 $this->setResponse($executor->getDiscordMappingHandler($user, $course_id));
                 break;
-
+            
+            case "validateCanvasLmsAccessToken":
+                $asciCourseId = $this->input["asciCourseId"];
+                $canvasLmsAccessToken = $this->input["canvasLmsAccessToken"];
+                $this->setResponse($executor->validateCanvasLmsAccessTokenHandler($asciCourseId, $canvasLmsAccessToken));
+                break;
+            
+            case "fetchCanvasLmsEnrollmentTerms":
+                $asciCourseId = $this->input["asciCourseId"];
+                $canvasAccessToken =$this-Input["canvasAccessToken"];
+                $this->setResponse($executor->fetchCanvasLmsEnrollmentTermsHandler($asciCourseId, $canvasAccessToken));
+                break;
+            
             case "fetchCanvasLmsCourseName":
                 $courseId = $this->input["courseId"];
                 $canvasCourseId = $this->input["canvasCourseId"];
