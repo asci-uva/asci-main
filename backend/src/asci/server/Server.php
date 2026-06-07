@@ -762,30 +762,35 @@ class Server
                 $this->setResponse($executor->getCanvasLmsEnrollmentTermsHandler($asciCourseId));
                 break;
             
-            case "fetchCanvasLmsCourseName":
-                $courseId = $this->input["courseId"];
-                $canvasCourseId = $this->input["canvasCourseId"];
-                $accessToken = $this->input["accessToken"];
-                $this->setResponse($executor->fetchCanvasLmsCourseNameHandler($courseId, $canvasCourseId, $accessToken));
+            case "searchCanvasLmsCourses":
+                $asciCourseId = $this->input["asciCourseId"];
+                $termId = $this->input["termId"];
                 break;
             
-            case "setCanvasLmsCourse":
-                $courseId = $this->input["courseId"];
-                $canvasCourseId = $this->input["canvasCourseId"];
-                $canvasCourseName = $this->input["canvasCourseName"];
-                $accessToken = $this->input["accessToken"];
-                $this->setResponse($executor->setCanvasLmsCourseHandler($courseId, $canvasCourseId, $canvasCourseName, $accessToken));
-                break;
+            // case "fetchCanvasLmsCourseName":
+            //     $courseId = $this->input["courseId"];
+            //     $canvasCourseId = $this->input["canvasCourseId"];
+            //     $accessToken = $this->input["accessToken"];
+            //     $this->setResponse($executor->fetchCanvasLmsCourseNameHandler($courseId, $canvasCourseId, $accessToken));
+            //     break;
             
-            case "getCanvasLmsSyncStatus":
-                $course_id = $this->input["courseId"];
-                $this->setResponse($executor->getCanvasLmsSyncStatusHandler($course_id));
-                break;
+            // case "setCanvasLmsCourse":
+            //     $courseId = $this->input["courseId"];
+            //     $canvasCourseId = $this->input["canvasCourseId"];
+            //     $canvasCourseName = $this->input["canvasCourseName"];
+            //     $accessToken = $this->input["accessToken"];
+            //     $this->setResponse($executor->setCanvasLmsCourseHandler($courseId, $canvasCourseId, $canvasCourseName, $accessToken));
+            //     break;
             
-            case "getCanvasLmsCourseUsers":
-                $course_id = $this->input["course_id"];
-                $this->setResponse($executor->getCanvasLmsCourseUsersHandler($course_id));
-                break;
+            // case "getCanvasLmsSyncStatus":
+            //     $course_id = $this->input["courseId"];
+            //     $this->setResponse($executor->getCanvasLmsSyncStatusHandler($course_id));
+            //     break;
+            
+            // case "getCanvasLmsCourseUsers":
+            //     $course_id = $this->input["course_id"];
+            //     $this->setResponse($executor->getCanvasLmsCourseUsersHandler($course_id));
+            //     break;
 
             default:
               throw new \asci\exceptions\ASCIException("Unknown command: {$this->input["command"]}"); 

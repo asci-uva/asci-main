@@ -9,15 +9,16 @@ function CanvasLmsSync(props) {
     const [showValidationModal, setShowValidationModal] = useState(false);
     const [removeAccessTokenButtonDisabled, setRemoveAccessTokenButtonDisabled] = useState(false);
     const [showRemoveModal, setShowRemoveModal] = useState(false);
+    const [terms, setTerms] = useState({});
     const termNames = ["Fall", "Spring", "Summer"];
     const [years, setYears] = useState([]);
-    const [selectedTerm, setSelectedTerm] = useState("");
+    const [selectedTermName, setSelectedTermName] = useState("");
     const [selectedYear, setSelectedYear] = useState("");
 
     useEffect(() => {
         if (props.canvasLmsSynced)
             getEnrollmentYears();
-    });
+    }, [props.CanvasLmsSynced]);
 
     const validateCanvasAccessToken = () => {
         setShowValidationModal(true);
@@ -48,14 +49,15 @@ function CanvasLmsSync(props) {
                     props.setCanvasLmsSynced(true);
                     getEnrollmentYears();
                     console.log("Successfully validated Canvas LMS access token");
-                    toast.success("Successfully validated canvas LMS access token");
+                    toast.success("Successfully validated Canvas LMS access token");
                 } else {
                     console.log(data.error);
-                    toast.error(data.error);
+                    toast.error(data.error || "Failed to validate Canvas LMS access token");
                 }
             })
             .catch((error) => {
                 setShowValidationModal(false);
+                setValidateButtonDisabled(false);
                 console.log(error);
                 toast.error(error);
             });
@@ -116,7 +118,37 @@ function CanvasLmsSync(props) {
             .then((data) => {
                 if (data.success === "true") {
                     console.log(data);
+                    setTerms(data.terms);
                     setYears([...new Set(Object.keys(data.terms).map(term => term.split(" ")[0]))].sort().reverse());
+                } else {
+                    toast.error(data.error);
+                }
+            })
+            .catch((error) => {
+                toast.error(error);
+            });
+    };
+
+    const searchCanvasLmsCourses = () => {
+        const termKey = `${selectedYear} ${selectedTermName}`;
+        const termId = terms[termKey];
+
+        const payload = {
+            asciCourseId: props.course_id,
+            termId: termId,
+            command: "searchCanvasLmsCourses",
+        };
+
+        fetch(props.url, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success === "true") {
+                    console.log(data);
                 } else {
                     toast.error(data.error);
                 }
@@ -138,25 +170,31 @@ function CanvasLmsSync(props) {
         return <button type="button" className="btn btn-primary" onClick={removeCanvasLmsAccessToken}>Remove Access Token</button>;
     }
 
+    function get_search_courses_button() {
+        return <button type="button" className="btn btn-primary" onClick={searchCanvasLmsCourses}>Search</button>;
+    }
+
     return (
         <div className="card">
             <h4 className="card-header">Canvas LMS Synchronization</h4>
             <div className="card-body">
+                <h5>Access token validation</h5>
             {props.canvasLmsSynced ? (
                 <>
                 <div className="mb-3">
                     <p>Canvas LMS access token detected</p>
                     {get_remove_access_token_button()}
                 </div>
+                <h5>Search for course</h5>
                 <div className="mb-3">
-                    <label>Select Semester</label>
+                    <label>Filter Semester</label>
                     <div className="d-flex gap-2">
                         <select
                             className="form-select"
-                            value={selectedTerm}
-                            onChange={(e) => setSelectedTerm(e.target.value)}
+                            value={selectedTermName}
+                            onChange={(e) => setSelectedTermName(e.target.value)}
                         >
-                            <option value="">Select Term</option>
+                            <option value="">Select Term Name</option>
                             {termNames.map((term) => (
                                 <option key={term} value={term}>{term}</option>
                             ))}
@@ -171,13 +209,14 @@ function CanvasLmsSync(props) {
                                 <option key={year} value={year}>{year}</option>
                             ))}
                         </select>
+                        {get_search_courses_button()}
                     </div>
                 </div>
                 </>
             ) : (
                 <>
                     <div className="mb-3">
-                        <label>Canvas LMS Access Token</label>
+                        <label>Enter Canvas LMS access token</label>
                         <input
                             className="form-control"
                             type="text"
