@@ -751,10 +751,15 @@ class Server
                 $this->setResponse($executor->validateCanvasLmsAccessTokenHandler($asciCourseId, $canvasLmsAccessToken));
                 break;
             
-            case "fetchCanvasLmsEnrollmentTerms":
+            case "removeCanvasLmsAccessToken":
                 $asciCourseId = $this->input["asciCourseId"];
-                $canvasAccessToken =$this-Input["canvasAccessToken"];
-                $this->setResponse($executor->fetchCanvasLmsEnrollmentTermsHandler($asciCourseId, $canvasAccessToken));
+                $this->setResponse($executor->removeCanvasLmsAccessTokenHandler($asciCourseId));
+                break;
+            
+            
+            case "getCanvasLmsEnrollmentTerms":
+                $asciCourseId = $this->input["asciCourseId"];
+                $this->setResponse($executor->getCanvasLmsEnrollmentTermsHandler($asciCourseId));
                 break;
             
             case "fetchCanvasLmsCourseName":
@@ -770,11 +775,6 @@ class Server
                 $canvasCourseName = $this->input["canvasCourseName"];
                 $accessToken = $this->input["accessToken"];
                 $this->setResponse($executor->setCanvasLmsCourseHandler($courseId, $canvasCourseId, $canvasCourseName, $accessToken));
-                break;
-            
-            case "removeCanvasLmsCourse":
-                $course_id = $this->input["courseId"];
-                $this->setResponse($executor->removeCanvasLmsCourseHandler($course_id));
                 break;
             
             case "getCanvasLmsSyncStatus":

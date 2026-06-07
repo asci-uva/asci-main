@@ -2601,9 +2601,22 @@ $usedCosSim = True;
       return ["success" => "true"];
     }
 
-    public function fetchCanvasLmsEnrollmentTermsHandler($asci_course_id, $canvas_access_token) {
-      if (!this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
+    public function removeCanvasLmsAccessTokenHandler($asci_course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to remove Canvas LMS access token");
+
+      $result = $this->synchronizationStore->removeCanvasLmsAccessToken($this->user->id);
+
+      if ($result)
+        return ["success" => "true"];
+      return ["success" => "false"];
+    }
+
+    public function getCanvasLmsEnrollmentTermsHandler($asci_course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS enrollment terms");
+
+      $canvas_access_token = $this->synchronizationStore->getCanvasLmsAccessToken($this->user->id);
 
       $canvas_domain = "https://canvas.its.virginia.edu";
       $url = "$canvas_domain/api/v1/accounts/self/terms?per_page=100";
