@@ -10,7 +10,7 @@ function CanvasLmsSync(props) {
     const [removeAccessTokenButtonDisabled, setRemoveAccessTokenButtonDisabled] = useState(false);
     const [showRemoveModal, setShowRemoveModal] = useState(false);
     const [terms, setTerms] = useState({});
-    const termNames = ["Fall", "Spring", "Summer"];
+    const [termNames, setTermNames] = useState([]);
     const [years, setYears] = useState([]);
     const [selectedTermName, setSelectedTermName] = useState("");
     const [selectedYear, setSelectedYear] = useState("");
@@ -120,6 +120,7 @@ function CanvasLmsSync(props) {
                     console.log(data);
                     setTerms(data.terms);
                     setYears([...new Set(Object.keys(data.terms).map(term => term.split(" ")[0]))].sort().reverse());
+                    setTermNames([...new Set(Object.keys(data.terms).map(term => term.split(" ")[1]))]);
                 } else {
                     toast.error(data.error);
                 }
