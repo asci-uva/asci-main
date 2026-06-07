@@ -762,6 +762,11 @@ class Server
                 $this->setResponse($executor->getCanvasLmsEnrollmentTermsHandler($asciCourseId));
                 break;
             
+            case "getCanvasLmsCourses":
+                $asciCourseId = $this->input["asciCourseId"];
+                $this->setResponse($executor->getCanvasLmsCoursesHandler($asciCourseId));
+                break;
+
             case "searchCanvasLmsCourses":
                 $asciCourseId = $this->input["asciCourseId"];
                 $termId = $this->input["termId"];
