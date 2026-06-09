@@ -2667,7 +2667,7 @@ $usedCosSim = True;
 
         foreach ($data['enrollment_terms'] as $term) {
           if (preg_match('/^\d{4} (Fall|Spring|Summer)$/', $term['name'])) {
-            $results[$term['name']] = $term['id'];
+            $results[$term['id']] = $term['name'];
           }
         }
 

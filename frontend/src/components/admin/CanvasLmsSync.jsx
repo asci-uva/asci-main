@@ -17,15 +17,12 @@ function CanvasLmsSync(props) {
     const [canvasLmsCourses, setCanvasLmsCourses] = useState([]);
     const [expandedCanvasLmsCourseId, setExpandedCanvasLmsCourseId] = useState(null);
     const [showSelectModal, setShowSelectModal] = useState(false);
-
-    const termIdToName = Object.fromEntries(
-        Object.entries(terms).map(([name, id]) => [id, name])
-    );
+    const [selectedCanvasLmsCourse, setSelectedCanvasLmsCourse] = useState(null);
 
     const filteredAndSortedCanvasLmsCourses = [...canvasLmsCourses]
     .filter((course) => {
         const termName =
-            termIdToName[course.enrollment_term_id] ?? "";
+            terms[course.enrollment_term_id] ?? "";
 
         const [year, term] = termName.split(" ");
 
@@ -38,7 +35,6 @@ function CanvasLmsSync(props) {
         return yearMatch && termMatch;
     })
     .sort((a, b) => {
-        // primary sort: newest term first
         return b.enrollment_term_id - a.enrollment_term_id;
     });
 
@@ -148,8 +144,9 @@ function CanvasLmsSync(props) {
                 if (data.success === "true") {
                     console.log(data);
                     setTerms(data.terms);
-                    setYears([...new Set(Object.keys(data.terms).map(term => term.split(" ")[0]))].sort().reverse());
-                    setTermNames([...new Set(Object.keys(data.terms).map(term => term.split(" ")[1]))]);
+                    const termNamesArray = Object.values(data.terms);
+                    setYears([...new Set(termNamesArray.map(t => t.split(" ")[0]))].sort().reverse());
+                    setTermNames([...new Set(termNamesArray.map(t => t.split(" ")[1]))]);
                 } else {
                     toast.error(data.error);
                 }
@@ -185,8 +182,9 @@ function CanvasLmsSync(props) {
             });
     };
 
-    const selectCanvasLmsCourse = () => {
+    const selectCanvasLmsCourse = (course) => {
         setShowSelectModal(true);
+        setSelectedCanvasLmsCourse(course);
     };
 
     const confirmSelectCanvasLmsCourse = () => {
@@ -203,10 +201,6 @@ function CanvasLmsSync(props) {
         if (removeAccessTokenButtonDisabled)
             return <button type="button" className="btn btn-primary" disabled>Removing Access Token (Please Wait)</button>;
         return <button type="button" className="btn btn-primary" onClick={removeCanvasLmsAccessToken}>Remove Access Token</button>;
-    }
-
-    function get_select_course_button() {
-        return <button type="button" className="btn btn-primary" onClick={selectCanvasLmsCourse}>Select Course</button>;
     }
 
     return (
@@ -271,13 +265,16 @@ function CanvasLmsSync(props) {
                                         </span>
 
                                         <span className="text-muted">
-                                            {termIdToName[course.enrollment_term_id] ?? "Unknown Term"}
+                                            {terms[course.enrollment_term_id] ?? "Unknown Term"}
                                         </span>
                                     </div>
 
                                     {expandedCanvasLmsCourseId === course.id && (
                                         <div className="mt-2">
-                                            {get_select_course_button()}
+                                            <button type="button" className="btn btn-primary" onClick={(e) => {
+                                                e.stopPropagation();
+                                                selectCanvasLmsCourse(course);
+                                            }}>Select Course</button>
                                         </div>
                                     )}
                                 </li>
@@ -354,7 +351,7 @@ function CanvasLmsSync(props) {
                             <p>Are you sure you want to select this Canvas LMS course?</p>
                         </div>
                         <div className="modal-footer">
-                            <button className="btn btn-secondary" onClick={() => setShowSelectModal(false)}>Cancel</button>
+                            <button className="btn btn-secondary" onClick={() => {setShowSelectModal(false); setSelectedCanvasLmsCourse(null)}}>Cancel</button>
                             <button className="btn btn-primary" onClick={confirmSelectCanvasLmsCourse}>Confirm</button>
                         </div>
                     </div>
