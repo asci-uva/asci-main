@@ -142,7 +142,6 @@ function CanvasLmsSync(props) {
             .then((response) => response.json())
             .then((data) => {
                 if (data.success === "true") {
-                    console.log(data);
                     setTerms(data.terms);
                     const termNamesArray = Object.values(data.terms);
                     setYears([...new Set(termNamesArray.map(t => t.split(" ")[0]))].sort().reverse());
@@ -171,7 +170,6 @@ function CanvasLmsSync(props) {
             .then((response) => response.json())
             .then((data) => {
                 if (data.success === "true") {
-                    console.log("Canvas courses:", data);
                     setCanvasLmsCourses(data.courses);
                 } else {
                     toast.error(data.error);
@@ -189,6 +187,31 @@ function CanvasLmsSync(props) {
 
     const confirmSelectCanvasLmsCourse = () => {
         setShowSelectModal(false);
+
+        const payload = {
+            asciCourseId: props.course_id,
+            canvasLmsCourse: selectedCanvasLmsCourse,
+            command: "syncCanvasLmsCourse"
+        };
+
+        fetch(props.url, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success === "true") {
+                    console.log("Successfully synced with Canvas LMS course");
+                    toast.success("Successfully synced with Canvas LMS course");
+                } else {
+                    toast.error(data.error);
+                }
+            })
+            .catch((error) => {
+                toast.error(error);
+            });
     };
 
     function get_validate_button() {

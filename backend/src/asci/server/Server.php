@@ -771,35 +771,11 @@ class Server
                 $this->setResponse($executor->getCanvasLmsCoursesHandler($asciCourseId));
                 break;
 
-            case "searchCanvasLmsCourses":
+            case "syncCanvasLmsCourse":
                 $asciCourseId = $this->input["asciCourseId"];
-                $termId = $this->input["termId"];
+                $canvasLmsCourse = $this->input["canvasLmsCourse"];
+                $this->setResponse($executor->syncCanvasLmsCourseHandler($asciCourseId, $canvasLmsCourse));
                 break;
-            
-            // case "fetchCanvasLmsCourseName":
-            //     $courseId = $this->input["courseId"];
-            //     $canvasCourseId = $this->input["canvasCourseId"];
-            //     $accessToken = $this->input["accessToken"];
-            //     $this->setResponse($executor->fetchCanvasLmsCourseNameHandler($courseId, $canvasCourseId, $accessToken));
-            //     break;
-            
-            // case "setCanvasLmsCourse":
-            //     $courseId = $this->input["courseId"];
-            //     $canvasCourseId = $this->input["canvasCourseId"];
-            //     $canvasCourseName = $this->input["canvasCourseName"];
-            //     $accessToken = $this->input["accessToken"];
-            //     $this->setResponse($executor->setCanvasLmsCourseHandler($courseId, $canvasCourseId, $canvasCourseName, $accessToken));
-            //     break;
-            
-            // case "getCanvasLmsSyncStatus":
-            //     $course_id = $this->input["courseId"];
-            //     $this->setResponse($executor->getCanvasLmsSyncStatusHandler($course_id));
-            //     break;
-            
-            // case "getCanvasLmsCourseUsers":
-            //     $course_id = $this->input["course_id"];
-            //     $this->setResponse($executor->getCanvasLmsCourseUsersHandler($course_id));
-            //     break;
 
             default:
               throw new \asci\exceptions\ASCIException("Unknown command: {$this->input["command"]}"); 

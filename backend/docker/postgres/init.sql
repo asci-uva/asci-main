@@ -238,17 +238,9 @@ CREATE TABLE canvas_lms_courses (
   asci_course_id INT PRIMARY KEY,
   canvas_course_id TEXT,
   name TEXT,
+  course_code TEXT,
   FOREIGN KEY (asci_course_id) REFERENCES courses(id)
 );
-
--- CREATE TABLE course_settings_canvas (
---   course_id INT PRIMARY KEY,
---   canvas_course_id TEXT,
---   canvas_course_name TEXT,
---   canvas_access_token TEXT,
---   canvas_access_token_iv TEXT,
---   FOREIGN KEY (course_id) REFERENCES courses(id)
--- );
 
 ALTER TABLE queue ADD FOREIGN KEY (user_id) REFERENCES users (id);
 
