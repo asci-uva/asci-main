@@ -20,6 +20,7 @@
     const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible");
     const [sidebarCol, setSidebarCol] = useState("col-md-3");
     const [contentCol, setContentCol] = useState("page-container content col-md-9 my-auto");
+    const [canvasLmsCourse, setCanvasLmsCourse] = useState(null);
 
     const handleCollapse = () => {
       if(sidebarOpen === "sidebar-visible")
@@ -39,6 +40,34 @@
     const refreshContent = () => {
       setRefresh(prev => prev + 1);
     };
+
+    useEffect(() => {
+      if (!hasCanvasLmsAccessToken) return;
+
+      const payload = {
+        asciCourseId: course,
+        command: "getCanvasLmsCourse",
+      };
+
+      fetch(props.url, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Canvas Course:", data);
+          if (data.success === "true") {
+            setCanvasLmsCourse(data.course);
+          } else {
+            setCanvasLmsCourse(null);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }, [hasCanvasLmsAccessToken, courseList, course]);
 
     return (
       <>
@@ -122,8 +151,8 @@
                         course_id={courseList[course].course_id} 
                         hasCanvasLmsAccessToken={hasCanvasLmsAccessToken} 
                         setHasCanvasLmsAccessToken={setHasCanvasLmsAccessToken} 
-                        // canvasCourseName={canvasCourseName}
-                        // setCanvasCourseName={setCanvasCourseName}
+                        canvasLmsCourse={canvasLmsCourse}
+                        setCanvasLmsCourse={setCanvasLmsCourse}
                         {...props} 
                       />
                     </div>

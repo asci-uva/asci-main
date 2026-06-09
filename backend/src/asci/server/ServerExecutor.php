@@ -2753,7 +2753,15 @@ $usedCosSim = True;
 
       $result = $this->synchronizationStore->syncCanvasLmsCourse($asci_course_id, $canvas_lms_course);
 
-      return ["success" => "true"];
+      return ["success" => "true", "course" => $result];
+    }
+
+    public function getCanvasLmsCourseHandler($asci_course_id) {
+      $result = $this->synchronizationStore->getCanvasLmsCourse($asci_course_id);
+
+      if ($result)
+        return ["success" => "true", "course" => $result];
+      return ["success" => "false"];
     }
 }
 

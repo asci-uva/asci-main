@@ -111,7 +111,7 @@ function CanvasLmsSync(props) {
             .then((data) => {
                 setRemoveAccessTokenButtonDisabled(false);
                 if (data.success === "true") {
-                    props.setCanvasLmsSynced(false);
+                    props.setHasCanvasLmsAccessToken(false);
                     setCanvasLmsAccessToken("");
                     console.log("Successfully removed Canvas LMS access token");
                     toast.success("Successfully removed canvas LMS access token");
@@ -205,6 +205,7 @@ function CanvasLmsSync(props) {
                 if (data.success === "true") {
                     console.log("Successfully synced with Canvas LMS course");
                     toast.success("Successfully synced with Canvas LMS course");
+                    props.setCanvasLmsCourse(data.course);
                 } else {
                     toast.error(data.error);
                 }
@@ -238,10 +239,13 @@ function CanvasLmsSync(props) {
                     {get_remove_access_token_button()}
                 </div>
                 <h5>Select a Canvas LMS course</h5>
-                <div className="mb-3" style={{
-                    position: "sticky",
-                    zIndex: 1000,
-                }}>
+                {props.canvasLmsCourse !== null ? (
+                <div className="mb-3">
+                    <p>Synced with {props.canvasLmsCourse.course_code} {props.canvasLmsCourse.name}</p>
+                </div>
+                ) : (
+                <>
+                <div className="mb-3" style={{position: "sticky", zIndex: 1000}}>
                     <div className="d-flex gap-2">
                         <select
                             className="form-select"
@@ -305,6 +309,8 @@ function CanvasLmsSync(props) {
                         </ul>
                     </div>
                 </div>
+                </>
+                )}
                 </>
             ) : (
                 <>
