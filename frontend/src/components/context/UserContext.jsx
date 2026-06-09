@@ -26,6 +26,7 @@ export const UserProvider = ({ children }) => {
   const [course, setCourse] = useState(null);
   const [courseSettings, setCourseSettings] = useState(null);
   const [courseRoster, setCourseRoster] = useState([]);
+  const [hasCanvasLmsAccessToken, setHasCanvasLmsAccessToken] = useState(false);
 
   const login = (userInfo, callback) => {
     let json = {};
@@ -58,6 +59,8 @@ export const UserProvider = ({ children }) => {
           setCourseList(data.courses);
           setCourse(null);
           callback(true);
+
+          checkUserHasCanvasLmsAccessToken();
         } else {
           // fail to login
           console.log("login failed");
@@ -245,9 +248,37 @@ export const UserProvider = ({ children }) => {
     setDiscordUsername(null);
     setCourseList(null);
     setCourse(null);
+    setHasCanvasLmsAccessToken(false);
     // Clear LocalStorage
     localStorage.clear();
     console.log("logout successfully, go back to login page");
+  };
+
+  const checkUserHasCanvasLmsAccessToken = () => {
+    const payload = {
+      command: "checkUserHasCanvasLmsAccessToken",
+    };
+
+    fetch(url, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success === "true") {
+        if (data.hasToken === true)
+          setHasCanvasLmsAccessToken(true);
+        else
+          setHasCanvasLmsAccessToken(false);
+      } else {
+        console.log(data.error);
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
   };
 
   const value = {
@@ -275,7 +306,9 @@ export const UserProvider = ({ children }) => {
       courseRoster,
       getCourseRoster,
       refreshCourseRoster,
-      isInstructor
+      isInstructor,
+      hasCanvasLmsAccessToken,
+      setHasCanvasLmsAccessToken,
   };
 
   return (

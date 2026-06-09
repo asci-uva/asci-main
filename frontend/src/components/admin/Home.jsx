@@ -15,13 +15,11 @@
 
   function Home(props) {
     let docRoot = props.documentRoot;
-    const {user, courseList, course} = useUser();
+    const {user, courseList, course, hasCanvasLmsAccessToken, setHasCanvasLmsAccessToken} = useUser();
     const [refresh, setRefresh] = useState(0);
     const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible");
     const [sidebarCol, setSidebarCol] = useState("col-md-3");
     const [contentCol, setContentCol] = useState("page-container content col-md-9 my-auto");
-    const [canvasLmsSynced, setCanvasLmsSynced] = useState(false);
-    const [canvasCourseName, setCanvasCourseName] = useState("");
 
     const handleCollapse = () => {
       if(sidebarOpen === "sidebar-visible")
@@ -41,26 +39,6 @@
     const refreshContent = () => {
       setRefresh(prev => prev + 1);
     };
-
-    useEffect(() => {
-        const payload = {
-            courseId: courseList[course].course_id,
-            command: "getCanvasLmsSyncStatus",
-        };
-
-        fetch(props.url, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.success === "true") {
-                    setCanvasLmsSynced(data.synced);
-                }
-            });
-    }, [courseList, course]);
 
     return (
       <>
@@ -120,7 +98,11 @@
 
                 <div className="tab-pane fade" id="pills-roster" role="tabpanel" aria-labelledby="pills-profile-tab">
                   <div className="col-md-12 my-auto mb-2">
-                      <UploadRoster course_id={courseList[course].course_id} canvasLmsSynced={canvasLmsSynced} canvasCourseName={canvasCourseName} {...props} />                                
+                      <UploadRoster 
+                        course_id={courseList[course].course_id} 
+                        canvasLmsSynced={hasCanvasLmsAccessToken} 
+                        // canvasCourseName={canvasCourseName} 
+                        {...props} />                                
                   </div>
                   <div className="col-md-12 my-auto">
                       <AddStudent course_id={courseList[course].course_id} {...props} />                                
@@ -138,10 +120,10 @@
                     <div className="col-md-12 my-auto">
                       <CanvasLmsSync 
                         course_id={courseList[course].course_id} 
-                        canvasLmsSynced={canvasLmsSynced} 
-                        setCanvasLmsSynced={setCanvasLmsSynced} 
-                        canvasCourseName={canvasCourseName}
-                        setCanvasCourseName={setCanvasCourseName}
+                        hasCanvasLmsAccessToken={hasCanvasLmsAccessToken} 
+                        setHasCanvasLmsAccessToken={setHasCanvasLmsAccessToken} 
+                        // canvasCourseName={canvasCourseName}
+                        // setCanvasCourseName={setCanvasCourseName}
                         {...props} 
                       />
                     </div>

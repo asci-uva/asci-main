@@ -212,11 +212,10 @@ class DBSynchronization
     }
 
     public function checkUserHasCanvasLmsAccessToken($user_id) {
-        $this->db->beginTransaction();
         $this->db->prepare('canvasCheckAccessTokenStmt', 'SELECT EXISTS (SELECT 1 FROM canvas_lms_access_tokens WHERE user_id = $1)');
         $result = $this->db->fetchrow($this->db->execute('canvasCheckAccessTokenStmt', [$user_id]));
 
-        return ($result === 1) ? true : false;
+        return $result['exists'] === 't';
     }
 
     public function removeCanvasLmsAccessToken($user_id) {

@@ -16,9 +16,9 @@ function CanvasLmsSync(props) {
     const [selectedYear, setSelectedYear] = useState("");
 
     useEffect(() => {
-        if (props.canvasLmsSynced)
+        if (props.hasCanvasLmsAccessToken)
             getEnrollmentYears();
-    }, [props.CanvasLmsSynced]);
+    }, [props.hasCanvasLmsAccessToken]);
 
     const validateCanvasAccessToken = () => {
         setShowValidationModal(true);
@@ -46,7 +46,7 @@ function CanvasLmsSync(props) {
             .then((data) => {
                 setValidateButtonDisabled(false);
                 if (data.success === "true") {
-                    props.setCanvasLmsSynced(true);
+                    props.setHasCanvasLmsAccessToken(true);
                     getEnrollmentYears();
                     console.log("Successfully validated Canvas LMS access token");
                     toast.success("Successfully validated Canvas LMS access token");
@@ -180,7 +180,7 @@ function CanvasLmsSync(props) {
             <h4 className="card-header">Canvas LMS Synchronization</h4>
             <div className="card-body">
                 <h5>Access token validation</h5>
-            {props.canvasLmsSynced ? (
+            {props.hasCanvasLmsAccessToken ? (
                 <>
                 <div className="mb-3">
                     <p>Canvas LMS access token detected</p>

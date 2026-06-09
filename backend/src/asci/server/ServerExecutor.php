@@ -2737,16 +2737,13 @@ $usedCosSim = True;
       return ["success" => "true", "terms" => $results];
     }
 
-    public function getCanvasLmsSyncStatusHandler($course_id) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "canvas-lms-sync"))
-        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS sync status");
-
+    public function checkUserHasCanvasLmsAccessTokenHandler() {
       $result = $this->synchronizationStore->checkUserHasCanvasLmsAccessToken($this->user->id);
 
       if ($result) {
-        return ["success" => "true", "synced" => true];
+        return ["success" => "true", "hasToken" => true];
       } else {
-        return ["success" => "true", "synced" => false];
+        return ["success" => "true", "hasToken" => false];
       }
     }
 
