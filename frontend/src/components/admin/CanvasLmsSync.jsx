@@ -14,10 +14,39 @@ function CanvasLmsSync(props) {
     const [years, setYears] = useState([]);
     const [selectedTermName, setSelectedTermName] = useState("");
     const [selectedYear, setSelectedYear] = useState("");
+    const [canvasLmsCourses, setCanvasLmsCourses] = useState([]);
+    const [expandedCanvasLmsCourseId, setExpandedCanvasLmsCourseId] = useState(null);
+    const [showSelectModal, setShowSelectModal] = useState(false);
+
+    const termIdToName = Object.fromEntries(
+        Object.entries(terms).map(([name, id]) => [id, name])
+    );
+
+    const filteredAndSortedCanvasLmsCourses = [...canvasLmsCourses]
+    .filter((course) => {
+        const termName =
+            termIdToName[course.enrollment_term_id] ?? "";
+
+        const [year, term] = termName.split(" ");
+
+        const yearMatch =
+            !selectedYear || year === selectedYear;
+
+        const termMatch =
+            !selectedTermName || term === selectedTermName;
+
+        return yearMatch && termMatch;
+    })
+    .sort((a, b) => {
+        // primary sort: newest term first
+        return b.enrollment_term_id - a.enrollment_term_id;
+    });
 
     useEffect(() => {
-        if (props.hasCanvasLmsAccessToken)
+        if (props.hasCanvasLmsAccessToken) {
             getEnrollmentYears();
+            getCanvasLmsCourses();
+        }
     }, [props.hasCanvasLmsAccessToken]);
 
     const validateCanvasAccessToken = () => {
@@ -130,14 +159,10 @@ function CanvasLmsSync(props) {
             });
     };
 
-    const searchCanvasLmsCourses = () => {
-        const termKey = `${selectedYear} ${selectedTermName}`;
-        const termId = terms[termKey];
-
+    const getCanvasLmsCourses = () => {
         const payload = {
             asciCourseId: props.course_id,
-            termId: termId,
-            command: "searchCanvasLmsCourses",
+            command: "getCanvasLmsCourses",
         };
 
         fetch(props.url, {
@@ -149,7 +174,8 @@ function CanvasLmsSync(props) {
             .then((response) => response.json())
             .then((data) => {
                 if (data.success === "true") {
-                    console.log(data);
+                    console.log("Canvas courses:", data);
+                    setCanvasLmsCourses(data.courses);
                 } else {
                     toast.error(data.error);
                 }
@@ -157,6 +183,14 @@ function CanvasLmsSync(props) {
             .catch((error) => {
                 toast.error(error);
             });
+    };
+
+    const selectCanvasLmsCourse = () => {
+        setShowSelectModal(true);
+    };
+
+    const confirmSelectCanvasLmsCourse = () => {
+        setShowSelectModal(false);
     };
 
     function get_validate_button() {
@@ -171,8 +205,8 @@ function CanvasLmsSync(props) {
         return <button type="button" className="btn btn-primary" onClick={removeCanvasLmsAccessToken}>Remove Access Token</button>;
     }
 
-    function get_search_courses_button() {
-        return <button type="button" className="btn btn-primary" onClick={searchCanvasLmsCourses}>Search</button>;
+    function get_select_course_button() {
+        return <button type="button" className="btn btn-primary" onClick={selectCanvasLmsCourse}>Select Course</button>;
     }
 
     return (
@@ -186,9 +220,11 @@ function CanvasLmsSync(props) {
                     <p>Canvas LMS access token detected</p>
                     {get_remove_access_token_button()}
                 </div>
-                <h5>Search for course</h5>
-                <div className="mb-3">
-                    <label>Filter Semester</label>
+                <h5>Select a Canvas LMS course</h5>
+                <div className="mb-3" style={{
+                    position: "sticky",
+                    zIndex: 1000,
+                }}>
                     <div className="d-flex gap-2">
                         <select
                             className="form-select"
@@ -210,7 +246,43 @@ function CanvasLmsSync(props) {
                                 <option key={year} value={year}>{year}</option>
                             ))}
                         </select>
-                        {get_search_courses_button()}
+                    </div>
+                </div>
+                <div className="mb-3">
+                    <div style={{maxHeight: "400px", overflowY: "auto"}}>
+                        <ul className="list-group">
+                            {filteredAndSortedCanvasLmsCourses.map((course) => (
+                                <li
+                                    key={course.id}
+                                    className="list-group-item"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() =>
+                                        setExpandedCanvasLmsCourseId(
+                                            expandedCanvasLmsCourseId === course.id ? null : course.id
+                                        )
+                                    }
+                                >
+                                    <div className="d-flex justify-content-between">
+                                        <span>
+                                            <span className="text-muted me-2">
+                                                {course.course_code}
+                                            </span>
+                                            <span>{course.name}</span>
+                                        </span>
+
+                                        <span className="text-muted">
+                                            {termIdToName[course.enrollment_term_id] ?? "Unknown Term"}
+                                        </span>
+                                    </div>
+
+                                    {expandedCanvasLmsCourseId === course.id && (
+                                        <div className="mt-2">
+                                            {get_select_course_button()}
+                                        </div>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                 </div>
                 </>
@@ -257,7 +329,7 @@ function CanvasLmsSync(props) {
                 <div className="modal-dialog">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h5 className="modal-title">Confirm Canvas access token removal</h5>
+                            <h5 className="modal-title">Confirm Canvas LMS access token removal</h5>
                         </div>
                         <div className="modal-body">
                             <p>Are you sure you want to remove this Canvas LMS access token?</p>
@@ -271,224 +343,26 @@ function CanvasLmsSync(props) {
                 </div>
             </div>
             )}
+            {showSelectModal && (
+            <div className="modal show d-block" tabIndex="-1">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Confirm Canvas LMS course selection</h5>
+                        </div>
+                        <div className="modal-body">
+                            <p>Are you sure you want to select this Canvas LMS course?</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-secondary" onClick={() => setShowSelectModal(false)}>Cancel</button>
+                            <button className="btn btn-primary" onClick={confirmSelectCanvasLmsCourse}>Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            )}
         </div>
     );
 }
-
-// function CanvasLmsSync(props) {
-//     const [canvasCourseId, setCanvasCourseId] = useState("");
-//     const [accessToken, setAccessToken] = useState("");
-//     const [selectedTerm, setSelectedTerm] = useState("");
-//     const [selectedYear, setSelectedYear] = useState("");
-//     const [disabled, setDisabled] = useState(false);
-//     const [showModal, setShowModal] = useState(false);
-//     const synced = props.canvasLmsSynced;
-
-//     const terms = ["Fall", "Spring", "Summer"];
-//     const years = ["2020", "2023", "2021", "2022"].sort().reverse();
-
-//     const handleSynchronize = () => {
-//         const trimmedCourseId = canvasCourseId.trim();
-//         const trimmedAccessToken = accessToken.trim()
-
-//         setCanvasCourseId(trimmedCourseId);
-//         setAccessToken(trimmedAccessToken);
-
-//         const payload = {
-//             canvasCourseId: canvasCourseId,
-//             accessToken: accessToken,
-//             courseId: props.course_id,
-//             command: "fetchCanvasLmsCourseName",
-//         };
-//     };
-
-//     const handleConfirmSynchronize = () => {
-//         setShowModal(false);
-//         setDisabled(true);
-
-//         const payload = {
-//             courseId: props.course_id,
-//             canvasCourseId: canvasCourseId,
-//             canvasCourseName: props.canvasCourseName,
-//             accessToken: accessToken,
-//             command: "setCanvasLmsCourse",
-//         };
-
-//         fetch(props.url, {
-//             method: "POST",
-//             credentials: "include",
-//             headers: {
-//                 "Content-Type": "application/json",
-//             },
-//             body: JSON.stringify(payload),
-//         })
-//             .then((response) => response.json())
-//             .then((data) => {
-//                 setDisabled(false);
-//                 if (data.success === "true") {
-//                     console.log(data.message);
-//                     toast.success(data.message);
-//                     props.setCanvasLmsSynced(true);
-//                 } else {
-//                     console.log(data.error);
-//                     toast.error(data.error);
-//                 }
-//             })
-//             .catch((error) => {
-//                 setDisabled(false);
-//                 console.error("Error during synchronization:", error);
-//                 toast.error("Error during synchronization:", error)
-//             });
-//     };
-
-//     const handleDesynchronize = () => {
-//         setShowModal(true);
-//     };
-
-//     const handleConfirmDesynchronize = () => {
-//         setDisabled(true);
-
-//         const payload = {
-//             courseId: props.course_id,
-//             command: "removeCanvasLmsCourse",
-//         };
-
-//         fetch(props.url, {
-//             method: "POST",
-//             credentials: "include",
-//             headers: {
-//                 "Content-Type": "application/json",
-//             },
-//             body: JSON.stringify(payload),
-//         })
-//             .then((response) => response.json())
-//             .then((data) => {
-//                 setDisabled(false);
-//                 setShowModal(false);
-//                 if (data.success === "true") {
-//                     console.log(data.message);
-//                     toast.success(data.message);
-//                 } else {
-//                     console.log(data.error);
-//                     toast.error(data.error);
-//                 }
-//                 props.setCanvasLmsSynced(false);
-//                 setCanvasCourseId("");
-//                 setAccessToken("");
-//             })
-//             .catch((error) => {
-//                 setDisabled(false);
-//                 console.error("Error during desynchronization:", error);
-//                 toast.error("Error during desynchronization:", error)
-//             });
-//     };
-
-//     function getButton() {
-//         if (synced) {
-//             if (disabled)
-//                 return (
-//                     <button type="button" className="btn btn-primary" disabled>Desynchronizing (Please Wait)</button>    
-//                 );
-//             return (
-//                 <button type="button" className="btn btn-primary" onClick={handleDesynchronize}>Desynchronize from course</button>  
-//             );
-//         }
-
-//         if (disabled)
-//             return (
-//                 <button type="button" className="btn btn-primary" onClick={handleSynchronize} disabled>Synchronizing (Please Wait)</button>    
-//             );
-//         return (
-//             <button type="button" className="btn btn-primary" onClick={handleSynchronize}>Synchronize with course</button>
-//         );
-//     }
-
-//     return (
-//     <div className="card">
-//         <h4 className="card-header">Canvas LMS Synchronization</h4>
-//         <div className="card-body">
-//         {synced ? (
-//             <div>
-//             <p>Synced with {props.canvasCourseName}</p>
-//             {getButton()}
-//             </div>
-//         ) : (
-//             <form key={synced}>
-//             {/* <div className="mb-3">
-//                 <label>Canvas LMS Course ID</label>
-//                 <input className="form-control"
-//                 type="text"
-//                 value={canvasCourseId}
-//                 onChange={(e) => setCanvasCourseId(e.target.value)}
-//                 required
-//                 />
-//             </div> */}
-//             <div className="mb-3">
-//                 <label>Canvas LMS Access Token:</label>
-//                 <input className="form-control"
-//                 type="text"
-//                 value={accessToken}
-//                 onChange={(e) => setAccessToken(e.target.value)}
-//                 required
-//                 />
-//             </div>
-//             <div className="mb-3 d-flex gap-2">
-//                 <select className="form-select" value={selectedTerm} onChange={(e) => setSelectedTerm(e.target.value)}>
-//                     <option value="">Select Term</option>
-//                     {terms.map((term) => (
-//                         <option key={term} value={term}>{term}</option>
-//                     ))}
-//                 </select>
-
-//                 <select className="form-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-//                     <option value="">Select Year</option>
-//                     {years.map((year) => (
-//                         <option key={year} value={year}>{year}</option>
-//                     ))}
-//                 </select>
-//             </div>
-//             {getButton()}
-//             </form>
-//         )}
-//         </div>
-//         {showModal && !synced && (
-//             <div className="modal show d-block" tabIndex="-1">
-//                 <div className="modal-dialog">
-//                     <div className="modal-content">
-//                         <div className="modal-header">
-//                             <h5 className="modal-title">Confirm Canvas Sync</h5>
-//                         </div>
-//                         <div className="modal-body">
-//                             <p>Are you sure you want to sync with <strong>{props.canvasCourseName}</strong> on Canvas LMS?</p>
-//                         </div>
-//                         <div className="modal-footer">
-//                             <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-//                             <button className="btn btn-primary" onClick={handleConfirmSynchronize}>Confirm</button>
-//                         </div>
-//                     </div>
-//                 </div>
-//             </div>
-//         )}
-//         {showModal && synced && (
-//             <div className="modal show d-block" tabIndex="-1">
-//                 <div className="modal-dialog">
-//                     <div className="modal-content">
-//                         <div className="modal-header">
-//                             <h5 className="modal-title">Confirm Canvas Desync</h5>
-//                         </div>
-//                         <div className="modal-body">
-//                             <p>Are you sure you want to desync from <strong>{props.canvasCourseName}</strong> on Canvas LMS?</p>
-//                         </div>
-//                         <div className="modal-footer">
-//                             <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-//                             <button className="btn btn-primary" onClick={handleConfirmDesynchronize}>Confirm</button>
-//                         </div>
-//                     </div>
-//                 </div>
-//             </div>
-//         )}
-//     </div>
-//     );
-// }
 
 export default CanvasLmsSync;

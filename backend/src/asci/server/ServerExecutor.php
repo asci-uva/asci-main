@@ -2604,6 +2604,16 @@ $usedCosSim = True;
       return ["success" => "true"];
     }
 
+    public function checkUserHasCanvasLmsAccessTokenHandler() {
+      $result = $this->synchronizationStore->checkUserHasCanvasLmsAccessToken($this->user->id);
+
+      if ($result) {
+        return ["success" => "true", "hasToken" => true];
+      } else {
+        return ["success" => "true", "hasToken" => false];
+      }
+    }
+
     public function removeCanvasLmsAccessTokenHandler($asci_course_id) {
       if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to remove Canvas LMS access token");
@@ -2718,7 +2728,7 @@ $usedCosSim = True;
         $data = json_decode($body, true);
 
         foreach ($data as $course) {
-          $results[] = ["id" => $course["id"], "name" => $course["name"]];
+          $results[] = ["id" => $course["id"], "name" => $course["name"], "course_code" => $course["course_code"], "enrollment_term_id" => $course["enrollment_term_id"]];
         }
 
         $url = null;
@@ -2734,17 +2744,7 @@ $usedCosSim = True;
         }
       }
 
-      return ["success" => "true", "terms" => $results];
-    }
-
-    public function checkUserHasCanvasLmsAccessTokenHandler() {
-      $result = $this->synchronizationStore->checkUserHasCanvasLmsAccessToken($this->user->id);
-
-      if ($result) {
-        return ["success" => "true", "hasToken" => true];
-      } else {
-        return ["success" => "true", "hasToken" => false];
-      }
+      return ["success" => "true", "courses" => $results];
     }
 
   //   public function fetchCanvasLmsCourseNameHandler($course_id, $canvas_course_id, $access_token) {
