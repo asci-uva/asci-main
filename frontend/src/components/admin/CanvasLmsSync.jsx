@@ -240,6 +240,9 @@ function CanvasLmsSync(props) {
             .then((data) => {
                 if (data.success === "true") {
                     props.setCanvasLmsCourse(null);
+                    setExpandedCanvasLmsCourseId(null);
+                    setSelectedTermName("");
+                    setSelectedYear("");
                     console.log("Successfully desynced with Canvas LMS course");
                     toast.success("Successfully desynced with Canvas LMS course");
                 } else {

@@ -116,7 +116,7 @@ class DBUser
             $computing_id = $user['computing_id'];
             $role = $user['role'];
     
-            // $userExists = $this->createUser($computing_id, $fname, $lname, $pname);
+            $userExists = $this->createUser($computing_id, $fname, $lname, $pname, $computing_id);
             // SQL query to check if a user with the given computing_id already exists
             $checkQuery = 'SELECT id FROM users WHERE computing_id = $1';
         

@@ -786,6 +786,11 @@ class Server
                 $asciCourseId = $this->input["asciCourseId"];
                 $this->setResponse($executor->desyncCanvasLmsCourseHandler($asciCourseId));
                 break;
+            
+            case "getCanvasLmsCourseUsers":
+                $asciCourseId = $this->input["asciCourseId"];
+                $this->setResponse($executor->getCanvasLmsCourseUsersHandler($asciCourseId));
+                break;
 
             default:
               throw new \asci\exceptions\ASCIException("Unknown command: {$this->input["command"]}"); 

@@ -56,8 +56,7 @@ function UploadRoster(props) {
   };
 
   const sendRosterToBackend = (rosterData) => {
-    if (props.canvasLmsSynced)
-      setDisabled(false);
+    setDisabled(false);
 
     const payload = {
       command: "uploadRoster",
@@ -104,7 +103,7 @@ function UploadRoster(props) {
 
     const payload = {
       command: "getCanvasLmsCourseUsers",
-      course_id: course.course_id,
+      asciCourseId: course.course_id,
     };
 
     fetch(props.url, {
@@ -174,11 +173,11 @@ function UploadRoster(props) {
   return (
 
     <div className="card mb-4">
-      {props.canvasLmsSynced ? (
+      {props.canvasLmsCourse !== null ? (
         <>
         <h4 className="card-header">Synchronize Roster from Canvas LMS</h4>
         <div className="card-body">
-          <p>Course Name: {props.canvasCourseName}</p>
+          <p>Course Name: {props.canvasLmsCourse.name}</p>
           {getSyncButton()}
         </div>
         {showModal && (
@@ -189,7 +188,8 @@ function UploadRoster(props) {
                             <h5 className="modal-title">Confirm Canvas Roster Fetch</h5>
                         </div>
                         <div className="modal-body">
-                            <p>Are you sure you want to fetch the roster from <strong>{props.canvasCourseName}</strong> on Canvas LMS?</p>
+                            <p>Are you sure you want to fetch the roster from <strong>{props.canvasLmsCourse.name}</strong> on Canvas LMS?</p>
+                            <p>WARNING: Syncing the roster will remove all manually added users except for Instructors</p>
                         </div>
                         <div className="modal-footer">
                             <button className="btn btn-secondary" onClick={() => {setShowModal(false); setDisabled(false)}}>Cancel</button>

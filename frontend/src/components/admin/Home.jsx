@@ -129,7 +129,7 @@
                       <UploadRoster 
                         course_id={courseList[course].course_id} 
                         canvasLmsSynced={hasCanvasLmsAccessToken} 
-                        // canvasCourseName={canvasCourseName} 
+                        canvasLmsCourse={canvasLmsCourse} 
                         {...props} />                                
                   </div>
                   <div className="col-md-12 my-auto">
