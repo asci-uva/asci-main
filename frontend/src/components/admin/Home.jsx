@@ -57,7 +57,6 @@
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log("Canvas Course:", data);
           if (data.success === "true") {
             setCanvasLmsCourse(data.course);
           } else {

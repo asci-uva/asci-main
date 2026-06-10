@@ -254,7 +254,7 @@ class DBSynchronization
 
         $this->db->commit();
 
-        return [$canvas_lms_course["id"], $canvas_lms_course["name"], $canvas_lms_course["course_code"]];
+        return $this->getCanvasLmsCourse($asci_course_id);
     }
 
     public function getCanvasLmsCourse($asci_course_id) {
