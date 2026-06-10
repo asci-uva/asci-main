@@ -2768,7 +2768,7 @@ $usedCosSim = True;
       if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to desync from a Canvas LMS course");
 
-      $result = $this->synchronizationStore->getCanvasLmsCourse($asci_course_id);
+      $result = $this->synchronizationStore->desyncCanvasLmsCourse($asci_course_id);
 
       if ($result)
         return ["success" => "true", "course" => $result];

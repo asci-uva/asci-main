@@ -116,6 +116,8 @@ function CanvasLmsSync(props) {
                     setCanvasLmsAccessToken("");
                     console.log("Successfully removed Canvas LMS access token");
                     toast.success("Successfully removed canvas LMS access token");
+                    if (props.canvasLmsCourse !== null)
+                        confirmRemoveCanvasLmsCourse();
                 } else {
                     console.log(data.error);
                     toast.error(data.error);
@@ -395,6 +397,9 @@ function CanvasLmsSync(props) {
                         <div className="modal-body">
                             <p>Are you sure you want to remove this Canvas LMS access token?</p>
                             <p>Note: The access token is directly tied to your ASCI account</p>
+                            {props.canvasLmsCourse !== null && (
+                                <p>WARNING: A Canvas LMS course is linked this ASCI course. Removing your access token will also desynchronize it</p>
+                            )}
                         </div>
                         <div className="modal-footer">
                             <button className="btn btn-secondary" onClick={() => setShowRemoveModal(false)}>Cancel</button>
