@@ -18,6 +18,7 @@ function CanvasLmsSync(props) {
     const [expandedCanvasLmsCourseId, setExpandedCanvasLmsCourseId] = useState(null);
     const [showSelectModal, setShowSelectModal] = useState(false);
     const [selectedCanvasLmsCourse, setSelectedCanvasLmsCourse] = useState(null);
+    const [showRemoveCanvasLmsCourseModal, setShowRemoveCanvasLmsCourseModal] = useState(false);
 
     const filteredAndSortedCanvasLmsCourses = [...canvasLmsCourses]
     .filter((course) => {
@@ -215,6 +216,39 @@ function CanvasLmsSync(props) {
             });
     };
 
+    const removeCanvasLmsCourse = () => {
+        setShowRemoveCanvasLmsCourseModal(true);
+    };
+
+    const confirmRemoveCanvasLmsCourse = () => {
+        setShowRemoveCanvasLmsCourseModal(false);
+
+        const payload = {
+            asciCourseId: props.course_id,
+            command: "desyncCanvasLmsCourse"
+        };
+
+        fetch(props.url, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success === "true") {
+                    props.setCanvasLmsCourse(null);
+                    console.log("Successfully desynced with Canvas LMS course");
+                    toast.success("Successfully desynced with Canvas LMS course");
+                } else {
+                    toast.error(data.error);
+                }
+            })
+            .catch((error) => {
+                toast.error(error);
+            });
+    };
+
     function get_validate_button() {
         if (validateButtonDisabled)
             return <button type="button" className="btn btn-primary" disabled>Validating Access Token (Please Wait)</button>;
@@ -242,6 +276,7 @@ function CanvasLmsSync(props) {
                 {props.canvasLmsCourse !== null ? (
                 <div className="mb-3">
                     <p>Synced with {props.canvasLmsCourse.course_code} {props.canvasLmsCourse.name}</p>
+                    <button type="button" className="btn btn-primary" onClick={removeCanvasLmsCourse}>Desynchronize from Canvas LMS course</button>
                 </div>
                 ) : (
                 <>
@@ -382,6 +417,24 @@ function CanvasLmsSync(props) {
                         <div className="modal-footer">
                             <button className="btn btn-secondary" onClick={() => {setShowSelectModal(false); setSelectedCanvasLmsCourse(null)}}>Cancel</button>
                             <button className="btn btn-primary" onClick={confirmSelectCanvasLmsCourse}>Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            )}
+            {showRemoveCanvasLmsCourseModal && (
+            <div className="modal show d-block" tabIndex="-1">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Confirm Canvas LMS course desynchronization</h5>
+                        </div>
+                        <div className="modal-body">
+                            <p>Are you sure you want to desynchronize this Canvas LMS course?</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-secondary" onClick={() => setShowRemoveCanvasLmsCourseModal(false)}>Cancel</button>
+                            <button className="btn btn-primary" onClick={confirmRemoveCanvasLmsCourse}>Confirm</button>
                         </div>
                     </div>
                 </div>

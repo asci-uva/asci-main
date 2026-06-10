@@ -264,4 +264,20 @@ class DBSynchronization
 
         return $result;
     }
+
+    public function desyncCanvasLmsCourse($asci_course_id) {
+        $this->db->beginTransaction();
+
+        $result = $this->getCanvasLmsCourse($asci_course_id);
+
+        if ($result) {
+            $this->db->prepare('removeCanvasCourseStmt',
+                'REMOVE FROM canvas_lms_courses WHERE asci_course_id = $1');
+            $this->db->execute('removeCanvasCourseStmt', [$asci_course_id]);
+        }
+
+        $this->db->beginTransaction();
+
+        return $result;
+    }
 }
