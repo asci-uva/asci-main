@@ -2696,53 +2696,14 @@ $usedCosSim = True;
 
       $canvas_domain = "https://canvas.its.virginia.edu";
       $url = "$canvas_domain/api/v1/courses?enrollment_type=teacher&per_page=100";
-      $results=[];
+      
+      $courses = $this->canvasGetAll($url, $canvas_access_token);
+      if ($courses === null)
+        return $this->err("Failed to fetch Canvas LMS courses");
 
-      while ($url) {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer $canvas_access_token"));
-        curl_setopt($ch, CURLOPT_HEADER, true);
-
-        $response = curl_exec($ch);
-
-        if ($errno = curl_errno($ch)) {
-          $errorText = "cURL error ({$errno}): " . curl_strerror($errno);
-          $this->logger->addError($errorText);
-          curl_close($ch);
-          return $this->err($errorText);
-        }
-
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-        curl_close($ch);
-
-        if ($http_code !== 200) {
-          $errorText = "HTTP error: " . $http_code;
-          $this->logger->addError($errorText);
-          return $this->err($errorText);
-        }
-
-        $headers = substr($response, 0, $header_size);
-        $body = substr($response, $header_size);
-        $data = json_decode($body, true);
-
-        foreach ($data as $course) {
-          $results[] = ["id" => $course["id"], "name" => $course["name"], "course_code" => $course["course_code"], "enrollment_term_id" => $course["enrollment_term_id"]];
-        }
-
-        $url = null;
-        foreach (explode("\n", $headers) as $header) {
-          if (stripos($header, 'Link:') === 0) {
-            foreach (explode(",", $header) as $part) {
-              if (strpos($part, 'rel="next"') !== false) {
-                preg_match('/<(.+?)>/', $part, $matches);
-                if ($matches) $url = trim($matches[1]);
-              }
-            }
-          }
-        }
+      $results = [];
+      foreach ($courses as $course) {
+        $results[] = ["id" => $course["id"], "name" => $course["name"], "course_code" => $course["course_code"], "enrollment_term_id" => $course["enrollment_term_id"]];
       }
 
       return ["success" => "true", "courses" => $results];
