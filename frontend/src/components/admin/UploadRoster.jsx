@@ -7,7 +7,10 @@ function UploadRoster(props) {
   const [rosterFile, setRosterFile] = useState(null);
   const { user, getCourse, courseSettings, setCourseSettings, refreshCourseRoster, refreshCourseList } = useUser();
   const [disabled, setDisabled] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [showSyncRosterModal, setShowSyncRosterModal] = useState(false);
+  const [syncRosterButtonDisabled, setSyncRosterButtonDisabled] = useState(false);
+  const [showSyncRosterResults, setShowSyncRosterResults] = useState(false);
+  const [syncRosterResults, setSyncRosterResults] = useState({});
 
   let course = getCourse();
 
@@ -93,80 +96,102 @@ function UploadRoster(props) {
       });
   };
 
-  const handleGetCanvasLmsCourseUsers = () => {
-    setShowModal(true);
+  const syncRoster = () => {
+    setShowSyncRosterModal(true);
   };
 
-  const confirmGetCanvasLmsCourseUsers = () => {
-    setShowModal(false);
-    setDisabled(true);
+  const confirmSyncCanvasLmsRoster = () => {
+    setShowSyncRosterModal(false);
+    setSyncRosterButtonDisabled(true);
 
     const payload = {
-      command: "getCanvasLmsCourseUsers",
-      asciCourseId: course.course_id,
+      asciCourseId: props.course_id,
+      command: "syncCanvasLmsRoster",
     };
 
     fetch(props.url, {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json"},
       body: JSON.stringify(payload),
     })
       .then((response) => response.json())
       .then((data) => {
-        setDisabled(false);
-        console.log("Fetched Canvas LMS course users:", data);
-        if (data.success) {
-          const rosterData = parseCanvasLmsResponse(data.users);
-          console.log(rosterData);
-          sendRosterToBackend(rosterData);
+        setSyncRosterButtonDisabled(false);
+        if (data.success === "true") {
+          console.log("Roster synced:", data);
+          toast.success("Successfully synced Canvas LMS roster");
+          refreshCourseRoster();
+          setShowSyncRosterResults(true);
+          setSyncRosterResults(data);
+          //TODO: display who was added
         } else {
-          console.log(data.error || "There was an error syncing Canvas LMS course users");
-          toast.error(data.error || "There was an error syncing Canvas LMS course users");
+          console.log(data.error);
+          toast.error(data.error || "Failed to sync Canvas LMS roster");
         }
       })
       .catch((error) => {
-        setDisabled(false);
-        console.error("There was an error while fetching Canvas LMS course users:", error);
-        toast.error("There was an error while fetching Canvas LMS course users");
+        setSyncRosterButtonDisabled(false);
+        console.log(error);
+        toast.error(error);
       })
   };
 
-  const parseCanvasLmsResponse = (users) => {
-    const parsed_users = [];
-
-    Object.entries(users).forEach(([role, userList]) => {
-      if (role === "instructor")
-        return;
-      
-      userList.forEach((user) => {
-        let f_name = "";
-        let l_name = "";
-
-        const name_parts = user.sortable_name.split(",");
-        l_name = name_parts[0]?.trim() || "";
-        f_name = name_parts[1]?.trim() || "";
-
-        parsed_users.push({
-          fname: f_name,
-          lname: l_name,
-          pname: f_name,
-          computing_id: user.sis_user_id,
-          role: role,
-        });
-      });
-    });
-
-    return parsed_users;
-  };
-
-  function getSyncButton() {
-    if (disabled)
+  function getSyncRosterButton() {
+    if (syncRosterButtonDisabled)
         return (
-        <button type="button" className="btn btn-primary" disabled>Fetching course roster (Please Wait)</button>
+        <button type="button" className="btn btn-primary" disabled>Syncing Roster (Please Wait)</button>
       );
     return (
-      <button type="button" className="btn btn-primary" onClick={handleGetCanvasLmsCourseUsers}>Synchronize with Course Roster</button>
+      <button type="button" className="btn btn-primary" onClick={syncRoster}>Synchronize Course Roster</button>
+    );
+  }
+
+  function getSyncRosterResults() {
+    const data = syncRosterResults;
+
+    const sections = [
+      { key: "added", label: "Added" },
+      { key: "updated", label: "Updated" },
+      { key: "removed", label: "Removed" },
+      { key: "skipped", label: "Skipped" },
+    ];
+
+    return (
+      <div className="mb-3" style={{ maxHeight: "400px", overflowY: "auto" }}>
+        {sections.map(({ key, label }) => {
+          if (key === "skipped" && (!data[key] || data[key].length === 0)) {
+            return null;
+          }
+          return (
+            <div key={key} className="mt-3">
+              <h6>{label} ({data[key]?.length || 0})</h6>
+              {data[key] && data[key].length > 0 ? (
+                <ul className="list-group">
+                  {data[key].map((user, i) => (
+                    <li key={i}>
+                      <div className="d-flex justify-content-between">
+                      <span>
+                          <span className="text-muted me-2">
+                            {user.computingId}
+                          </span>
+                        <span>{user.fname} {user.lname}</span>
+                      </span>
+
+                      <span className="text-muted">
+                        {user.role}
+                      </span>
+                    </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>None</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
     );
   }
 
@@ -177,27 +202,37 @@ function UploadRoster(props) {
         <>
         <h4 className="card-header">Synchronize Roster from Canvas LMS</h4>
         <div className="card-body">
-          <p>Course Name: {props.canvasLmsCourse.name}</p>
-          {getSyncButton()}
+          <div className="mb-3">
+            <h5>Canvas LMS Course Info</h5>
+            <p>Course Code: {props.canvasLmsCourse.course_code}</p>
+            <p>Course Name: {props.canvasLmsCourse.name}</p>
+            {getSyncRosterButton()}
+          </div>
+          <div className="mb-3">
+            <h5>Roster Sync Results</h5>
+            {showSyncRosterResults && (
+              getSyncRosterResults()
+            )}
+          </div>
         </div>
-        {showModal && (
-            <div className="modal show d-block" tabIndex="-1">
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">Confirm Canvas Roster Fetch</h5>
-                        </div>
-                        <div className="modal-body">
-                            <p>Are you sure you want to fetch the roster from <strong>{props.canvasLmsCourse.name}</strong> on Canvas LMS?</p>
-                            <p>WARNING: Syncing the roster will remove all manually added users except for Instructors</p>
-                        </div>
-                        <div className="modal-footer">
-                            <button className="btn btn-secondary" onClick={() => {setShowModal(false); setDisabled(false)}}>Cancel</button>
-                            <button className="btn btn-primary" onClick={confirmGetCanvasLmsCourseUsers}>Confirm</button>
-                        </div>
-                    </div>
+        {showSyncRosterModal && (
+          <div className="modal show d-block" tabIndex="-1">
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Confirm Canvas Roster Sync</h5>
                 </div>
+                <div className="modal-body">
+                  <p>Are you sure you want to sync the roster from <strong>{props.canvasLmsCourse.name}</strong> on Canvas LMS?</p>
+                  <p>WARNING: Syncing the roster will remove all manually added users except for Instructors</p>
+                </div>
+                <div className="modal-footer">
+                  <button className="btn btn-secondary" onClick={() => setShowSyncRosterModal(false)}>Cancel</button>
+                  <button className="btn btn-primary" onClick={confirmSyncCanvasLmsRoster}>Confirm</button>
+                </div>
+              </div>
             </div>
+          </div>
         )}
         </>
       ) : (

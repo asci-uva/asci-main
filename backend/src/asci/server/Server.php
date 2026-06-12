@@ -787,9 +787,14 @@ class Server
                 $this->setResponse($executor->desyncCanvasLmsCourseHandler($asciCourseId));
                 break;
             
-            case "getCanvasLmsCourseUsers":
+            // case "getCanvasLmsCourseUsers":
+            //     $asciCourseId = $this->input["asciCourseId"];
+            //     $this->setResponse($executor->getCanvasLmsCourseUsersHandler($asciCourseId));
+            //     break;
+            
+            case "syncCanvasLmsRoster":
                 $asciCourseId = $this->input["asciCourseId"];
-                $this->setResponse($executor->getCanvasLmsCourseUsersHandler($asciCourseId));
+                $this->setResponse($executor->syncCanvasLmsRosterHandler($asciCourseId));
                 break;
 
             default:

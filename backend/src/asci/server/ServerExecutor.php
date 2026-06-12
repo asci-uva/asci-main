@@ -27,6 +27,7 @@ class ServerExecutor{
   public $userStore = null; // The user storage 
   public $courseStore = null; // The course storage 
   public $userCourseStore = null; // The UserCourse storage 
+  public $synchronizationStore = null; // The synchronization storage
 
   private $user = null;
   //Model state (NOT interacting with DB)
@@ -2775,78 +2776,102 @@ $usedCosSim = True;
       return err("No Canvas LMS course assoicated with ASCI course");
     }
 
-    public function getCanvasLmsCourseUsersHandler($asci_course_id) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course-roster"))
-        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS course roster");
+  public function syncCanvasLmsRosterHandler($asci_course_id) {
+    if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course-roster"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to sync the Canvas LMS roster");
 
-      $canvas_course_id = ($this->synchronizationStore->getCanvasLmsCourse($asci_course_id))["canvas_course_id"];
-      $access_token = $this->synchronizationStore->getCanvasLmsAccessToken($this->user->id);
+    $canvas_course = $this->synchronizationStore->getCanvasLmsCourse($asci_course_id);
+    if (!$canvas_course)
+      return $this->err("No Canvas LMS course associated with ASCI course");
 
-      if (!$canvas_course_id || !$access_token)
-        return $this->err("No Canvas LMS course found associated with ASCI course");
+    $access_token = $this->synchronizationStore->getCanvasLmsAccessToken($this->user->id);
+    if (!$access_token)
+      return $this->err("No Canvas LMS access token found");
 
-      $canvas_domain = "https://canvas.its.virginia.edu";
-      $enrollment_types = ["student", "teacher", "ta"];
-      $results = [];
+    $canvas_domain = "https://canvas.its.virginia.edu";
+    $canvas_course_id = $canvas_course["canvas_course_id"];
+    $url = "$canvas_domain/api/v1/courses/$canvas_course_id/users?enrollment_type[]=student&enrollment_type[]=ta&enrollment_type[]=teacher&include[]=enrollments&per_page=100";
 
-      foreach ($enrollment_types as $type) {
-        $url = "$canvas_domain/api/v1/courses/$canvas_course_id/users?enrollment_type[]=$type&per_page=100";
-        $users = [];
+    $canvas_lms_users = $this->canvasGetAll($url, $access_token);
+    if ($canvas_lms_users === null)
+      return $this->err("Failed to fetch Canvas LMS roster");
 
-        while ($url) {
-          $ch = curl_init();
-          curl_setopt($ch, CURLOPT_URL, $url);
-          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-          curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer $access_token"));
-          curl_setopt($ch, CURLOPT_HEADER, true);
-
-          $response = curl_exec($ch);
-
-          if ($errno = curl_errno($ch)) {
-              $errorText = "cURL error ({$errno}): " . curl_strerror($errno);
-              $this->logger->addError($errorText);
-              curl_close($ch);
-              return $this->err($errorText);
-          }
-
-          $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-          $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-          curl_close($ch);
-
-          if ($http_code !== 200) {
-            $errorText = "HTTP error: " . $http_code;
-            $this->logger->addError($errorText);
-            return $this->err($errorText);
-          }
-
-          $headers = substr($response, 0, $header_size);
-          $body = substr($response, $header_size);
-          $users = array_merge($users, json_decode($body, true));
-
-          $url = null;
-          foreach (explode("\n", $headers) as $header) {
-            if (stripos($header, 'Link:') === 0) {
-              foreach (explode(",", $header) as $part) {
-                if (strpos($part, 'rel="next"') !== false) {
-                  preg_match('/<(.+?)>/', $part, $matches);
-                  if ($matches) $url = trim($matches[1]);
-                }
-              }
-            }
-          }
-        }
-
-        $results[$type] = $users;
+    $converted = [];
+    $skipped = [];
+    foreach ($canvas_lms_users as $canvas_lms_user) {
+      $person = $this->synchronizationStore->canvasLmsUserToAsciUser($canvas_lms_user);
+      if ($person === null) {
+        $skipped[] = $canvas_lms_user;
+      } else {
+        $converted[] = $person;
       }
+    }
+
+    $result = $this->synchronizationStore->syncCanvasLmsRoster($asci_course_id, $converted);
 
     return [
       "success" => "true",
-      "users" => [
-        "student" => $results["student"],
-        "instructor" => $results["teacher"],
-        "ta" => $results["ta"]
-      ]
+      "course" => $this->synchronizationStore->getCanvasLmsCourse($asci_course_id),
+      "added" => $result["added"],
+      "updated" => $result["updated"],
+      "removed" => $result["removed"],
+      "skipped" => $skipped,
     ];
+
+    return ["success" => "true", "asci_roster" => $coverted];
+  }
+
+  protected function canvasGetAll($url, $access_token) {
+    $results = [];
+
+    while ($url) {
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, $url);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer $access_token"));
+      curl_setopt($ch, CURLOPT_HEADER, true);
+
+      $response = curl_exec($ch);
+
+      if ($errno = curl_errno($ch)) {
+        $this->logger->addError("cURL error ({$errno}): " . curl_strerror($errno));
+        curl_close($ch);
+        return null;
+      }
+
+      $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+      curl_close($ch);
+
+      if ($http_code !== 200) {
+        $this->logger->addError("HTTP error: " . $http_code);
+        return null;
+      }
+
+      $headers = substr($response, 0, $header_size);
+      $body = substr($response, $header_size);
+      $data = json_decode($body, true);
+
+      if (is_array($data)) {
+        foreach ($data as $item) {
+          $results[] = $item;
+        }
+      }
+
+      $url = null;
+      foreach (explode("\n", $headers) as $header) {
+        if (stripos($header, 'Link:') === 0) {
+          foreach (explode(",", $header) as $part) {
+            if (strpos($part, 'rel="next"') !== false) {
+              preg_match('/<(.+?)>/', $part, $matches);
+              if ($matches) $url = trim($matches[1]);
+            }
+          }
+        }
+      }
+    }
+
+    return $results;
   }
 }
 

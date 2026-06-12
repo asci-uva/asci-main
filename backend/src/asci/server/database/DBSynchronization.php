@@ -258,11 +258,10 @@ class DBSynchronization
     }
 
     public function getCanvasLmsCourse($asci_course_id) {
-        $this->db->prepare('getCanvasCourseStmt',
-            'SELECT canvas_course_id, name, course_code FROM canvas_lms_courses WHERE asci_course_id = $1');
-        $result = $this->db->fetchrow($this->db->execute('getCanvasCourseStmt', [$asci_course_id]));
-
-        return $result;
+        return $this->db->fetchrow($this->db->query(
+            'SELECT canvas_course_id, name, course_code FROM canvas_lms_courses WHERE asci_course_id = $1',
+            [$asci_course_id]
+        ));
     }
 
     public function desyncCanvasLmsCourse($asci_course_id) {
@@ -274,5 +273,125 @@ class DBSynchronization
             $this->db->execute('removeCanvasCourseStmt', [$asci_course_id]);
         }
         return $result;
+    }
+
+    public function canvasLmsUserToAsciUser($canvasLmsUser) {
+        $computing_id = isset($canvasLmsUser['sis_user_id']) ? trim((string)$canvasLmsUser['sis_user_id']) : '';
+        if ($computing_id === '')
+            return null;
+
+        $role = null;
+        $rank = ['student' => 1, 'ta' => 2, 'instructor' => 3];
+        $typeMap = [
+            'StudentEnrollment' => 'student',
+            'TaEnrollment' => 'ta',
+            'TeacherEnrollment' => 'instructor',
+        ];
+        $enrollments = isset($canvasLmsUser['enrollments']) && is_array($canvasLmsUser['enrollments']) ? $canvasLmsUser['enrollments'] : [];
+        foreach ($enrollments as $enrollment) {
+            $state = isset($enrollment['enrollmentstate']) ? $enrollment['enrollment_state'] : 'active';
+            if ($state !== 'active' && $state !== 'invited')
+                continue;
+            $type = isset($enrollment['type']) ? $enrollment['type'] : null;
+            if (!isset($typeMap[$type]))
+                continue;
+            $candidate = $typeMap[$type];
+            if ($role === null ||  $rank[$candidate] > $rank[$role])
+                $role = $candidate;
+        }
+        if ($role === null)
+            return null;
+
+        $sortable = isset($canvasLmsUser['sortable_name']) ? trim($canvasLmsUser['sortable_name']) : '';
+        $name = isset($canvasLmsUser['name']) ? trim($canvasLmsUser['name']) : '';
+        if ($sortable !== '' && strpos($sortable, ',') !== false) {
+            list($lname, $fname) = array_pad(explode(',', $sortable, 2), 2, '');
+            $lname = trim($lname);
+            $fname = trim($fname);
+        } else if ($name !== '') {
+            $parts = preg_split('/\s+/', $name);
+            $fname = $parts[0];
+            $lname = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : '';
+        } else {
+            return null;
+        }
+
+        return [
+            'computing_id' => $computing_id,
+            'role' => $role,
+            'fname' => $fname,
+            'lname' => $lname,
+            'pname' => $fname,
+        ];
+    }
+
+    public function syncCanvasLmsRoster($asci_course_id, $converted) {
+        $added = [];
+        $updated = [];
+        $removed = [];
+        $convertedSeen = [];
+
+        $this->db->beginTransaction();
+
+        foreach ($converted as $person) {
+            $convertedSeen[$person['computing_id']] = true;
+            $userRow = $this->db->fetchrow($this->db->query(
+                'SELECT id FROM users WHERE computing_id = $1', [$person['computing_id']]));
+            if ($userRow) {
+                $userId = $userRow['id'];
+            } else {
+                $password = password_hash($person['computing_id'], PASSWORD_DEFAULT);
+                $insertRow = $this->db->fetchrow($this->db->query(
+                    'INSERT INTO users (computing_id, fname, lname, pname, password) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+                    [$person['computing_id'], $person['fname'], $person['lname'], $person['pname'], $password]
+                ));
+                $userId = $insertRow['id'];
+            }
+
+            $enrollment = $this->db->fetchrow($this->db->query(
+                'SELECT role FROM user_courses WHERE user_id = $1 AND course_id = $2', 
+                [$userId, $asci_course_id]
+            ));
+            if (!$enrollment) {
+                $this->db->query(
+                    'INSERT INTO user_courses (user_id, course_id, role) VALUES ($1, $2, $3)',
+                    [$userId, $asci_course_id, $person['role']]
+                );
+                $added[] = ["computingId" => $person['computing_id'], 'fname' => $person['fname'], 'lname' => $person['lname'], 'role' => $person['role']];
+            } else if ($enrollment['role'] !== $person['role']) {
+                $this->db->query(
+                    'UPDATE user_courses SET role = $1 WHERE user_id = $2 AND course_id = $3',
+                    [$person['role'], $userId, $asci_course_id]
+                );
+                $updated[] = ["computingId" => $person['computing_id'], 'fname' => $person['fname'], 'lname' => $person['lname'], 'role' => $person['role']];
+            }
+        }
+
+        $current = $this->db->query(
+            "SELECT uc.user_id, uc.role, u.computing_id, u.fname, u.lname FROM user_courses uc JOIN users u ON u.id = uc.user_id WHERE uc.course_id = $1 AND uc.role in ('student', 'ta')",
+            [$asci_course_id]
+        );
+
+        $usersToRemove = [];
+        while ($row = $this->db->fetchrow($current)) {
+            if (!isset($convertedSeen[$row['computing_id']]))
+                $usersToRemove[] = $row;
+        }
+
+        foreach ($usersToRemove as $user) {
+            $this->db->query(
+                'DELETE FROM user_courses WHERE user_id = $1 AND course_id = $2',
+                [$user['user_id'], $asci_course_id]
+            );
+            $removed[] = ["computingId" => $user['computing_id'], 'fname' => $user['fname'], 'lname' => $user['lname'], 'role' => $user['role']];
+        }
+
+        $this->db->commit();
+
+        return [
+            'added' => $added,
+            'updated' => $updated,
+            'removed' => $removed
+        ];
     }
 }
