@@ -196,7 +196,6 @@ function UploadRoster(props) {
   }
 
   return (
-
     <div className="card mb-4">
       {props.canvasLmsCourse !== null ? (
         <>
@@ -208,12 +207,12 @@ function UploadRoster(props) {
             <p>Course Name: {props.canvasLmsCourse.name}</p>
             {getSyncRosterButton()}
           </div>
-          <div className="mb-3">
+          {showSyncRosterResults && (
+            <div className="mb-3">
             <h5>Roster Sync Results</h5>
-            {showSyncRosterResults && (
-              getSyncRosterResults()
-            )}
+            {getSyncRosterResults()}
           </div>
+          )}
         </div>
         {showSyncRosterModal && (
           <div className="modal show d-block" tabIndex="-1">
