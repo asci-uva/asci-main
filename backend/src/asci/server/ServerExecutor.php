@@ -2701,9 +2701,31 @@ $usedCosSim = True;
       if ($courses === null)
         return $this->err("Failed to fetch Canvas LMS courses");
 
+      $linked_courses = $this->synchronizationStore->getLinkedCanvasLmsCourses();
+      $linked_map = [];
+      if ($linked_courses) {
+        foreach ($linked_courses as $linked_course) {
+          $linked_map[(string) $linked_course["canvas_course_id"]] = [
+            "mnemonic" => $linked_course["mnemonic"],
+            "number" => $linked_course["number"],
+            "name" => $linked_course["name"],
+            "semester" => $linked_course["semester"],
+          ];
+        }
+      }
+
       $results = [];
       foreach ($courses as $course) {
-        $results[] = ["id" => $course["id"], "name" => $course["name"], "course_code" => $course["course_code"], "enrollment_term_id" => $course["enrollment_term_id"]];
+        $canvas_course_id = (string) $course["id"];
+        $linked = isset($linked_map[$canvas_course_id]);
+        $results[] = [
+          "id" => $course["id"],
+          "name" => $course["name"],
+          "course_code" => $course["course_code"],
+          "enrollment_term_id" => $course["enrollment_term_id"],
+          "linked" => $linked,
+          "linked_asci_course" => $linked ? $linked_map[$canvas_course_id] : null,
+        ];
       }
 
       return ["success" => "true", "courses" => $results];

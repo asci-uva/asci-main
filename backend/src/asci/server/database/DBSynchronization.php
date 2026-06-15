@@ -264,6 +264,15 @@ class DBSynchronization
         ));
     }
 
+    public function getLinkedCanvasLmsCourses() {
+        return $this->db->fetchall($this->db->query(
+            'SELECT cl.canvas_course_id, c.mnemonic, c.number, c.name, c.semester
+             FROM canvas_lms_courses cl
+             JOIN courses c ON c.id = cl.asci_course_id',
+            []
+        ));
+    }
+
     public function desyncCanvasLmsCourse($asci_course_id) {
         $result = $this->getCanvasLmsCourse($asci_course_id);
 

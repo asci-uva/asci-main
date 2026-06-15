@@ -3,6 +3,10 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 
+function formatLinkedAsciCourse(c) {
+    return `${c.mnemonic} ${c.number}: ${c.name} (${c.semester})`;
+}
+
 function CanvasLmsSync(props) {
     const [canvasLmsAccessToken, setCanvasLmsAccessToken] = useState("");
     const [validateButtonDisabled, setValidateButtonDisabled] = useState(false);
@@ -315,8 +319,8 @@ function CanvasLmsSync(props) {
                             {filteredAndSortedCanvasLmsCourses.map((course) => (
                                 <li
                                     key={course.id}
-                                    className="list-group-item"
-                                    style={{ cursor: "pointer" }}
+                                    className={`list-group-item${course.linked ? " text-muted" : ""}`}
+                                    style={{ cursor: "pointer", ...(course.linked ? { opacity: 0.55 } : {}) }}
                                     onClick={() =>
                                         setExpandedCanvasLmsCourseId(
                                             expandedCanvasLmsCourseId === course.id ? null : course.id
@@ -338,10 +342,17 @@ function CanvasLmsSync(props) {
 
                                     {expandedCanvasLmsCourseId === course.id && (
                                         <div className="mt-2">
-                                            <button type="button" className="btn btn-primary" onClick={(e) => {
-                                                e.stopPropagation();
-                                                selectCanvasLmsCourse(course);
-                                            }}>Select Course</button>
+                                            {course.linked ? (
+                                                <>
+                                                    <button type="button" className="btn btn-primary" disabled>Select Course</button>
+                                                    <p className="mb-0 mt-2">Already linked to {formatLinkedAsciCourse(course.linked_asci_course)}</p>
+                                                </>
+                                            ) : (
+                                                <button type="button" className="btn btn-primary" onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    selectCanvasLmsCourse(course);
+                                                }}>Select Course</button>
+                                            )}
                                         </div>
                                     )}
                                 </li>
