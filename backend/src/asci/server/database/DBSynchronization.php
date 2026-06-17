@@ -298,7 +298,7 @@ class DBSynchronization
         ];
         $enrollments = isset($canvasLmsUser['enrollments']) && is_array($canvasLmsUser['enrollments']) ? $canvasLmsUser['enrollments'] : [];
         foreach ($enrollments as $enrollment) {
-            $state = isset($enrollment['enrollmentstate']) ? $enrollment['enrollment_state'] : 'active';
+            $state = isset($enrollment['enrollment_state']) ? $enrollment['enrollment_state'] : 'active';
             if ($state !== 'active' && $state !== 'invited')
                 continue;
             $type = isset($enrollment['type']) ? $enrollment['type'] : null;
