@@ -247,6 +247,7 @@ function CanvasLmsSync(props) {
                     setExpandedCanvasLmsCourseId(null);
                     setSelectedTermName("");
                     setSelectedYear("");
+                    getCanvasLmsCourses();
                     console.log("Successfully desynced with Canvas LMS course");
                     toast.success("Successfully desynced with Canvas LMS course");
                 } else {
