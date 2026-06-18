@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { postCommand } from "../utils/postCommand";
+import ConfirmModal from "../utils/ConfirmModal";
 
 
 function formatLinkedAsciCourse(c) {
@@ -66,13 +68,7 @@ function CanvasLmsSync(props) {
             command: "validateCanvasLmsAccessToken",
         };
 
-        fetch(props.url, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        })
-            .then((response) => response.json())
+        postCommand(props.url, payload)
             .then((data) => {
                 setValidateButtonDisabled(false);
                 if (data.success === "true") {
@@ -106,13 +102,7 @@ function CanvasLmsSync(props) {
             command: "removeCanvasLmsAccessToken",
         };
 
-        fetch(props.url, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        })
-            .then((response) => response.json())
+        postCommand(props.url, payload)
             .then((data) => {
                 setRemoveAccessTokenButtonDisabled(false);
                 if (data.success === "true") {
@@ -140,13 +130,7 @@ function CanvasLmsSync(props) {
             command: "getCanvasLmsEnrollmentTerms",
         };
 
-        fetch(props.url, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        })
-            .then((response) => response.json())
+        postCommand(props.url, payload)
             .then((data) => {
                 if (data.success === "true") {
                     setTerms(data.terms);
@@ -168,13 +152,7 @@ function CanvasLmsSync(props) {
             command: "getCanvasLmsCourses",
         };
 
-        fetch(props.url, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        })
-            .then((response) => response.json())
+        postCommand(props.url, payload)
             .then((data) => {
                 if (data.success === "true") {
                     setCanvasLmsCourses(data.courses);
@@ -201,13 +179,7 @@ function CanvasLmsSync(props) {
             command: "syncCanvasLmsCourse"
         };
 
-        fetch(props.url, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        })
-            .then((response) => response.json())
+        postCommand(props.url, payload)
             .then((data) => {
                 if (data.success === "true") {
                     console.log("Successfully synced with Canvas LMS course");
@@ -234,13 +206,7 @@ function CanvasLmsSync(props) {
             command: "desyncCanvasLmsCourse"
         };
 
-        fetch(props.url, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        })
-            .then((response) => response.json())
+        postCommand(props.url, payload)
             .then((data) => {
                 if (data.success === "true") {
                     props.setCanvasLmsCourse(null);
@@ -383,83 +349,43 @@ function CanvasLmsSync(props) {
                 </>
             )}
             </div>
-            {showValidationModal && (
-            <div className="modal show d-block" tabIndex="-1">
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">Confirm Canvas access token validation</h5>
-                        </div>
-                        <div className="modal-body">
-                            <p>Are you sure you want to validate this Canvas LMS access token?</p>
-                            <p>Note: The access token will be directly tied to your ASCI account</p>
-                        </div>
-                        <div className="modal-footer">
-                            <button className="btn btn-secondary" onClick={() => setShowValidationModal(false)}>Cancel</button>
-                            <button className="btn btn-primary" onClick={confirmValidation}>Confirm</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            )}
-            {showRemoveModal && (
-            <div className="modal show d-block" tabIndex="-1">
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">Confirm Canvas LMS access token removal</h5>
-                        </div>
-                        <div className="modal-body">
-                            <p>Are you sure you want to remove this Canvas LMS access token?</p>
-                            <p>Note: The access token is directly tied to your ASCI account</p>
-                            {props.canvasLmsCourse !== null && (
-                                <p>WARNING: A Canvas LMS course is linked this ASCI course. Removing your access token will also desynchronize it</p>
-                            )}
-                        </div>
-                        <div className="modal-footer">
-                            <button className="btn btn-secondary" onClick={() => setShowRemoveModal(false)}>Cancel</button>
-                            <button className="btn btn-primary" onClick={confirmRemoval}>Confirm</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            )}
-            {showSelectModal && (
-            <div className="modal show d-block" tabIndex="-1">
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">Confirm Canvas LMS course selection</h5>
-                        </div>
-                        <div className="modal-body">
-                            <p>Are you sure you want to select this Canvas LMS course?</p>
-                        </div>
-                        <div className="modal-footer">
-                            <button className="btn btn-secondary" onClick={() => {setShowSelectModal(false); setSelectedCanvasLmsCourse(null)}}>Cancel</button>
-                            <button className="btn btn-primary" onClick={confirmSelectCanvasLmsCourse}>Confirm</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            )}
-            {showRemoveCanvasLmsCourseModal && (
-            <div className="modal show d-block" tabIndex="-1">
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">Confirm Canvas LMS course desynchronization</h5>
-                        </div>
-                        <div className="modal-body">
-                            <p>Are you sure you want to desynchronize this Canvas LMS course?</p>
-                        </div>
-                        <div className="modal-footer">
-                            <button className="btn btn-secondary" onClick={() => setShowRemoveCanvasLmsCourseModal(false)}>Cancel</button>
-                            <button className="btn btn-primary" onClick={confirmRemoveCanvasLmsCourse}>Confirm</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            )}
+            <ConfirmModal
+                show={showValidationModal}
+                title="Confirm Canvas access token validation"
+                onCancel={() => setShowValidationModal(false)}
+                onConfirm={confirmValidation}
+            >
+                <p>Are you sure you want to validate this Canvas LMS access token?</p>
+                <p>Note: The access token will be directly tied to your ASCI account</p>
+            </ConfirmModal>
+            <ConfirmModal
+                show={showRemoveModal}
+                title="Confirm Canvas LMS access token removal"
+                onCancel={() => setShowRemoveModal(false)}
+                onConfirm={confirmRemoval}
+            >
+                <p>Are you sure you want to remove this Canvas LMS access token?</p>
+                <p>Note: The access token is directly tied to your ASCI account</p>
+                {props.canvasLmsCourse !== null && (
+                    <p>WARNING: A Canvas LMS course is linked this ASCI course. Removing your access token will also desynchronize it</p>
+                )}
+            </ConfirmModal>
+            <ConfirmModal
+                show={showSelectModal}
+                title="Confirm Canvas LMS course selection"
+                onCancel={() => {setShowSelectModal(false); setSelectedCanvasLmsCourse(null)}}
+                onConfirm={confirmSelectCanvasLmsCourse}
+            >
+                <p>Are you sure you want to select this Canvas LMS course?</p>
+            </ConfirmModal>
+            <ConfirmModal
+                show={showRemoveCanvasLmsCourseModal}
+                title="Confirm Canvas LMS course desynchronization"
+                onCancel={() => setShowRemoveCanvasLmsCourseModal(false)}
+                onConfirm={confirmRemoveCanvasLmsCourse}
+            >
+                <p>Are you sure you want to desynchronize this Canvas LMS course?</p>
+            </ConfirmModal>
         </div>
     );
 }
