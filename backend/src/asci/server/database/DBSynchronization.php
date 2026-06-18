@@ -197,9 +197,10 @@ class DBSynchronization
     }
 
     public function getCanvasLmsAccessToken($user_id) {
-        $this->db->prepare('canvasGetAccessTokenStmt',
-            'SELECT access_token, access_token_iv FROM canvas_lms_access_tokens WHERE user_id = $1');
-        $result = $this->db->fetchrow($this->db->execute('canvasGetAccessTokenStmt', [$user_id]));
+        $result = $this->db->fetchrow($this->db->query(
+            'SELECT access_token, access_token_iv FROM canvas_lms_access_tokens WHERE user_id = $1',
+            [$user_id]
+        ));
 
         if (!$result)
             return null;

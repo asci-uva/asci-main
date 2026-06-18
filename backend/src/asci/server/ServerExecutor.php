@@ -2575,30 +2575,10 @@ $usedCosSim = True;
       if ($canvas_lms_access_token === "")
         return $this->err("Access token is empty");
 
-      $canvas_domain = "https://canvas.its.virginia.edu";
-
-      $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, "$canvas_domain/api/v1/users/self");
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer $canvas_lms_access_token"));
-      $response = curl_exec($ch);
-      $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-      if($errno = curl_errno($ch)) {
-        $errorText = "cURL error ({$errno}): " . curl_strerror($errno);
-        $this->logger->addError($errorText);
-        curl_close($ch);
-        return $this->err($errorText);
-      }
-
-      if ($http_code !== 200) {
-        $errorText = "HTTP error: " . $http_code;
-        $this->logger->addError($errorText);
-        curl_close($ch);
-        return $this->err($errorText);
-      }
-
-      curl_close($ch);
+      $canvas = new \asci\server\CanvasLmsClient($canvas_lms_access_token, $this->logger);
+      $result = $canvas->get("/api/v1/users/self");
+      if (!$result["ok"])
+        return $this->err($result["error"]);
 
       $this->synchronizationStore->addCanvasLmsAccessToken($this->user->id, $canvas_lms_access_token);
 
@@ -2629,6 +2609,14 @@ $usedCosSim = True;
     public function getCanvasLmsEnrollmentTermsHandler($asci_course_id) {
       if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS enrollment terms");
+      
+      $canvas = $this->canvasLmsClientForCurrentUser();
+
+      $terms = $canvas->getAll("/api/v1/accounts/self/terms", "per_page=100", "enrollment_terms");
+      if ($terms === null)
+        return $this->err($canvas->getLastError());
+
+      $result = [];
 
       $canvas_access_token = $this->synchronizationStore->getCanvasLmsAccessToken($this->user->id);
 
@@ -2636,52 +2624,9 @@ $usedCosSim = True;
       $url = "$canvas_domain/api/v1/accounts/self/terms?per_page=100";
       $results=[];
 
-      while ($url) {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer $canvas_access_token"));
-        curl_setopt($ch, CURLOPT_HEADER, true);
-
-        $response = curl_exec($ch);
-
-        if ($errno = curl_errno($ch)) {
-          $errorText = "cURL error ({$errno}): " . curl_strerror($errno);
-          $this->logger->addError($errorText);
-          curl_close($ch);
-          return $this->err($errorText);
-        }
-
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-        curl_close($ch);
-
-        if ($http_code !== 200) {
-          $errorText = "HTTP error: " . $http_code;
-          $this->logger->addError($errorText);
-          return $this->err($errorText);
-        }
-
-        $headers = substr($response, 0, $header_size);
-        $body = substr($response, $header_size);
-        $data = json_decode($body, true);
-
-        foreach ($data['enrollment_terms'] as $term) {
-          if (preg_match('/^\d{4} (Fall|Spring|Summer)$/', $term['name'])) {
-            $results[$term['id']] = $term['name'];
-          }
-        }
-
-        $url = null;
-        foreach (explode("\n", $headers) as $header) {
-          if (stripos($header, 'Link:') === 0) {
-            foreach (explode(",", $header) as $part) {
-              if (strpos($part, 'rel="next"') !== false) {
-                preg_match('/<(.+?)>/', $part, $matches);
-                if ($matches) $url = trim($matches[1]);
-              }
-            }
-          }
+      foreach ($terms as $term) {
+        if (preg_match('/^\d{4} (Fall|Spring|Summer)$/', $term['name'])) {
+          $results[$term['id']] = $term['name'];
         }
       }
 
@@ -2691,13 +2636,9 @@ $usedCosSim = True;
     public function getCanvasLmsCoursesHandler($asci_course_id) {
       if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS courses");
-      
-      $canvas_access_token = $this->synchronizationStore->getCanvasLmsAccessToken($this->user->id);
 
-      $canvas_domain = "https://canvas.its.virginia.edu";
-      $url = "$canvas_domain/api/v1/courses?enrollment_type=teacher&per_page=100";
-      
-      $courses = $this->canvasGetAll($url, $canvas_access_token);
+      $canvas = $this->canvasLmsClientForCurrentUser();
+      $courses = $canvas->getAll("/api/v1/courses", "enrollment_type=teacher&per_page=100");
       if ($courses === null)
         return $this->err("Failed to fetch Canvas LMS courses");
 
@@ -2771,11 +2712,11 @@ $usedCosSim = True;
     if (!$access_token)
       return $this->err("No Canvas LMS access token found");
 
-    $canvas_domain = "https://canvas.its.virginia.edu";
+    $canvas = new \asci\server\CanvasLmsClient($access_token, $this->logger);
     $canvas_course_id = $canvas_course["canvas_course_id"];
-    $url = "$canvas_domain/api/v1/courses/$canvas_course_id/users?enrollment_type[]=student&enrollment_type[]=ta&enrollment_type[]=teacher&include[]=enrollments&per_page=100";
+    $query = "enrollment_type[]=student&enrollment_type[]=ta&enrollment_type[]=teacher&include[]=enrollments&per_page=100";
 
-    $canvas_lms_users = $this->canvasGetAll($url, $access_token);
+    $canvas_lms_users = $canvas->getAll("/api/v1/courses/$canvas_course_id/users", $query);
     if ($canvas_lms_users === null)
       return $this->err("Failed to fetch Canvas LMS roster");
 
@@ -2804,57 +2745,9 @@ $usedCosSim = True;
     return ["success" => "true", "asci_roster" => $coverted];
   }
 
-  protected function canvasGetAll($url, $access_token) {
-    $results = [];
-
-    while ($url) {
-      $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, $url);
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer $access_token"));
-      curl_setopt($ch, CURLOPT_HEADER, true);
-
-      $response = curl_exec($ch);
-
-      if ($errno = curl_errno($ch)) {
-        $this->logger->addError("cURL error ({$errno}): " . curl_strerror($errno));
-        curl_close($ch);
-        return null;
-      }
-
-      $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-      $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-      curl_close($ch);
-
-      if ($http_code !== 200) {
-        $this->logger->addError("HTTP error: " . $http_code);
-        return null;
-      }
-
-      $headers = substr($response, 0, $header_size);
-      $body = substr($response, $header_size);
-      $data = json_decode($body, true);
-
-      if (is_array($data)) {
-        foreach ($data as $item) {
-          $results[] = $item;
-        }
-      }
-
-      $url = null;
-      foreach (explode("\n", $headers) as $header) {
-        if (stripos($header, 'Link:') === 0) {
-          foreach (explode(",", $header) as $part) {
-            if (strpos($part, 'rel="next"') !== false) {
-              preg_match('/<(.+?)>/', $part, $matches);
-              if ($matches) $url = trim($matches[1]);
-            }
-          }
-        }
-      }
-    }
-
-    return $results;
+  private function canvasLmsClientForCurrentUser() {
+    $access_token = $this->synchronizationStore->getCanvasLmsAccessToken($this->user->id);
+    return new \asci\server\CanvasLmsClient($access_token, $this->logger);
   }
 }
 
