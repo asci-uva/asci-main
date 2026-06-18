@@ -110,8 +110,6 @@ function CanvasLmsSync(props) {
                     setCanvasLmsAccessToken("");
                     console.log("Successfully removed Canvas LMS access token");
                     toast.success("Successfully removed canvas LMS access token");
-                    if (props.canvasLmsCourse !== null)
-                        confirmRemoveCanvasLmsCourse();
                 } else {
                     console.log(data.error);
                     toast.error(data.error);
@@ -233,29 +231,51 @@ function CanvasLmsSync(props) {
 
     function get_remove_access_token_button() {
         if (removeAccessTokenButtonDisabled)
-            return <button type="button" className="btn btn-primary" disabled>Removing Access Token (Please Wait)</button>;
-        return <button type="button" className="btn btn-primary" onClick={removeCanvasLmsAccessToken}>Remove Access Token</button>;
+            return <button type="button" className="btn btn-primary mb-3" disabled>Removing Access Token (Please Wait)</button>;
+        return <button type="button" className="btn btn-primary mb-3" onClick={removeCanvasLmsAccessToken}>Remove Access Token</button>;
     }
 
     return (
         <div className="card">
             <h4 className="card-header">Canvas LMS Synchronization</h4>
             <div className="card-body">
-                <h5>Access token validation</h5>
+            <h5>Access token validation</h5>
             {props.hasCanvasLmsAccessToken ? (
                 <>
                 <div className="mb-3">
                     <p>Canvas LMS access token detected</p>
                     {get_remove_access_token_button()}
                 </div>
-                <h5>Select a Canvas LMS course</h5>
-                {props.canvasLmsCourse !== null ? (
+                </>
+            ) : (
+                <>
+                <div className="mb-3">
+                    <label>Enter Canvas LMS access token</label>
+                    <input
+                        className="form-control"
+                        type="text"
+                        value={canvasLmsAccessToken}
+                        onChange={(e) => setCanvasLmsAccessToken(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") validateCanvasAccessToken();
+                        }}
+                        required
+                    />
+                </div>
+                {get_validate_button()}
+                </>
+            )}
+            {props.canvasLmsCourse !== null ? (
+                <>
+                <h5>Canvas LMS course</h5>
                 <div className="mb-3">
                     <p>Synced with {props.canvasLmsCourse.course_code} {props.canvasLmsCourse.name}</p>
                     <button type="button" className="btn btn-primary" onClick={removeCanvasLmsCourse}>Desynchronize from Canvas LMS course</button>
                 </div>
+                </>
                 ) : (
                 <>
+                <h5>Canvas LMS course</h5>
                 <div className="mb-3" style={{position: "sticky", zIndex: 1000}}>
                     <div className="d-flex gap-2">
                         <select
@@ -328,25 +348,6 @@ function CanvasLmsSync(props) {
                     </div>
                 </div>
                 </>
-                )}
-                </>
-            ) : (
-                <>
-                    <div className="mb-3">
-                        <label>Enter Canvas LMS access token</label>
-                        <input
-                            className="form-control"
-                            type="text"
-                            value={canvasLmsAccessToken}
-                            onChange={(e) => setCanvasLmsAccessToken(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") validateCanvasAccessToken();
-                            }}
-                            required
-                        />
-                    </div>
-                    {get_validate_button()}
-                </>
             )}
             </div>
             <ConfirmModal
@@ -367,7 +368,7 @@ function CanvasLmsSync(props) {
                 <p>Are you sure you want to remove this Canvas LMS access token?</p>
                 <p>Note: The access token is directly tied to your ASCI account</p>
                 {props.canvasLmsCourse !== null && (
-                    <p>WARNING: A Canvas LMS course is linked this ASCI course. Removing your access token will also desynchronize it</p>
+                    <p>WARNING: A Canvas LMS course is linked this ASCI course. Removing your access token will cause some synced features to not work</p>
                 )}
             </ConfirmModal>
             <ConfirmModal

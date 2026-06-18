@@ -125,8 +125,16 @@ function UploadRoster(props) {
   };
 
   function getSyncRosterButton() {
+    if (!props.hasCanvasLmsAccessToken)
+      return (
+        <>
+        <p className="text-muted">Cannot sync course without a Canvas LMS access token</p>
+        <button type="button" className="btn btn-primary" disabled>Synchronize Course Roster</button>
+        </>
+    );
+
     if (syncRosterButtonDisabled)
-        return (
+      return (
         <button type="button" className="btn btn-primary" disabled>Syncing Roster (Please Wait)</button>
       );
     return (
@@ -190,8 +198,10 @@ function UploadRoster(props) {
         <div className="card-body">
           <div className="mb-3">
             <h5>Canvas LMS Course Info</h5>
-            <p>Course Code: {props.canvasLmsCourse.course_code}</p>
-            <p>Course Name: {props.canvasLmsCourse.name}</p>
+            <p>
+              Course Code: {props.canvasLmsCourse.course_code} <br />
+              Course Name: {props.canvasLmsCourse.name}
+            </p>
             {getSyncRosterButton()}
           </div>
           {showSyncRosterResults && (

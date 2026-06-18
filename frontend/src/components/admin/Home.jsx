@@ -12,6 +12,7 @@
   import UpdateChat from "./UpdateChat";
   import CurrentCourseContent from "./CurrentCourseContent";
   import ViewQuests from "./ViewQuests";
+  import { postCommand } from "../utils/postCommand";
 
   function Home(props) {
     let docRoot = props.documentRoot;
@@ -49,13 +50,7 @@
         command: "getCanvasLmsCourse",
       };
 
-      fetch(props.url, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-        .then((response) => response.json())
+      postCommand(props.url, payload)
         .then((data) => {
           if (data.success === "true") {
             setCanvasLmsCourse(data.course);
@@ -89,6 +84,15 @@
               
               <h3 className="mb-3">Course: {courseList[course].mnemonic} {courseList[course].number} -  {courseList[course].name} ({courseList[course].semester})</h3>
               
+              {canvasLmsCourse !== null && !hasCanvasLmsAccessToken && (
+                <div className="alert alert-warning d-flex justify-content-between align-items-center mb-3">
+                  <span>
+                    This course is still linked to Canvas LMS course {canvasLmsCourse.course_code} {canvasLmsCourse.name}, but no Canvas access token is detected.
+                    Some features will be disabled until you add a token or unlink the course.
+                  </span>
+                </div>
+              )}
+
               <div className="card">
                 <div className="card-header">
               <ul className="nav nav-tabs card-header-tabs" id="pills-tab" role="tablist">
