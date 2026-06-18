@@ -128,7 +128,7 @@
                   <div className="col-md-12 my-auto mb-2">
                       <UploadRoster 
                         course_id={courseList[course].course_id} 
-                        canvasLmsSynced={hasCanvasLmsAccessToken} 
+                        hasCanvasLmsAccessToken={hasCanvasLmsAccessToken} 
                         canvasLmsCourse={canvasLmsCourse} 
                         {...props} />                                
                   </div>
