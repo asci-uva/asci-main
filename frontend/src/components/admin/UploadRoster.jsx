@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useUser } from "../context/UserContext";
+import { postCommand } from "../utils/postCommand";
+import ConfirmModal from "../utils/ConfirmModal";
 
 function UploadRoster(props) {
   const [rosterFile, setRosterFile] = useState(null);
@@ -70,15 +72,7 @@ function UploadRoster(props) {
 
     console.log("Upload roster payload: ", payload);
 
-    fetch(props.url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(payload),
-    })
-      .then((response) => response.json())
+    postCommand(props.url, payload)
       .then((data) => {
         console.log("Upload roster respond: ", data);
         if (data.success) {
@@ -109,13 +103,7 @@ function UploadRoster(props) {
       command: "syncCanvasLmsRoster",
     };
 
-    fetch(props.url, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json"},
-      body: JSON.stringify(payload),
-    })
-      .then((response) => response.json())
+    postCommand(props.url, payload)
       .then((data) => {
         setSyncRosterButtonDisabled(false);
         if (data.success === "true") {
@@ -124,7 +112,6 @@ function UploadRoster(props) {
           refreshCourseRoster();
           setShowSyncRosterResults(true);
           setSyncRosterResults(data);
-          //TODO: display who was added
         } else {
           console.log(data.error);
           toast.error(data.error || "Failed to sync Canvas LMS roster");
@@ -214,25 +201,15 @@ function UploadRoster(props) {
           </div>
           )}
         </div>
-        {showSyncRosterModal && (
-          <div className="modal show d-block" tabIndex="-1">
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Confirm Canvas Roster Sync</h5>
-                </div>
-                <div className="modal-body">
-                  <p>Are you sure you want to sync the roster from <strong>{props.canvasLmsCourse.name}</strong> on Canvas LMS?</p>
-                  <p>WARNING: Syncing the roster will remove all manually added users except for Instructors</p>
-                </div>
-                <div className="modal-footer">
-                  <button className="btn btn-secondary" onClick={() => setShowSyncRosterModal(false)}>Cancel</button>
-                  <button className="btn btn-primary" onClick={confirmSyncCanvasLmsRoster}>Confirm</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <ConfirmModal
+          show={showSyncRosterModal}
+          title="Confirm Canvas Roster Sync"
+          onCancel={() => setShowSyncRosterModal(false)}
+          onConfirm={confirmSyncCanvasLmsRoster}
+        >
+          <p>Are you sure you want to sync the roster from <strong>{props.canvasLmsCourse.name}</strong> on Canvas LMS?</p>
+          <p>WARNING: Syncing the roster will remove all manually added users except for Instructors</p>
+        </ConfirmModal>
         </>
       ) : (
         <>
