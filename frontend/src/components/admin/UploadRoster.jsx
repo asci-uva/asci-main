@@ -206,9 +206,9 @@ function UploadRoster(props) {
           </div>
           {showSyncRosterResults && (
             <div className="mb-3">
-            <h5>Roster Sync Results</h5>
-            {getSyncRosterResults()}
-          </div>
+              <h5>Roster Sync Results</h5>
+              {getSyncRosterResults()}
+            </div>
           )}
         </div>
         <ConfirmModal

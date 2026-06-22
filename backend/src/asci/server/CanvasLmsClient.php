@@ -4,6 +4,7 @@ namespace asci\server;
 
 class CanvasLmsClient {
     const BASE_URL = "https://canvas.its.virginia.edu";
+    const USER_AGENT = "ASCI/1.0";
 
     private $accessToken;
     private $logger;
@@ -22,7 +23,7 @@ class CanvasLmsClient {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, self::BASE_URL . $path);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer {$this->accessToken}"));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer {$this->accessToken}", "User-Agent: " . self::USER_AGENT));
         $response = curl_exec($ch);
 
         if ($errno = curl_errno($ch)) {
@@ -52,7 +53,7 @@ class CanvasLmsClient {
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer {$this->accessToken}"));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer {$this->accessToken}", "User-Agent: " . self::USER_AGENT));
             curl_setopt($ch, CURLOPT_HEADER, true);
 
             $response = curl_exec($ch);
