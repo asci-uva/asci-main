@@ -378,7 +378,9 @@
                     <p>Are you sure you want to remove this Canvas LMS access token?</p>
                     <p>Note: The access token is directly tied to your ASCI account</p>
                     {props.canvasLmsCourse !== null && (
-                        <p>WARNING: A Canvas LMS course is linked this ASCI course. Removing your access token will cause some synced features to not work</p>
+                        <p className="alert alert-warning d-flex justify-content-between align-items-center mb-3">
+                            A Canvas LMS course is linked this ASCI course. Removing your access token will cause some synced features to not work
+                        </p>
                     )}
                 </ConfirmModal>
                 <ConfirmModal

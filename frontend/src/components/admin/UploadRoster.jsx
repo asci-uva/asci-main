@@ -218,7 +218,9 @@ function UploadRoster(props) {
           onConfirm={confirmSyncCanvasLmsRoster}
         >
           <p>Are you sure you want to sync the roster from <strong>{props.canvasLmsCourse.name}</strong> on Canvas LMS?</p>
-          <p>WARNING: Syncing the roster will remove all manually added users except for Instructors</p>
+          <p className="alert alert-warning d-flex justify-content-between align-items-center mb-3">
+            Syncing the roster will remove all manually added users except for Instructors
+          </p>
         </ConfirmModal>
         </>
       ) : (

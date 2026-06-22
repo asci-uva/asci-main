@@ -106,13 +106,16 @@
                   <button className="nav-link" id="pills-roster-tab" data-bs-toggle="pill" data-bs-target="#pills-roster" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Update Roster</button>
                 </li>
                 <li className="nav-item" role="presentation">
-                  <button className="nav-link" id="pills-sync-tab" data-bs-toggle="pill" data-bs-target="#pills-sync" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Synchronization/Uploads</button>
+                  <button className="nav-link" id="pills-sync-tab" data-bs-toggle="pill" data-bs-target="#pills-sync" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Course Content Uploads</button>
                 </li>
                 <li className="nav-item" role="presentation">
                   <button className="nav-link" id="pills-content-tab" data-bs-toggle="pill" data-bs-target="#pills-content" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Course Content</button>
                 </li>
                 <li className="nav-item" role="presentation">
                   <button className="nav-link" id="pills-quests-tab" data-bs-toggle="pill" data-bs-target="#pills-quests" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Quests</button>
+                </li>
+                <li className="nav-item" role="presentation">
+                  <button className="nav-link" id="pills-external-tools-tab" data-bs-toggle="pill" data-bs-target="#pills-external-tools" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">External Tools/Integrations</button>
                 </li>
               </ul>
                 </div>
@@ -137,7 +140,11 @@
                         {...props} />                                
                   </div>
                   <div className="col-md-12 my-auto">
-                      <AddStudent course_id={courseList[course].course_id} {...props} />                                
+                      <AddStudent 
+                        course_id={courseList[course].course_id} 
+                        hasCanvasLmsAccessToken={hasCanvasLmsAccessToken}
+                        canvasLmsCourse={canvasLmsCourse}
+                        {...props} />                                
                   </div>
                 </div>
 
@@ -149,19 +156,6 @@
 
                 <div className="tab-pane fade" id="pills-sync" role="tabpanel" aria-labelledby="pills-contact-tab">
                   <div className="row">
-                    <div className="col-md-12 my-auto">
-                      <CanvasLmsSync 
-                        course_id={courseList[course].course_id} 
-                        hasCanvasLmsAccessToken={hasCanvasLmsAccessToken} 
-                        setHasCanvasLmsAccessToken={setHasCanvasLmsAccessToken} 
-                        canvasLmsCourse={canvasLmsCourse}
-                        setCanvasLmsCourse={setCanvasLmsCourse}
-                        {...props} 
-                      />
-                    </div>
-                    <div className="col-md-12 my-auto">
-                      <GradescopeSync course_id={courseList[course].course_id} {...props} />              
-                    </div>
                     <div className="col-md-12 my-auto"> 
                       <UpdateChat course_id={courseList[course].course_id} uploadSuccess={refreshContent} {...props} /> 
                     </div>
@@ -180,6 +174,24 @@
                   <div className="row">
                     <div className="col-md-12 my-auto">
                       <ViewQuests course_id={courseList[course].course_id} {...props} />              
+                    </div>
+                  </div>
+                </div>
+
+                <div className="tab-pane fade" id="pills-external-tools" role="tabpanel" aria-labelledby="pills-contact-tab">
+                  <div className="row">
+                    <div className="col-md-12 my-auto">
+                      <CanvasLmsSync 
+                        course_id={courseList[course].course_id} 
+                        hasCanvasLmsAccessToken={hasCanvasLmsAccessToken} 
+                        setHasCanvasLmsAccessToken={setHasCanvasLmsAccessToken} 
+                        canvasLmsCourse={canvasLmsCourse}
+                        setCanvasLmsCourse={setCanvasLmsCourse}
+                        {...props} 
+                      />              
+                    </div>
+                    <div className="col-md-12 my-auto">
+                      <GradescopeSync course_id={courseList[course].course_id} {...props} />              
                     </div>
                   </div>
                 </div>
