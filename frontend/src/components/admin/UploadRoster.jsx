@@ -125,7 +125,7 @@ function UploadRoster(props) {
   };
 
   function getSyncRosterButton() {
-    if (!props.hasCanvasLmsAccessToken)
+    if (!props.canvasLmsAccessTokenInfo.hasToken)
       return (
         <>
         <p className="text-muted">Cannot sync course without a Canvas LMS access token</p>
@@ -137,6 +137,12 @@ function UploadRoster(props) {
       return (
         <button type="button" className="btn btn-primary" disabled>Syncing Roster (Please Wait)</button>
       );
+    
+    if (props.canvasLmsAccessTokenInfo.hasToken && !props.canvasLmsAccessTokenInfo.isTokenWorking)
+      return (
+        <button type="button" className="btn btn-primary" disabled>Synchronize Course Roster</button>
+      );
+    
     return (
       <button type="button" className="btn btn-primary" onClick={syncRoster}>Synchronize Course Roster</button>
     );
@@ -196,6 +202,9 @@ function UploadRoster(props) {
         <>
         <h4 className="card-header">Synchronize Roster from Canvas LMS</h4>
         <div className="card-body">
+          {props.canvasLmsAccessTokenInfo.hasToken && !props.canvasLmsAccessTokenInfo.isTokenWorking && (
+            <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot connect to Canvas LMS.</p>
+          )}
           <div className="mb-3">
             <h5>Canvas LMS Course Info</h5>
             <p>
@@ -207,7 +216,11 @@ function UploadRoster(props) {
           {showSyncRosterResults && (
             <div className="mb-3">
               <h5>Roster Sync Results</h5>
-              {getSyncRosterResults()}
+              {props.canvasLmsAccessTokenInfo.isTokenWorking ? (
+                getSyncRosterResults()
+              ) : (
+                <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot connect to Canvas LMS.</p>
+              )}
             </div>
           )}
         </div>

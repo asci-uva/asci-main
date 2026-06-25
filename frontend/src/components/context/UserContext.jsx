@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 const UserContext = createContext({
     userid: null,
@@ -26,7 +27,7 @@ export const UserProvider = ({ children }) => {
   const [course, setCourse] = useState(null);
   const [courseSettings, setCourseSettings] = useState(null);
   const [courseRoster, setCourseRoster] = useState([]);
-  const [hasCanvasLmsAccessToken, setHasCanvasLmsAccessToken] = useState(false);
+  const [canvasLmsAccessTokenInfo, setCanvasLmsAccessTokenInfo] = useState({ hasToken: false, isTokenWorking: false});
 
   const login = (userInfo, callback) => {
     let json = {};
@@ -60,7 +61,7 @@ export const UserProvider = ({ children }) => {
           setCourse(null);
           callback(true);
 
-          checkUserHasCanvasLmsAccessToken();
+          checkUserHasWorkingCanvasLmsAccessToken();
         } else {
           // fail to login
           console.log("login failed");
@@ -248,15 +249,15 @@ export const UserProvider = ({ children }) => {
     setDiscordUsername(null);
     setCourseList(null);
     setCourse(null);
-    setHasCanvasLmsAccessToken(false);
+    setCanvasLmsAccessTokenInfo({ hasToken: false, isTokenWorking: false });
     // Clear LocalStorage
     localStorage.clear();
     console.log("logout successfully, go back to login page");
   };
 
-  const checkUserHasCanvasLmsAccessToken = () => {
+  const checkUserHasWorkingCanvasLmsAccessToken = () => {
     const payload = {
-      command: "checkUserHasCanvasLmsAccessToken",
+      command: "checkUserHasWorkingCanvasLmsAccessToken",
     };
 
     fetch(url, {
@@ -267,11 +268,13 @@ export const UserProvider = ({ children }) => {
   })
     .then((response) => response.json())
     .then((data) => {
+      setCanvasLmsAccessTokenInfo({
+        hasToken: data.hasToken,
+        isTokenWorking: data.isTokenWorking,
+      });
       if (data.success === "true") {
-        if (data.hasToken === true)
-          setHasCanvasLmsAccessToken(true);
-        else
-          setHasCanvasLmsAccessToken(false);
+        if (data.hasToken && !data.isTokenWorking)
+          toast.error("Unable to validate Canvas LMS access token");
       } else {
         console.log(data.error);
       }
@@ -307,8 +310,8 @@ export const UserProvider = ({ children }) => {
       getCourseRoster,
       refreshCourseRoster,
       isInstructor,
-      hasCanvasLmsAccessToken,
-      setHasCanvasLmsAccessToken,
+      canvasLmsAccessTokenInfo,
+      setCanvasLmsAccessTokenInfo,
   };
 
   return (

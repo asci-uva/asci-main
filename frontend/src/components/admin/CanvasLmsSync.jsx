@@ -46,11 +46,11 @@
         .sort((a, b) => {return b.enrollment_term_id - a.enrollment_term_id;});
 
         useEffect(() => {
-            if (props.hasCanvasLmsAccessToken) {
+            if (props.canvasLmsAccessTokenInfo.hasToken && props.canvasLmsAccessTokenInfo.isTokenWorking) {
                 getEnrollmentYears();
                 getCanvasLmsCourses();
             }
-        }, [props.hasCanvasLmsAccessToken]);
+        }, [props.canvasLmsAccessTokenInfo]);
 
         const validateCanvasAccessToken = () => {
             setShowValidationModal(true);
@@ -72,7 +72,10 @@
                 .then((data) => {
                     setValidateButtonDisabled(false);
                     if (data.success === "true") {
-                        props.setHasCanvasLmsAccessToken(true);
+                        props.setCanvasLmsAccessTokenInfo({
+                            hasToken: true,
+                            isTokenWorking: true,
+                        });
                         getEnrollmentYears();
                         console.log("Successfully validated Canvas LMS access token");
                         toast.success("Successfully validated Canvas LMS access token");
@@ -106,7 +109,10 @@
                 .then((data) => {
                     setRemoveAccessTokenButtonDisabled(false);
                     if (data.success === "true") {
-                        props.setHasCanvasLmsAccessToken(false);
+                        props.setCanvasLmsAccessTokenInfo({
+                            hasToken: false,
+                            isTokenWorking: false,
+                        });
                         setCanvasLmsAccessToken("");
                         console.log("Successfully removed Canvas LMS access token");
                         toast.success("Successfully removed canvas LMS access token");
@@ -242,7 +248,7 @@
                 <div className="card-body">
                     <div className="mb-3">
                         <h5>Access token</h5>
-                        {props.hasCanvasLmsAccessToken ? (
+                        {props.canvasLmsAccessTokenInfo.hasToken ? (
                             <>
                             <p className="text-muted">Canvas LMS access token detected</p>
                             {getRemoveAccessTokenButton()}
@@ -272,89 +278,95 @@
                     </div>
                     ) : (
                     <>
-                    {props.hasCanvasLmsAccessToken && (
+                    {props.canvasLmsAccessTokenInfo.hasToken && (
                         <div className="mb-3">
                             <h5>Select Canvas LMS course</h5>
-                            <div className="mb-3" style={{position: "sticky", zIndex: 1000}}>
-                                <div className="d-flex gap-2">
-                                    <select
-                                        className="form-select"
-                                        style={{width: "auto", flexShrink: 0}}
-                                        value={selectedTermName}
-                                        onChange={(e) => setSelectedTermName(e.target.value)}
-                                    >
-                                        <option value="">Select Term Name</option>
-                                        {termNames.map((term) => (
-                                            <option key={term} value={term}>{term}</option>
-                                        ))}
-                                    </select>
-                                    <select
-                                        className="form-select"
-                                        style={{width: "auto", flexShrink: 0}}
-                                        value={selectedYear}
-                                        onChange={(e) => setSelectedYear(e.target.value)}
-                                    >
-                                        <option value="">Select Year</option>
-                                        {years.map((year) => (
-                                            <option key={year} value={year}>{year}</option>
-                                        ))}
-                                    </select>
-                                    <input
-                                        type="text"
-                                        className="form-control flex-grow-1"
-                                        placeholder="Search by name or course code"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                    />
+                            {!props.canvasLmsAccessTokenInfo.isTokenWorking ? (
+                                    <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot connect to Canvas LMS.</p>
+                            ) : (
+                                <>
+                                    <div className="mb-3" style={{position: "sticky", zIndex: 1000}}>
+                                    <div className="d-flex gap-2">
+                                        <select
+                                            className="form-select"
+                                            style={{width: "auto", flexShrink: 0}}
+                                            value={selectedTermName}
+                                            onChange={(e) => setSelectedTermName(e.target.value)}
+                                        >
+                                            <option value="">Select Term Name</option>
+                                            {termNames.map((term) => (
+                                                <option key={term} value={term}>{term}</option>
+                                            ))}
+                                        </select>
+                                        <select
+                                            className="form-select"
+                                            style={{width: "auto", flexShrink: 0}}
+                                            value={selectedYear}
+                                            onChange={(e) => setSelectedYear(e.target.value)}
+                                        >
+                                            <option value="">Select Year</option>
+                                            {years.map((year) => (
+                                                <option key={year} value={year}>{year}</option>
+                                            ))}
+                                        </select>
+                                        <input
+                                            type="text"
+                                            className="form-control flex-grow-1"
+                                            placeholder="Search by name or course code"
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="mb-3">
-                                <div style={{maxHeight: "400px", overflowY: "auto"}}>
-                                    <ul className="list-group">
-                                        {filteredAndSortedCanvasLmsCourses.map((course) => (
-                                            <li
-                                                key={course.id}
-                                                className={`list-group-item${course.linked ? " text-muted" : ""}`}
-                                                style={{ cursor: "pointer", ...(course.linked ? { opacity: 0.55 } : {}) }}
-                                                onClick={() =>
-                                                    setExpandedCanvasLmsCourseId(
-                                                        expandedCanvasLmsCourseId === course.id ? null : course.id
-                                                    )
-                                                }
-                                            >
-                                                <div className="d-flex justify-content-between">
-                                                    <span>
-                                                        <span className="text-muted me-2">
-                                                            {course.course_code}
+                                <div className="mb-3">
+                                    <div style={{maxHeight: "400px", overflowY: "auto"}}>
+                                        <ul className="list-group">
+                                            {filteredAndSortedCanvasLmsCourses.map((course) => (
+                                                <li
+                                                    key={course.id}
+                                                    className={`list-group-item${course.linked ? " text-muted" : ""}`}
+                                                    style={{ cursor: "pointer", ...(course.linked ? { opacity: 0.55 } : {}) }}
+                                                    onClick={() =>
+                                                        setExpandedCanvasLmsCourseId(
+                                                            expandedCanvasLmsCourseId === course.id ? null : course.id
+                                                        )
+                                                    }
+                                                >
+                                                    <div className="d-flex justify-content-between">
+                                                        <span>
+                                                            <span className="text-muted me-2">
+                                                                {course.course_code}
+                                                            </span>
+                                                            <span>{course.name}</span>
                                                         </span>
-                                                        <span>{course.name}</span>
-                                                    </span>
 
-                                                    <span className="text-muted">
-                                                        {terms[course.enrollment_term_id] ?? "Unknown Term"}
-                                                    </span>
-                                                </div>
-
-                                                {expandedCanvasLmsCourseId === course.id && (
-                                                    <div className="mt-2">
-                                                        {course.linked ? (
-                                                            <>
-                                                                <button type="button" className="btn btn-primary" disabled>Select Course</button>
-                                                                <p className="mb-0 mt-2">Already linked to {formatLinkedAsciCourse(course.linked_asci_course)}</p>
-                                                            </>
-                                                        ) : (
-                                                            <button type="button" className="btn btn-primary" onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                selectCanvasLmsCourse(course);
-                                                            }}>Select Course</button>
-                                                        )}
+                                                        <span className="text-muted">
+                                                            {terms[course.enrollment_term_id] ?? "Unknown Term"}
+                                                        </span>
                                                     </div>
-                                                )}
-                                            </li>
-                                        ))}
-                                    </ul>
+
+                                                    {expandedCanvasLmsCourseId === course.id && (
+                                                        <div className="mt-2">
+                                                            {course.linked ? (
+                                                                <>
+                                                                    <button type="button" className="btn btn-primary" disabled>Select Course</button>
+                                                                    <p className="mb-0 mt-2">Already linked to {formatLinkedAsciCourse(course.linked_asci_course)}</p>
+                                                                </>
+                                                            ) : (
+                                                                <button type="button" className="btn btn-primary" onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    selectCanvasLmsCourse(course);
+                                                                }}>Select Course</button>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
                                 </div>
-                            </div>
+                                </>
+                            )}
                         </div>
                     )}
                     </>

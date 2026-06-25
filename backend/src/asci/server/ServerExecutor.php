@@ -2585,14 +2585,17 @@ $usedCosSim = True;
       return ["success" => "true"];
     }
 
-    public function checkUserHasCanvasLmsAccessTokenHandler() {
+    public function checkUserHasWorkingCanvasLmsAccessTokenHandler() {
       $result = $this->synchronizationStore->checkUserHasCanvasLmsAccessToken($this->user->id);
 
-      if ($result) {
-        return ["success" => "true", "hasToken" => true];
-      } else {
+      if (!$result)
         return ["success" => "true", "hasToken" => false];
-      }
+
+      $canvas = $this->canvasLmsClientForCurrentUser();
+      $result = $canvas->get("/api/v1/users/self");
+      if (!$result["ok"])
+        return ["success" => "true", "hasToken" => true, "isTokenWorking" => false];
+      return ["success" => "true", "hasToken" => true, "isTokenWorking" => false];
     }
 
     public function removeCanvasLmsAccessTokenHandler($asci_course_id) {

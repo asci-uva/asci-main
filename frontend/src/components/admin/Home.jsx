@@ -16,7 +16,7 @@
 
   function Home(props) {
     let docRoot = props.documentRoot;
-    const {user, courseList, course, hasCanvasLmsAccessToken, setHasCanvasLmsAccessToken} = useUser();
+    const {user, courseList, course, canvasLmsAccessTokenInfo, setCanvasLmsAccessTokenInfo} = useUser();
     const [refresh, setRefresh] = useState(0);
     const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible");
     const [sidebarCol, setSidebarCol] = useState("col-md-3");
@@ -43,7 +43,7 @@
     };
 
     useEffect(() => {
-      if (!hasCanvasLmsAccessToken) return;
+      if (!canvasLmsAccessTokenInfo.hasToken) return;
 
       const payload = {
         asciCourseId: course,
@@ -61,7 +61,7 @@
         .catch((error) => {
           console.log(error);
         });
-    }, [hasCanvasLmsAccessToken, courseList, course]);
+    }, [canvasLmsAccessTokenInfo, courseList, course]);
 
     return (
       <>
@@ -84,7 +84,7 @@
               
               <h3 className="mb-3">Course: {courseList[course].mnemonic} {courseList[course].number} -  {courseList[course].name} ({courseList[course].semester})</h3>
               
-              {canvasLmsCourse !== null && !hasCanvasLmsAccessToken && (
+              {canvasLmsCourse !== null && !canvasLmsAccessTokenInfo["hasToken"] && (
                 <div className="alert alert-warning d-flex justify-content-between align-items-center mb-3">
                   <span>
                     This course is still linked to Canvas LMS course {canvasLmsCourse.course_code} {canvasLmsCourse.name}, but no Canvas access token is detected.
@@ -135,14 +135,14 @@
                   <div className="col-md-12 my-auto mb-2">
                       <UploadRoster 
                         course_id={courseList[course].course_id} 
-                        hasCanvasLmsAccessToken={hasCanvasLmsAccessToken} 
+                        canvasLmsAccessTokenInfo={canvasLmsAccessTokenInfo} 
                         canvasLmsCourse={canvasLmsCourse} 
                         {...props} />                                
                   </div>
                   <div className="col-md-12 my-auto">
                       <AddStudent 
                         course_id={courseList[course].course_id} 
-                        hasCanvasLmsAccessToken={hasCanvasLmsAccessToken}
+                        canvasLmsAccessTokenInfo={canvasLmsAccessTokenInfo}
                         canvasLmsCourse={canvasLmsCourse}
                         {...props} />                                
                   </div>
@@ -183,8 +183,8 @@
                     <div className="col-md-12 my-auto">
                       <CanvasLmsSync 
                         course_id={courseList[course].course_id} 
-                        hasCanvasLmsAccessToken={hasCanvasLmsAccessToken} 
-                        setHasCanvasLmsAccessToken={setHasCanvasLmsAccessToken} 
+                        canvasLmsAccessTokenInfo={canvasLmsAccessTokenInfo} 
+                        setCanvasLmsAccessTokenInfo={setCanvasLmsAccessTokenInfo}
                         canvasLmsCourse={canvasLmsCourse}
                         setCanvasLmsCourse={setCanvasLmsCourse}
                         {...props} 

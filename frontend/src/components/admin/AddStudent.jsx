@@ -61,7 +61,7 @@ function AddStudent(props) {
         <h4 className="card-header">Add Individual</h4>
           <div className="card-body">
 
-            {props.hasCanvasLmsAccessToken && props.canvasLmsCourse && (
+            {props.hasWorkingCanvasLmsAccessToken && props.canvasLmsCourse && (
               <div className="alert alert-warning d-flex justify-content-between align-items-center mb-3">
                 <span>
                   This course is still linked to Canvas LMS course {props.canvasLmsCourse.course_code} {props.canvasLmsCourse.name}. 

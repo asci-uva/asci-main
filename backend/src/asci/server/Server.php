@@ -753,8 +753,8 @@ class Server
                 $this->setResponse($executor->validateCanvasLmsAccessTokenHandler($asciCourseId, $canvasLmsAccessToken));
                 break;
 
-            case "checkUserHasCanvasLmsAccessToken":
-                $this->setResponse($executor->checkUserHasCanvasLmsAccessTokenHandler());
+            case "checkUserHasWorkingCanvasLmsAccessToken":
+                $this->setResponse($executor->checkUserHasWorkingCanvasLmsAccessTokenHandler());
                 break;
             
             case "removeCanvasLmsAccessToken":
