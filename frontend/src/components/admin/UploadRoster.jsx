@@ -128,7 +128,7 @@ function UploadRoster(props) {
     if (!props.canvasLmsAccessTokenInfo.hasToken)
       return (
         <>
-        <p className="text-muted">Cannot sync course without a Canvas LMS access token</p>
+        <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot sync course without a Canvas LMS access token</p>
         <button type="button" className="btn btn-primary" disabled>Synchronize Course Roster</button>
         </>
     );

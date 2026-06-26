@@ -282,7 +282,7 @@
                         <div className="mb-3">
                             <h5>Select Canvas LMS course</h5>
                             {!props.canvasLmsAccessTokenInfo.isTokenWorking ? (
-                                    <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot connect to Canvas LMS.</p>
+                                <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot connect to Canvas LMS.</p>
                             ) : (
                                 <>
                                     <div className="mb-3" style={{position: "sticky", zIndex: 1000}}>
