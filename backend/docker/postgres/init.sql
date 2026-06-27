@@ -239,6 +239,9 @@ CREATE TABLE canvas_lms_courses (
   canvas_course_id TEXT,
   name TEXT,
   course_code TEXT,
+  last_synced_at TIMESTAMP,
+  stale_period INTERVAL NOT NULL DEFAULT '7 days',
+  autosync_enabled BOOLEAN NOT NULL DEFAULT false,
   FOREIGN KEY (asci_course_id) REFERENCES courses(id)
 );
 
@@ -366,3 +369,8 @@ VALUES (1, 1, '2024-01-08 04:05:00', '2024-01-08 04:10:00');
 
 INSERT INTO session_users (session_id, user_id)
 VALUES (1, 1);
+
+-- Canvas LMS sync settings / last-sync timestamp (idempotent for existing DBs)
+ALTER TABLE canvas_lms_courses ADD COLUMN IF NOT EXISTS last_synced_at TIMESTAMP;
+ALTER TABLE canvas_lms_courses ADD COLUMN IF NOT EXISTS stale_period INTERVAL NOT NULL DEFAULT '7 days';
+ALTER TABLE canvas_lms_courses ADD COLUMN IF NOT EXISTS autosync_enabled BOOLEAN NOT NULL DEFAULT false;

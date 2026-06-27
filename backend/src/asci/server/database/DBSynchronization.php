@@ -260,9 +260,25 @@ class DBSynchronization
 
     public function getCanvasLmsCourse($asci_course_id) {
         return $this->db->fetchrow($this->db->query(
-            'SELECT canvas_course_id, name, course_code FROM canvas_lms_courses WHERE asci_course_id = $1',
+            'SELECT canvas_course_id, name, course_code, last_synced_at, stale_period, autosync_enabled FROM canvas_lms_courses WHERE asci_course_id = $1',
             [$asci_course_id]
         ));
+    }
+
+    public function getCanvasLmsSyncSettings($asci_course_id) {
+        return $this->db->fetchrow($this->db->query(
+            'SELECT autosync_enabled, stale_period, last_synced_at FROM canvas_lms_courses WHERE asci_course_id = $1',
+            [$asci_course_id]
+        ));
+    }
+
+    public function setCanvasLmsSyncSettings($asci_course_id, $autosync_enabled, $stale_period) {
+        $this->db->prepare('setCanvasSyncSettingsStmt',
+            'UPDATE canvas_lms_courses SET autosync_enabled = $1, stale_period = $2 WHERE asci_course_id = $3');
+        $this->db->execute('setCanvasSyncSettingsStmt',
+            [$autosync_enabled ? 't' : 'f', $stale_period, $asci_course_id]);
+
+        return $this->getCanvasLmsSyncSettings($asci_course_id);
     }
 
     public function getLinkedCanvasLmsCourses() {
@@ -395,6 +411,11 @@ class DBSynchronization
             );
             $removed[] = ["computingId" => $user['computing_id'], 'fname' => $user['fname'], 'lname' => $user['lname'], 'role' => $user['role']];
         }
+
+        $this->db->query(
+            'UPDATE canvas_lms_courses SET last_synced_at = now() WHERE asci_course_id = $1',
+            [$asci_course_id]
+        );
 
         $this->db->commit();
 

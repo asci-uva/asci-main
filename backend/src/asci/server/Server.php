@@ -793,6 +793,18 @@ class Server
                 $this->setResponse($executor->syncCanvasLmsRosterHandler($asciCourseId));
                 break;
 
+            case "getCanvasLmsSyncSettings":
+                $asciCourseId = $this->input["asciCourseId"];
+                $this->setResponse($executor->getCanvasLmsSyncSettingsHandler($asciCourseId));
+                break;
+
+            case "setCanvasLmsSyncSettings":
+                $asciCourseId = $this->input["asciCourseId"];
+                $autosyncEnabled = $this->input["autosyncEnabled"];
+                $stalePeriod = $this->input["stalePeriod"];
+                $this->setResponse($executor->setCanvasLmsSyncSettingsHandler($asciCourseId, $autosyncEnabled, $stalePeriod));
+                break;
+
             default:
               throw new \asci\exceptions\ASCIException("Unknown command: {$this->input["command"]}"); 
 

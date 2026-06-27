@@ -2595,7 +2595,7 @@ $usedCosSim = True;
       $result = $canvas->get("/api/v1/users/self");
       if (!$result["ok"])
         return ["success" => "true", "hasToken" => true, "isTokenWorking" => false];
-      return ["success" => "true", "hasToken" => true, "isTokenWorking" => false];
+      return ["success" => "true", "hasToken" => true, "isTokenWorking" => true];
     }
 
     public function removeCanvasLmsAccessTokenHandler($asci_course_id) {
@@ -2703,6 +2703,33 @@ $usedCosSim = True;
       return err("No Canvas LMS course assoicated with ASCI course");
     }
 
+    public function getCanvasLmsSyncSettingsHandler($asci_course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course-roster"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to read Canvas LMS sync settings");
+
+      $settings = $this->synchronizationStore->getCanvasLmsSyncSettings($asci_course_id);
+      if (!$settings)
+        return $this->err("No Canvas LMS course associated with ASCI course");
+
+      return ["success" => "true", "settings" => $settings];
+    }
+
+    public function setCanvasLmsSyncSettingsHandler($asci_course_id, $autosync_enabled, $stale_period) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to change Canvas LMS sync settings");
+
+      if (!$this->isValidStalePeriod($stale_period))
+        return $this->err("Invalid stale period interval");
+
+      $existing = $this->synchronizationStore->getCanvasLmsSyncSettings($asci_course_id);
+      if (!$existing)
+        return $this->err("No Canvas LMS course associated with ASCI course");
+
+      $settings = $this->synchronizationStore->setCanvasLmsSyncSettings($asci_course_id, (bool)$autosync_enabled, $stale_period);
+
+      return ["success" => "true", "settings" => $settings];
+    }
+
   public function syncCanvasLmsRosterHandler($asci_course_id) {
     if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course-roster"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to sync the Canvas LMS roster");
@@ -2752,5 +2779,14 @@ $usedCosSim = True;
     $access_token = $this->synchronizationStore->getCanvasLmsAccessToken($this->user->id);
     return new \asci\server\CanvasLmsClient($access_token, $this->logger);
   }
+
+  private function isValidStalePeriod($stale_period) {
+      if (!is_string($stale_period))
+        return false;
+      $trimmed = trim($stale_period);
+      if ($trimmed === "")
+        return false;
+      return preg_match('/^(\d+\s+(year|years|month|months|mon|mons|day|days|hour|hours)\s*)+$/', $trimmed) === 1;
+    }
 }
 

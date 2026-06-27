@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useUser } from "../context/UserContext";
 import { postCommand } from "../utils/postCommand";
 import ConfirmModal from "../utils/ConfirmModal";
+import { formatLastSynced, isStale } from "../utils/CanvasStalePeriod";
 
 function UploadRoster(props) {
   const [rosterFile, setRosterFile] = useState(null);
@@ -13,8 +14,36 @@ function UploadRoster(props) {
   const [syncRosterButtonDisabled, setSyncRosterButtonDisabled] = useState(false);
   const [showSyncRosterResults, setShowSyncRosterResults] = useState(false);
   const [syncRosterResults, setSyncRosterResults] = useState({});
+  const [syncSettings, setSyncSettings] = useState(null);
+  const autoSyncRan = useRef({});
 
   let course = getCourse();
+
+  const fetchSyncSettings = () => {
+    return postCommand(props.url, {
+      asciCourseId: props.course_id,
+      command: "getCanvasLmsSyncSettings",
+    })
+      .then((data) => {
+        if (data.success === "true") {
+          setSyncSettings(data.settings);
+          return data.settings;
+        }
+        return null;
+      })
+      .catch((error) => {
+        console.log(error);
+        return null;
+      });
+  };
+
+  useEffect(() => {
+    if (props.canvasLmsCourse !== null) {
+      fetchSyncSettings();
+    } else {
+      setSyncSettings(null);
+    }
+  }, [props.canvasLmsCourse, props.course_id]);
 
   const handleFileChange = (event) => {
     setRosterFile(event.target.files[0]);
@@ -94,55 +123,89 @@ function UploadRoster(props) {
     setShowSyncRosterModal(true);
   };
 
-  const confirmSyncCanvasLmsRoster = () => {
-    setShowSyncRosterModal(false);
-    setSyncRosterButtonDisabled(true);
+  const updateTimestampFromSync = (data) => {
+    if (data.course) {
+      setSyncSettings((prev) => ({
+        ...(prev || {}),
+        last_synced_at: data.course.last_synced_at,
+        stale_period: data.course.stale_period,
+        autosync_enabled: data.course.autosync_enabled,
+      }));
+    } else {
+      fetchSyncSettings();
+    }
+  };
+
+  const performSyncCanvasLmsRoster = ({ silent } = { silent: false }) => {
+    if (!silent) setSyncRosterButtonDisabled(true);
 
     const payload = {
       asciCourseId: props.course_id,
       command: "syncCanvasLmsRoster",
     };
 
-    postCommand(props.url, payload)
+    return postCommand(props.url, payload)
       .then((data) => {
-        setSyncRosterButtonDisabled(false);
+        if (!silent) setSyncRosterButtonDisabled(false);
         if (data.success === "true") {
           console.log("Roster synced:", data);
-          toast.success("Successfully synced Canvas LMS roster");
           refreshCourseRoster();
-          setShowSyncRosterResults(true);
-          setSyncRosterResults(data);
+          updateTimestampFromSync(data);
+          if (!silent) {
+            toast.success("Successfully synced Canvas LMS roster");
+            setShowSyncRosterResults(true);
+            setSyncRosterResults(data);
+          }
         } else {
           console.log(data.error);
           toast.error(data.error || "Failed to sync Canvas LMS roster");
         }
       })
       .catch((error) => {
-        setSyncRosterButtonDisabled(false);
+        if (!silent) setSyncRosterButtonDisabled(false);
         console.log(error);
         toast.error(error);
-      })
+      });
   };
+
+  const confirmSyncCanvasLmsRoster = () => {
+    setShowSyncRosterModal(false);
+    performSyncCanvasLmsRoster({ silent: false });
+  };
+
+  useEffect(() => {
+    if (props.canvasLmsCourse === null) return;
+    if (!syncSettings) return;
+    if (!syncSettings.autosync_enabled) return;
+    if (!props.canvasLmsAccessTokenInfo.hasToken || !props.canvasLmsAccessTokenInfo.isTokenWorking) return;
+    if (!course || (course.role !== "instructor" && course.role !== "ta")) return;
+    if (!isStale(syncSettings.last_synced_at, syncSettings.stale_period)) return;
+
+    if (autoSyncRan.current[props.course_id]) return;
+    autoSyncRan.current[props.course_id] = true;
+
+    performSyncCanvasLmsRoster({ silent: true });
+  }, [syncSettings, props.canvasLmsCourse, props.canvasLmsAccessTokenInfo, props.course_id]);
 
   function getSyncRosterButton() {
     if (!props.canvasLmsAccessTokenInfo.hasToken)
       return (
         <>
-        <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot sync course without a Canvas LMS access token</p>
-        <button type="button" className="btn btn-primary" disabled>Synchronize Course Roster</button>
+          <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot sync course without a Canvas LMS access token</p>
+          <button type="button" className="btn btn-primary" disabled>Synchronize Course Roster</button>
         </>
-    );
+      );
 
     if (syncRosterButtonDisabled)
       return (
         <button type="button" className="btn btn-primary" disabled>Syncing Roster (Please Wait)</button>
       );
-    
+
     if (props.canvasLmsAccessTokenInfo.hasToken && !props.canvasLmsAccessTokenInfo.isTokenWorking)
       return (
         <button type="button" className="btn btn-primary" disabled>Synchronize Course Roster</button>
       );
-    
+
     return (
       <button type="button" className="btn btn-primary" onClick={syncRoster}>Synchronize Course Roster</button>
     );
@@ -172,17 +235,17 @@ function UploadRoster(props) {
                   {data[key].map((user, i) => (
                     <li key={i}>
                       <div className="d-flex justify-content-between">
-                      <span>
+                        <span>
                           <span className="text-muted me-2">
                             {user.computingId}
                           </span>
-                        <span>{user.fname} {user.lname}</span>
-                      </span>
+                          <span>{user.fname} {user.lname}</span>
+                        </span>
 
-                      <span className="text-muted">
-                        {user.role}
-                      </span>
-                    </div>
+                        <span className="text-muted">
+                          {user.role}
+                        </span>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -196,55 +259,77 @@ function UploadRoster(props) {
     );
   }
 
+  if (!props.canvasLmsCourseLoaded) {
+    return (
+      <div className="card mb-4">
+        <h4 className="card-header">Roster</h4>
+        <div className="card-body">
+          <p className="text-muted mb-0">Loading…</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="card mb-4">
       {props.canvasLmsCourse !== null ? (
         <>
-        <h4 className="card-header">Synchronize Roster from Canvas LMS</h4>
-        <div className="card-body">
-          {props.canvasLmsAccessTokenInfo.hasToken && !props.canvasLmsAccessTokenInfo.isTokenWorking && (
-            <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot connect to Canvas LMS.</p>
-          )}
-          <div className="mb-3">
-            <h5>Canvas LMS Course Info</h5>
-            <p>
-              Course Code: {props.canvasLmsCourse.course_code} <br />
-              Course Name: {props.canvasLmsCourse.name}
-            </p>
-            {getSyncRosterButton()}
-          </div>
-          {showSyncRosterResults && (
+          <h4 className="card-header">Synchronize Roster from Canvas LMS</h4>
+          <div className="card-body">
+            {props.canvasLmsAccessTokenInfo.hasToken && !props.canvasLmsAccessTokenInfo.isTokenWorking && (
+              <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot connect to Canvas LMS.</p>
+            )}
             <div className="mb-3">
-              <h5>Roster Sync Results</h5>
-              {props.canvasLmsAccessTokenInfo.isTokenWorking ? (
-                getSyncRosterResults()
-              ) : (
-                <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot connect to Canvas LMS.</p>
+              <h5>Canvas LMS Course Info</h5>
+              <p>
+                Course Code: {props.canvasLmsCourse.course_code} <br />
+                Course Name: {props.canvasLmsCourse.name}
+              </p>
+              {syncSettings && (
+                <p
+                  className={
+                    isStale(syncSettings.last_synced_at, syncSettings.stale_period)
+                      ? "text-danger"
+                      : ""
+                  }
+                >
+                  Last synced: {formatLastSynced(syncSettings.last_synced_at)}
+                </p>
               )}
+              {getSyncRosterButton()}
             </div>
-          )}
-        </div>
-        <ConfirmModal
-          show={showSyncRosterModal}
-          title="Confirm Canvas Roster Sync"
-          onCancel={() => setShowSyncRosterModal(false)}
-          onConfirm={confirmSyncCanvasLmsRoster}
-        >
-          <p>Are you sure you want to sync the roster from <strong>{props.canvasLmsCourse.name}</strong> on Canvas LMS?</p>
-          <p className="alert alert-warning d-flex justify-content-between align-items-center mb-3">
-            Syncing the roster will remove all manually added users except for Instructors
-          </p>
-        </ConfirmModal>
+            {showSyncRosterResults && (
+              <div className="mb-3">
+                <h5>Roster Sync Results</h5>
+                {props.canvasLmsAccessTokenInfo.isTokenWorking ? (
+                  getSyncRosterResults()
+                ) : (
+                  <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot connect to Canvas LMS.</p>
+                )}
+              </div>
+            )}
+          </div>
+          <ConfirmModal
+            show={showSyncRosterModal}
+            title="Confirm Canvas Roster Sync"
+            onCancel={() => setShowSyncRosterModal(false)}
+            onConfirm={confirmSyncCanvasLmsRoster}
+          >
+            <p>Are you sure you want to sync the roster from <strong>{props.canvasLmsCourse.name}</strong> on Canvas LMS?</p>
+            <p className="alert alert-warning d-flex justify-content-between align-items-center mb-3">
+              Syncing the roster will remove all manually added users except for Instructors
+            </p>
+          </ConfirmModal>
         </>
       ) : (
         <>
-        <h4 className="card-header">Upload Roster</h4>
-        <form className="p-3">
-          <div className="input-group">
-          <input className="form-control" type="file" onChange={handleFileChange} accept=".csv" />
-          <button type="button" className="btn btn-primary" onClick={uploadRoster}>Upload</button>
-          </div>
-        </form>
+          <h4 className="card-header">Upload Roster</h4>
+          <form className="p-3">
+            <div className="input-group">
+              <input className="form-control" type="file" onChange={handleFileChange} accept=".csv" />
+              <button type="button" className="btn btn-primary" onClick={uploadRoster}>Upload</button>
+            </div>
+          </form>
         </>
       )}
     </div>
