@@ -259,17 +259,23 @@ class DBSynchronization
     }
 
     public function getCanvasLmsCourse($asci_course_id) {
-        return $this->db->fetchrow($this->db->query(
+        $row = $this->db->fetchrow($this->db->query(
             'SELECT canvas_course_id, name, course_code, last_synced_at, stale_period, autosync_enabled FROM canvas_lms_courses WHERE asci_course_id = $1',
             [$asci_course_id]
         ));
+        if ($row)
+            $row['autosync_enabled'] = $row['autosync_enabled'] === 't';
+        return $row;
     }
 
     public function getCanvasLmsSyncSettings($asci_course_id) {
-        return $this->db->fetchrow($this->db->query(
+        $row = $this->db->fetchrow($this->db->query(
             'SELECT autosync_enabled, stale_period, last_synced_at FROM canvas_lms_courses WHERE asci_course_id = $1',
             [$asci_course_id]
         ));
+        if ($row)
+            $row['autosync_enabled'] = $row['autosync_enabled'] === 't';
+        return $row;
     }
 
     public function setCanvasLmsSyncSettings($asci_course_id, $autosync_enabled, $stale_period) {
