@@ -343,7 +343,7 @@ function CanvasLmsSync(props) {
                                         onChange={(e) => setAutosyncEnabled(e.target.checked)}
                                     />
                                     <label className="form-check-label" htmlFor="autosyncEnabledCheckbox">
-                                        Automatically sync roster when an instructor or TA opens this course
+                                        Automatically sync roster when an instructor or TA opens this course after the stale period has elapsed
                                     </label>
                                 </div>
                                 <label className="form-label">Stale period</label>
