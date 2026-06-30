@@ -14,36 +14,9 @@ function UploadRoster(props) {
   const [syncRosterButtonDisabled, setSyncRosterButtonDisabled] = useState(false);
   const [showSyncRosterResults, setShowSyncRosterResults] = useState(false);
   const [syncRosterResults, setSyncRosterResults] = useState({});
-  const [syncSettings, setSyncSettings] = useState(null);
   const autoSyncRan = useRef({});
 
   let course = getCourse();
-
-  const fetchSyncSettings = () => {
-    return postCommand(props.url, {
-      asciCourseId: props.course_id,
-      command: "getCanvasLmsSyncSettings",
-    })
-      .then((data) => {
-        if (data.success === "true") {
-          setSyncSettings(data.settings);
-          return data.settings;
-        }
-        return null;
-      })
-      .catch((error) => {
-        console.log(error);
-        return null;
-      });
-  };
-
-  useEffect(() => {
-    if (props.canvasLmsCourse !== null) {
-      fetchSyncSettings();
-    } else {
-      setSyncSettings(null);
-    }
-  }, [props.canvasLmsCourse, props.course_id]);
 
   const handleFileChange = (event) => {
     setRosterFile(event.target.files[0]);
@@ -125,14 +98,14 @@ function UploadRoster(props) {
 
   const updateTimestampFromSync = (data) => {
     if (data.course) {
-      setSyncSettings((prev) => ({
+      props.setCanvasSyncSettings((prev) => ({
         ...(prev || {}),
         last_synced_at: data.course.last_synced_at,
         stale_period: data.course.stale_period,
         autosync_enabled: data.course.autosync_enabled,
       }));
     } else {
-      fetchSyncSettings();
+      props.refreshCanvasSyncSettings();
     }
   };
 
@@ -175,17 +148,17 @@ function UploadRoster(props) {
 
   useEffect(() => {
     if (props.canvasLmsCourse === null) return;
-    if (!syncSettings) return;
-    if (!syncSettings.autosync_enabled) return;
+    if (!props.canvasSyncSettings) return;
+    if (!props.canvasSyncSettings.autosync_enabled) return;
     if (!props.canvasLmsAccessTokenInfo.hasToken || !props.canvasLmsAccessTokenInfo.isTokenWorking) return;
     if (!course || (course.role !== "instructor" && course.role !== "ta")) return;
-    if (!isStale(syncSettings.last_synced_at, syncSettings.stale_period)) return;
+    if (!isStale(props.canvasSyncSettings.last_synced_at, props.canvasSyncSettings.stale_period)) return;
 
     if (autoSyncRan.current[props.course_id]) return;
     autoSyncRan.current[props.course_id] = true;
 
     performSyncCanvasLmsRoster({ silent: true });
-  }, [syncSettings, props.canvasLmsCourse, props.canvasLmsAccessTokenInfo, props.course_id]);
+  }, [props.canvasSyncSettings, props.canvasLmsCourse, props.canvasLmsAccessTokenInfo, props.course_id]);
 
   function getSyncRosterButton() {
     if (!props.canvasLmsAccessTokenInfo.hasToken)
@@ -285,15 +258,15 @@ function UploadRoster(props) {
                 Course Code: {props.canvasLmsCourse.course_code} <br />
                 Course Name: {props.canvasLmsCourse.name}
               </p>
-              {syncSettings && (
+              {props.canvasSyncSettings && (
                 <p
                   className={
-                    isStale(syncSettings.last_synced_at, syncSettings.stale_period)
+                    isStale(props.canvasSyncSettings.last_synced_at, props.canvasSyncSettings.stale_period)
                       ? "text-danger"
                       : ""
                   }
                 >
-                  Last synced: {formatLastSynced(syncSettings.last_synced_at)}
+                  Last synced: {formatLastSynced(props.canvasSyncSettings.last_synced_at)}
                 </p>
               )}
               {getSyncRosterButton()}

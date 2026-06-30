@@ -37,10 +37,7 @@ function CanvasLmsSync(props) {
     const [saveSettingsButtonDisabled, setSaveSettingsButtonDisabled] = useState(false);
 
     const { getCourse } = useUser();
-    const courseRole = getCourse() && getCourse().role;
-    const isInstructor = courseRole === "instructor";
-    const isInstructorOrTa = courseRole === "instructor" || courseRole === "ta";
-    const hasWorkingToken = props.canvasLmsAccessTokenInfo.hasToken && props.canvasLmsAccessTokenInfo.isTokenWorking;
+    const isInstructor = getCourse() && getCourse().role === "instructor";
 
     const filteredAndSortedCanvasLmsCourses = [...canvasLmsCourses]
         .filter((course) => {
@@ -68,50 +65,22 @@ function CanvasLmsSync(props) {
     }, [props.canvasLmsAccessTokenInfo]);
 
     useEffect(() => {
-        if (props.canvasLmsCourse !== null && isInstructorOrTa && hasWorkingToken) {
-            getSyncSettings();
+        if (props.canvasSyncSettings) {
+            setAutosyncEnabled(Boolean(props.canvasSyncSettings.autosync_enabled));
+            setStaleParts(intervalToParts(props.canvasSyncSettings.stale_period));
         } else {
             setAutosyncEnabled(false);
             setStaleParts({ years: 0, months: 0, days: 7, hours: 0 });
         }
-    }, [props.canvasLmsCourse, props.course_id, isInstructorOrTa, hasWorkingToken]);
-
-    const getSyncSettings = () => {
-        const payload = {
-            asciCourseId: props.course_id,
-            command: "getCanvasLmsSyncSettings",
-        };
-
-        postCommand(props.url, payload)
-            .then((data) => {
-                if (data.success === "true") {
-                    setAutosyncEnabled(Boolean(data.settings.autosync_enabled));
-                    setStaleParts(intervalToParts(data.settings.stale_period));
-                } else {
-                    toast.error(data.error);
-                }
-            })
-            .catch((error) => {
-                toast.error(error);
-            });
-    };
+    }, [props.canvasSyncSettings]);
 
     const saveSyncSettings = () => {
         setSaveSettingsButtonDisabled(true);
 
-        const payload = {
-            asciCourseId: props.course_id,
-            autosyncEnabled: autosyncEnabled,
-            stalePeriod: partsToInterval(staleParts),
-            command: "setCanvasLmsSyncSettings",
-        };
-
-        postCommand(props.url, payload)
+        props.saveCanvasSyncSettings(autosyncEnabled, partsToInterval(staleParts))
             .then((data) => {
                 setSaveSettingsButtonDisabled(false);
                 if (data.success === "true") {
-                    setAutosyncEnabled(Boolean(data.settings.autosync_enabled));
-                    setStaleParts(intervalToParts(data.settings.stale_period));
                     toast.success("Successfully saved Canvas LMS sync settings");
                 } else {
                     toast.error(data.error || "Failed to save Canvas LMS sync settings");

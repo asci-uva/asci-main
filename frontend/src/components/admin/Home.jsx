@@ -13,16 +13,32 @@ import UpdateChat from "./UpdateChat";
 import CurrentCourseContent from "./CurrentCourseContent";
 import ViewQuests from "./ViewQuests";
 import { postCommand } from "../utils/postCommand";
+import { useCanvasSyncSettings } from "../utils/useCanvasSyncSettings";
 
 function Home(props) {
   let docRoot = props.documentRoot;
-  const { user, courseList, course, canvasLmsAccessTokenInfo, setCanvasLmsAccessTokenInfo } = useUser();
+  const { user, courseList, course, canvasLmsAccessTokenInfo, setCanvasLmsAccessTokenInfo, getCourse } = useUser();
   const [refresh, setRefresh] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible");
   const [sidebarCol, setSidebarCol] = useState("col-md-3");
   const [contentCol, setContentCol] = useState("page-container content col-md-9 my-auto");
   const [canvasLmsCourse, setCanvasLmsCourse] = useState(null);
   const [canvasLmsCourseLoaded, setCanvasLmsCourseLoaded] = useState(false);
+
+  const courseRole = getCourse() && getCourse().role;
+  const isInstructorOrTa = courseRole === "instructor" || courseRole === "ta";
+  const hasWorkingToken = canvasLmsAccessTokenInfo.hasToken && canvasLmsAccessTokenInfo.isTokenWorking;
+
+  const {
+    settings: canvasSyncSettings,
+    setSettings: setCanvasSyncSettings,
+    refresh: refreshCanvasSyncSettings,
+    save: saveCanvasSyncSettings,
+  } = useCanvasSyncSettings(
+    props.url,
+    courseList[course].course_id,
+    canvasLmsCourse !== null && isInstructorOrTa && hasWorkingToken
+  );
 
   const handleCollapse = () => {
     if (sidebarOpen === "sidebar-visible") {
@@ -139,6 +155,9 @@ function Home(props) {
                       canvasLmsAccessTokenInfo={canvasLmsAccessTokenInfo}
                       canvasLmsCourse={canvasLmsCourse}
                       canvasLmsCourseLoaded={canvasLmsCourseLoaded}
+                      canvasSyncSettings={canvasSyncSettings}
+                      setCanvasSyncSettings={setCanvasSyncSettings}
+                      refreshCanvasSyncSettings={refreshCanvasSyncSettings}
                       {...props} />
                   </div>
                   <div className="col-md-12 my-auto">
@@ -191,6 +210,8 @@ function Home(props) {
                         canvasLmsCourse={canvasLmsCourse}
                         setCanvasLmsCourse={setCanvasLmsCourse}
                         canvasLmsCourseLoaded={canvasLmsCourseLoaded}
+                        canvasSyncSettings={canvasSyncSettings}
+                        saveCanvasSyncSettings={saveCanvasSyncSettings}
                         {...props}
                       />
                     </div>
