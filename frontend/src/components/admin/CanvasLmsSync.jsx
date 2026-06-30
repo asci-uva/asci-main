@@ -37,7 +37,10 @@ function CanvasLmsSync(props) {
     const [saveSettingsButtonDisabled, setSaveSettingsButtonDisabled] = useState(false);
 
     const { getCourse } = useUser();
-    const isInstructor = getCourse() && getCourse().role === "instructor";
+    const courseRole = getCourse() && getCourse().role;
+    const isInstructor = courseRole === "instructor";
+    const isInstructorOrTa = courseRole === "instructor" || courseRole === "ta";
+    const hasWorkingToken = props.canvasLmsAccessTokenInfo.hasToken && props.canvasLmsAccessTokenInfo.isTokenWorking;
 
     const filteredAndSortedCanvasLmsCourses = [...canvasLmsCourses]
         .filter((course) => {
@@ -65,10 +68,13 @@ function CanvasLmsSync(props) {
     }, [props.canvasLmsAccessTokenInfo]);
 
     useEffect(() => {
-        if (props.canvasLmsCourse !== null && isInstructor) {
+        if (props.canvasLmsCourse !== null && isInstructorOrTa && hasWorkingToken) {
             getSyncSettings();
+        } else {
+            setAutosyncEnabled(false);
+            setStaleParts({ years: 0, months: 0, days: 7, hours: 0 });
         }
-    }, [props.canvasLmsCourse]);
+    }, [props.canvasLmsCourse, props.course_id, isInstructorOrTa, hasWorkingToken]);
 
     const getSyncSettings = () => {
         const payload = {
