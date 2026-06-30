@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { useUser } from "../context/UserContext";
+import CanvasLinkWarning from "./CanvasLinkWarning";
 
 
 function AddStudent(props) {
@@ -62,12 +63,10 @@ function AddStudent(props) {
       <div className="card-body">
 
         {props.canvasLmsCourseLoaded && props.canvasLmsAccessTokenInfo.hasToken && props.canvasLmsCourse && (
-          <div className="alert alert-warning d-flex justify-content-between align-items-center mb-3">
-            <span>
-              This course is still linked to Canvas LMS course {props.canvasLmsCourse.course_code} {props.canvasLmsCourse.name}.
-              Manually added students will be removed upon next sync.
-            </span>
-          </div>
+          <CanvasLinkWarning
+            canvasLmsCourse={props.canvasLmsCourse}
+            message=". Manually added students will be removed upon next sync."
+          />
         )}
 
         <form className="">

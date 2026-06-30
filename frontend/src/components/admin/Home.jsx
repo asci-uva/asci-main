@@ -14,6 +14,7 @@ import CurrentCourseContent from "./CurrentCourseContent";
 import ViewQuests from "./ViewQuests";
 import { postCommand } from "../utils/postCommand";
 import { useCanvasSyncSettings } from "../utils/useCanvasSyncSettings";
+import CanvasLinkWarning from "./CanvasLinkWarning";
 
 function Home(props) {
   let docRoot = props.documentRoot;
@@ -102,12 +103,10 @@ function Home(props) {
             <h3 className="mb-3">Course: {courseList[course].mnemonic} {courseList[course].number} -  {courseList[course].name} ({courseList[course].semester})</h3>
 
             {canvasLmsCourse !== null && !canvasLmsAccessTokenInfo["hasToken"] && (
-              <div className="alert alert-warning d-flex justify-content-between align-items-center mb-3">
-                <span>
-                  This course is still linked to Canvas LMS course {canvasLmsCourse.course_code} {canvasLmsCourse.name}, but no Canvas access token is detected.
-                  Some features will be disabled until you add a token or unlink the course.
-                </span>
-              </div>
+              <CanvasLinkWarning
+                canvasLmsCourse={canvasLmsCourse}
+                message=", but no Canvas access token is detected. Some features will be disabled until you add a token or unlink the course."
+              />
             )}
 
             <div className="card">

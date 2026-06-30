@@ -5,6 +5,7 @@ import { postCommand } from "../utils/postCommand";
 import ConfirmModal from "../utils/ConfirmModal";
 import { useUser } from "../context/UserContext";
 import { intervalToParts, partsToInterval } from "../utils/CanvasStalePeriod";
+import CanvasLinkWarning from "./CanvasLinkWarning";
 
 
 function formatLinkedAsciCourse(c) {
@@ -490,11 +491,10 @@ function CanvasLmsSync(props) {
             >
                 <p>Are you sure you want to remove this Canvas LMS access token?</p>
                 <p>Note: The access token is directly tied to your ASCI account</p>
-                {props.canvasLmsCourse !== null && (
-                    <p className="alert alert-warning d-flex justify-content-between align-items-center mb-3">
-                        A Canvas LMS course is linked this ASCI course. Removing your access token will cause some synced features to not work
-                    </p>
-                )}
+                <CanvasLinkWarning
+                    canvasLmsCourse={props.canvasLmsCourse}
+                    message=". Removing your access token will cause some synced features to stop working."
+                />
             </ConfirmModal>
             <ConfirmModal
                 show={showSelectModal}
