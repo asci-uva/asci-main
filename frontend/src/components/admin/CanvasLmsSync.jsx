@@ -313,8 +313,8 @@ function CanvasLmsSync(props) {
 
     function getSaveSettingsButton() {
         if (saveSettingsButtonDisabled)
-            <button type="button" className="btn btn-primary" disabled>Saving (Please Wait)</button>;
-        <button type="button" className="btn btn-primary" onClick={saveSyncSettings}>Save Sync Settings</button>;
+            return <button type="button" className="btn btn-primary" disabled>Saving (Please Wait)</button>;
+        return <button type="button" className="btn btn-primary" onClick={saveSyncSettings}>Save Sync Settings</button>;
     }
 
     return (
