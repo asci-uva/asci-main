@@ -4,7 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useUser } from "../context/UserContext";
 import { postCommand } from "../utils/postCommand";
 import ConfirmModal from "../utils/ConfirmModal";
-import { formatLastSynced, isStale } from "../utils/CanvasStalePeriod";
+import { formatLastSynced } from "../utils/CanvasStalePeriod";
 
 function UploadRoster(props) {
   const [rosterFile, setRosterFile] = useState(null);
@@ -77,7 +77,7 @@ function UploadRoster(props) {
     postCommand(props.url, payload)
       .then((data) => {
         console.log("Upload roster respond: ", data);
-        if (data.success) {
+        if (data.success === "true") {
           console.log("Roster uploaded successfully!");
           toast.success("Roster uploaded successfully!");
           refreshCourseRoster();
@@ -103,6 +103,7 @@ function UploadRoster(props) {
         last_synced_at: data.course.last_synced_at,
         stale_period: data.course.stale_period,
         autosync_enabled: data.course.autosync_enabled,
+        is_stale: false, // a course that was just synced is by definition not stale
       }));
     } else {
       props.refreshCanvasSyncSettings();
@@ -152,7 +153,7 @@ function UploadRoster(props) {
     if (!props.canvasSyncSettings.autosync_enabled) return;
     if (!props.canvasLmsAccessTokenInfo.hasToken || !props.canvasLmsAccessTokenInfo.isTokenWorking) return;
     if (!course || (course.role !== "instructor" && course.role !== "ta")) return;
-    if (!isStale(props.canvasSyncSettings.last_synced_at, props.canvasSyncSettings.stale_period)) return;
+    if (!props.canvasSyncSettings.is_stale) return;
 
     if (autoSyncRan.current[props.course_id]) return;
     autoSyncRan.current[props.course_id] = true;
@@ -260,11 +261,7 @@ function UploadRoster(props) {
               </p>
               {props.canvasSyncSettings && (
                 <p
-                  className={
-                    isStale(props.canvasSyncSettings.last_synced_at, props.canvasSyncSettings.stale_period)
-                      ? "text-danger"
-                      : ""
-                  }
+                  className={props.canvasSyncSettings.is_stale ? "text-danger" : ""}
                 >
                   Last synced: {formatLastSynced(props.canvasSyncSettings.last_synced_at)}
                 </p>

@@ -1730,7 +1730,7 @@ $usedCosSim = True;
             }
         }
 
-        $response["success"] = true;
+        $response["success"] = "true";
         return $response;
     }
 
@@ -1754,7 +1754,7 @@ $usedCosSim = True;
             }
         }
 
-        $response["success"] = true;
+        $response["success"] = "true";
         return $response;
     }
 

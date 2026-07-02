@@ -270,11 +270,15 @@ class DBSynchronization
 
     public function getCanvasLmsSyncSettings($asci_course_id) {
         $row = $this->db->fetchrow($this->db->query(
-            'SELECT autosync_enabled, stale_period, last_synced_at FROM canvas_lms_courses WHERE asci_course_id = $1',
+            'SELECT autosync_enabled, stale_period, last_synced_at,
+                    (last_synced_at IS NULL OR now() - last_synced_at > stale_period) AS is_stale
+             FROM canvas_lms_courses WHERE asci_course_id = $1',
             [$asci_course_id]
         ));
-        if ($row)
+        if ($row) {
             $row['autosync_enabled'] = $row['autosync_enabled'] === 't';
+            $row['is_stale'] = $row['is_stale'] === 't';
+        }
         return $row;
     }
 

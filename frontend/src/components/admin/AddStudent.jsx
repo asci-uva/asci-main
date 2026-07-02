@@ -43,7 +43,7 @@ function AddStudent(props) {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        if (data.success) {
+        if (data.success === "true") {
           toast.success("Student/TA added successfully!");
           refreshCourseRoster();
         } else {
