@@ -34,6 +34,6 @@ RUN apt install -y python3-pandas python3-numpy python3-sklearn python3-selenium
 RUN service apache2 restart
 
 RUN mkdir /opt/log
-RUN touch /opt/log/server.log && chmod a+w /opt/log/server.log
+RUN touch /opt/log/server.log && chmod 777 /opt/log/server.log
 
 RUN mkdir /opt/tmp && chmod a+rw /opt/tmp
