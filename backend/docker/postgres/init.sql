@@ -3,6 +3,7 @@ ALTER DATABASE asci SET timezone TO 'America/New_York';
 CREATE TYPE roles AS ENUM (
   'student',
   'instructor',
+  'primary_instructor',
   'ta'
 );
 
@@ -40,6 +41,10 @@ CREATE TABLE user_courses (
   role roles,
   PRIMARY KEY (user_id, course_id)
 );
+
+CREATE UNIQUE INDEX user_courses_one_primary_instructor
+ON user_courses (course_id)
+WHERE role = 'primary_instructor';
 
 CREATE TABLE courses (
   id SERIAL PRIMARY KEY,
@@ -317,7 +322,7 @@ INSERT INTO course_settings (course_id, show_queue_list, grouping_enabled, smart
 VALUES (2, true, true, true, true);
 
 INSERT INTO user_courses (user_id, course_id, role)
-VALUES (4, 3, 'instructor');
+VALUES (4, 3, 'primary_instructor');
 
 INSERT INTO user_courses (user_id, course_id, role)
 VALUES (2, 3, 'student');
@@ -369,8 +374,3 @@ VALUES (1, 1, '2024-01-08 04:05:00', '2024-01-08 04:10:00');
 
 INSERT INTO session_users (session_id, user_id)
 VALUES (1, 1);
-
--- Canvas LMS sync settings / last-sync timestamp (idempotent for existing DBs)
-ALTER TABLE canvas_lms_courses ADD COLUMN IF NOT EXISTS last_synced_at TIMESTAMP;
-ALTER TABLE canvas_lms_courses ADD COLUMN IF NOT EXISTS stale_period INTERVAL NOT NULL DEFAULT '7 days';
-ALTER TABLE canvas_lms_courses ADD COLUMN IF NOT EXISTS autosync_enabled BOOLEAN NOT NULL DEFAULT false;
