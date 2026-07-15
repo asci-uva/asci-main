@@ -1,13 +1,3 @@
-const DAY_MS = 24 * 60 * 60 * 1000;
-const HOUR_MS = 60 * 60 * 1000;
-
-const FIXED = {
-  years: 365 * DAY_MS,
-  months: 30 * DAY_MS,
-  days: DAY_MS,
-  hours: HOUR_MS,
-};
-
 function matchUnit(str, pattern) {
   const m = str.match(pattern);
   return m ? parseInt(m[1], 10) : 0;
@@ -38,25 +28,6 @@ export function partsToInterval(parts) {
   const days = Number(p.days) || 0;
   const hours = Number(p.hours) || 0;
   return `${years} years ${months} months ${days} days ${hours} hours`;
-}
-
-function partsToMs(parts) {
-  return (
-    parts.years * FIXED.years +
-    parts.months * FIXED.months +
-    parts.days * FIXED.days +
-    parts.hours * FIXED.hours
-  );
-}
-
-export function isStale(lastSyncedAt, intervalStr, now = Date.now()) {
-  if (!lastSyncedAt) return true;
-
-  const last = new Date(lastSyncedAt).getTime();
-  if (isNaN(last)) return true;
-
-  const periodMs = partsToMs(intervalToParts(intervalStr));
-  return now - last > periodMs;
 }
 
 export function formatLastSynced(lastSyncedAt) {
