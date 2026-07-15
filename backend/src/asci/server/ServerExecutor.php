@@ -2640,8 +2640,9 @@ $usedCosSim = True;
       if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS courses");
 
-      $canvas = $this->canvasLmsClientForCurrentUser();
-      $courses = $canvas->getAll("/api/v1/courses", "enrollment_type=teacher&per_page=100");
+      // $canvas = $this->canvasLmsClientForCurrentUser();
+      // $courses = $canvas->getAll("/api/v1/courses", "enrollment_type=teacher&per_page=100");
+      $courses = $canvas->getAll("/api/v1/courses", "enrollment_type=teacher&enrollment_type=ta&per_page=100"); // FOR DEV ONLY
       if ($courses === null)
         return $this->err("Failed to fetch Canvas LMS courses");
 

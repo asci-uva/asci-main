@@ -312,7 +312,7 @@ class DBSynchronization
     }
 
     public function canvasLmsUserToAsciUser($canvasLmsUser) {
-        $computing_id = isset($canvasLmsUser['sis_user_id']) ? trim((string)$canvasLmsUser['sis_user_id']) : '';
+        $computing_id = isset($canvasLmsUser['login_id']) ? trim((string)$canvasLmsUser['login_id']) : '';
         if ($computing_id === '')
             return null;
 
