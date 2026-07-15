@@ -6,6 +6,7 @@ import ConfirmModal from "../utils/ConfirmModal";
 import { useUser } from "../context/UserContext";
 import { intervalToParts, partsToInterval } from "../utils/CanvasStalePeriod";
 import CanvasLinkWarning from "./CanvasLinkWarning";
+import { isInstructorRole } from "../utils/roles";
 
 
 function formatLinkedAsciCourse(c) {
@@ -38,7 +39,7 @@ function CanvasLmsSync(props) {
     const [saveSettingsButtonDisabled, setSaveSettingsButtonDisabled] = useState(false);
 
     const { getCourse } = useUser();
-    const isInstructor = getCourse() && getCourse().role === "instructor";
+    const isInstructor = getCourse() && isInstructorRole(getCourse().role);
 
     const filteredAndSortedCanvasLmsCourses = [...canvasLmsCourses]
         .filter((course) => {

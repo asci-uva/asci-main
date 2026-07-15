@@ -2,6 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useUser } from "../context/UserContext";
+import { isInstructorRole } from "../utils/roles";
 
 function ManagePoints(props) {
   let url = props.url;
@@ -351,7 +352,7 @@ function ManagePoints(props) {
       {
         students = filteredData;
       }
-      var instructors = Object.keys(courseRoster).find(k => courseRoster[k].role == "instructor" && courseRoster[k].computing_id == user.userid);
+      var instructors = Object.keys(courseRoster).find(k => isInstructorRole(courseRoster[k].role) && courseRoster[k].computing_id == user.userid);
       
       return (
         <div className="container p-4">

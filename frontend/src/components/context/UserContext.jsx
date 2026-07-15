@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import { isInstructorRole, formatRole } from "../utils/roles";
 
 const UserContext = createContext({
     userid: null,
@@ -121,7 +122,7 @@ export const UserProvider = ({ children }) => {
                                 + " - "
                                 + courseList[key]["semester"]
                                 + " ("
-                                + courseList[key]["role"]
+                                + formatRole(courseList[key]["role"])
                                 + ")";
 
               cList[key] = courseName;
@@ -162,7 +163,7 @@ export const UserProvider = ({ children }) => {
   const isInstructor = () => {
 
     for(var key in courseList){
-      if(courseList[key]["role"] == "instructor") return true;
+      if(isInstructorRole(courseList[key]["role"])) return true;
     }
 
     return false;

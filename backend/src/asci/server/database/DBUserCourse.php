@@ -137,26 +137,26 @@ class DBUserCourse
             return true;
           break;
         case "ta-queue":
-          if ($role == "ta" || $role == "instructor")
+          if (\asci\util\Roles::isStaffRole($role))
             return true;
           break;
         case "course-roster":
-          if ($role == "ta" || $role == "instructor")
+          if (\asci\util\Roles::isStaffRole($role))
             return true;
           break;
         case "course-settings":
         case "upload-llm":
         case "upload-piazza":
         case "course-stats":
-          if ($role == "instructor")
+          if (\asci\util\Roles::isInstructorRole($role))
             return true;
           break;
         case "sync-canvas-lms-course":
-          if ($role == "instructor")
+          if (\asci\util\Roles::isInstructorRole($role))
             return true;
           break;
         case "sync-canvas-lms-course-roster":
-          if ($role == "ta" || $role == "instructor")
+          if (\asci\util\Roles::isStaffRole($role))
             return true;
           break;
         case "llm-chat":

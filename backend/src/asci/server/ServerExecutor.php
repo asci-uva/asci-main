@@ -106,7 +106,7 @@ class ServerExecutor{
     }
 
     // Instructors can access archived courses for management/restoration.
-    if (in_array("instructor", $roles, true)) {
+    if (!empty(array_filter($roles, '\asci\util\Roles::isInstructorRole'))) {
       return;
     }
 
@@ -201,7 +201,7 @@ class ServerExecutor{
 
       $isArchived = ($settings->archived == "t");
       $role = strtolower((string)$course->getRole());
-      $isInstructor = ($role == "instructor");
+      $isInstructor = \asci\util\Roles::isInstructorRole($role);
 
       // Archived courses are only visible to instructors for management/restoration.
       if($isArchived && !$isInstructor) continue;

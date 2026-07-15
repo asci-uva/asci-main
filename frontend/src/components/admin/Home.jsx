@@ -15,6 +15,7 @@ import ViewQuests from "./ViewQuests";
 import { postCommand } from "../utils/postCommand";
 import { useCanvasSyncSettings } from "../utils/useCanvasSyncSettings";
 import CanvasLinkWarning from "./CanvasLinkWarning";
+import { isStaffRole } from "../utils/roles";
 
 function Home(props) {
   let docRoot = props.documentRoot;
@@ -27,7 +28,7 @@ function Home(props) {
   const [canvasLmsCourseLoaded, setCanvasLmsCourseLoaded] = useState(false);
 
   const courseRole = getCourse() && getCourse().role;
-  const isInstructorOrTa = courseRole === "instructor" || courseRole === "ta";
+  const isInstructorOrTa = isStaffRole(courseRole);
   const hasWorkingToken = canvasLmsAccessTokenInfo.hasToken && canvasLmsAccessTokenInfo.isTokenWorking;
 
   const {

@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import { isInstructorRole, isStaffRole } from "../utils/roles";
 
 function Cards(props) {
   const {getCourse, getCourseSettings} = useUser();
@@ -34,7 +35,7 @@ function Cards(props) {
       </div>
       ) : null }
 
-      { course.role === "instructor" ? (
+      { isInstructorRole(course.role) ? (
         <div className="col-lg-4 col-md-6 mb-4">
           <div className="card p-3">
             <div className="card-img-top text-center">
@@ -46,7 +47,7 @@ function Cards(props) {
           </div>
         </div>
       ) : null }
-      { course.role === "instructor" ? (
+      { isInstructorRole(course.role) ? (
         <div className="col-lg-4 col-md-6 mb-4">
           <div className="card p-3">
             <div className="card-img-top text-center">
@@ -70,7 +71,7 @@ function Cards(props) {
         </div>
       </div>
       ) : null }
-      { course.role === "instructor" ? (
+      { isInstructorRole(course.role) ? (
       <div className="col-lg-4 col-md-6 mb-4">
         <div className="card p-3">
           <div className="card-img-top text-center">
@@ -82,7 +83,7 @@ function Cards(props) {
         </div>
       </div>
       ) : null }
-      { course.role === "instructor" || course.role === "ta" ? (
+      { isStaffRole(course.role) ? (
       <div className="col-lg-4 col-md-6 mb-4">
         <div className="card p-3">
           <div className="card-img-top text-center">

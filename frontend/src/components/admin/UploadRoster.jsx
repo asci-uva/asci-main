@@ -5,6 +5,7 @@ import { useUser } from "../context/UserContext";
 import { postCommand } from "../utils/postCommand";
 import ConfirmModal from "../utils/ConfirmModal";
 import { formatLastSynced } from "../utils/CanvasStalePeriod";
+import { isStaffRole, formatRole } from "../utils/roles";
 
 function UploadRoster(props) {
   const [rosterFile, setRosterFile] = useState(null);
@@ -152,7 +153,7 @@ function UploadRoster(props) {
     if (!props.canvasSyncSettings) return;
     if (!props.canvasSyncSettings.autosync_enabled) return;
     if (!props.canvasLmsAccessTokenInfo.hasToken || !props.canvasLmsAccessTokenInfo.isTokenWorking) return;
-    if (!course || (course.role !== "instructor" && course.role !== "ta")) return;
+    if (!course || !isStaffRole(course.role)) return;
     if (!props.canvasSyncSettings.is_stale) return;
 
     if (autoSyncRan.current[props.course_id]) return;
@@ -217,7 +218,7 @@ function UploadRoster(props) {
                         </span>
 
                         <span className="text-muted">
-                          {user.role}
+                          {formatRole(user.role)}
                         </span>
                       </div>
                     </li>

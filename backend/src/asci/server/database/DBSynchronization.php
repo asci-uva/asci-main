@@ -317,7 +317,7 @@ class DBSynchronization
             return null;
 
         $role = null;
-        $rank = ['student' => 1, 'ta' => 2, 'instructor' => 3];
+        $rank = ['student' => 1, 'ta' => 2, 'instructor' => 3, 'primary_instructor' => 4];
         $typeMap = [
             'StudentEnrollment' => 'student',
             'TaEnrollment' => 'ta',
@@ -394,7 +394,7 @@ class DBSynchronization
                     [$userId, $asci_course_id, $person['role']]
                 );
                 $added[] = ["computingId" => $person['computing_id'], 'fname' => $person['fname'], 'lname' => $person['lname'], 'role' => $person['role']];
-            } else if ($enrollment['role'] !== $person['role']) {
+            } else if ($enrollment['role'] !== $person['role'] && $enrollment['role'] !== \asci\util\Roles::PRIMARY_INSTRUCTOR) {
                 $this->db->query(
                     'UPDATE user_courses SET role = $1 WHERE user_id = $2 AND course_id = $3',
                     [$person['role'], $userId, $asci_course_id]

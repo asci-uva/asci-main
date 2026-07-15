@@ -2,6 +2,7 @@ import React from "react";
 import {useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import { useUser } from "../context/UserContext";
+import { isInstructorRole, formatRole } from "./roles";
 
 function SelectCourse(props) {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ function SelectCourse(props) {
     for (var key in courseList) {
       let course = courseList[key];
 
-      if (course["role"] === "instructor") {
+      if (isInstructorRole(course["role"])) {
         hasInstructorRole = true;
       }
 
@@ -39,7 +40,7 @@ function SelectCourse(props) {
         " - " +
         course["semester"];
 
-      courseName += " (" + course["role"] +")";
+      courseName += " (" + formatRole(course["role"]) +")";
 
       if (course["archived"] === "t") {
         archivedCourseList[key] = courseName + " [Archived]";

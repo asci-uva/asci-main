@@ -2,6 +2,7 @@ import React from "react";
 import {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import { useUser } from "../context/UserContext";
+import { formatRole } from "../utils/roles";
 
 function ViewRoster(props) {
 
@@ -76,7 +77,7 @@ function ViewRoster(props) {
         <td>{data[k].fname}</td>
         <td>{data[k].lname}</td>
         <td>{data[k].pname}</td>
-        <td>{data[k].role}</td>
+        <td>{formatRole(data[k].role)}</td>
       </tr>
     );
   }

@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import { isInstructorRole, isStaffRole } from "./roles";
 //import { UserProvider } from "../context/UserContext";
 
 function Navigation(props) {
@@ -41,28 +42,28 @@ function Navigation(props) {
                 </NavLink>
               </li>
             ) : null }
-            { course.role == "instructor" ? (
+            { isInstructorRole(course.role) ? (
                 <li className="nav-item">
                   <NavLink className="nav-link" to="/asci/admin" end>
                     <i className="bi-gear-wide-connected"></i> Admin
                   </NavLink>
                 </li>
               ) : null }
-              { course.role == "instructor" ? (
+              { isInstructorRole(course.role) ? (
                 <li className="nav-item">
                   <NavLink className="nav-link" to="/asci/stats">
                     <i className="bi-bar-chart-line"></i> Statistics
                   </NavLink>
                 </li>
               ) : null }
-              { course.role == "instructor" ? (
+              { isInstructorRole(course.role) ? (
                 <li className="nav-item">
                   <NavLink className="nav-link" to="/asci/admin/SelectQuests">
                     <i className="bi-trophy"></i> Quests
                   </NavLink>
                 </li>
               ) : null }
-              { course.role == "instructor" || course.role == "ta" ? (
+              { isStaffRole(course.role) ? (
                 <li className="nav-item">
                   <NavLink className="nav-link" to="/asci/admin/PointsHome">
                     <i className="bi-clipboard-data"></i> Student Points
@@ -76,35 +77,35 @@ function Navigation(props) {
                 <i className="bi-mortarboard"></i> {course.mnemonic} {course.number} {course.name} ({course.semester}) 
               </a>
               <ul className="dropdown-menu">
-              { course.role == "instructor" ? (
+              { isInstructorRole(course.role) ? (
                 <li className="">
                   <NavLink className="dropdown-item" to="/asci/admin" end>
                     <i className="bi-gear-wide-connected"></i> Admin
                   </NavLink>
                 </li>
               ) : null }
-              { course.role == "instructor" ? (
+              { isInstructorRole(course.role) ? (
                 <li className="">
                   <NavLink className="dropdown-item" to="/asci/stats">
                     <i className="bi-bar-chart-line"></i> Statistics
                   </NavLink>
                 </li>
               ) : null }
-              { course.role == "instructor" ? (
+              { isInstructorRole(course.role) ? (
                 <li className="">
                   <NavLink className="dropdown-item" to="/asci/admin/SelectQuests">
                     <i className="bi-trophy"></i> Quests
                   </NavLink>
                 </li>
               ) : null }
-              { course.role == "instructor" || course.role == "ta" ? (
+              { isStaffRole(course.role) ? (
                 <li className="">
                   <NavLink className="dropdown-item" to="/asci/admin/PointsHome">
                     <i className="bi-clipboard-data"></i> Student Points
                   </NavLink>
                 </li>
               ) : null }
-              { course.role == "instructor" ? (
+              { isInstructorRole(course.role) ? (
                 <li><hr className="dropdown-divider"/></li>
               ) : null }
                 <li>
