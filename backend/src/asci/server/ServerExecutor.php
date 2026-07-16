@@ -2783,8 +2783,6 @@ $usedCosSim = True;
       "removed" => $result["removed"],
       "skipped" => $skipped,
     ];
-
-    return ["success" => "true", "asci_roster" => $coverted];
   }
 
   private function canvasLmsClientForCourse($asci_course_id) {
