@@ -5,8 +5,8 @@ import { postCommand } from "../utils/postCommand";
 import ConfirmModal from "../utils/ConfirmModal";
 import { useUser } from "../context/UserContext";
 import { intervalToParts, partsToInterval } from "../utils/CanvasStalePeriod";
+import { PRIMARY_INSTRUCTOR } from "../utils/roles";
 import CanvasLinkWarning from "./CanvasLinkWarning";
-import { isInstructorRole } from "../utils/roles";
 
 
 function formatLinkedAsciCourse(c) {
@@ -15,6 +15,29 @@ function formatLinkedAsciCourse(c) {
 
 function range(n) {
     return Array.from({ length: n }, (_, i) => i);
+}
+
+export function tokenStatusMessage(status) {
+    if (!status.hasPrimaryInstructor)
+        return "This course has no primary instructor, so Canvas integration is unavailable.";
+    if (!status.hasToken)
+        return "The primary instructor has not added a Canvas access token.";
+    if (!status.isTokenWorking)
+        return "The primary instructor's Canvas access token is not working.";
+    return "Canvas access token managed by the primary instructor (linked and working).";
+}
+
+export function formatStaleParts(parts) {
+    const units = [
+        ["years", "year"],
+        ["months", "month"],
+        ["days", "day"],
+        ["hours", "hour"],
+    ];
+    const pieces = units
+        .filter(([key]) => parts[key] > 0)
+        .map(([key, label]) => `${parts[key]} ${label}${parts[key] === 1 ? "" : "s"}`);
+    return pieces.length > 0 ? pieces.join(", ") : "0 days";
 }
 
 function CanvasLmsSync(props) {
@@ -39,7 +62,7 @@ function CanvasLmsSync(props) {
     const [saveSettingsButtonDisabled, setSaveSettingsButtonDisabled] = useState(false);
 
     const { getCourse } = useUser();
-    const isInstructor = getCourse() && isInstructorRole(getCourse().role);
+    const isPrimaryInstructor = getCourse() && getCourse().role === PRIMARY_INSTRUCTOR;
 
     const filteredAndSortedCanvasLmsCourses = [...canvasLmsCourses]
         .filter((course) => {
@@ -60,11 +83,11 @@ function CanvasLmsSync(props) {
         .sort((a, b) => { return b.enrollment_term_id - a.enrollment_term_id; });
 
     useEffect(() => {
-        if (props.canvasLmsAccessTokenInfo.hasToken && props.canvasLmsAccessTokenInfo.isTokenWorking) {
+        if (props.canvasTokenStatus.hasToken && props.canvasTokenStatus.isTokenWorking) {
             getEnrollmentYears();
             getCanvasLmsCourses();
         }
-    }, [props.canvasLmsAccessTokenInfo]);
+    }, [props.canvasTokenStatus]);
 
     useEffect(() => {
         if (props.canvasSyncSettings) {
@@ -118,10 +141,7 @@ function CanvasLmsSync(props) {
             .then((data) => {
                 setValidateButtonDisabled(false);
                 if (data.success === "true") {
-                    props.setCanvasLmsAccessTokenInfo({
-                        hasToken: true,
-                        isTokenWorking: true,
-                    });
+                    props.refreshCanvasTokenStatus();
                     getEnrollmentYears();
                     console.log("Successfully validated Canvas LMS access token");
                     toast.success("Successfully validated Canvas LMS access token");
@@ -155,10 +175,7 @@ function CanvasLmsSync(props) {
             .then((data) => {
                 setRemoveAccessTokenButtonDisabled(false);
                 if (data.success === "true") {
-                    props.setCanvasLmsAccessTokenInfo({
-                        hasToken: false,
-                        isTokenWorking: false,
-                    });
+                    props.refreshCanvasTokenStatus();
                     setCanvasLmsAccessToken("");
                     console.log("Successfully removed Canvas LMS access token");
                     toast.success("Successfully removed canvas LMS access token");
@@ -300,7 +317,9 @@ function CanvasLmsSync(props) {
             <div className="card-body">
                 <div className="mb-3">
                     <h5>Access token</h5>
-                    {props.canvasLmsAccessTokenInfo.hasToken ? (
+                    {!isPrimaryInstructor ? (
+                        <p className="text-muted">{tokenStatusMessage(props.canvasTokenStatus)}</p>
+                    ) : props.canvasTokenStatus.hasToken ? (
                         <>
                             <p className="text-muted">Canvas LMS access token detected</p>
                             {getRemoveAccessTokenButton()}
@@ -331,9 +350,24 @@ function CanvasLmsSync(props) {
                         <div className="mb-3">
                             <h5>Canvas LMS course</h5>
                             <p className="text-muted">Synced with {props.canvasLmsCourse.course_code} {props.canvasLmsCourse.name}</p>
-                            <button type="button" className="btn btn-primary" onClick={removeCanvasLmsCourse}>Desynchronize from course</button>
+                            {isPrimaryInstructor && (
+                                <button type="button" className="btn btn-primary" onClick={removeCanvasLmsCourse}>Desynchronize from course</button>
+                            )}
                         </div>
-                        {isInstructor && (
+                        {!isPrimaryInstructor ? (
+                            <div className="mb-3">
+                                <h5>Sync Settings</h5>
+                                {props.canvasSyncSettings ? (
+                                    <p className="text-muted mb-0">
+                                        Autosync: {props.canvasSyncSettings.autosync_enabled ? "enabled" : "disabled"}
+                                        <br />
+                                        Stale period: {formatStaleParts(intervalToParts(props.canvasSyncSettings.stale_period))}
+                                    </p>
+                                ) : (
+                                    <p className="text-muted mb-0">Loading…</p>
+                                )}
+                            </div>
+                        ) : (
                             <div className="mb-3">
                                 <h5>Sync Settings</h5>
                                 <div className="form-check mb-3">
@@ -345,7 +379,7 @@ function CanvasLmsSync(props) {
                                         onChange={(e) => setAutosyncEnabled(e.target.checked)}
                                     />
                                     <label className="form-check-label" htmlFor="autosyncEnabledCheckbox">
-                                        Automatically sync roster when an instructor or TA opens this course after the stale period has elapsed
+                                        Automatically sync roster when a staff member opens this course after the stale period has elapsed
                                     </label>
                                 </div>
                                 <label className="form-label">Stale period</label>
@@ -379,12 +413,17 @@ function CanvasLmsSync(props) {
                             </div>
                         )}
                     </>
+                ) : !isPrimaryInstructor ? (
+                    <div className="mb-3">
+                        <h5>Canvas LMS course</h5>
+                        <p className="text-muted mb-0">The primary instructor has not linked a Canvas course.</p>
+                    </div>
                 ) : (
                     <>
-                        {props.canvasLmsAccessTokenInfo.hasToken && (
+                        {props.canvasTokenStatus.hasToken && (
                             <div className="mb-3">
                                 <h5>Select Canvas LMS Course</h5>
-                                {!props.canvasLmsAccessTokenInfo.isTokenWorking ? (
+                                {!props.canvasTokenStatus.isTokenWorking ? (
                                     <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot connect to Canvas LMS.</p>
                                 ) : (
                                     <>
@@ -482,7 +521,7 @@ function CanvasLmsSync(props) {
                 onConfirm={confirmValidation}
             >
                 <p>Are you sure you want to validate this Canvas LMS access token?</p>
-                <p>Note: The access token will be directly tied to your ASCI account</p>
+                <p>Note: The access token will be tied to your ASCI account and used for all Canvas syncing in this course</p>
             </ConfirmModal>
             <ConfirmModal
                 show={showRemoveModal}

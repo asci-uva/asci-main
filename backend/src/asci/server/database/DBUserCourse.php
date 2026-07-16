@@ -133,7 +133,7 @@ class DBUserCourse
 
       switch($permission) {
         case "join-queue":
-          if ($role == "student")
+          if ($role == \asci\util\Roles::STUDENT)
             return true;
           break;
         case "ta-queue":
@@ -151,8 +151,8 @@ class DBUserCourse
           if (\asci\util\Roles::isInstructorRole($role))
             return true;
           break;
-        case "sync-canvas-lms-course":
-          if (\asci\util\Roles::isInstructorRole($role))
+        case "manage-canvas-lms-integration":
+          if ($role == \asci\util\Roles::PRIMARY_INSTRUCTOR)
             return true;
           break;
         case "sync-canvas-lms-course-roster":

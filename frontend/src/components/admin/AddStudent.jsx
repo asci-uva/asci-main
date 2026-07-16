@@ -62,7 +62,7 @@ function AddStudent(props) {
       <h4 className="card-header">Add Individual</h4>
       <div className="card-body">
 
-        {props.canvasLmsCourseLoaded && props.canvasLmsAccessTokenInfo.hasToken && props.canvasLmsCourse && (
+        {props.canvasLmsCourseLoaded && props.canvasTokenStatus.hasToken && props.canvasLmsCourse && (
           <CanvasLinkWarning
             canvasLmsCourse={props.canvasLmsCourse}
             message=". Manually added students will be removed upon next sync."

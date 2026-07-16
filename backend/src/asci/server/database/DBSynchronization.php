@@ -196,6 +196,23 @@ class DBSynchronization
         return true;
     }
 
+    public function getPrimaryInstructorUserId($asci_course_id) {
+        $row = $this->db->fetchrow($this->db->query(
+            "SELECT user_id FROM user_courses WHERE course_id = $1 AND role = 'primary_instructor'",
+            [$asci_course_id]
+        ));
+
+        return $row ? $row['user_id'] : null;
+    }
+
+    public function getCanvasLmsAccessTokenForCourse($asci_course_id) {
+        $primary_instructor_id = $this->getPrimaryInstructorUserId($asci_course_id);
+        if ($primary_instructor_id === null)
+            return null;
+
+        return $this->getCanvasLmsAccessToken($primary_instructor_id);
+    }
+
     public function getCanvasLmsAccessToken($user_id) {
         $result = $this->db->fetchrow($this->db->query(
             'SELECT access_token, access_token_iv FROM canvas_lms_access_tokens WHERE user_id = $1',

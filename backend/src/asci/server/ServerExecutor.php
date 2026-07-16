@@ -2569,7 +2569,7 @@ $usedCosSim = True;
     }
 
     public function validateCanvasLmsAccessTokenHandler($asci_course_id, $canvas_lms_access_token) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to validate Canvas LMS access token");
       
       if ($canvas_lms_access_token === "")
@@ -2585,21 +2585,33 @@ $usedCosSim = True;
       return ["success" => "true"];
     }
 
-    public function checkUserHasWorkingCanvasLmsAccessTokenHandler() {
-      $result = $this->synchronizationStore->checkUserHasCanvasLmsAccessToken($this->user->id);
+    public function getCanvasLmsTokenStatusHandler($asci_course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course-roster"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to read the Canvas LMS token status");
 
-      if (!$result)
-        return ["success" => "true", "hasToken" => false];
+      $primary_instructor_id = $this->synchronizationStore->getPrimaryInstructorUserId($asci_course_id);
+      $has_primary_instructor = $primary_instructor_id !== null;
+      $has_token = $has_primary_instructor
+        && $this->synchronizationStore->checkUserHasCanvasLmsAccessToken($primary_instructor_id);
 
-      $canvas = $this->canvasLmsClientForCurrentUser();
-      $result = $canvas->get("/api/v1/users/self");
-      if (!$result["ok"])
-        return ["success" => "true", "hasToken" => true, "isTokenWorking" => false];
-      return ["success" => "true", "hasToken" => true, "isTokenWorking" => true];
+      $is_token_working = false;
+      if ($has_token) {
+        $canvas = $this->canvasLmsClientForCourse($asci_course_id);
+        $result = $canvas->get("/api/v1/users/self");
+        $is_token_working = $result["ok"];
+      }
+
+      return [
+        "success" => "true",
+        "hasPrimaryInstructor" => $has_primary_instructor,
+        "hasToken" => $has_token,
+        "isTokenWorking" => $is_token_working,
+        "isPrimaryInstructor" => $has_primary_instructor && $this->user->id == $primary_instructor_id,
+      ];
     }
 
     public function removeCanvasLmsAccessTokenHandler($asci_course_id) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to remove Canvas LMS access token");
 
       $result = $this->synchronizationStore->removeCanvasLmsAccessToken($this->user->id);
@@ -2610,21 +2622,17 @@ $usedCosSim = True;
     }
 
     public function getCanvasLmsEnrollmentTermsHandler($asci_course_id) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS enrollment terms");
       
-      $canvas = $this->canvasLmsClientForCurrentUser();
+      $canvas = $this->canvasLmsClientForCourse($asci_course_id);
+      if ($canvas === null)
+        return $this->err("The primary instructor for this course has not added a Canvas LMS access token");
 
       $terms = $canvas->getAll("/api/v1/accounts/self/terms", "per_page=100", "enrollment_terms");
       if ($terms === null)
         return $this->err($canvas->getLastError());
 
-      $result = [];
-
-      $canvas_access_token = $this->synchronizationStore->getCanvasLmsAccessToken($this->user->id);
-
-      $canvas_domain = "https://canvas.its.virginia.edu";
-      $url = "$canvas_domain/api/v1/accounts/self/terms?per_page=100";
       $results=[];
 
       foreach ($terms as $term) {
@@ -2637,10 +2645,13 @@ $usedCosSim = True;
     }
 
     public function getCanvasLmsCoursesHandler($asci_course_id) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS courses");
 
-      // $canvas = $this->canvasLmsClientForCurrentUser();
+      $canvas = $this->canvasLmsClientForCourse($asci_course_id);
+      if ($canvas === null)
+        return $this->err("The primary instructor for this course has not added a Canvas LMS access token");
+
       // $courses = $canvas->getAll("/api/v1/courses", "enrollment_type=teacher&per_page=100");
       $courses = $canvas->getAll("/api/v1/courses", "enrollment_type=teacher&enrollment_type=ta&per_page=100"); // FOR DEV ONLY
       if ($courses === null)
@@ -2677,7 +2688,7 @@ $usedCosSim = True;
     }
 
     public function syncCanvasLmsCourseHandler($asci_course_id, $canvas_lms_course) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to sync with a Canvas LMS course");
 
       $result = $this->synchronizationStore->syncCanvasLmsCourse($asci_course_id, $canvas_lms_course);
@@ -2694,7 +2705,7 @@ $usedCosSim = True;
     }
     
     public function desyncCanvasLmsCourseHandler($asci_course_id) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to desync from a Canvas LMS course");
 
       $result = $this->synchronizationStore->desyncCanvasLmsCourse($asci_course_id);
@@ -2716,7 +2727,7 @@ $usedCosSim = True;
     }
 
     public function setCanvasLmsSyncSettingsHandler($asci_course_id, $autosync_enabled, $stale_period) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course"))
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to change Canvas LMS sync settings");
 
       if (!$this->isValidStalePeriod($stale_period))
@@ -2739,9 +2750,9 @@ $usedCosSim = True;
     if (!$canvas_course)
       return $this->err("No Canvas LMS course associated with ASCI course");
 
-    $access_token = $this->synchronizationStore->getCanvasLmsAccessToken($this->user->id);
+    $access_token = $this->synchronizationStore->getCanvasLmsAccessTokenForCourse($asci_course_id);
     if (!$access_token)
-      return $this->err("No Canvas LMS access token found");
+      return $this->err("The primary instructor for this course has not added a Canvas LMS access token");
 
     $canvas = new \asci\server\CanvasLmsClient($access_token, $this->logger);
     $canvas_course_id = $canvas_course["canvas_course_id"];
@@ -2776,8 +2787,10 @@ $usedCosSim = True;
     return ["success" => "true", "asci_roster" => $coverted];
   }
 
-  private function canvasLmsClientForCurrentUser() {
-    $access_token = $this->synchronizationStore->getCanvasLmsAccessToken($this->user->id);
+  private function canvasLmsClientForCourse($asci_course_id) {
+    $access_token = $this->synchronizationStore->getCanvasLmsAccessTokenForCourse($asci_course_id);
+    if (!$access_token)
+      return null;
     return new \asci\server\CanvasLmsClient($access_token, $this->logger);
   }
 
