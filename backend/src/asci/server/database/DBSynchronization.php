@@ -421,7 +421,7 @@ class DBSynchronization
         }
 
         $current = $this->db->query(
-            "SELECT uc.user_id, uc.role, u.computing_id, u.fname, u.lname FROM user_courses uc JOIN users u ON u.id = uc.user_id WHERE uc.course_id = $1 AND uc.role in ('student', 'ta')",
+            "SELECT uc.user_id, uc.role, u.computing_id, u.fname, u.lname FROM user_courses uc JOIN users u ON u.id = uc.user_id WHERE uc.course_id = $1 AND uc.role in ('student', 'ta', 'instructor')",
             [$asci_course_id]
         );
 
