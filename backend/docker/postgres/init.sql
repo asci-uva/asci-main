@@ -35,6 +35,9 @@ CREATE TABLE users (
   password TEXT
 );
 
+CREATE UNIQUE INDEX users_computing_id_lower_unique
+ON users (LOWER(computing_id));
+
 CREATE TABLE user_courses (
   user_id INT,
   course_id INT,

@@ -791,7 +791,8 @@ class Server
             
             case "syncCanvasLmsRoster":
                 $asciCourseId = $this->input["asciCourseId"];
-                $this->setResponse($executor->syncCanvasLmsRosterHandler($asciCourseId));
+                $autosync = ($this->input["autosync"] ?? false) === true;
+                $this->setResponse($executor->syncCanvasLmsRosterHandler($asciCourseId, $autosync));
                 break;
 
             case "getCanvasLmsSyncSettings":

@@ -260,6 +260,14 @@ class DatabaseConnector {
         }
     }
 
+    public function affectedRows($resource) {
+        try {
+            return \pg_affected_rows($resource);
+        } catch (\Exception $e) {
+            throw new \asci\exceptions\ASCIDatabaseException($e->getMessage());
+        }
+    }
+
     public function fetchAllRowsAsArray($resource) {
         try{
             $rows = array();

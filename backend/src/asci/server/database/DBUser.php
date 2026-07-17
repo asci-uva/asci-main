@@ -26,7 +26,7 @@ class DBUser
 
     public function getUser($computing_id)
     {
-        $query = 'select * from users where computing_id = $1';
+        $query = 'select * from users where LOWER(computing_id) = LOWER($1)';
         $result = $this->db->query($query, array($computing_id));
 
 
@@ -68,26 +68,28 @@ class DBUser
 
     public function createUser($computing_id, $fname, $lname, $pname, $password) {
         // SQL query to check if a user with the given computing_id already exists
-        $checkQuery = 'SELECT id FROM users WHERE computing_id = $1';
-        
+        $checkQuery = 'SELECT id FROM users WHERE LOWER(computing_id) = LOWER($1)';
+
         // Check if the user already exists
         $existingUser = $this->db->query($checkQuery, array($computing_id));
         $row = $this->db->fetchrow($existingUser);
-    
+
         if ($row) {
             // User already exists
             $this->logger->info("User with computing_id: $computing_id already exists.");
             return true;
         }
-    
-        // If the user does not exist, send SQL query to insert a new user
-        $insertQuery = 'INSERT INTO users (computing_id, fname, lname, pname, password) VALUES ($1, $2, $3, $4, $5)';
+
+        // If the user does not exist, send SQL query to insert a new user.
+        // ON CONFLICT: another request may have created this user between the
+        // check above and this insert; treat losing that race as success.
+        $insertQuery = 'INSERT INTO users (computing_id, fname, lname, pname, password) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (LOWER(computing_id)) DO NOTHING';
 
         // Get hashed password
         $hashedPasword = password_hash($password, PASSWORD_DEFAULT);
 
         // Parameters for the query
-        $params = array($computing_id, $fname, $lname, $pname, $hashedPasword);
+        $params = array(strtolower($computing_id), $fname, $lname, $pname, $hashedPasword);
     
         try {
             // Execute the query to insert the user
@@ -116,41 +118,32 @@ class DBUser
             $computing_id = $user['computing_id'];
             $role = $user['role'];
     
-            $userExists = $this->createUser($computing_id, $fname, $lname, $pname, $computing_id);
-            // SQL query to check if a user with the given computing_id already exists
-            $checkQuery = 'SELECT id FROM users WHERE computing_id = $1';
-        
-            // Check if the user already exists
-            $existingUser = $this->db->query($checkQuery, array($computing_id));
-            $userExists = $this->db->fetchrow($existingUser); 
-    
-            if (!$userExists) {
+            $this->createUser($computing_id, $fname, $lname, $pname, $computing_id);
+
+            // Re-check that the user exists (created just now or previously)
+            $userIdQuery = 'SELECT id FROM users WHERE LOWER(computing_id) = LOWER($1)';
+            $result = $this->db->query($userIdQuery, array($computing_id));
+            $row = $this->db->fetchrow($result);
+
+            if (!$row) {
                 $this->logger->error("Failed to find or create user with computing_id: $computing_id");
                 $results[$computing_id] = false;
                 continue; // skip to the next user
             }
-    
-            $userIdQuery = 'SELECT id FROM users WHERE computing_id = $1';
-            $result = $this->db->query($userIdQuery, array($computing_id));
-            $row = $this->db->fetchrow($result);
-    
-            if (!$row) {
-                $this->logger->error("Unexpected error: User with computing_id $computing_id not found after creation.");
-                $results[$computing_id] = false;
-                continue;
-            }
             $userId = $row['id'];
-    
+
             $checkUserCourseQuery = 'SELECT user_id FROM user_courses WHERE user_id = $1 AND course_id = $2';
             $result = $this->db->query($checkUserCourseQuery, array($userId, $course_id));
-    
+
             if ($row = $this->db->fetchrow($result)) {
                 $this->logger->info("User-course relation already exists with ID: " . $userId);
                 $results[$computing_id] = false;
                 continue;
             }
-    
-            $insertUserCourseQuery = 'INSERT INTO user_courses (user_id, course_id, role) VALUES ($1, $2, $3)';
+
+            // ON CONFLICT: tolerate a concurrent enrollment (e.g. a roster sync)
+            // landing between the check above and this insert
+            $insertUserCourseQuery = 'INSERT INTO user_courses (user_id, course_id, role) VALUES ($1, $2, $3) ON CONFLICT (user_id, course_id) DO NOTHING';
             $params = array($userId, $course_id, $role);
     
             try {

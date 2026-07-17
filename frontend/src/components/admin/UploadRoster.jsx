@@ -111,12 +111,13 @@ function UploadRoster(props) {
     }
   };
 
-  const performSyncCanvasLmsRoster = ({ silent } = { silent: false }) => {
+  const performSyncCanvasLmsRoster = ({ silent = false, autosync = false } = {}) => {
     if (!silent) setSyncRosterButtonDisabled(true);
 
     const payload = {
       asciCourseId: props.course_id,
       command: "syncCanvasLmsRoster",
+      ...(autosync ? { autosync: true } : {}),
     };
 
     return postCommand(props.url, payload)
@@ -159,7 +160,7 @@ function UploadRoster(props) {
     if (autoSyncRan.current[props.course_id]) return;
     autoSyncRan.current[props.course_id] = true;
 
-    performSyncCanvasLmsRoster({ silent: true });
+    performSyncCanvasLmsRoster({ silent: true, autosync: true });
   }, [props.canvasSyncSettings, props.canvasLmsCourse, props.canvasTokenStatus, props.course_id]);
 
   function getSyncRosterButton() {

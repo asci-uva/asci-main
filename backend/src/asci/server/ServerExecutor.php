@@ -2742,7 +2742,7 @@ $usedCosSim = True;
       return ["success" => "true", "settings" => $settings];
     }
 
-  public function syncCanvasLmsRosterHandler($asci_course_id) {
+  public function syncCanvasLmsRosterHandler($asci_course_id, $autosync = false) {
     if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course-roster"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to sync the Canvas LMS roster");
 
@@ -2754,13 +2754,33 @@ $usedCosSim = True;
     if (!$access_token)
       return $this->err("The primary instructor for this course has not added a Canvas LMS access token");
 
+    $this->synchronizationStore->acquireRosterSyncLock($asci_course_id);
+
+    if ($autosync) {
+      $sync_settings = $this->synchronizationStore->getCanvasLmsSyncSettings($asci_course_id);
+      if ($sync_settings && !$sync_settings["is_stale"]) {
+        $this->synchronizationStore->releaseRosterSyncLock($asci_course_id);
+        return [
+          "success" => "true",
+          "skipped_sync" => true,
+          "course" => $this->synchronizationStore->getCanvasLmsCourse($asci_course_id),
+          "added" => [],
+          "updated" => [],
+          "removed" => [],
+          "skipped" => [],
+        ];
+      }
+    }
+
     $canvas = new \asci\server\CanvasLmsClient($access_token, $this->logger);
     $canvas_course_id = $canvas_course["canvas_course_id"];
     $query = "enrollment_type[]=student&enrollment_type[]=ta&enrollment_type[]=teacher&include[]=enrollments&per_page=100";
 
     $canvas_lms_users = $canvas->getAll("/api/v1/courses/$canvas_course_id/users", $query);
-    if ($canvas_lms_users === null)
+    if ($canvas_lms_users === null) {
+      $this->synchronizationStore->releaseRosterSyncLock($asci_course_id);
       return $this->err("Failed to fetch Canvas LMS roster");
+    }
 
     $converted = [];
     $skipped = [];
@@ -2774,6 +2794,8 @@ $usedCosSim = True;
     }
 
     $result = $this->synchronizationStore->syncCanvasLmsRoster($asci_course_id, $converted);
+
+    $this->synchronizationStore->releaseRosterSyncLock($asci_course_id);
 
     return [
       "success" => "true",

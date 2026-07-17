@@ -177,22 +177,11 @@ class DBSynchronization
         $encrypted = openssl_encrypt($access_token, 'AES-256-CBC', $key, 0, $iv);
         $iv_base64 = base64_encode($iv);
 
-        $this->db->beginTransaction();
+        $this->db->prepare('upsertCanvasAccessTokenStmt',
+            'INSERT INTO canvas_lms_access_tokens (user_id, access_token, access_token_iv) VALUES ($1, $2, $3)
+             ON CONFLICT (user_id) DO UPDATE SET access_token = EXCLUDED.access_token, access_token_iv = EXCLUDED.access_token_iv');
+        $this->db->execute('upsertCanvasAccessTokenStmt', [$userId, $encrypted, $iv_base64]);
 
-        $this->db->prepare('canvasCheckAccessTokenStmt', 'SELECT * FROM canvas_lms_access_tokens WHERE user_id = $1');
-        $result = $this->db->fetchrow($this->db->execute('canvasCheckAccessTokenStmt', [$userId]));
-
-        if ($result) {
-            $this->db->prepare('updateCanvasAccessTokenStmt',
-                'UPDATE canvas_lms_access_tokens SET access_token = $1, access_token_iv = $2 WHERE user_id = $3');
-            $this->db->execute('updateCanvasAccessTokenStmt', [$encrypted, $iv_base64, $userId]);
-        } else {
-            $this->db->prepare('addCanvasAccessTokenStmt', 
-                'INSERT INTO canvas_lms_access_tokens (user_id, access_token, access_token_iv) VALUES ($1, $2, $3)');
-            $this->db->execute('addCanvasAccessTokenStmt', [$userId, $encrypted, $iv_base64]);
-        }
-
-        $this->db->commit();
         return true;
     }
 
@@ -328,8 +317,16 @@ class DBSynchronization
         return $result;
     }
 
+    public function acquireRosterSyncLock($asci_course_id) {
+        $this->db->query("SELECT pg_advisory_lock(hashtext('canvas_roster_sync'), $1)", [$asci_course_id]);
+    }
+
+    public function releaseRosterSyncLock($asci_course_id) {
+        $this->db->query("SELECT pg_advisory_unlock(hashtext('canvas_roster_sync'), $1)", [$asci_course_id]);
+    }
+
     public function canvasLmsUserToAsciUser($canvasLmsUser) {
-        $computing_id = isset($canvasLmsUser['login_id']) ? trim((string)$canvasLmsUser['login_id']) : '';
+        $computing_id = isset($canvasLmsUser['login_id']) ? strtolower(trim((string)$canvasLmsUser['login_id'])) : '';
         if ($computing_id === '')
             return null;
 
@@ -389,31 +386,38 @@ class DBSynchronization
         foreach ($converted as $person) {
             $convertedSeen[$person['computing_id']] = true;
             $userRow = $this->db->fetchrow($this->db->query(
-                'SELECT id FROM users WHERE computing_id = $1', [$person['computing_id']]));
+                'SELECT id FROM users WHERE LOWER(computing_id) = LOWER($1)', [$person['computing_id']]));
             if ($userRow) {
                 $userId = $userRow['id'];
             } else {
                 $password = password_hash($person['computing_id'], PASSWORD_DEFAULT);
                 $insertRow = $this->db->fetchrow($this->db->query(
-                    'INSERT INTO users (computing_id, fname, lname, pname, password) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+                    'INSERT INTO users (computing_id, fname, lname, pname, password) VALUES (LOWER($1), $2, $3, $4, $5) ON CONFLICT (LOWER(computing_id)) DO NOTHING RETURNING id',
                     [$person['computing_id'], $person['fname'], $person['lname'], $person['pname'], $password]
                 ));
-                $userId = $insertRow['id'];
+                if ($insertRow) {
+                    $userId = $insertRow['id'];
+                } else {
+                    $userRow = $this->db->fetchrow($this->db->query(
+                        'SELECT id FROM users WHERE LOWER(computing_id) = LOWER($1)', [$person['computing_id']]));
+                    $userId = $userRow['id'];
+                }
             }
 
             $enrollment = $this->db->fetchrow($this->db->query(
-                'SELECT role FROM user_courses WHERE user_id = $1 AND course_id = $2', 
+                'SELECT role FROM user_courses WHERE user_id = $1 AND course_id = $2',
                 [$userId, $asci_course_id]
             ));
             if (!$enrollment) {
-                $this->db->query(
-                    'INSERT INTO user_courses (user_id, course_id, role) VALUES ($1, $2, $3)',
+                $insertResult = $this->db->query(
+                    'INSERT INTO user_courses (user_id, course_id, role) VALUES ($1, $2, $3) ON CONFLICT (user_id, course_id) DO NOTHING',
                     [$userId, $asci_course_id, $person['role']]
                 );
-                $added[] = ["computingId" => $person['computing_id'], 'fname' => $person['fname'], 'lname' => $person['lname'], 'role' => $person['role']];
+                if ($this->db->affectedRows($insertResult) === 1)
+                    $added[] = ["computingId" => $person['computing_id'], 'fname' => $person['fname'], 'lname' => $person['lname'], 'role' => $person['role']];
             } else if ($enrollment['role'] !== $person['role'] && $enrollment['role'] !== \asci\util\Roles::PRIMARY_INSTRUCTOR) {
                 $this->db->query(
-                    'UPDATE user_courses SET role = $1 WHERE user_id = $2 AND course_id = $3',
+                    "UPDATE user_courses SET role = $1 WHERE user_id = $2 AND course_id = $3 AND role <> 'primary_instructor'",
                     [$person['role'], $userId, $asci_course_id]
                 );
                 $updated[] = ["computingId" => $person['computing_id'], 'fname' => $person['fname'], 'lname' => $person['lname'], 'role' => $person['role']];
