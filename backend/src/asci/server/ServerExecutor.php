@@ -2595,10 +2595,13 @@ $usedCosSim = True;
         && $this->synchronizationStore->checkUserHasCanvasLmsAccessToken($primary_instructor_id);
 
       $is_token_working = false;
+      $is_token_expired = false;
       if ($has_token) {
         $canvas = $this->canvasLmsClientForCourse($asci_course_id);
         $result = $canvas->get("/api/v1/users/self");
         $is_token_working = $result["ok"];
+        $is_token_expired = !$result["ok"]
+          && ($result["http_code"] === 401 || $this->canvasBodyIndicatesExpiredToken($result["body"]));
       }
 
       return [
@@ -2606,6 +2609,7 @@ $usedCosSim = True;
         "hasPrimaryInstructor" => $has_primary_instructor,
         "hasToken" => $has_token,
         "isTokenWorking" => $is_token_working,
+        "isTokenExpired" => $is_token_expired,
         "isPrimaryInstructor" => $has_primary_instructor && $this->user->id == $primary_instructor_id,
       ];
     }
@@ -2815,12 +2819,26 @@ $usedCosSim = True;
   }
 
   private function isValidStalePeriod($stale_period) {
-      if (!is_string($stale_period))
-        return false;
-      $trimmed = trim($stale_period);
-      if ($trimmed === "")
-        return false;
-      return preg_match('/^(\d+\s+(year|years|month|months|mon|mons|day|days|hour|hours)\s*)+$/', $trimmed) === 1;
+    if (!is_string($stale_period))
+      return false;
+    $trimmed = trim($stale_period);
+    if ($trimmed === "")
+      return false;
+    return preg_match('/^(\d+\s+(year|years|month|months|mon|mons|day|days|hour|hours)\s*)+$/', $trimmed) === 1;
+  }
+
+  private function canvasBodyIndicatesExpiredToken($body) {
+    if (!is_array($body) || !isset($body["errors"]) || !is_array($body["errors"]))
+      return false;
+    foreach ($body["errors"] as $err) {
+      if (!is_array($err))
+        continue;
+      if (isset($err["expired_at"]))
+        return true;
+      if (isset($err["message"]) && stripos($err["message"], "expired access token") !== false)
+        return true;
     }
+    return false;
+  }
 }
 

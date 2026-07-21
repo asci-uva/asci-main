@@ -39,7 +39,7 @@ class CanvasLmsClient {
         if ($http_code !== 200) {
             $error = "HTTP error: " . $http_code;
             $this->fail($error);
-            return ["ok" => false, "http_code" => $http_code, "body" => null, "error" => $error];
+            return ["ok" => false, "http_code" => $http_code, "body" => json_decode($response, true), "error" => $error];
         }
 
         return ["ok" => true, "http_code" => $http_code, "body" => json_decode($response, true), "error" => null];

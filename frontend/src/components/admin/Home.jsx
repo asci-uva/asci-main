@@ -17,6 +17,7 @@ import { useCanvasSyncSettings } from "../utils/useCanvasSyncSettings";
 import { useCanvasTokenStatus } from "../utils/useCanvasTokenStatus";
 import { isStaffRole } from "../utils/roles";
 import CanvasLinkWarning from "./CanvasLinkWarning";
+import CanvasTokenExpiredWarning from "./CanvasTokenExpiredWarning";
 
 function Home(props) {
   let docRoot = props.documentRoot;
@@ -107,6 +108,10 @@ function Home(props) {
           <div className={contentCol}>
 
             <h3 className="mb-3">Course: {courseList[course].mnemonic} {courseList[course].number} -  {courseList[course].name} ({courseList[course].semester})</h3>
+
+            {canvasTokenStatus.isTokenExpired && (
+              <CanvasTokenExpiredWarning canvasLmsCourse={canvasLmsCourse} />
+            )}
 
             {canvasLmsCourse !== null && !canvasTokenStatus.hasToken && (
               <CanvasLinkWarning

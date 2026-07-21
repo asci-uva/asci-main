@@ -5,6 +5,7 @@ export const DEFAULT_TOKEN_STATUS = {
     hasPrimaryInstructor: false,
     hasToken: false,
     isTokenWorking: false,
+    isTokenExpired: false,
     isPrimaryInstructor: false,
 };
 
@@ -23,6 +24,7 @@ export function useCanvasTokenStatus(url, courseId, enabled) {
                         hasPrimaryInstructor: Boolean(data.hasPrimaryInstructor),
                         hasToken: Boolean(data.hasToken),
                         isTokenWorking: Boolean(data.isTokenWorking),
+                        isTokenExpired: Boolean(data.isTokenExpired),
                         isPrimaryInstructor: Boolean(data.isPrimaryInstructor),
                     };
                     setStatus(next);
