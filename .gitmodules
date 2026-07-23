@@ -1,0 +1,3 @@
+[submodule "gradescope/api"]
+	path = gradescope/api
+	url = git@github.com:Michael-Sy/gradescope-api.git
