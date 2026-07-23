@@ -167,6 +167,11 @@ function UploadRoster(props) {
     if (!isInstructorRole(course?.role))
       return null;
 
+    if (!props.canvasTokenStatusLoaded)
+      return (
+        <button type="button" className="btn btn-primary" disabled>Loading…</button>
+      );
+
     if (!props.canvasTokenStatus.hasToken)
       return (
         <>

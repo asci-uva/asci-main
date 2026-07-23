@@ -317,7 +317,11 @@ function CanvasLmsSync(props) {
             <div className="card-body">
                 <div className="mb-3">
                     <h5>Access token</h5>
-                    {!isPrimaryInstructor ? (
+                    {!props.canvasTokenStatusLoaded ? (
+                        <p className="text-muted mb-0">Loading…</p>
+                    ) : props.canvasTokenStatusError ? (
+                        <p className="text-muted mb-0">Could not load Canvas access token status.</p>
+                    ) : !isPrimaryInstructor ? (
                         <p className="text-muted">{tokenStatusMessage(props.canvasTokenStatus)}</p>
                     ) : props.canvasTokenStatus.hasToken ? (
                         <>
@@ -354,18 +358,24 @@ function CanvasLmsSync(props) {
                                 <button type="button" className="btn btn-primary" onClick={removeCanvasLmsCourse}>Desynchronize from course</button>
                             )}
                         </div>
-                        {!isPrimaryInstructor ? (
+                        {!props.canvasSyncSettingsLoaded ? (
                             <div className="mb-3">
                                 <h5>Sync Settings</h5>
-                                {props.canvasSyncSettings ? (
-                                    <p className="text-muted mb-0">
-                                        Autosync: {props.canvasSyncSettings.autosync_enabled ? "enabled" : "disabled"}
-                                        <br />
-                                        Stale period: {formatStaleParts(intervalToParts(props.canvasSyncSettings.stale_period))}
-                                    </p>
-                                ) : (
-                                    <p className="text-muted mb-0">Loading…</p>
-                                )}
+                                <p className="text-muted mb-0">Loading…</p>
+                            </div>
+                        ) : (props.canvasSyncSettingsError || !props.canvasSyncSettings) ? (
+                            <div className="mb-3">
+                                <h5>Sync Settings</h5>
+                                <p className="text-muted mb-0">Could not load Canvas sync settings.</p>
+                            </div>
+                        ) : !isPrimaryInstructor ? (
+                            <div className="mb-3">
+                                <h5>Sync Settings</h5>
+                                <p className="text-muted mb-0">
+                                    Autosync: {props.canvasSyncSettings.autosync_enabled ? "enabled" : "disabled"}
+                                    <br />
+                                    Stale period: {formatStaleParts(intervalToParts(props.canvasSyncSettings.stale_period))}
+                                </p>
                             </div>
                         ) : (
                             <div className="mb-3">
@@ -420,7 +430,7 @@ function CanvasLmsSync(props) {
                     </div>
                 ) : (
                     <>
-                        {props.canvasTokenStatus.hasToken && (
+                        {props.canvasTokenStatusLoaded && props.canvasTokenStatus.hasToken && (
                             <div className="mb-3">
                                 <h5>Select Canvas LMS Course</h5>
                                 {!props.canvasTokenStatus.isTokenWorking ? (

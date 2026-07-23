@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import UploadRoster from "./UploadRoster";
@@ -28,18 +28,23 @@ function Home(props) {
   const [contentCol, setContentCol] = useState("page-container content col-md-9 my-auto");
   const [canvasLmsCourse, setCanvasLmsCourse] = useState(null);
   const [canvasLmsCourseLoaded, setCanvasLmsCourseLoaded] = useState(false);
+  const canvasLmsCourseRequestIdRef = useRef(0);
 
   const courseRole = getCourse() && getCourse().role;
   const isStaff = isStaffRole(courseRole);
 
   const {
     status: canvasTokenStatus,
+    loaded: canvasTokenStatusLoaded,
+    error: canvasTokenStatusError,
     refresh: refreshCanvasTokenStatus,
   } = useCanvasTokenStatus(props.url, courseList[course].course_id, isStaff);
 
   const {
     settings: canvasSyncSettings,
     setSettings: setCanvasSyncSettings,
+    loaded: canvasSyncSettingsLoaded,
+    error: canvasSyncSettingsError,
     refresh: refreshCanvasSyncSettings,
     save: saveCanvasSyncSettings,
   } = useCanvasSyncSettings(
@@ -66,7 +71,11 @@ function Home(props) {
   };
 
   useEffect(() => {
+    setCanvasLmsCourse(null);
     setCanvasLmsCourseLoaded(false);
+
+    const requestId = ++canvasLmsCourseRequestIdRef.current;
+    const isCurrent = () => requestId === canvasLmsCourseRequestIdRef.current;
 
     const payload = {
       asciCourseId: courseList[course].course_id,
@@ -75,6 +84,7 @@ function Home(props) {
 
     postCommand(props.url, payload)
       .then((data) => {
+        if (!isCurrent()) return;
         if (data.success === "true") {
           setCanvasLmsCourse(data.course);
         } else {
@@ -84,6 +94,7 @@ function Home(props) {
       })
       .catch((error) => {
         console.log(error);
+        if (!isCurrent()) return;
         setCanvasLmsCourseLoaded(true);
       });
   }, [courseList, course]);
@@ -109,11 +120,11 @@ function Home(props) {
 
             <h3 className="mb-3">Course: {courseList[course].mnemonic} {courseList[course].number} -  {courseList[course].name} ({courseList[course].semester})</h3>
 
-            {canvasTokenStatus.isTokenExpired && (
+            {canvasTokenStatusLoaded && canvasTokenStatus.isTokenExpired && (
               <CanvasTokenExpiredWarning canvasLmsCourse={canvasLmsCourse} />
             )}
 
-            {canvasLmsCourse !== null && !canvasTokenStatus.hasToken && (
+            {canvasTokenStatusLoaded && canvasLmsCourse !== null && !canvasTokenStatus.hasToken && (
               <CanvasLinkWarning
                 canvasLmsCourse={canvasLmsCourse}
                 message=", but the primary instructor has not added a Canvas access token. Synced features are disabled until they add one or the course is unlinked."
@@ -163,6 +174,7 @@ function Home(props) {
                     <UploadRoster
                       course_id={courseList[course].course_id}
                       canvasTokenStatus={canvasTokenStatus}
+                      canvasTokenStatusLoaded={canvasTokenStatusLoaded}
                       canvasLmsCourse={canvasLmsCourse}
                       canvasLmsCourseLoaded={canvasLmsCourseLoaded}
                       canvasSyncSettings={canvasSyncSettings}
@@ -174,6 +186,7 @@ function Home(props) {
                     <AddStudent
                       course_id={courseList[course].course_id}
                       canvasTokenStatus={canvasTokenStatus}
+                      canvasTokenStatusLoaded={canvasTokenStatusLoaded}
                       canvasLmsCourse={canvasLmsCourse}
                       canvasLmsCourseLoaded={canvasLmsCourseLoaded}
                       {...props} />
@@ -216,11 +229,15 @@ function Home(props) {
                       <CanvasLmsSync
                         course_id={courseList[course].course_id}
                         canvasTokenStatus={canvasTokenStatus}
+                        canvasTokenStatusLoaded={canvasTokenStatusLoaded}
+                        canvasTokenStatusError={canvasTokenStatusError}
                         refreshCanvasTokenStatus={refreshCanvasTokenStatus}
                         canvasLmsCourse={canvasLmsCourse}
                         setCanvasLmsCourse={setCanvasLmsCourse}
                         canvasLmsCourseLoaded={canvasLmsCourseLoaded}
                         canvasSyncSettings={canvasSyncSettings}
+                        canvasSyncSettingsLoaded={canvasSyncSettingsLoaded}
+                        canvasSyncSettingsError={canvasSyncSettingsError}
                         saveCanvasSyncSettings={saveCanvasSyncSettings}
                         {...props}
                       />
