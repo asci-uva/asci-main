@@ -25,6 +25,11 @@ CREATE TYPE group_mapping_status AS ENUM (
   'inactive'
 );
 
+CREATE TYPE external_tool AS ENUM (
+  'canvas',
+  'gradescope'
+);
+
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   computing_id VARCHAR(12),
@@ -251,6 +256,14 @@ CREATE TABLE canvas_lms_courses (
   stale_period INTERVAL NOT NULL DEFAULT '7 days',
   autosync_enabled BOOLEAN NOT NULL DEFAULT false,
   FOREIGN KEY (asci_course_id) REFERENCES courses(id)
+);
+
+CREATE TABLE course_external_tools (
+  course_id  INT  NOT NULL REFERENCES courses(id),
+  tool       external_tool NOT NULL,
+  enabled    BOOL NOT NULL DEFAULT false,
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  PRIMARY KEY (course_id, tool)
 );
 
 ALTER TABLE queue ADD FOREIGN KEY (user_id) REFERENCES users (id);

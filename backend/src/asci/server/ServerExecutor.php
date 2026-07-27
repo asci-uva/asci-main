@@ -118,6 +118,63 @@ class ServerExecutor{
     }
   }
 
+  public function getCourseExternalToolsHandler($course_id){
+    $dao = new \asci\server\database\DBCourseExternalTools($this->db);
+    return [
+      "success" => "true",
+      "externalTools" => $dao->getExternalTools($course_id)
+    ];
+  }
+
+  public function setCourseExternalToolHandler($course_id, $tool, $enabled){
+    if (!in_array($tool, \asci\server\database\DBCourseExternalTools::KNOWN_TOOLS, true))
+      throw new \asci\exceptions\ASCIException("Unknown external tool: {$tool}");
+
+    $this->requirePrimaryInstructor($course_id);
+
+    $dao = new \asci\server\database\DBCourseExternalTools($this->db);
+    $dao->setEnabled($course_id, $tool, $enabled);
+
+    return [
+      "success" => "true",
+      "externalTools" => $dao->getExternalTools($course_id)
+    ];
+  }
+
+  public function requirePrimaryInstructor($course_id){
+    $primary_instructor_id = $this->synchronizationStore->getPrimaryInstructorUserId($course_id);
+    if ($this->user == null || $primary_instructor_id === null || $this->user->id != $primary_instructor_id) {
+      throw new \asci\exceptions\ASCIPermissionException("Only the primary instructor can change external tools.");
+    }
+  }
+
+  const GATED_COMMAND_TOOL = [
+    "syncCanvasLmsRoster"          => "canvas",
+    "linkCanvasLmsCourse"          => "canvas",
+    "validateCanvasLmsAccessToken" => "canvas",
+    "removeCanvasLmsAccessToken"   => "canvas",
+    "setCanvasLmsSyncSettings"     => "canvas",
+    "downloadGradescopeData"       => "gradescope",
+    "updateGradescopeDataByCourse" => "gradescope",
+  ];
+
+  public function denyDisabledExternalToolCommand($user, $course_id, $command){
+    if ($course_id == null || $command == null) {
+      return;
+    }
+
+    if (!isset(self::GATED_COMMAND_TOOL[$command])) {
+      return;
+    }
+    $tool = self::GATED_COMMAND_TOOL[$command];
+
+    $dao = new \asci\server\database\DBCourseExternalTools($this->db);
+    if (!$dao->isEnabled($course_id, $tool)) {
+      $label = ucfirst($tool);
+      throw new \asci\exceptions\ASCIPermissionException("The {$label} external tool is disabled for this course.");
+    }
+  }
+
 
 
   /*
@@ -2569,7 +2626,7 @@ $usedCosSim = True;
     }
 
     public function validateCanvasLmsAccessTokenHandler($asci_course_id, $canvas_lms_access_token) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-external-tool"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to validate Canvas LMS access token");
       
       if ($canvas_lms_access_token === "")
@@ -2615,7 +2672,7 @@ $usedCosSim = True;
     }
 
     public function removeCanvasLmsAccessTokenHandler($asci_course_id) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-external-tool"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to remove Canvas LMS access token");
 
       $result = $this->synchronizationStore->removeCanvasLmsAccessToken($this->user->id);
@@ -2626,7 +2683,7 @@ $usedCosSim = True;
     }
 
     public function getCanvasLmsEnrollmentTermsHandler($asci_course_id) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-external-tool"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS enrollment terms");
       
       $canvas = $this->canvasLmsClientForCourse($asci_course_id);
@@ -2649,7 +2706,7 @@ $usedCosSim = True;
     }
 
     public function getCanvasLmsCoursesHandler($asci_course_id) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-external-tool"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS courses");
 
       $canvas = $this->canvasLmsClientForCourse($asci_course_id);
@@ -2691,11 +2748,11 @@ $usedCosSim = True;
       return ["success" => "true", "courses" => $results];
     }
 
-    public function syncCanvasLmsCourseHandler($asci_course_id, $canvas_lms_course) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
-        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to sync with a Canvas LMS course");
+    public function linkCanvasLmsCourseHandler($asci_course_id, $canvas_lms_course) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-external-tool"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to link with a Canvas LMS course");
 
-      $result = $this->synchronizationStore->syncCanvasLmsCourse($asci_course_id, $canvas_lms_course);
+      $result = $this->synchronizationStore->linkCanvasLmsCourse($asci_course_id, $canvas_lms_course);
 
       return ["success" => "true", "course" => $result];
     }
@@ -2708,11 +2765,11 @@ $usedCosSim = True;
       return ["success" => "false"];
     }
     
-    public function desyncCanvasLmsCourseHandler($asci_course_id) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
-        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to desync from a Canvas LMS course");
+    public function unlinkCanvasLmsCourseHandler($asci_course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-external-tool"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to unlink from a Canvas LMS course");
 
-      $result = $this->synchronizationStore->desyncCanvasLmsCourse($asci_course_id);
+      $result = $this->synchronizationStore->unlinkCanvasLmsCourse($asci_course_id);
 
       if ($result)
         return ["success" => "true", "course" => $result];
@@ -2731,7 +2788,7 @@ $usedCosSim = True;
     }
 
     public function setCanvasLmsSyncSettingsHandler($asci_course_id, $autosync_enabled, $stale_period) {
-      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-external-tool"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to change Canvas LMS sync settings");
 
       if (!$this->isValidStalePeriod($stale_period))

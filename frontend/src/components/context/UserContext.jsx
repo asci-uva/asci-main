@@ -2,11 +2,11 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { isInstructorRole, formatRole } from "../utils/roles";
 
 const UserContext = createContext({
-    userid: null,
-    fname: null,
-    lname: null,
-    login: () => {},
-    logout: () => {}
+  userid: null,
+  fname: null,
+  lname: null,
+  login: () => { },
+  logout: () => { }
 });
 
 // Use REACT_APP_BACKEND_URL if set (empty = same-origin on Heroku).
@@ -27,6 +27,7 @@ export const UserProvider = ({ children }) => {
   const [course, setCourse] = useState(null);
   const [courseSettings, setCourseSettings] = useState(null);
   const [courseRoster, setCourseRoster] = useState([]);
+  const [courseExternalTools, setCourseExternalTools] = useState(null);
   const login = (userInfo, callback) => {
     let json = {};
     json.command = "login";
@@ -89,9 +90,9 @@ export const UserProvider = ({ children }) => {
       .then((data) => {
         console.log(data);
         if (data.success === "true") {
-          
+
           setCourseList(data.courses);
-          
+
           callback(true);
         } else {
           // fail to login
@@ -106,23 +107,23 @@ export const UserProvider = ({ children }) => {
   };
 
   const courseListString = () => {
-          let cList = {};
-            for(var key in courseList){
-              //Construct the course title from it's pieces
-              let courseName = "" 
-                                + courseList[key]["mnemonic"]
-                                + courseList[key]["number"]
-                                + " "
-                                + courseList[key]["name"]
-                                + " - "
-                                + courseList[key]["semester"]
-                                + " ("
-                                + formatRole(courseList[key]["role"])
-                                + ")";
+    let cList = {};
+    for (var key in courseList) {
+      //Construct the course title from it's pieces
+      let courseName = ""
+        + courseList[key]["mnemonic"]
+        + courseList[key]["number"]
+        + " "
+        + courseList[key]["name"]
+        + " - "
+        + courseList[key]["semester"]
+        + " ("
+        + formatRole(courseList[key]["role"])
+        + ")";
 
-              cList[key] = courseName;
-            }
-        return cList;
+      cList[key] = courseName;
+    }
+    return cList;
   }
 
   const updateDiscordUsername = (newDiscordUsername, callback) => {
@@ -157,8 +158,8 @@ export const UserProvider = ({ children }) => {
 
   const isInstructor = () => {
 
-    for(var key in courseList){
-      if(isInstructorRole(courseList[key]["role"])) return true;
+    for (var key in courseList) {
+      if (isInstructorRole(courseList[key]["role"])) return true;
     }
 
     return false;
@@ -190,11 +191,11 @@ export const UserProvider = ({ children }) => {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("data is: " , data);
+        console.log("data is: ", data);
         if (data.success === "true") {
-          
+
           setCourseRoster(data.roster);
-          
+
         } else {
           // fail to login
           console.log("refreshing course roster failed");
@@ -202,12 +203,80 @@ export const UserProvider = ({ children }) => {
       })
       .catch((error) => {
         console.error("Error during refresh course roster:", error);
-        
+
       });
   };
 
   const getCourseRoster = () => {
     return courseRoster;
+  };
+
+  const getCourseExternalTools = () => {
+    return courseExternalTools;
+  };
+
+  useEffect(() => {
+    if (course == null || courseList == null || courseList[course] == null) {
+      setCourseExternalTools(null);
+      return;
+    }
+
+    const courseId = courseList[course].course_id;
+    fetch(url, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        command: "getCourseExternalTools",
+        user: userid,
+        course_id: courseId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success === "true") {
+          setCourseExternalTools(data.externalTools);
+        } else {
+          console.log("Failed to load course external tools");
+        }
+      })
+      .catch((error) => {
+        console.error("Error loading course external tools:", error);
+      });
+  }, [course, courseList, userid]);
+
+  const setCourseExternalTool = (tool, enabled, callback) => {
+    if (course == null || courseList == null || courseList[course] == null) {
+      if (callback) callback(false, "No course selected");
+      return;
+    }
+
+    const courseId = courseList[course].course_id;
+    fetch(url, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        command: "setCourseExternalTool",
+        user: userid,
+        course_id: courseId,
+        tool: tool,
+        enabled: enabled,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success === "true") {
+          setCourseExternalTools(data.externalTools);
+          if (callback) callback(true);
+        } else {
+          if (callback) callback(false, data.error);
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating course external tool:", error);
+        if (callback) callback(false);
+      });
   };
 
   const logout = () => {
@@ -245,37 +314,41 @@ export const UserProvider = ({ children }) => {
     setDiscordUsername(null);
     setCourseList(null);
     setCourse(null);
+    setCourseExternalTools(null);
     // Clear LocalStorage
     localStorage.clear();
     console.log("logout successfully, go back to login page");
   };
 
   const value = {
-      user: {
-          userid,
-          fname,
-          lname,
-          pname,
-          discord_username: discordUsername,
-      },
-      updateDiscordUsername,
-      courseList,
-      courseListString,
-      login,
-      logout,
-      course,
-      getCourse,
-      setCourse,
-      setCourseList,
-      refreshCourseList,
-      courseSettings,
-      getCourseSettings,
-      setCourseSettings,
-      setCourseRoster,
-      courseRoster,
-      getCourseRoster,
-      refreshCourseRoster,
-      isInstructor,
+    user: {
+      userid,
+      fname,
+      lname,
+      pname,
+      discord_username: discordUsername,
+    },
+    updateDiscordUsername,
+    courseList,
+    courseListString,
+    login,
+    logout,
+    course,
+    getCourse,
+    setCourse,
+    setCourseList,
+    refreshCourseList,
+    courseSettings,
+    getCourseSettings,
+    setCourseSettings,
+    setCourseRoster,
+    courseRoster,
+    getCourseRoster,
+    refreshCourseRoster,
+    courseExternalTools,
+    getCourseExternalTools,
+    setCourseExternalTool,
+    isInstructor,
   };
 
   return (

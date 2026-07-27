@@ -180,6 +180,9 @@ class Server
                         $requested_course_id = $requested_course_id["course_id"] ?? null;
                     }
                     $executor->denyArchivedCourseForStudents($user, $requested_course_id, $this->input["command"]);
+
+                    $external_tool_course_id = $requested_course_id ?? $this->input["asciCourseId"] ?? null;
+                    $executor->denyDisabledExternalToolCommand($user, $external_tool_course_id, $this->input["command"]);
         }
 
         /* This section acquires a lock for the given course IF a courseId was provided */
@@ -471,6 +474,20 @@ class Server
                 $courseId = $this->input["courseId"];
 
                 $this->setResponse($executor->getCourseStats($courseId));
+                break;
+
+            case "getCourseExternalTools":
+                $courseId = $this->input["course_id"] ?? $this->input["courseId"];
+
+                $this->setResponse($executor->getCourseExternalToolsHandler($courseId));
+                break;
+
+            case "setCourseExternalTool":
+                $courseId = $this->input["course_id"] ?? $this->input["courseId"];
+                $tool = $this->input["tool"];
+                $enabled = $this->input["enabled"];
+
+                $this->setResponse($executor->setCourseExternalToolHandler($courseId, $tool, $enabled));
                 break;
 
             case "cancelGroup":
@@ -773,10 +790,10 @@ class Server
                 $this->setResponse($executor->getCanvasLmsCoursesHandler($asciCourseId));
                 break;
 
-            case "syncCanvasLmsCourse":
+            case "linkCanvasLmsCourse":
                 $asciCourseId = $this->input["asciCourseId"];
                 $canvasLmsCourse = $this->input["canvasLmsCourse"];
-                $this->setResponse($executor->syncCanvasLmsCourseHandler($asciCourseId, $canvasLmsCourse));
+                $this->setResponse($executor->linkCanvasLmsCourseHandler($asciCourseId, $canvasLmsCourse));
                 break;
             
             case "getCanvasLmsCourse":
@@ -784,9 +801,9 @@ class Server
                 $this->setResponse($executor->getCanvasLmsCourseHandler($asciCourseId));
                 break;
             
-            case "desyncCanvasLmsCourse":
+            case "unlinkCanvasLmsCourse":
                 $asciCourseId = $this->input["asciCourseId"];
-                $this->setResponse($executor->desyncCanvasLmsCourseHandler($asciCourseId));
+                $this->setResponse($executor->linkCanvasLmsCourseHandler($asciCourseId));
                 break;
             
             case "syncCanvasLmsRoster":

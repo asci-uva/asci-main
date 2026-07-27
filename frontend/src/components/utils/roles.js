@@ -14,6 +14,10 @@ export function isInstructorRole(role) {
   return role === INSTRUCTOR || role === PRIMARY_INSTRUCTOR;
 }
 
+export function isPrimaryInstructor(role) {
+  return role === PRIMARY_INSTRUCTOR;
+}
+
 export function isStaffRole(role) {
   return role === TA || isInstructorRole(role);
 }

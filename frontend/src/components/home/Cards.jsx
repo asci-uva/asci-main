@@ -2,9 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { isInstructorRole, isStaffRole } from "../utils/roles";
+import { EXTERNAL_TOOLS_ROUTE } from "../utils/externalTools";
 
 function Cards(props) {
-  const {getCourse, getCourseSettings} = useUser();
+  const { getCourse, getCourseSettings } = useUser();
   let course = getCourse();
   let settings = getCourseSettings();
 
@@ -22,20 +23,20 @@ function Cards(props) {
         </div>
       </div>
 
-      { settings!=null && settings.llm_enabled=="t" ? (
-      <div className="col-lg-4 col-md-6 mb-4">
-        <div className="card p-3">
-          <div className="card-img-top text-center">
-            <i className="bi-chat-right-text home-icon"></i>
-          </div>
-          <div className="card-body">
-            <p className="card-text text-center"><Link to="chat" className="btn btn-primary">Bot Chat</Link></p>
+      {settings != null && settings.llm_enabled == "t" ? (
+        <div className="col-lg-4 col-md-6 mb-4">
+          <div className="card p-3">
+            <div className="card-img-top text-center">
+              <i className="bi-chat-right-text home-icon"></i>
+            </div>
+            <div className="card-body">
+              <p className="card-text text-center"><Link to="chat" className="btn btn-primary">Bot Chat</Link></p>
+            </div>
           </div>
         </div>
-      </div>
-      ) : null }
+      ) : null}
 
-      { isInstructorRole(course.role) ? (
+      {isInstructorRole(course.role) ? (
         <div className="col-lg-4 col-md-6 mb-4">
           <div className="card p-3">
             <div className="card-img-top text-center">
@@ -46,8 +47,8 @@ function Cards(props) {
             </div>
           </div>
         </div>
-      ) : null }
-      { isInstructorRole(course.role) ? (
+      ) : null}
+      {isInstructorRole(course.role) ? (
         <div className="col-lg-4 col-md-6 mb-4">
           <div className="card p-3">
             <div className="card-img-top text-center">
@@ -58,43 +59,56 @@ function Cards(props) {
             </div>
           </div>
         </div>
-      ) : null }
-      { settings!=null && settings.show_quests=="t" && course.role === "student" ? (
-      <div className="col-lg-4 col-md-6 mb-4">
-        <div className="card p-3">
-          <div className="card-img-top text-center">
-            <i className="bi-trophy home-icon"></i>
-          </div>
-          <div className="card-body">
-            <p className="card-text text-center"><Link to="points" className="btn btn-primary">Earn Points</Link></p>
-          </div>
-        </div>
-      </div>
-      ) : null }
-      { isInstructorRole(course.role) ? (
-      <div className="col-lg-4 col-md-6 mb-4">
-        <div className="card p-3">
-          <div className="card-img-top text-center">
-            <i className="bi-trophy home-icon"></i>
-          </div>
-          <div className="card-body">
-            <p className="card-text text-center"><Link to="admin/SelectQuests" className="btn btn-primary">Quests</Link></p>
+      ) : null}
+      {settings != null && settings.show_quests == "t" && course.role === "student" ? (
+        <div className="col-lg-4 col-md-6 mb-4">
+          <div className="card p-3">
+            <div className="card-img-top text-center">
+              <i className="bi-trophy home-icon"></i>
+            </div>
+            <div className="card-body">
+              <p className="card-text text-center"><Link to="points" className="btn btn-primary">Earn Points</Link></p>
+            </div>
           </div>
         </div>
-      </div>
-      ) : null }
-      { isStaffRole(course.role) ? (
-      <div className="col-lg-4 col-md-6 mb-4">
-        <div className="card p-3">
-          <div className="card-img-top text-center">
-            <i className="bi-clipboard-data home-icon"></i>
-          </div>
-          <div className="card-body">
-            <p className="card-text text-center"><Link to="admin/PointsHome" className="btn btn-primary">Student Points</Link></p>
+      ) : null}
+      {isInstructorRole(course.role) ? (
+        <div className="col-lg-4 col-md-6 mb-4">
+          <div className="card p-3">
+            <div className="card-img-top text-center">
+              <i className="bi-trophy home-icon"></i>
+            </div>
+            <div className="card-body">
+              <p className="card-text text-center"><Link to="admin/SelectQuests" className="btn btn-primary">Quests</Link></p>
+            </div>
           </div>
         </div>
-      </div>
-      ) : null }
+      ) : null}
+      {isStaffRole(course.role) ? (
+        <div className="col-lg-4 col-md-6 mb-4">
+          <div className="card p-3">
+            <div className="card-img-top text-center">
+              <i className="bi-clipboard-data home-icon"></i>
+            </div>
+            <div className="card-body">
+              <p className="card-text text-center"><Link to="admin/PointsHome" className="btn btn-primary">Student Points</Link></p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {isStaffRole(course.role) ? (
+        <div className="col-lg-4 col-md-6 mb-4">
+          <div className="card p-3">
+            <div className="card-img-top text-center">
+              <i className="bi-puzzle home-icon"></i>
+            </div>
+            <div className="card-body">
+              <p className="card-text text-center"><Link to={EXTERNAL_TOOLS_ROUTE} className="btn btn-primary">External Tools</Link></p>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

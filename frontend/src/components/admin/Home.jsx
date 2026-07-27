@@ -3,8 +3,6 @@ import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import UploadRoster from "./UploadRoster";
 import AddStudent from "./AddStudent";
-import CanvasLmsSync from "./CanvasLmsSync";
-import GradescopeSync from "./GradescopeSync";
 import EditCourseInfo from "./EditCourseInfo";
 import EditCourseSettings from "./EditCourseSettings";
 import CreateNewCourse from "./CreateNewCourse";
@@ -21,7 +19,7 @@ import CanvasTokenExpiredWarning from "./CanvasTokenExpiredWarning";
 
 function Home(props) {
   let docRoot = props.documentRoot;
-  const { user, courseList, course, getCourse } = useUser();
+  const { user, courseList, course, getCourse, getCourseExternalTools } = useUser();
   const [refresh, setRefresh] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible");
   const [sidebarCol, setSidebarCol] = useState("col-md-3");
@@ -32,21 +30,17 @@ function Home(props) {
 
   const courseRole = getCourse() && getCourse().role;
   const isStaff = isStaffRole(courseRole);
+  const canvasEnabled = getCourseExternalTools()?.canvas?.enabled ?? false;
 
   const {
     status: canvasTokenStatus,
     loaded: canvasTokenStatusLoaded,
-    error: canvasTokenStatusError,
-    refresh: refreshCanvasTokenStatus,
   } = useCanvasTokenStatus(props.url, courseList[course].course_id, isStaff);
 
   const {
     settings: canvasSyncSettings,
     setSettings: setCanvasSyncSettings,
-    loaded: canvasSyncSettingsLoaded,
-    error: canvasSyncSettingsError,
     refresh: refreshCanvasSyncSettings,
-    save: saveCanvasSyncSettings,
   } = useCanvasSyncSettings(
     props.url,
     courseList[course].course_id,
@@ -120,11 +114,11 @@ function Home(props) {
 
             <h3 className="mb-3">Course: {courseList[course].mnemonic} {courseList[course].number} -  {courseList[course].name} ({courseList[course].semester})</h3>
 
-            {canvasTokenStatusLoaded && canvasTokenStatus.isTokenExpired && (
+            {canvasEnabled && canvasTokenStatusLoaded && canvasTokenStatus.isTokenExpired && (
               <CanvasTokenExpiredWarning canvasLmsCourse={canvasLmsCourse} />
             )}
 
-            {canvasTokenStatusLoaded && canvasLmsCourse !== null && !canvasTokenStatus.hasToken && (
+            {canvasEnabled && canvasTokenStatusLoaded && canvasLmsCourse !== null && !canvasTokenStatus.hasToken && (
               <CanvasLinkWarning
                 canvasLmsCourse={canvasLmsCourse}
                 message=", but the primary instructor has not added a Canvas access token. Synced features are disabled until they add one or the course is unlinked."
@@ -152,9 +146,6 @@ function Home(props) {
                   <li className="nav-item" role="presentation">
                     <button className="nav-link" id="pills-quests-tab" data-bs-toggle="pill" data-bs-target="#pills-quests" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Quests</button>
                   </li>
-                  <li className="nav-item" role="presentation">
-                    <button className="nav-link" id="pills-external-tools-tab" data-bs-toggle="pill" data-bs-target="#pills-external-tools" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">External Tools/Integrations</button>
-                  </li>
                 </ul>
               </div>
 
@@ -175,7 +166,7 @@ function Home(props) {
                       course_id={courseList[course].course_id}
                       canvasTokenStatus={canvasTokenStatus}
                       canvasTokenStatusLoaded={canvasTokenStatusLoaded}
-                      canvasLmsCourse={canvasLmsCourse}
+                      canvasLmsCourse={canvasEnabled ? canvasLmsCourse : null}
                       canvasLmsCourseLoaded={canvasLmsCourseLoaded}
                       canvasSyncSettings={canvasSyncSettings}
                       setCanvasSyncSettings={setCanvasSyncSettings}
@@ -187,7 +178,7 @@ function Home(props) {
                       course_id={courseList[course].course_id}
                       canvasTokenStatus={canvasTokenStatus}
                       canvasTokenStatusLoaded={canvasTokenStatusLoaded}
-                      canvasLmsCourse={canvasLmsCourse}
+                      canvasLmsCourse={canvasEnabled ? canvasLmsCourse : null}
                       canvasLmsCourseLoaded={canvasLmsCourseLoaded}
                       {...props} />
                   </div>
@@ -219,31 +210,6 @@ function Home(props) {
                   <div className="row">
                     <div className="col-md-12 my-auto">
                       <ViewQuests course_id={courseList[course].course_id} {...props} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="tab-pane fade" id="pills-external-tools" role="tabpanel" aria-labelledby="pills-contact-tab">
-                  <div className="row">
-                    <div className="col-md-12 my-auto">
-                      <CanvasLmsSync
-                        course_id={courseList[course].course_id}
-                        canvasTokenStatus={canvasTokenStatus}
-                        canvasTokenStatusLoaded={canvasTokenStatusLoaded}
-                        canvasTokenStatusError={canvasTokenStatusError}
-                        refreshCanvasTokenStatus={refreshCanvasTokenStatus}
-                        canvasLmsCourse={canvasLmsCourse}
-                        setCanvasLmsCourse={setCanvasLmsCourse}
-                        canvasLmsCourseLoaded={canvasLmsCourseLoaded}
-                        canvasSyncSettings={canvasSyncSettings}
-                        canvasSyncSettingsLoaded={canvasSyncSettingsLoaded}
-                        canvasSyncSettingsError={canvasSyncSettingsError}
-                        saveCanvasSyncSettings={saveCanvasSyncSettings}
-                        {...props}
-                      />
-                    </div>
-                    <div className="col-md-12 my-auto">
-                      <GradescopeSync course_id={courseList[course].course_id} {...props} />
                     </div>
                   </div>
                 </div>

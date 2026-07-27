@@ -151,7 +151,7 @@ class DBUserCourse
           if (\asci\util\Roles::isInstructorRole($role))
             return true;
           break;
-        case "manage-canvas-lms-integration":
+        case "manage-canvas-lms-external-tool":
           if ($role == \asci\util\Roles::PRIMARY_INSTRUCTOR)
             return true;
           break;

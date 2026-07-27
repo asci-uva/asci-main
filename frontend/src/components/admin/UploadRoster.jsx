@@ -258,7 +258,7 @@ function UploadRoster(props) {
     <div className="card mb-4">
       {props.canvasLmsCourse !== null ? (
         <>
-          <h4 className="card-header">Synchronize Roster from Canvas LMS</h4>
+          <h4 className="card-header">Synchronize Roster</h4>
           <div className="card-body">
             {props.canvasTokenStatus.hasToken && !props.canvasTokenStatus.isTokenWorking && (
               <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot connect to Canvas LMS.</p>
