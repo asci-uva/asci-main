@@ -1,0 +1,24 @@
+# Build context is ./gradescope/, so these paths are relative to it.
+# gradescope-api/ is the submodule; keep everything that must not enter the
+# image out of the context.
+
+# A host-side venv would shadow the one built inside the image.
+gradescope-api/.venv/
+
+# Not a directory for a submodule - .git is a gitlink file, so no trailing slash.
+gradescope-api/.git
+gradescope-api/.github/
+gradescope-api/.vscode/
+gradescope-api/.pre-commit-config.yaml
+
+# Dev-only trees. pytest is a runtime dependency of gradescopeapi, so excluding
+# the test files does not affect the installed dependency set.
+gradescope-api/tests/
+gradescope-api/docs/
+gradescope-api/htmlcov/
+
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/.ruff_cache/
+**/.mypy_cache/

@@ -15,6 +15,9 @@ docker pull httpd
 //Pull the project from our Github (Not much there yet)
 git clone http://github.com/asci-uva/asci-main
 
+//Fetch the submodules (the gradescope service is one, and a plain clone leaves it empty)
+git submodule update --init --recursive
+
 //Build images (only have to do this once apparently)
 docker compose build
 

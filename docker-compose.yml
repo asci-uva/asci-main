@@ -67,5 +67,20 @@ services:
     container_name: "ASCI_react"
     ports:
       - 3000:3000
+
+  gradescope:
+    build:
+      context: ./gradescope/
+      dockerfile: ./docker/Dockerfile
+
+    container_name: "ASCI_gradescope"
+    restart: on-failure
+    ports:
+      - 8083:80
+    volumes:
+      - ./gradescope/gradescope-api/src/:/app/src/
+      - ./gradescope/log/:/opt/log/
+    environment:
+      TZ: "America/New_York"
 volumes:
-    db-data:
+  db-data:

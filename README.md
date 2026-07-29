@@ -29,6 +29,16 @@ Navigate to your desired folder on your machine and clone this repository:
 git clone http://github.com/asci-uva/asci-main
 ```
 
+### Initialize the submodules
+
+The Gradescope service lives in a git submodule, which a plain clone leaves empty. Navigate into the
+root directory of this repository and fetch it (if you cloned with `--recurse-submodules`, this is
+already done):
+
+```
+git submodule update --init --recursive
+```
+
 ### Build the images
 
 Navigate intot the root directory of this repository and use docker-compose to build the images (you only have to do this once, and again if you change any of the custom Dockerfiles)
