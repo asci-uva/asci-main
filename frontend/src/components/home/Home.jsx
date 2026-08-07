@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Cards } from "./";
+import Cards from "./Cards";
 import { useUser } from "../context/UserContext";
 
 

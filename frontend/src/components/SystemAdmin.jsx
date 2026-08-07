@@ -4,7 +4,7 @@ import {
   UploadRoster,
   ViewRoster,
   AddStudent
-} from "./admin";
+} from "./courseRoster";
 import {
   CreateNewUser,
   SelectCourse,

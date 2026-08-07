@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { useUser } from "../context/UserContext";
-import CanvasLinkWarning from "./CanvasLinkWarning";
+import CanvasLinkWarning from "../externalTools/CanvasLinkWarning";
 
 
 function AddStudent(props) {

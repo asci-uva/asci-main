@@ -243,14 +243,14 @@ function CanvasLmsSync(props) {
         const payload = {
             asciCourseId: props.course_id,
             canvasLmsCourse: selectedCanvasLmsCourse,
-            command: "syncCanvasLmsCourse"
+            command: "linkCanvasLmsCourse"
         };
 
         postCommand(props.url, payload)
             .then((data) => {
                 if (data.success === "true") {
-                    console.log("Successfully synced with Canvas LMS course");
-                    toast.success("Successfully synced with Canvas LMS course");
+                    console.log("Successfully linked with Canvas LMS course");
+                    toast.success("Successfully linked with Canvas LMS course");
                     props.setCanvasLmsCourse(data.course);
                 } else {
                     toast.error(data.error);
@@ -270,7 +270,7 @@ function CanvasLmsSync(props) {
 
         const payload = {
             asciCourseId: props.course_id,
-            command: "desyncCanvasLmsCourse"
+            command: "unlinkCanvasLmsCourse"
         };
 
         postCommand(props.url, payload)
@@ -282,8 +282,8 @@ function CanvasLmsSync(props) {
                     setSelectedTermName("");
                     setSelectedYear("");
                     getCanvasLmsCourses();
-                    console.log("Successfully desynced with Canvas LMS course");
-                    toast.success("Successfully desynced with Canvas LMS course");
+                    console.log("Successfully unlinked from Canvas LMS course");
+                    toast.success("Successfully unlinked from Canvas LMS course");
                 } else {
                     toast.error(data.error);
                 }
@@ -313,7 +313,7 @@ function CanvasLmsSync(props) {
 
     return (
         <div className="card">
-            <h4 className="card-header">Canvas LMS Synchronization</h4>
+            <h4 className="card-header">Canvas LMS</h4>
             <div className="card-body">
                 <div className="mb-3">
                     <h5>Access token</h5>
@@ -353,9 +353,9 @@ function CanvasLmsSync(props) {
                     <>
                         <div className="mb-3">
                             <h5>Canvas LMS course</h5>
-                            <p className="text-muted">Synced with {props.canvasLmsCourse.course_code} {props.canvasLmsCourse.name}</p>
+                            <p className="text-muted">Linked with {props.canvasLmsCourse.course_code} {props.canvasLmsCourse.name}</p>
                             {isPrimaryInstructor && (
-                                <button type="button" className="btn btn-primary" onClick={removeCanvasLmsCourse}>Desynchronize from course</button>
+                                <button type="button" className="btn btn-primary" onClick={removeCanvasLmsCourse}>Unlink course</button>
                             )}
                         </div>
                         {!props.canvasSyncSettingsLoaded ? (

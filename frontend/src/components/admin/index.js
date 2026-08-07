@@ -1,12 +1,9 @@
 export { default as Home } from "./Home";
 export { default as CreateNewCourse } from "./CreateNewCourse";
 export { default as CourseManagement } from "./CourseManagement";
-export { default as UploadRoster } from "./UploadRoster";
 export { default as UpdateChat } from "./UpdateChat";
 export { default as EditCourse } from "./EditCourse";
-export { default as AddStudent } from "./AddStudent";
 export { default as SelectQuests } from "./SelectQuests";
 export { default as QuestCard } from "./QuestCard";
 export { default as ManagePoints } from "./ManagePoints";
 export { default as PointsHome } from "./PointsHome";
-export { default as ViewRoster } from "./ViewRoster"

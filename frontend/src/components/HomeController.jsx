@@ -3,6 +3,8 @@ import { Routes, Route } from "react-router-dom";
 import QueueController from "./QueueController";
 import ChatController from "./ChatController";
 import AdminController from "./AdminController";
+import ExternalToolsController from "./ExternalToolsController";
+import CourseRosterController from "./CourseRosterController";
 import PointsController from "./PointsController";
 import StatsController from "./StatsController";
 import SystemAdmin from "./SystemAdmin";
@@ -65,6 +67,30 @@ const HomeController = (props) => {
           element={
             <AdminController
               documentRoot={props.documentRoot + "/admin"}
+              url={props.url}
+              uploadurl={props.uploadurl}
+              debugMode={props.debugMode}
+            />
+          }
+        />
+        {/* Use ExternalToolsController for all external tool routes */}
+        <Route
+          path={"externalTools/*"}
+          element={
+            <ExternalToolsController
+              documentRoot={props.documentRoot + "/externalTools"}
+              url={props.url}
+              uploadurl={props.uploadurl}
+              debugMode={props.debugMode}
+            />
+          }
+        />
+        {/* Use CourseRosterController for all course roster routes */}
+        <Route
+          path={"courseRoster/*"}
+          element={
+            <CourseRosterController
+              documentRoot={props.documentRoot + "/courseRoster"}
               url={props.url}
               uploadurl={props.uploadurl}
               debugMode={props.debugMode}

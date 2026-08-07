@@ -2691,11 +2691,11 @@ $usedCosSim = True;
       return ["success" => "true", "courses" => $results];
     }
 
-    public function syncCanvasLmsCourseHandler($asci_course_id, $canvas_lms_course) {
+    public function linkCanvasLmsCourseHandler($asci_course_id, $canvas_lms_course) {
       if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to sync with a Canvas LMS course");
 
-      $result = $this->synchronizationStore->syncCanvasLmsCourse($asci_course_id, $canvas_lms_course);
+      $result = $this->synchronizationStore->linkCanvasLmsCourse($asci_course_id, $canvas_lms_course);
 
       return ["success" => "true", "course" => $result];
     }
@@ -2708,11 +2708,11 @@ $usedCosSim = True;
       return ["success" => "false"];
     }
     
-    public function desyncCanvasLmsCourseHandler($asci_course_id) {
+    public function unlinkCanvasLmsCourseHandler($asci_course_id) {
       if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to desync from a Canvas LMS course");
 
-      $result = $this->synchronizationStore->desyncCanvasLmsCourse($asci_course_id);
+      $result = $this->synchronizationStore->unlinkCanvasLmsCourse($asci_course_id);
 
       if ($result)
         return ["success" => "true", "course" => $result];

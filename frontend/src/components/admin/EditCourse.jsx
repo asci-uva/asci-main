@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import UploadRoster from "./UploadRoster";
+import UploadRoster from "../courseRoster/UploadRoster";
 import UpdateChat from "./UpdateChat";
-import AddStudent from "./AddStudent";
-import GradescopeSync from "./GradescopeSync";
+import AddStudent from "../courseRoster/AddStudent";
+import GradescopeSync from "../externalTools/GradescopeSync";
 import EditCourseInfo from "./EditCourseInfo";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

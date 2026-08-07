@@ -745,7 +745,7 @@ class Server
                 $this->setResponse($executor->getDiscordMappingHandler($user, $course_id));
                 break;
 
-            /*Canvas LMS Synchronization*/
+            /*Canvas LMS*/
             
             case "validateCanvasLmsAccessToken":
                 $asciCourseId = $this->input["asciCourseId"];
@@ -773,10 +773,10 @@ class Server
                 $this->setResponse($executor->getCanvasLmsCoursesHandler($asciCourseId));
                 break;
 
-            case "syncCanvasLmsCourse":
+            case "linkCanvasLmsCourse":
                 $asciCourseId = $this->input["asciCourseId"];
                 $canvasLmsCourse = $this->input["canvasLmsCourse"];
-                $this->setResponse($executor->syncCanvasLmsCourseHandler($asciCourseId, $canvasLmsCourse));
+                $this->setResponse($executor->linkCanvasLmsCourseHandler($asciCourseId, $canvasLmsCourse));
                 break;
             
             case "getCanvasLmsCourse":
@@ -784,9 +784,9 @@ class Server
                 $this->setResponse($executor->getCanvasLmsCourseHandler($asciCourseId));
                 break;
             
-            case "desyncCanvasLmsCourse":
+            case "unlinkCanvasLmsCourse":
                 $asciCourseId = $this->input["asciCourseId"];
-                $this->setResponse($executor->desyncCanvasLmsCourseHandler($asciCourseId));
+                $this->setResponse($executor->unlinkCanvasLmsCourseHandler($asciCourseId));
                 break;
             
             case "syncCanvasLmsRoster":

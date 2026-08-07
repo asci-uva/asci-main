@@ -5,7 +5,6 @@ import {
   Home,
   CreateNewCourse,
   CourseManagement,
-  UploadRoster,
   UpdateChat,
   EditCourse,
   SelectQuests,

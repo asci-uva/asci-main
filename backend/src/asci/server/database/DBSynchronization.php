@@ -243,7 +243,7 @@ class DBSynchronization
         return $result;    
     }
 
-    public function syncCanvasLmsCourse($asci_course_id, $canvas_lms_course) {
+    public function linkCanvasLmsCourse($asci_course_id, $canvas_lms_course) {
         $this->db->beginTransaction();
 
         $this->db->prepare('checkCanvasCourseSyncStmt', 'SELECT EXISTS (SELECT 1 FROM canvas_lms_courses WHERE asci_course_id = $1)');
@@ -306,7 +306,7 @@ class DBSynchronization
         ));
     }
 
-    public function desyncCanvasLmsCourse($asci_course_id) {
+    public function unlinkCanvasLmsCourse($asci_course_id) {
         $result = $this->getCanvasLmsCourse($asci_course_id);
 
         if ($result) {
