@@ -307,13 +307,22 @@ class DBSynchronization
     }
 
     public function unlinkCanvasLmsCourse($asci_course_id) {
+        $this->db->beginTransaction();
+
         $result = $this->getCanvasLmsCourse($asci_course_id);
 
         if ($result) {
+            $this->db->prepare('removeCanvasAssignmentsStmt',
+                'DELETE FROM canvas_lms_assignments WHERE asci_course_id = $1');
+            $this->db->execute('removeCanvasAssignmentsStmt', [$asci_course_id]);
+
             $this->db->prepare('removeCanvasCourseStmt',
                 'DELETE FROM canvas_lms_courses WHERE asci_course_id = $1');
             $this->db->execute('removeCanvasCourseStmt', [$asci_course_id]);
         }
+
+        $this->db->commit();
+
         return $result;
     }
 

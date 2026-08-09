@@ -253,6 +253,35 @@ CREATE TABLE canvas_lms_courses (
   FOREIGN KEY (asci_course_id) REFERENCES courses(id)
 );
 
+CREATE TABLE canvas_lms_assignments (
+  id SERIAL PRIMARY KEY,
+  asci_course_id INT NOT NULL,
+  canvas_assignment_id TEXT NOT NULL,
+  canvas_assignment_group_id TEXT,
+  name TEXT,
+  description TEXT,
+  html_url TEXT,
+  due_at TIMESTAMP,
+  unlock_at TIMESTAMP,
+  lock_at TIMESTAMP,
+  points_possible FLOAT,
+  grading_type TEXT,
+  submission_types TEXT[],
+  allowed_attempts INT,
+  position INT,
+  published BOOLEAN,
+  workflow_state TEXT,
+  omit_from_final_grade BOOLEAN,
+  canvas_created_at TIMESTAMP,
+  canvas_updated_at TIMESTAMP,
+  last_synced_at TIMESTAMP,
+  UNIQUE (asci_course_id, canvas_assignment_id),
+  FOREIGN KEY (asci_course_id) REFERENCES canvas_lms_courses(asci_course_id)
+);
+
+CREATE INDEX canvas_lms_assignments_course
+ON canvas_lms_assignments (asci_course_id);
+
 ALTER TABLE queue ADD FOREIGN KEY (user_id) REFERENCES users (id);
 
 ALTER TABLE queue ADD FOREIGN KEY (session_id) REFERENCES sessions (id);
