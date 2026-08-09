@@ -5,6 +5,7 @@ import ChatController from "./ChatController";
 import AdminController from "./AdminController";
 import ExternalToolsController from "./ExternalToolsController";
 import CourseRosterController from "./CourseRosterController";
+import AssessmentsController from "./AssessmentsController";
 import PointsController from "./PointsController";
 import StatsController from "./StatsController";
 import SystemAdmin from "./SystemAdmin";
@@ -91,6 +92,18 @@ const HomeController = (props) => {
           element={
             <CourseRosterController
               documentRoot={props.documentRoot + "/courseRoster"}
+              url={props.url}
+              uploadurl={props.uploadurl}
+              debugMode={props.debugMode}
+            />
+          }
+        />
+        {/* Use AssessmentsController for all assessment routes */}
+        <Route
+          path={"assessments/*"}
+          element={
+            <AssessmentsController
+              documentRoot={props.documentRoot + "/assessments"}
               url={props.url}
               uploadurl={props.uploadurl}
               debugMode={props.debugMode}

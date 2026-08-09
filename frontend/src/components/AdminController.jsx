@@ -7,7 +7,6 @@ import {
   CourseManagement,
   UpdateChat,
   EditCourse,
-  SelectQuests,
   ManagePoints,
   PointsHome
 } from "./admin";
@@ -48,10 +47,6 @@ const AdminController = (props) => {
         <Route
           path="/coursePanel/:courseId"
           element={<CoursePanel {...props} />}
-        />
-        <Route
-          path="selectQuests"
-          element={<SelectQuests {...props} />}
         />
         {/* <Route
           path="managePoints"

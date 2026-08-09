@@ -1,12 +1,12 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
-import QuestCard from "./QuestCard";
+import QuestCard from "../admin/QuestCard";
 import { useUser } from "../context/UserContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-function SelectQuests(props) {
+function Quests(props) {
   let docRoot = props.documentRoot;
   let debugMode = props.debugMode;
   let url = props.url;
@@ -212,73 +212,71 @@ function SelectQuests(props) {
       }
 
       return (
-        <div className="container p-4">
-          <div className="row">
-            <h1>All Quests Options</h1>
+        <div className="row">
+          <h4 className="mb-3">All Quests Options</h4>
+          <div>
+            <input
+              id="QuestSearchTextBox"
+              type="text" className="mb-1 mt-2"
+              onChange={onSearchBarChange}
+              placeholder="Search..." />
+          </div>
+          <div className="col-md-8">  
             <div>
-              <input
-                id="QuestSearchTextBox"
-                type="text" className="mb-1 mt-2"
-                onChange={onSearchBarChange}
-                placeholder="Search..." />
+              {Object.keys(qData).map((questId) => {
+                return <div>
+                  <QuestCard currentQuest={quests[questId]} id={questId} url={props.url} key={questId} showAddToCourse={true} showDelete={true} onDelete={handleDelete}/>
+                  </div>
+              })}  
             </div>
-            <div className="col-md-8">  
-              <div>
-                {Object.keys(qData).map((questId) => {
-                  return <div>
-                    <QuestCard currentQuest={quests[questId]} id={questId} url={props.url} key={questId} showAddToCourse={true} showDelete={true} onDelete={handleDelete}/>
-                    </div>
-                })}  
-              </div>
-            </div>
-            
-            <div className="col-md-4">
-              <h4 className="card-header">Create New Quest</h4>
-              <div className="card-body">
+          </div>
+          
+          <div className="col-md-4">
+            <h4 className="card-header">Create New Quest</h4>
+            <div className="card-body">
 
-                <form className="">
+              <form className="">
 
-                  <div className="input-group mb-1">
-                    <input
-                      type="text" className="form-control"
-                      value={mnemonic}
-                      onChange={(e) => setMnemonic(e.target.value)}
-                      placeholder="Mnemonic"></input>
-                  </div>
+                <div className="input-group mb-1">
+                  <input
+                    type="text" className="form-control"
+                    value={mnemonic}
+                    onChange={(e) => setMnemonic(e.target.value)}
+                    placeholder="Mnemonic"></input>
+                </div>
 
-                  <div className="input-group mb-1"> 
-                    <input
-                      type="text" className="form-control"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Name" />
-                  </div>
-                  
-                  <div className="input-group mb-1"> 
-                      <textarea className="form-control"
-                      rows="5" cols="33" 
-                      value={description} 
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Description"></textarea>
-                  </div>
+                <div className="input-group mb-1"> 
+                  <input
+                    type="text" className="form-control"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Name" />
+                </div>
+                
+                <div className="input-group mb-1"> 
+                    <textarea className="form-control"
+                    rows="5" cols="33" 
+                    value={description} 
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Description"></textarea>
+                </div>
 
-                  <div className="input-group mb-1"> 
-                    <input
-                      type="text" className="form-control mb-3"
-                      value={total_pts}
-                      onChange={(e) => setTotalPts(e.target.value)}
-                      placeholder="Total Points" />
-                  </div>
+                <div className="input-group mb-1"> 
+                  <input
+                    type="text" className="form-control mb-3"
+                    value={total_pts}
+                    onChange={(e) => setTotalPts(e.target.value)}
+                    placeholder="Total Points" />
+                </div>
 
-                  <button type="button" className="btn btn-primary" onClick={handleSubmit}>Add Quest</button>
-                </form>
-                <p className="p-2"><b>Note: </b>Quests for office hour frequency and Piazza post frequency have automated status updates. To ensure proper automation, set mnemonics are follows:
-                  <ul>
-                    <li><b>OH#</b> (e.g. OH4 or OH10) for office hours of # visits</li>
-                    <li><b>P#</b> (e.g. P3 or P12) <b>and</b> ensure "Piazza" is in the quest name for Piazza posts of # amount</li>
-                  </ul>
-                </p>
-              </div>
+                <button type="button" className="btn btn-primary" onClick={handleSubmit}>Add Quest</button>
+              </form>
+              <p className="p-2"><b>Note: </b>Quests for office hour frequency and Piazza post frequency have automated status updates. To ensure proper automation, set mnemonics are follows:
+                <ul>
+                  <li><b>OH#</b> (e.g. OH4 or OH10) for office hours of # visits</li>
+                  <li><b>P#</b> (e.g. P3 or P12) <b>and</b> ensure "Piazza" is in the quest name for Piazza posts of # amount</li>
+                </ul>
+              </p>
             </div>
           </div>
         </div>
@@ -299,4 +297,4 @@ function SelectQuests(props) {
 
 }
 
-export default SelectQuests;
+export default Quests;
