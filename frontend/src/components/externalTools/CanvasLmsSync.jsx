@@ -5,6 +5,7 @@ import { postCommand } from "../utils/postCommand";
 import ConfirmModal from "../utils/ConfirmModal";
 import { useUser } from "../context/UserContext";
 import { intervalToParts, partsToInterval } from "../utils/CanvasStalePeriod";
+import { errorMessage } from "../utils/errorMessage";
 import { PRIMARY_INSTRUCTOR } from "../utils/roles";
 import CanvasLinkWarning from "./CanvasLinkWarning";
 
@@ -108,12 +109,12 @@ function CanvasLmsSync(props) {
                 if (data.success === "true") {
                     toast.success("Successfully saved Canvas LMS sync settings");
                 } else {
-                    toast.error(data.error || "Failed to save Canvas LMS sync settings");
+                    toast.error(errorMessage(data.error, "Failed to save Canvas LMS sync settings"));
                 }
             })
             .catch((error) => {
                 setSaveSettingsButtonDisabled(false);
-                toast.error(error);
+                toast.error(errorMessage(error, "Failed to save Canvas LMS sync settings"));
             });
     };
 
@@ -147,14 +148,14 @@ function CanvasLmsSync(props) {
                     toast.success("Successfully validated Canvas LMS access token");
                 } else {
                     console.log(data.error);
-                    toast.error(data.error || "Failed to validate Canvas LMS access token");
+                    toast.error(errorMessage(data.error, "Failed to validate Canvas LMS access token"));
                 }
             })
             .catch((error) => {
                 setShowValidationModal(false);
                 setValidateButtonDisabled(false);
                 console.log(error);
-                toast.error(error);
+                toast.error(errorMessage(error, "Failed to validate Canvas LMS access token"));
             });
     };
 
@@ -181,13 +182,13 @@ function CanvasLmsSync(props) {
                     toast.success("Successfully removed canvas LMS access token");
                 } else {
                     console.log(data.error);
-                    toast.error(data.error);
+                    toast.error(errorMessage(data.error, "Failed to remove Canvas LMS access token"));
                 }
             })
             .catch((error) => {
                 setRemoveAccessTokenButtonDisabled(false);
                 console.log(error);
-                toast.error(error);
+                toast.error(errorMessage(error, "Failed to remove Canvas LMS access token"));
             });
     };
 
@@ -205,11 +206,11 @@ function CanvasLmsSync(props) {
                     setYears([...new Set(termNamesArray.map(t => t.split(" ")[0]))].sort().reverse());
                     setTermNames([...new Set(termNamesArray.map(t => t.split(" ")[1]))]);
                 } else {
-                    toast.error(data.error);
+                    toast.error(errorMessage(data.error, "Failed to load Canvas LMS enrollment terms"));
                 }
             })
             .catch((error) => {
-                toast.error(error);
+                toast.error(errorMessage(error, "Failed to load Canvas LMS enrollment terms"));
             });
     };
 
@@ -224,11 +225,11 @@ function CanvasLmsSync(props) {
                 if (data.success === "true") {
                     setCanvasLmsCourses(data.courses);
                 } else {
-                    toast.error(data.error);
+                    toast.error(errorMessage(data.error, "Failed to load Canvas LMS courses"));
                 }
             })
             .catch((error) => {
-                toast.error(error);
+                toast.error(errorMessage(error, "Failed to load Canvas LMS courses"));
             });
     };
 
@@ -253,11 +254,11 @@ function CanvasLmsSync(props) {
                     toast.success("Successfully linked with Canvas LMS course");
                     props.setCanvasLmsCourse(data.course);
                 } else {
-                    toast.error(data.error);
+                    toast.error(errorMessage(data.error, "Failed to link with Canvas LMS course"));
                 }
             })
             .catch((error) => {
-                toast.error(error);
+                toast.error(errorMessage(error, "Failed to link with Canvas LMS course"));
             });
     };
 
@@ -285,11 +286,11 @@ function CanvasLmsSync(props) {
                     console.log("Successfully unlinked from Canvas LMS course");
                     toast.success("Successfully unlinked from Canvas LMS course");
                 } else {
-                    toast.error(data.error);
+                    toast.error(errorMessage(data.error, "Failed to unlink from Canvas LMS course"));
                 }
             })
             .catch((error) => {
-                toast.error(error);
+                toast.error(errorMessage(error, "Failed to unlink from Canvas LMS course"));
             });
     };
 
@@ -556,11 +557,11 @@ function CanvasLmsSync(props) {
             </ConfirmModal>
             <ConfirmModal
                 show={showRemoveCanvasLmsCourseModal}
-                title="Confirm Canvas LMS course desynchronization"
+                title="Confirm Canvas LMS course unlink"
                 onCancel={() => setShowRemoveCanvasLmsCourseModal(false)}
                 onConfirm={confirmRemoveCanvasLmsCourse}
             >
-                <p>Are you sure you want to desynchronize this Canvas LMS course?</p>
+                <p>Are you sure you want to unlink this Canvas LMS course?</p>
             </ConfirmModal>
         </div>
     );

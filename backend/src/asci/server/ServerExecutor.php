@@ -28,6 +28,8 @@ class ServerExecutor{
   public $courseStore = null; // The course storage 
   public $userCourseStore = null; // The UserCourse storage 
   public $synchronizationStore = null; // The synchronization storage
+  public $canvasAssignmentStore = null; // The Canvas LMS assignment storage
+  public $canvasSubmissionStore = null; // The Canvas LMS submission storage
 
   private $user = null;
   //Model state (NOT interacting with DB)
@@ -66,6 +68,8 @@ class ServerExecutor{
     $this->courseStore = new \asci\server\database\DBCourse($this->db);
     $this->userCourseStore = new \asci\server\database\DBUserCourse($this->db);
     $this->synchronizationStore = new \asci\server\database\DBSynchronization($this->db);
+    $this->canvasAssignmentStore = new \asci\server\database\DBCanvasAssignment($this->db);
+    $this->canvasSubmissionStore = new \asci\server\database\DBCanvasSubmission($this->db);
     // Check $_SERVER["uid"]; // their computing ID  (name and id can come from roster)
 
     // This may need to change with other authentication types
@@ -2656,8 +2660,7 @@ $usedCosSim = True;
       if ($canvas === null)
         return $this->err("The primary instructor for this course has not added a Canvas LMS access token");
 
-      // $courses = $canvas->getAll("/api/v1/courses", "enrollment_type=teacher&per_page=100");
-      $courses = $canvas->getAll("/api/v1/courses", "enrollment_type=teacher&enrollment_type=ta&per_page=100"); // FOR DEV ONLY
+      $courses = $canvas->getAll("/api/v1/courses", "enrollment_type=teacher&per_page=100");
       if ($courses === null)
         return $this->err("Failed to fetch Canvas LMS courses");
 
@@ -2807,6 +2810,118 @@ $usedCosSim = True;
       "added" => $result["added"],
       "updated" => $result["updated"],
       "removed" => $result["removed"],
+      "skipped" => $skipped,
+    ];
+  }
+
+  public function getCanvasAssignmentsHandler($asci_course_id, $refresh = false) {
+    if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "canvas-lms-assignments"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to view Canvas LMS assignments");
+
+    $canvas_course = $this->synchronizationStore->getCanvasLmsCourse($asci_course_id);
+    if (!$canvas_course)
+      return $this->err("No Canvas LMS course associated with ASCI course");
+
+    $assignments = $this->canvasAssignmentStore->getAssignmentsByCourseId($asci_course_id);
+
+    if (!$refresh)
+      return ["success" => "true", "synced" => false, "assignments" => $assignments];
+
+    $canvas = $this->canvasLmsClientForCourse($asci_course_id);
+    if ($canvas === null)
+      return $this->err("The primary instructor for this course has not added a Canvas LMS access token");
+
+    $canvas_course_id = $canvas_course["canvas_course_id"];
+    $canvas_assignments = $canvas->getAll("/api/v1/courses/$canvas_course_id/assignments", "per_page=100");
+    if ($canvas_assignments === null)
+      return $this->err("Failed to fetch Canvas LMS assignments");
+
+    $counts = $this->canvasAssignmentStore->syncAssignments($asci_course_id, $canvas_assignments);
+
+    return [
+      "success" => "true",
+      "synced" => true,
+      "assignments" => $this->canvasAssignmentStore->getAssignmentsByCourseId($asci_course_id),
+      "added" => $counts["added"],
+      "updated" => $counts["updated"],
+      "flagged" => $counts["flagged"],
+      "guarded" => $counts["guarded"],
+      "skipped" => $counts["skipped"],
+    ];
+  }
+
+  public function getCanvasSubmissionsHandler($asci_course_id) {
+    if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "canvas-lms-assignments"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to view Canvas LMS submissions");
+
+    return [
+      "success" => "true",
+      "submissions" => $this->canvasSubmissionStore->getSubmissionsByCourseId($asci_course_id),
+      "students" => $this->userStore->getStudentsForCourse($asci_course_id),
+    ];
+  }
+
+  public function removeFlaggedCanvasAssignmentHandler($asci_course_id, $canvas_assignment_id) {
+    if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-assignments"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to remove Canvas LMS assignments");
+
+    $submissions = $this->canvasAssignmentStore->deleteFlaggedAssignment($asci_course_id, $canvas_assignment_id);
+
+    if ($submissions === false)
+      return $this->err("That assignment is not flagged as missing from Canvas, so it was not removed");
+
+    return [
+      "success" => "true",
+      "removedSubmissions" => $submissions,
+      "assignments" => $this->canvasAssignmentStore->getAssignmentsByCourseId($asci_course_id),
+    ];
+  }
+
+  public function uploadGradescopeSubmissionsHandler($asci_course_id, $submissions) {
+    if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "upload-canvas-lms-submissions"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to upload Canvas LMS submissions");
+
+    $canvas_course = $this->synchronizationStore->getCanvasLmsCourse($asci_course_id);
+    if (!$canvas_course)
+      return $this->err("No Canvas LMS course associated with ASCI course");
+
+    if (!is_array($submissions))
+      return $this->err("No submissions were uploaded");
+
+    $imported = 0;
+    $updated = 0;
+    $skipped = 0;
+
+    foreach ($submissions as $submission) {
+      if (!isset($submission["canvasAssignmentId"]) || !isset($submission["rows"]) || !is_array($submission["rows"]))
+        continue;
+
+      $assignment = $this->canvasAssignmentStore->getAssignmentByCanvasId(
+        $asci_course_id, $submission["canvasAssignmentId"]
+      );
+
+      if (!$assignment) {
+        $this->logger->error("Uploaded submissions reference an unknown assignment, skipping", [
+          "course" => $asci_course_id,
+          "canvas_assignment_id" => $submission["canvasAssignmentId"]
+        ]);
+        $skipped += count($submission["rows"]);
+        continue;
+      }
+
+      $counts = $this->canvasSubmissionStore->importSubmissions(
+        $asci_course_id, $assignment["id"], $submission["rows"]
+      );
+
+      $imported += $counts["imported"];
+      $updated += $counts["updated"];
+      $skipped += $counts["skipped"];
+    }
+
+    return [
+      "success" => "true",
+      "imported" => $imported,
+      "updated" => $updated,
       "skipped" => $skipped,
     ];
   }

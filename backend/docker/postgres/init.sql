@@ -275,12 +275,46 @@ CREATE TABLE canvas_lms_assignments (
   canvas_created_at TIMESTAMP,
   canvas_updated_at TIMESTAMP,
   last_synced_at TIMESTAMP,
+  missing_from_canvas_at TIMESTAMP,
   UNIQUE (asci_course_id, canvas_assignment_id),
   FOREIGN KEY (asci_course_id) REFERENCES canvas_lms_courses(asci_course_id)
 );
 
 CREATE INDEX canvas_lms_assignments_course
 ON canvas_lms_assignments (asci_course_id);
+
+CREATE TABLE canvas_lms_submissions (
+  id SERIAL PRIMARY KEY,
+  canvas_lms_assignment_id INT NOT NULL,
+  canvas_user_id TEXT,
+  user_id INT,
+  canvas_submission_id TEXT,
+  score NUMERIC(6,2),
+  submitted_at TIMESTAMP,
+  lateness INTERVAL,
+  workflow_state TEXT,
+  attempt INT,
+  source TEXT,
+  last_synced_at TIMESTAMP,
+  last_uploaded_at TIMESTAMP,
+  CHECK (canvas_user_id IS NOT NULL OR user_id IS NOT NULL),
+  FOREIGN KEY (canvas_lms_assignment_id) REFERENCES canvas_lms_assignments(id) ON DELETE RESTRICT,
+  FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE UNIQUE INDEX canvas_lms_submissions_canvas_user
+ON canvas_lms_submissions (canvas_lms_assignment_id, canvas_user_id)
+WHERE canvas_user_id IS NOT NULL;
+
+CREATE UNIQUE INDEX canvas_lms_submissions_asci_user
+ON canvas_lms_submissions (canvas_lms_assignment_id, user_id)
+WHERE user_id IS NOT NULL;
+
+CREATE INDEX canvas_lms_submissions_assignment
+ON canvas_lms_submissions (canvas_lms_assignment_id);
+
+CREATE INDEX canvas_lms_submissions_user
+ON canvas_lms_submissions (user_id);
 
 ALTER TABLE queue ADD FOREIGN KEY (user_id) REFERENCES users (id);
 

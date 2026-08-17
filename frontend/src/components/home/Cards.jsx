@@ -95,7 +95,7 @@ function Cards(props) {
         </div>
       </div>
       ) : null }
-      { isInstructorRole(course.role) ? (
+      { isStaffRole(course.role) ? (
       <div className="col-lg-4 col-md-6 mb-4">
         <div className="card p-3">
           <div className="card-img-top text-center">
@@ -111,10 +111,10 @@ function Cards(props) {
       <div className="col-lg-4 col-md-6 mb-4">
         <div className="card p-3">
           <div className="card-img-top text-center">
-            <i className="bi-clipboard-data home-icon"></i>
+            <i className="bi-person-lines-fill home-icon"></i>
           </div>
           <div className="card-body">
-            <p className="card-text text-center"><Link to="admin/PointsHome" className="btn btn-primary">Student Points</Link></p>
+            <p className="card-text text-center"><Link to="analytics" className="btn btn-primary">Analytics</Link></p>
           </div>
         </div>
       </div>

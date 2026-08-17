@@ -54,6 +54,11 @@
   color: black;
 }
 
+.analytics-pie .c3-chart-arc text {
+  fill: #0b0b0b;
+  font-weight: 600;
+}
+
 .card {
   margin: 5px;
   border: 1px solid rgb(127, 127, 142);

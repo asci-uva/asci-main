@@ -800,6 +800,29 @@ class Server
                 $this->setResponse($executor->getCanvasLmsSyncSettingsHandler($asciCourseId));
                 break;
 
+            case "getCanvasAssignments":
+                $asciCourseId = $this->input["asciCourseId"];
+                $refresh = ($this->input["refresh"] ?? false) === true;
+                $this->setResponse($executor->getCanvasAssignmentsHandler($asciCourseId, $refresh));
+                break;
+
+            case "removeFlaggedCanvasAssignment":
+                $asciCourseId = $this->input["asciCourseId"];
+                $canvasAssignmentId = $this->input["canvasAssignmentId"];
+                $this->setResponse($executor->removeFlaggedCanvasAssignmentHandler($asciCourseId, $canvasAssignmentId));
+                break;
+
+            case "getCanvasSubmissions":
+                $asciCourseId = $this->input["asciCourseId"];
+                $this->setResponse($executor->getCanvasSubmissionsHandler($asciCourseId));
+                break;
+
+            case "uploadGradescopeSubmissions":
+                $asciCourseId = $this->input["asciCourseId"];
+                $submissions = $this->input["submissions"];
+                $this->setResponse($executor->uploadGradescopeSubmissionsHandler($asciCourseId, $submissions));
+                break;
+
             case "setCanvasLmsSyncSettings":
                 $asciCourseId = $this->input["asciCourseId"];
                 $autosyncEnabled = $this->input["autosyncEnabled"];

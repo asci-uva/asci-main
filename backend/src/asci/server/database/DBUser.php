@@ -53,6 +53,24 @@ class DBUser
         return $roster;
     }
 
+    public function getStudentsForCourse($course_id){
+        $query = 'SELECT U.id, U.computing_id, U.fname, U.lname, U.pname, C.role
+                  FROM users U JOIN user_courses C on U.id = C.user_id
+                  WHERE C.course_id = $1 AND C.role = \'student\'
+                  ORDER BY LOWER(U.lname), LOWER(U.fname)';
+
+        $result = $this->db->query($query, array($course_id));
+
+        if(!$result) return [];
+
+        $students = [];
+        while($row = $this->db->fetchrow($result)){
+            $students[] = $row;
+        }
+
+        return $students;
+    }
+
     public function getUserById($user_id){
         $query = 'select * from users where id = $1';
         $result = $this->db->query($query, array($user_id));

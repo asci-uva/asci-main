@@ -33,8 +33,6 @@ function HandleStudent(props) {
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
   const [aiSummary, setAiSummary] = useState("Loading...");
 
-  const [settings, setSettings] = useState(null);
-
   const navigate = useNavigate();
 
   const openModal = () => setSummaryModalOpen(true);
@@ -69,8 +67,6 @@ function HandleStudent(props) {
     //Ping the server and make sure this person is actually a TA
     console.log("TA: Checking if token exists");
 
-    getSettings();
-
     polling = true;
     pollNumWaiting();
 
@@ -84,46 +80,6 @@ function HandleStudent(props) {
 
 
   }, []);
-
-  function getSettings(){
-    /* Also get course settings */
-    let request2 = {};
-    request2.command = "getCourseSettings";
-    request2.user = user.userid;
-    request2.courseId = course.course_id;
-    fetchSettings(request2, url);
-  }
-
-
-
-  const fetchSettings = (json0, url0) =>{
-    fetch(url0, {
-      method: 'POST', // or 'PUT'
-      credentials: "include",
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(json0),
-    }).then(response => response.json())
-      .then(data => {
-        console.log("Data is: ", data);
-        let success = data.success;
-        if(success === "true"){
-
-          setSettings(data.settings);
-
-        }
-        else{
-          console.log("HOME: Server returned error");
-          navigate(docRoot + "/error");
-        }
-      })
-      .catch((error) => {
-        console.log("HOME: There was an error:", error);
-        navigate(docRoot + "/error");
-
-      });
-  }
 
   function pollNumWaiting(){
     //Get a student

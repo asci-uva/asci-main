@@ -5,6 +5,7 @@ import { useUser } from "../context/UserContext";
 import { postCommand } from "../utils/postCommand";
 import ConfirmModal from "../utils/ConfirmModal";
 import { formatLastSynced } from "../utils/CanvasStalePeriod";
+import { errorMessage } from "../utils/errorMessage";
 import { isInstructorRole, isStaffRole } from "../utils/roles";
 
 function UploadRoster(props) {
@@ -134,13 +135,13 @@ function UploadRoster(props) {
           }
         } else {
           console.log(data.error);
-          toast.error(data.error || "Failed to sync Canvas LMS roster");
+          toast.error(errorMessage(data.error, "Failed to sync Canvas LMS roster"));
         }
       })
       .catch((error) => {
         if (!silent) setSyncRosterButtonDisabled(false);
         console.log(error);
-        toast.error(error);
+        toast.error(errorMessage(error, "Failed to sync Canvas LMS roster"));
       });
   };
 

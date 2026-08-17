@@ -70,7 +70,7 @@ function Navigation(props) {
                   </NavLink>
                 </li>
               ) : null }
-              { isInstructorRole(course.role) ? (
+              { isStaffRole(course.role) ? (
                 <li className="nav-item">
                   <NavLink className="nav-link" to="/asci/assessments">
                     <i className="bi-clipboard-check"></i> Assessments
@@ -79,8 +79,8 @@ function Navigation(props) {
               ) : null }
               { isStaffRole(course.role) ? (
                 <li className="nav-item">
-                  <NavLink className="nav-link" to="/asci/admin/PointsHome">
-                    <i className="bi-clipboard-data"></i> Student Points
+                  <NavLink className="nav-link" to="/asci/analytics">
+                    <i className="bi-person-lines-fill"></i> Analytics
                   </NavLink>
                 </li>
               ) : null }
@@ -119,7 +119,7 @@ function Navigation(props) {
                   </NavLink>
                 </li>
               ) : null }
-              { isInstructorRole(course.role) ? (
+              { isStaffRole(course.role) ? (
                 <li className="">
                   <NavLink className="dropdown-item" to="/asci/assessments">
                     <i className="bi-clipboard-check"></i> Assessments
@@ -128,8 +128,8 @@ function Navigation(props) {
               ) : null }
               { isStaffRole(course.role) ? (
                 <li className="">
-                  <NavLink className="dropdown-item" to="/asci/admin/PointsHome">
-                    <i className="bi-clipboard-data"></i> Student Points
+                  <NavLink className="dropdown-item" to="/asci/analytics">
+                    <i className="bi-person-lines-fill"></i> Analytics
                   </NavLink>
                 </li>
               ) : null }

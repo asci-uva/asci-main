@@ -8,46 +8,14 @@ function PendingApprovals(props) {
   let root = "/asci";
 
   const navigate = useNavigate();
-  const {user, getCourse, courseRoster, setCourseRoster, refreshCourseRoster} = useUser();
+  const {user, getCourse, getCourseSettings, courseRoster, setCourseRoster, refreshCourseRoster} = useUser();
   let course = getCourse();
   const [filteredData, setFilteredData] = useState(null);
   const [quests, setQuests] = useState({});
-  const [showQuests, setShowQuests] = useState(false);
   const [openStudent, setOpenStudent] = useState(null);
 
-  const getSettings = () => {
-    let request = {
-      command: "getCourseSettings",
-      user: user.userid,
-      courseId: course.course_id
-    };
-    
-    fetch(url, {
-      method: 'POST', // or 'PUT'
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: "include",
-      body: JSON.stringify(request),
-    }).then(response => response.json())
-      .then(data => {
-        if (data.success === "true") {
-          if(data.settings.show_quests == "t"){
-            setShowQuests(true);
-          }
-
-        }
-        else {
-          console.log("HOME: Server returned error");
-          navigate(root + "/error");
-        }
-      })
-      .catch((error) => {
-        console.log("HOME: There was an error:", error);
-        navigate(root + "/error");
-
-      });
-  }
+  const settings = getCourseSettings();
+  const showQuests = settings != null && settings.show_quests == "t";
 
   const getUserQuests = (studentId) => {
     let request = {
@@ -146,7 +114,6 @@ function PendingApprovals(props) {
   useEffect(() => {
     //If token is set, kick to home screen to check validity of session
     if (user) {
-      getSettings();
       refreshCourseRoster();
     }
     else {
@@ -155,12 +122,14 @@ function PendingApprovals(props) {
   }, []);
 
   useEffect(() => {
+    if (!showQuests) return;
+
     Object.keys(courseRoster).filter(k => courseRoster[k].role == "student")
     .forEach(k => {
         const student = courseRoster[k];
         getUserQuests(student.computing_id);
     });
-  }, [courseRoster, props.refresh]);
+  }, [courseRoster, props.refresh, showQuests]);
 
   const PendingTableHeaderRow = () => {
     return (

@@ -1,20 +1,54 @@
 import React, { useState } from "react";
 import { useUser } from "../context/UserContext";
+import { useCanvasLmsCourse } from "../utils/useCanvasLmsCourse";
+import { isInstructorRole, isStaffRole } from "../utils/roles";
 import Quests from "./Quests";
 import Assignments from "./Assignments";
-
-const TABS = [
-  { key: "quests", label: "Quests" },
-  { key: "assignments", label: "Assignments" },
-];
+import StudentPoints from "./StudentPoints";
 
 function Home(props) {
-  const { getCourse } = useUser();
+  const { getCourse, getCourseSettings } = useUser();
   const course = getCourse();
+  const courseId = course.course_id;
+  const isStaff = isStaffRole(course.role);
+
+  const settings = getCourseSettings();
+  const showQuests = settings != null && settings.show_quests == "t";
+
+  const {
+    course: canvasLmsCourse,
+    loaded: canvasLmsCourseLoaded,
+  } = useCanvasLmsCourse(props.url, courseId, isStaff);
 
   const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible");
   const [sidebarCol, setSidebarCol] = useState("col-md-3");
   const [contentCol, setContentCol] = useState("page-container content col-md-9 my-auto");
+
+  const tabs = [];
+
+  if (isInstructorRole(course.role)) {
+    tabs.push({
+      key: "assignments",
+      label: "Assignments",
+      content: (
+        <Assignments
+          course_id={courseId}
+          canvasLmsCourse={canvasLmsCourse}
+          canvasLmsCourseLoaded={canvasLmsCourseLoaded}
+          {...props}
+        />
+      ),
+    });
+    if (showQuests)
+      tabs.push({ key: "quests", label: "Quests", content: <Quests {...props} /> });
+  }
+
+  if (isStaff && showQuests)
+    tabs.push({
+      key: "points",
+      label: "Student Points",
+      content: <StudentPoints {...props} />,
+    });
 
   const handleCollapse = () => {
     if (sidebarOpen === "sidebar-visible") {
@@ -38,8 +72,9 @@ function Home(props) {
                 <h1><i className="bi-clipboard-check big-icon"></i></h1>
                 <h2>Assessments</h2>
                 <p>
-                  Manage the quests and assignments students work on in this
-                  course.
+                  {showQuests
+                    ? "Manage the assignments and quests students work on in this course, and the points they have earned."
+                    : "Manage the assignments students work on in this course."}
                 </p>
               </div>
               <button type="button" className="sidebar-button" onClick={handleCollapse}><i className="bi-arrows-collapse-vertical"></i></button>
@@ -52,7 +87,7 @@ function Home(props) {
             <div className="card">
               <div className="card-header">
                 <ul className="nav nav-tabs card-header-tabs" id="assessments-tab" role="tablist">
-                  {TABS.map((tab, idx) => (
+                  {tabs.map((tab, idx) => (
                     <li className="nav-item" role="presentation" key={tab.key}>
                       <button
                         className={`nav-link ${idx === 0 ? "active" : ""}`}
@@ -72,17 +107,17 @@ function Home(props) {
               </div>
 
               <div className="tab-content card-body" id="assessments-tabContent">
-                <div className="tab-pane fade show active" id="assessments-quests" role="tabpanel" aria-labelledby="assessments-quests-tab">
-                  <div className="col-md-12 my-auto">
-                    <Quests {...props} />
+                {tabs.map((tab, idx) => (
+                  <div
+                    className={`tab-pane fade ${idx === 0 ? "show active" : ""}`}
+                    id={`assessments-${tab.key}`}
+                    role="tabpanel"
+                    aria-labelledby={`assessments-${tab.key}-tab`}
+                    key={tab.key}
+                  >
+                    <div className="col-md-12 my-auto">{tab.content}</div>
                   </div>
-                </div>
-
-                <div className="tab-pane fade" id="assessments-assignments" role="tabpanel" aria-labelledby="assessments-assignments-tab">
-                  <div className="col-md-12 my-auto">
-                    <Assignments {...props} />
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>

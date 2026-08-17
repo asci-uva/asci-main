@@ -159,6 +159,15 @@ class DBUserCourse
           if (\asci\util\Roles::isStaffRole($role))
             return true;
           break;
+        case "canvas-lms-assignments":
+          if (\asci\util\Roles::isStaffRole($role))
+            return true;
+          break;
+        case "upload-canvas-lms-submissions":
+        case "manage-canvas-lms-assignments":
+          if (\asci\util\Roles::isInstructorRole($role))
+            return true;
+          break;
         case "llm-chat":
           return true;
         case "llm-summary":

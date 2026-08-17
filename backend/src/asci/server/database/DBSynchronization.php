@@ -312,6 +312,12 @@ class DBSynchronization
         $result = $this->getCanvasLmsCourse($asci_course_id);
 
         if ($result) {
+            $this->db->prepare('removeCanvasSubmissionsStmt',
+                'DELETE FROM canvas_lms_submissions s
+                  USING canvas_lms_assignments a
+                  WHERE a.id = s.canvas_lms_assignment_id AND a.asci_course_id = $1');
+            $this->db->execute('removeCanvasSubmissionsStmt', [$asci_course_id]);
+
             $this->db->prepare('removeCanvasAssignmentsStmt',
                 'DELETE FROM canvas_lms_assignments WHERE asci_course_id = $1');
             $this->db->execute('removeCanvasAssignmentsStmt', [$asci_course_id]);

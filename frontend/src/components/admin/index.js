@@ -5,4 +5,3 @@ export { default as UpdateChat } from "./UpdateChat";
 export { default as EditCourse } from "./EditCourse";
 export { default as QuestCard } from "./QuestCard";
 export { default as ManagePoints } from "./ManagePoints";
-export { default as PointsHome } from "./PointsHome";

@@ -13,49 +13,16 @@ function Quests(props) {
   let root = "/asci";
 
   const navigate = useNavigate();
-  const {user, getCourse} = useUser();
-  let course = getCourse();
+  const {user, getCourseSettings} = useUser();
   const [quests, setQuests] = useState({});
-  const [showQuests, setShowQuests] = useState(false);
   const [mnemonic, setMnemonic] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [total_pts, setTotalPts] = useState("");
   const [filteredData, setFilteredData] = useState(null);
 
-  const getSettings = () => {
-    let request = {
-      command: "getCourseSettings",
-      user: user.userid,
-      courseId: course.course_id
-    };
-    
-    fetch(url, {
-      method: 'POST', // or 'PUT'
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: "include",
-      body: JSON.stringify(request),
-    }).then(response => response.json())
-      .then(data => {
-        if (data.success === "true") {
-          if(data.settings.show_quests == "t"){
-            setShowQuests(true);
-          }
-
-        }
-        else {
-          console.log("HOME: Server returned error");
-          navigate(root + "/error");
-        }
-      })
-      .catch((error) => {
-        console.log("HOME: There was an error:", error);
-        navigate(root + "/error");
-
-      });
-  }
+  const settings = getCourseSettings();
+  const showQuests = settings != null && settings.show_quests == "t";
 
   const getQuests = () => {
     let request = {
@@ -172,13 +139,12 @@ function Quests(props) {
   useEffect(() => {
     //If token is set, kick to home screen to check validity of session
     if (user) {
-      getSettings();
-      getQuests();
+      if (showQuests) getQuests();
     }
     else {
       navigate(root + "/login");
     }
-  }, []);
+  }, [showQuests]);
 
   const onSearchBarChange = (e) => {
     console.log("searching!");
@@ -224,10 +190,10 @@ function Quests(props) {
           <div className="col-md-8">  
             <div>
               {Object.keys(qData).map((questId) => {
-                return <div>
-                  <QuestCard currentQuest={quests[questId]} id={questId} url={props.url} key={questId} showAddToCourse={true} showDelete={true} onDelete={handleDelete}/>
+                return <div key={questId}>
+                  <QuestCard currentQuest={quests[questId]} id={questId} url={props.url} showAddToCourse={true} showDelete={true} onDelete={handleDelete}/>
                   </div>
-              })}  
+              })}
             </div>
           </div>
           
@@ -271,12 +237,12 @@ function Quests(props) {
 
                 <button type="button" className="btn btn-primary" onClick={handleSubmit}>Add Quest</button>
               </form>
-              <p className="p-2"><b>Note: </b>Quests for office hour frequency and Piazza post frequency have automated status updates. To ensure proper automation, set mnemonics are follows:
+              <div className="p-2"><b>Note: </b>Quests for office hour frequency and Piazza post frequency have automated status updates. To ensure proper automation, set mnemonics are follows:
                 <ul>
                   <li><b>OH#</b> (e.g. OH4 or OH10) for office hours of # visits</li>
                   <li><b>P#</b> (e.g. P3 or P12) <b>and</b> ensure "Piazza" is in the quest name for Piazza posts of # amount</li>
                 </ul>
-              </p>
+              </div>
             </div>
           </div>
         </div>

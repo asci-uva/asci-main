@@ -6,6 +6,7 @@ import AdminController from "./AdminController";
 import ExternalToolsController from "./ExternalToolsController";
 import CourseRosterController from "./CourseRosterController";
 import AssessmentsController from "./AssessmentsController";
+import AnalyticsController from "./AnalyticsController";
 import PointsController from "./PointsController";
 import StatsController from "./StatsController";
 import SystemAdmin from "./SystemAdmin";
@@ -104,6 +105,18 @@ const HomeController = (props) => {
           element={
             <AssessmentsController
               documentRoot={props.documentRoot + "/assessments"}
+              url={props.url}
+              uploadurl={props.uploadurl}
+              debugMode={props.debugMode}
+            />
+          }
+        />
+        {/* Use AnalyticsController for all per-student analytics routes */}
+        <Route
+          path={"analytics/*"}
+          element={
+            <AnalyticsController
+              documentRoot={props.documentRoot + "/analytics"}
               url={props.url}
               uploadurl={props.uploadurl}
               debugMode={props.debugMode}
