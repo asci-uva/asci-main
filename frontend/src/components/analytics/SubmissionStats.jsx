@@ -1,12 +1,26 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import CollapsibleCard from "./CollapsibleCard";
 import c3 from "c3";
 import "c3/c3.css";
-import { studentSubmissionAnalytics } from "./studentAnalytics";
+import {
+  studentSubmissionAnalytics,
+  ON_TIME,
+  LATE,
+  MISSING,
+  NOT_YET_DUE,
+} from "./studentAnalytics";
 
 const SLICE_COLORS = {
   "On Time": "#1baf7a",
   Late: "#eda100",
   Missing: "#d03b3b",
+};
+
+const STATE_BADGES = {
+  [ON_TIME]: { label: "On Time", className: "bg-success" },
+  [LATE]: { label: "Late", className: "bg-warning text-dark" },
+  [MISSING]: { label: "Missing", className: "bg-danger" },
+  [NOT_YET_DUE]: { label: "Not Due Yet", className: "bg-secondary" },
 };
 
 function formatPercent(value) {
@@ -117,6 +131,79 @@ function BreakdownTable({ analytics }) {
   );
 }
 
+function formatDueDate(dueAt) {
+  if (!dueAt) return "No due date";
+
+  const date = new Date(String(dueAt).replace(" ", "T"));
+  if (isNaN(date.getTime())) return "No due date";
+
+  return date.toLocaleString();
+}
+
+function formatScore(row) {
+  if (row.score === null)
+    return row.state === MISSING && row.pointsPossible !== null
+      ? `0 / ${row.pointsPossible}`
+      : "—";
+
+  if (row.pointsPossible === null) return String(row.score);
+
+  return `${row.score} / ${row.pointsPossible}`;
+}
+
+function AssignmentGrades({ analytics }) {
+  if (analytics.assignments.length === 0) return null;
+
+  return (
+    <div className="mt-4">
+      <div style={{ maxHeight: 400 + "px" }} className="overflow-auto">
+        <table className="table table-striped table-sm mb-0">
+          <thead>
+            <tr>
+              <th>Assignment</th>
+              <th>Due</th>
+              <th>Status</th>
+              <th>Score</th>
+              <th>Grade</th>
+              <th>Time late</th>
+            </tr>
+          </thead>
+          <tbody className="table-group-divider">
+            {analytics.assignments.map((row) => {
+              const badge = STATE_BADGES[row.state];
+
+              return (
+                <tr key={row.id}>
+                  <td>
+                    {row.htmlUrl ? (
+                      <a href={row.htmlUrl} target="_blank" rel="noreferrer">
+                        {row.name}
+                      </a>
+                    ) : (
+                      row.name
+                    )}
+                  </td>
+                  <td>{formatDueDate(row.dueAt)}</td>
+                  <td>
+                    <span className={`badge ${badge.className}`}>{badge.label}</span>
+                  </td>
+                  <td>{formatScore(row)}</td>
+                  <td className={row.graded ? "" : "text-muted"}>
+                    {formatPercent(row.percent)}
+                  </td>
+                  <td>
+                    {row.state === LATE ? formatTardiness(row.tardinessSeconds) : "—"}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function TardinessStats({ analytics }) {
   const rows = [
     { label: "Mean", value: analytics.tardinessMeanSeconds },
@@ -145,7 +232,7 @@ function TardinessStats({ analytics }) {
 }
 
 function SubmissionStats(props) {
-  const chartRef = useRef(null);
+  const [chartNode, setChartNode] = useState(null);
 
   const analytics = useMemo(
     () =>
@@ -156,10 +243,10 @@ function SubmissionStats(props) {
   const hasData = props.student !== null && analytics.totalDue > 0;
 
   useEffect(() => {
-    if (!hasData || chartRef.current === null) return;
+    if (!hasData || chartNode === null) return;
 
     const chart = c3.generate({
-      bindto: chartRef.current,
+      bindto: chartNode,
       data: {
         columns: [
           ["On Time", analytics.onTime],
@@ -183,7 +270,7 @@ function SubmissionStats(props) {
     });
 
     return () => chart.destroy();
-  }, [hasData, analytics.onTime, analytics.late, analytics.missing]);
+  }, [chartNode, hasData, analytics.onTime, analytics.late, analytics.missing]);
 
   const body = () => {
     if (props.student === null)
@@ -220,7 +307,7 @@ function SubmissionStats(props) {
       <>
         <div className="row">
           <div className="col-md-7">
-            <div className="analytics-pie" ref={chartRef}></div>
+            <div className="analytics-pie" ref={setChartNode}></div>
           </div>
           <div className="col-md-5">
             <AverageGrade analytics={analytics} />
@@ -228,6 +315,8 @@ function SubmissionStats(props) {
             <TardinessStats analytics={analytics} />
           </div>
         </div>
+
+        <AssignmentGrades analytics={analytics} />
 
         {analytics.notYetDue > 0 && (
           <p className="text-muted mt-3 mb-0">
@@ -241,12 +330,7 @@ function SubmissionStats(props) {
     );
   };
 
-  return (
-    <div className="card mb-4">
-      <h4 className="card-header">Assignment Submissions</h4>
-      <div className="card-body">{body()}</div>
-    </div>
-  );
+  return <CollapsibleCard title="Assignment Submissions">{body()}</CollapsibleCard>;
 }
 
 export default SubmissionStats;

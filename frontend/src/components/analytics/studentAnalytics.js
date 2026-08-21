@@ -105,6 +105,44 @@ function belongsTo(submission, student) {
   );
 }
 
+function hasScore(submission) {
+  return Boolean(
+    submission &&
+      submission.score !== null &&
+      submission.score !== undefined &&
+      submission.score !== "" &&
+      !isNaN(Number(submission.score))
+  );
+}
+
+function assignmentRow(assignment, submission, now) {
+  const state = submissionState(assignment, submission, now);
+  const points = Number(assignment.points_possible);
+  const scored = !isNaN(points) && points > 0;
+  const graded = scored && state !== MISSING && hasScore(submission);
+
+  let percent = null;
+  if (graded) percent = (Number(submission.score) / points) * 100;
+  else if (scored && state === MISSING) percent = 0;
+
+  return {
+    id: assignment.id,
+    name: assignment.name,
+    htmlUrl: assignment.html_url,
+    dueAt: assignment.due_at,
+    state,
+    pointsPossible: scored ? points : null,
+    score: graded ? Number(submission.score) : null,
+    percent,
+    graded,
+    submittedAt: submission ? submission.submitted_at : null,
+    tardinessSeconds:
+      state === ON_TIME || state === LATE
+        ? tardinessSeconds(assignment, submission, now)
+        : null,
+  };
+}
+
 export function studentSubmissionAnalytics(
   assignments,
   submissions,
@@ -124,42 +162,28 @@ export function studentSubmissionAnalytics(
     byAssignment[submission.canvas_lms_assignment_id] = submission;
   });
 
+  const rows = (assignments || [])
+    .filter(
+      (assignment) => isPublished(assignment) && !assignment.missing_from_canvas_at
+    )
+    .map((assignment) => assignmentRow(assignment, byAssignment[assignment.id], now));
+
   let percentTotal = 0;
   let gradedCount = 0;
   let missingScoredCount = 0;
   const tardiness = [];
 
-  (assignments || [])
-    .filter(
-      (assignment) => isPublished(assignment) && !assignment.missing_from_canvas_at
-    )
-    .forEach((assignment) => {
-      const submission = byAssignment[assignment.id];
-      const state = submissionState(assignment, submission, now);
-      counts[state] += 1;
+  rows.forEach((row) => {
+    counts[row.state] += 1;
 
-      if (state === ON_TIME || state === LATE)
-        tardiness.push(tardinessSeconds(assignment, submission, now));
+    if (row.tardinessSeconds !== null) tardiness.push(row.tardinessSeconds);
 
-      const points = Number(assignment.points_possible);
-      if (isNaN(points) || points <= 0) return;
-
-      if (state === MISSING) {
-        missingScoredCount += 1;
-        return;
-      }
-
-      if (
-        submission &&
-        submission.score !== null &&
-        submission.score !== undefined &&
-        submission.score !== "" &&
-        !isNaN(Number(submission.score))
-      ) {
-        percentTotal += (Number(submission.score) / points) * 100;
-        gradedCount += 1;
-      }
-    });
+    if (row.graded) {
+      percentTotal += row.percent;
+      gradedCount += 1;
+    } else if (row.state === MISSING && row.pointsPossible !== null)
+      missingScoredCount += 1;
+  });
 
   const scoredCount = gradedCount + missingScoredCount;
   const submittedCount = tardiness.length;
@@ -179,6 +203,7 @@ export function studentSubmissionAnalytics(
     tardinessTotalSeconds: submittedCount > 0 ? tardinessTotal : null,
     tardinessMeanSeconds: submittedCount > 0 ? tardinessTotal / submittedCount : null,
     tardinessMedianSeconds: median(tardiness),
+    assignments: rows,
   };
 }
 
@@ -197,5 +222,6 @@ function emptyAnalytics(counts) {
     tardinessTotalSeconds: null,
     tardinessMeanSeconds: null,
     tardinessMedianSeconds: null,
+    assignments: [],
   };
 }

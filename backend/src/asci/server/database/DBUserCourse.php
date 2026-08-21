@@ -163,6 +163,14 @@ class DBUserCourse
           if (\asci\util\Roles::isStaffRole($role))
             return true;
           break;
+        case "office-hour-analytics":
+          if (\asci\util\Roles::isStaffRole($role))
+            return true;
+          break;
+        case "piazza-analytics":
+          if (\asci\util\Roles::isStaffRole($role))
+            return true;
+          break;
         case "upload-canvas-lms-submissions":
         case "manage-canvas-lms-assignments":
           if (\asci\util\Roles::isInstructorRole($role))
@@ -217,6 +225,31 @@ class DBUserCourse
         }
 
         return $toReturn;
+    }
+
+    public function getPiazzaStatsForCourse($courseId)
+    {
+      $query = 'select P.user_id, Us.computing_id, P.days, P.posts, P.asks, P.answers, P.views
+                from ((piazza_raw_stats P join users Us on Us.id = P.user_id)
+                      join user_courses C on C.user_id = P.user_id and C.course_id = P.course_id)
+                where P.course_id = $1 and C.role = \'student\'';
+
+      $result = $this->db->query($query, array($courseId));
+
+      return $this->db->fetchAll($result);
+    }
+
+    public function getPiazzaStreamForCourse($courseId)
+    {
+      $query = 'select S.user_id, Us.computing_id, S.time, S.action
+                from ((piazza_stream S join users Us on Us.id = S.user_id)
+                      join user_courses C on C.user_id = S.user_id and C.course_id = S.course_id)
+                where S.course_id = $1 and C.role = \'student\' and S.time is not null
+                order by S.time';
+
+      $result = $this->db->query($query, array($courseId));
+
+      return $this->db->fetchAll($result);
     }
 
     // 

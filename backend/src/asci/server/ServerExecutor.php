@@ -2861,6 +2861,29 @@ $usedCosSim = True;
     ];
   }
 
+  public function getOfficeHoursSessionsHandler($asci_course_id) {
+    if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "office-hour-analytics"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to view office hour analytics");
+
+    $dbsession = new \asci\server\database\DBSession($this->db);
+
+    return [
+      "success" => "true",
+      "sessions" => $dbsession->getOfficeHoursSessionsForCourse($asci_course_id),
+    ];
+  }
+
+  public function getPiazzaAnalyticsHandler($asci_course_id) {
+    if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "piazza-analytics"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to view Piazza analytics");
+
+    return [
+      "success" => "true",
+      "stats" => $this->userCourseStore->getPiazzaStatsForCourse($asci_course_id),
+      "stream" => $this->userCourseStore->getPiazzaStreamForCourse($asci_course_id),
+    ];
+  }
+
   public function removeFlaggedCanvasAssignmentHandler($asci_course_id, $canvas_assignment_id) {
     if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-assignments"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to remove Canvas LMS assignments");

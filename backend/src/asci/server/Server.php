@@ -817,6 +817,16 @@ class Server
                 $this->setResponse($executor->getCanvasSubmissionsHandler($asciCourseId));
                 break;
 
+            case "getOfficeHoursSessions":
+                $asciCourseId = $this->input["asciCourseId"];
+                $this->setResponse($executor->getOfficeHoursSessionsHandler($asciCourseId));
+                break;
+
+            case "getPiazzaAnalytics":
+                $asciCourseId = $this->input["asciCourseId"];
+                $this->setResponse($executor->getPiazzaAnalyticsHandler($asciCourseId));
+                break;
+
             case "uploadGradescopeSubmissions":
                 $asciCourseId = $this->input["asciCourseId"];
                 $submissions = $this->input["submissions"];

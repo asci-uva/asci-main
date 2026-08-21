@@ -7,6 +7,9 @@ import { isStaffRole } from "../utils/roles";
 import StudentSearch from "./StudentSearch";
 import StudentInfo from "./StudentInfo";
 import SubmissionStats from "./SubmissionStats";
+import OfficeHoursStats from "./OfficeHoursStats";
+import PiazzaStats from "./PiazzaStats";
+import StatComparison from "./StatComparison";
 
 function Home(props) {
   const { getCourse } = useUser();
@@ -17,12 +20,21 @@ function Home(props) {
   const [students, setStudents] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [sessions, setSessions] = useState([]);
+  const [piazzaStats, setPiazzaStats] = useState([]);
+  const [piazzaStream, setPiazzaStream] = useState([]);
   const [selected, setSelected] = useState(null);
   const [studentsLoaded, setStudentsLoaded] = useState(false);
   const [assignmentsLoaded, setAssignmentsLoaded] = useState(false);
+  const [sessionsLoaded, setSessionsLoaded] = useState(false);
   const [error, setError] = useState(null);
+  const [piazzaLoaded, setPiazzaLoaded] = useState(false);
+  const [officeHoursError, setOfficeHoursError] = useState(null);
+  const [piazzaError, setPiazzaError] = useState(null);
   const studentsRequestRef = useRef(0);
   const assignmentsRequestRef = useRef(0);
+  const sessionsRequestRef = useRef(0);
+  const piazzaRequestRef = useRef(0);
 
   const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible");
   const [sidebarCol, setSidebarCol] = useState("col-md-3");
@@ -97,6 +109,66 @@ function Home(props) {
       });
   }, [props.url, courseId, isStaff, canvasLmsCourse, canvasLmsCourseLoaded]);
 
+  useEffect(() => {
+    if (!isStaff || !courseId) return;
+
+    const requestId = ++sessionsRequestRef.current;
+    const isCurrent = () => requestId === sessionsRequestRef.current;
+
+    postCommand(props.url, {
+      asciCourseId: courseId,
+      command: "getOfficeHoursSessions",
+    })
+      .then((data) => {
+        if (!isCurrent()) return;
+        setSessionsLoaded(true);
+
+        if (data.success === "true") setSessions(data.sessions || []);
+        else {
+          console.log(data.error);
+          setOfficeHoursError(
+            errorMessage(data.error, "Failed to load office hour sessions")
+          );
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+        if (!isCurrent()) return;
+        setSessionsLoaded(true);
+        setOfficeHoursError("Failed to load office hour sessions");
+      });
+  }, [props.url, courseId, isStaff]);
+
+  useEffect(() => {
+    if (!isStaff || !courseId) return;
+
+    const requestId = ++piazzaRequestRef.current;
+    const isCurrent = () => requestId === piazzaRequestRef.current;
+
+    postCommand(props.url, {
+      asciCourseId: courseId,
+      command: "getPiazzaAnalytics",
+    })
+      .then((data) => {
+        if (!isCurrent()) return;
+        setPiazzaLoaded(true);
+
+        if (data.success === "true") {
+          setPiazzaStats(data.stats || []);
+          setPiazzaStream(data.stream || []);
+        } else {
+          console.log(data.error);
+          setPiazzaError(errorMessage(data.error, "Failed to load Piazza statistics"));
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+        if (!isCurrent()) return;
+        setPiazzaLoaded(true);
+        setPiazzaError("Failed to load Piazza statistics");
+      });
+  }, [props.url, courseId, isStaff]);
+
   const handleCollapse = () => {
     if (sidebarOpen === "sidebar-visible") {
       setSidebarCol("col-md-1");
@@ -137,6 +209,32 @@ function Home(props) {
           canvasLmsCourse={canvasLmsCourse}
           loaded={assignmentsLoaded && studentsLoaded}
           error={error}
+        />
+
+        <OfficeHoursStats
+          student={selected}
+          sessions={sessions}
+          loaded={sessionsLoaded}
+          error={officeHoursError}
+        />
+
+        <PiazzaStats
+          student={selected}
+          stats={piazzaStats}
+          stream={piazzaStream}
+          loaded={piazzaLoaded}
+          error={piazzaError}
+        />
+
+        <StatComparison
+          student={selected}
+          sessions={sessions}
+          stream={piazzaStream}
+          assignments={assignments}
+          submissions={submissions}
+          loaded={
+            studentsLoaded && assignmentsLoaded && sessionsLoaded && piazzaLoaded
+          }
         />
       </>
     );
