@@ -196,10 +196,10 @@ export function statComparisonAnalytics(data, student, now = new Date()) {
   };
 }
 
-export function chartSeries(analytics, enabled, metrics) {
+export function chartSeries(analytics, enabled, metrics, sources = SOURCES) {
   const series = [];
 
-  SOURCES.forEach((source) => {
+  sources.forEach((source) => {
     if (!enabled[source.key] || !analytics.available[source.key]) return;
 
     const metric = metricFor(source, metrics);
@@ -216,10 +216,10 @@ export function chartSeries(analytics, enabled, metrics) {
   return series;
 }
 
-function Toggles({ analytics, enabled, metrics, onToggle, onMetric }) {
+function Toggles({ sources, analytics, enabled, metrics, onToggle, onMetric }) {
   return (
     <div className="d-flex flex-wrap mb-3">
-      {SOURCES.map((source) => {
+      {sources.map((source) => {
         const available = analytics.available[source.key];
 
         return (
@@ -304,12 +304,20 @@ function StatComparison(props) {
     [props.sessions, props.stream, props.assignments, props.submissions, props.student]
   );
 
-  const series = useMemo(
-    () => chartSeries(analytics, enabled, metrics),
-    [analytics, enabled, metrics]
+  const sources = useMemo(
+    () =>
+      SOURCES.filter(
+        (source) => source.key !== "piazza" || props.piazzaEnabled !== false
+      ),
+    [props.piazzaEnabled]
   );
 
-  const anyAvailable = SOURCES.some((source) => analytics.available[source.key]);
+  const series = useMemo(
+    () => chartSeries(analytics, enabled, metrics, sources),
+    [analytics, enabled, metrics, sources]
+  );
+
+  const anyAvailable = sources.some((source) => analytics.available[source.key]);
 
   useEffect(() => {
     if (chartNode === null || series.length === 0) return;
@@ -380,14 +388,16 @@ function StatComparison(props) {
     if (!anyAvailable)
       return (
         <h5 className="mb-0">
-          There is no office hour, Piazza, or graded assignment history for this
-          student to compare.
+          {props.piazzaEnabled === false
+            ? "There is no office hour or graded assignment history for this student to compare."
+            : "There is no office hour, Piazza, or graded assignment history for this student to compare."}
         </h5>
       );
 
     return (
       <>
         <Toggles
+          sources={sources}
           analytics={analytics}
           enabled={enabled}
           metrics={metrics}

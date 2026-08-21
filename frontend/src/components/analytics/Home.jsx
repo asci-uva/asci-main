@@ -3,6 +3,7 @@ import { useUser } from "../context/UserContext";
 import { postCommand } from "../utils/postCommand";
 import { errorMessage } from "../utils/errorMessage";
 import { useCanvasLmsCourse } from "../utils/useCanvasLmsCourse";
+import { useExternalTools } from "../utils/useExternalTools";
 import { isStaffRole } from "../utils/roles";
 import StudentSearch from "./StudentSearch";
 import StudentInfo from "./StudentInfo";
@@ -44,6 +45,12 @@ function Home(props) {
     course: canvasLmsCourse,
     loaded: canvasLmsCourseLoaded,
   } = useCanvasLmsCourse(props.url, courseId, isStaff);
+
+  const {
+    tools: externalTools,
+    loaded: externalToolsLoaded,
+  } = useExternalTools(props.url, courseId, isStaff);
+  const piazzaEnabled = externalTools.piazza === true;
 
   useEffect(() => {
     if (!isStaff || !courseId) return;
@@ -140,10 +147,18 @@ function Home(props) {
   }, [props.url, courseId, isStaff]);
 
   useEffect(() => {
-    if (!isStaff || !courseId) return;
+    if (!isStaff || !courseId || !externalToolsLoaded) return;
 
     const requestId = ++piazzaRequestRef.current;
     const isCurrent = () => requestId === piazzaRequestRef.current;
+
+    if (!piazzaEnabled) {
+      setPiazzaStats([]);
+      setPiazzaStream([]);
+      setPiazzaError(null);
+      setPiazzaLoaded(true);
+      return;
+    }
 
     postCommand(props.url, {
       asciCourseId: courseId,
@@ -167,7 +182,7 @@ function Home(props) {
         setPiazzaLoaded(true);
         setPiazzaError("Failed to load Piazza statistics");
       });
-  }, [props.url, courseId, isStaff]);
+  }, [props.url, courseId, isStaff, externalToolsLoaded, piazzaEnabled]);
 
   const handleCollapse = () => {
     if (sidebarOpen === "sidebar-visible") {
@@ -218,16 +233,19 @@ function Home(props) {
           error={officeHoursError}
         />
 
-        <PiazzaStats
-          student={selected}
-          stats={piazzaStats}
-          stream={piazzaStream}
-          loaded={piazzaLoaded}
-          error={piazzaError}
-        />
+        {piazzaEnabled && (
+          <PiazzaStats
+            student={selected}
+            stats={piazzaStats}
+            stream={piazzaStream}
+            loaded={piazzaLoaded}
+            error={piazzaError}
+          />
+        )}
 
         <StatComparison
           student={selected}
+          piazzaEnabled={piazzaEnabled}
           sessions={sessions}
           stream={piazzaStream}
           assignments={assignments}
