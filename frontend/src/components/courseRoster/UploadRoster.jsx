@@ -151,6 +151,7 @@ function UploadRoster(props) {
   };
 
   useEffect(() => {
+    if (!props.canvasEnabled) return;
     if (props.canvasLmsCourse === null) return;
     if (!props.canvasSyncSettings) return;
     if (!props.canvasSyncSettings.autosync_enabled) return;
@@ -162,7 +163,7 @@ function UploadRoster(props) {
     autoSyncRan.current[props.course_id] = true;
 
     performSyncCanvasLmsRoster({ silent: true, autosync: true });
-  }, [props.canvasSyncSettings, props.canvasLmsCourse, props.canvasTokenStatus, props.course_id]);
+  }, [props.canvasEnabled, props.canvasSyncSettings, props.canvasLmsCourse, props.canvasTokenStatus, props.course_id]);
 
   function getSyncRosterButton() {
     if (!isInstructorRole(course?.role))
@@ -244,7 +245,7 @@ function UploadRoster(props) {
     );
   }
 
-  if (!props.canvasLmsCourseLoaded) {
+  if (!props.canvasLmsCourseLoaded || !props.externalToolsLoaded) {
     return (
       <div className="card mb-4">
         <h4 className="card-header">Roster</h4>
@@ -257,7 +258,7 @@ function UploadRoster(props) {
 
   return (
     <div className="card mb-4">
-      {props.canvasLmsCourse !== null ? (
+      {props.canvasEnabled && props.canvasLmsCourse !== null ? (
         <>
           <h4 className="card-header">Synchronize Roster from Canvas LMS</h4>
           <div className="card-body">

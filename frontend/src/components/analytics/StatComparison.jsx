@@ -11,6 +11,7 @@ export const SOURCES = [
   {
     key: "officeHours",
     label: "Office Hours",
+    history: "office hour",
     color: "#1baf7a",
     metrics: [
       {
@@ -32,6 +33,7 @@ export const SOURCES = [
   {
     key: "piazza",
     label: "Piazza",
+    history: "Piazza",
     color: "#3d7dd8",
     metrics: [
       {
@@ -61,6 +63,7 @@ export const SOURCES = [
   {
     key: "grade",
     label: "Assignment Grade",
+    history: "graded assignment",
     color: "#7a5bd8",
     metrics: [
       {
@@ -79,6 +82,16 @@ const DEFAULT_METRICS = {
   piazza: "contributions",
   grade: "average",
 };
+
+function historyList(sources) {
+  const names = sources.map((source) => source.history);
+
+  if (names.length === 0) return "";
+  if (names.length === 1) return names[0];
+  if (names.length === 2) return `${names[0]} or ${names[1]}`;
+
+  return `${names.slice(0, -1).join(", ")}, or ${names[names.length - 1]}`;
+}
 
 function metricFor(source, metrics) {
   return (
@@ -303,13 +316,15 @@ function StatComparison(props) {
       ),
     [props.sessions, props.stream, props.assignments, props.submissions, props.student]
   );
-
+  
   const sources = useMemo(
     () =>
-      SOURCES.filter(
-        (source) => source.key !== "piazza" || props.piazzaEnabled !== false
-      ),
-    [props.piazzaEnabled]
+      SOURCES.filter((source) => {
+        if (source.key === "piazza") return props.piazzaEnabled !== false;
+        if (source.key === "grade") return props.canvasEnabled !== false;
+        return true;
+      }),
+    [props.piazzaEnabled, props.canvasEnabled]
   );
 
   const series = useMemo(
@@ -388,9 +403,7 @@ function StatComparison(props) {
     if (!anyAvailable)
       return (
         <h5 className="mb-0">
-          {props.piazzaEnabled === false
-            ? "There is no office hour or graded assignment history for this student to compare."
-            : "There is no office hour, Piazza, or graded assignment history for this student to compare."}
+          There is no {historyList(sources)} history for this student to compare.
         </h5>
       );
 

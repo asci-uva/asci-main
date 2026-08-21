@@ -50,6 +50,7 @@ function Home(props) {
     tools: externalTools,
     loaded: externalToolsLoaded,
   } = useExternalTools(props.url, courseId, isStaff);
+  const canvasEnabled = externalTools.canvas === true;
   const piazzaEnabled = externalTools.piazza === true;
 
   useEffect(() => {
@@ -217,14 +218,16 @@ function Home(props) {
 
         <StudentInfo student={selected} />
 
-        <SubmissionStats
-          student={selected}
-          assignments={assignments}
-          submissions={submissions}
-          canvasLmsCourse={canvasLmsCourse}
-          loaded={assignmentsLoaded && studentsLoaded}
-          error={error}
-        />
+        {canvasEnabled && (
+          <SubmissionStats
+            student={selected}
+            assignments={assignments}
+            submissions={submissions}
+            canvasLmsCourse={canvasLmsCourse}
+            loaded={assignmentsLoaded && studentsLoaded}
+            error={error}
+          />
+        )}
 
         <OfficeHoursStats
           student={selected}
@@ -245,6 +248,7 @@ function Home(props) {
 
         <StatComparison
           student={selected}
+          canvasEnabled={canvasEnabled}
           piazzaEnabled={piazzaEnabled}
           sessions={sessions}
           stream={piazzaStream}

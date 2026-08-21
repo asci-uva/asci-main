@@ -22,6 +22,7 @@ function Home(props) {
   } = useCanvasLmsCourse(props.url, courseId, isStaff);
 
   const { tools: externalTools } = useExternalTools(props.url, courseId, isStaff);
+  const canvasEnabled = externalTools.canvas === true;
   const gradescopeEnabled = externalTools.gradescope === true;
 
   const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible");
@@ -31,19 +32,20 @@ function Home(props) {
   const tabs = [];
 
   if (isInstructorRole(course.role)) {
-    tabs.push({
-      key: "assignments",
-      label: "Assignments",
-      content: (
-        <Assignments
-          course_id={courseId}
-          canvasLmsCourse={canvasLmsCourse}
-          canvasLmsCourseLoaded={canvasLmsCourseLoaded}
-          gradescopeEnabled={gradescopeEnabled}
-          {...props}
-        />
-      ),
-    });
+    if (canvasEnabled)
+      tabs.push({
+        key: "assignments",
+        label: "Assignments",
+        content: (
+          <Assignments
+            course_id={courseId}
+            canvasLmsCourse={canvasLmsCourse}
+            canvasLmsCourseLoaded={canvasLmsCourseLoaded}
+            gradescopeEnabled={gradescopeEnabled}
+            {...props}
+          />
+        ),
+      });
     if (showQuests)
       tabs.push({ key: "quests", label: "Quests", content: <Quests {...props} /> });
   }

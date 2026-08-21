@@ -59,6 +59,8 @@ function Home(props) {
     canvasLmsCourse !== null && isStaff
   );
 
+  const canvasEnabled = externalTools.canvas === true;
+
   const toolToggle = (tool, label) => (
     <ExternalToolToggle
       tool={tool}
@@ -103,11 +105,11 @@ function Home(props) {
           <div className={contentCol}>
             <h3 className="mb-3">Course: {course.mnemonic} {course.number} - {course.name} ({course.semester})</h3>
 
-            {canvasTokenStatusLoaded && canvasTokenStatus.isTokenExpired && (
+            {canvasEnabled && canvasTokenStatusLoaded && canvasTokenStatus.isTokenExpired && (
               <CanvasTokenExpiredWarning canvasLmsCourse={canvasLmsCourse} />
             )}
 
-            {canvasTokenStatusLoaded && canvasLmsCourse !== null && !canvasTokenStatus.hasToken && (
+            {canvasEnabled && canvasTokenStatusLoaded && canvasLmsCourse !== null && !canvasTokenStatus.hasToken && (
               <CanvasLinkWarning
                 canvasLmsCourse={canvasLmsCourse}
                 message=", but the primary instructor has not added a Canvas access token. Synced features are disabled until they add one or the course is unlinked."
@@ -140,21 +142,23 @@ function Home(props) {
                 <div className="tab-pane fade show active" id="ext-canvas" role="tabpanel" aria-labelledby="ext-canvas-tab">
                   <div className="col-md-12 my-auto">
                     {toolToggle("canvas", "Canvas LMS")}
-                    <CanvasLmsSync
-                      course_id={courseId}
-                      canvasTokenStatus={canvasTokenStatus}
-                      canvasTokenStatusLoaded={canvasTokenStatusLoaded}
-                      canvasTokenStatusError={canvasTokenStatusError}
-                      refreshCanvasTokenStatus={refreshCanvasTokenStatus}
-                      canvasLmsCourse={canvasLmsCourse}
-                      setCanvasLmsCourse={setCanvasLmsCourse}
-                      canvasLmsCourseLoaded={canvasLmsCourseLoaded}
-                      canvasSyncSettings={canvasSyncSettings}
-                      canvasSyncSettingsLoaded={canvasSyncSettingsLoaded}
-                      canvasSyncSettingsError={canvasSyncSettingsError}
-                      saveCanvasSyncSettings={saveCanvasSyncSettings}
-                      {...props}
-                    />
+                    {canvasEnabled && (
+                      <CanvasLmsSync
+                        course_id={courseId}
+                        canvasTokenStatus={canvasTokenStatus}
+                        canvasTokenStatusLoaded={canvasTokenStatusLoaded}
+                        canvasTokenStatusError={canvasTokenStatusError}
+                        refreshCanvasTokenStatus={refreshCanvasTokenStatus}
+                        canvasLmsCourse={canvasLmsCourse}
+                        setCanvasLmsCourse={setCanvasLmsCourse}
+                        canvasLmsCourseLoaded={canvasLmsCourseLoaded}
+                        canvasSyncSettings={canvasSyncSettings}
+                        canvasSyncSettingsLoaded={canvasSyncSettingsLoaded}
+                        canvasSyncSettingsError={canvasSyncSettingsError}
+                        saveCanvasSyncSettings={saveCanvasSyncSettings}
+                        {...props}
+                      />
+                    )}
                   </div>
                 </div>
 

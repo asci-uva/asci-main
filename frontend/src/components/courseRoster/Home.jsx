@@ -3,6 +3,7 @@ import { useUser } from "../context/UserContext";
 import { useCanvasSyncSettings } from "../utils/useCanvasSyncSettings";
 import { useCanvasTokenStatus } from "../utils/useCanvasTokenStatus";
 import { useCanvasLmsCourse } from "../utils/useCanvasLmsCourse";
+import { useExternalTools } from "../utils/useExternalTools";
 import { isStaffRole } from "../utils/roles";
 import ViewRoster from "./ViewRoster";
 import UploadRoster from "./UploadRoster";
@@ -27,6 +28,12 @@ function Home(props) {
     course: canvasLmsCourse,
     loaded: canvasLmsCourseLoaded,
   } = useCanvasLmsCourse(props.url, courseId, isStaff);
+
+  const {
+    tools: externalTools,
+    loaded: externalToolsLoaded,
+  } = useExternalTools(props.url, courseId, isStaff);
+  const canvasEnabled = externalTools.canvas === true;
 
   const {
     settings: canvasSyncSettings,
@@ -116,6 +123,8 @@ function Home(props) {
                   <div className="col-md-12 my-auto mb-2">
                     <UploadRoster
                       course_id={courseId}
+                      canvasEnabled={canvasEnabled}
+                      externalToolsLoaded={externalToolsLoaded}
                       canvasTokenStatus={canvasTokenStatus}
                       canvasTokenStatusLoaded={canvasTokenStatusLoaded}
                       canvasLmsCourse={canvasLmsCourse}
@@ -129,6 +138,7 @@ function Home(props) {
                   <div className="col-md-12 my-auto">
                     <AddStudent
                       course_id={courseId}
+                      canvasEnabled={canvasEnabled}
                       canvasTokenStatus={canvasTokenStatus}
                       canvasTokenStatusLoaded={canvasTokenStatusLoaded}
                       canvasLmsCourse={canvasLmsCourse}
