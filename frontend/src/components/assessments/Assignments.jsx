@@ -143,7 +143,7 @@ function Assignments(props) {
 
   return (
     <>
-      {props.canvasLmsCourse !== null && loaded && (
+      {props.gradescopeEnabled && props.canvasLmsCourse !== null && loaded && (
         <UploadGradescopeCsv
           url={props.url}
           course_id={courseId}

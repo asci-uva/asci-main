@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useUser } from "../context/UserContext";
 import { useCanvasLmsCourse } from "../utils/useCanvasLmsCourse";
+import { useExternalTools } from "../utils/useExternalTools";
 import { isInstructorRole, isStaffRole } from "../utils/roles";
 import Quests from "./Quests";
 import Assignments from "./Assignments";
@@ -20,6 +21,9 @@ function Home(props) {
     loaded: canvasLmsCourseLoaded,
   } = useCanvasLmsCourse(props.url, courseId, isStaff);
 
+  const { tools: externalTools } = useExternalTools(props.url, courseId, isStaff);
+  const gradescopeEnabled = externalTools.gradescope === true;
+
   const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible");
   const [sidebarCol, setSidebarCol] = useState("col-md-3");
   const [contentCol, setContentCol] = useState("page-container content col-md-9 my-auto");
@@ -35,6 +39,7 @@ function Home(props) {
           course_id={courseId}
           canvasLmsCourse={canvasLmsCourse}
           canvasLmsCourseLoaded={canvasLmsCourseLoaded}
+          gradescopeEnabled={gradescopeEnabled}
           {...props}
         />
       ),

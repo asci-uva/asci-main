@@ -25,6 +25,12 @@ CREATE TYPE group_mapping_status AS ENUM (
   'inactive'
 );
 
+CREATE TYPE external_tool AS ENUM (
+  'canvas',
+  'gradescope',
+  'piazza'
+);
+
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   computing_id VARCHAR(12),
@@ -232,6 +238,15 @@ CREATE TABLE course_quests (
   quest_id INT,
   course_id INT,
   PRIMARY KEY (course_id, quest_id)
+);
+
+-- External tools
+CREATE TABLE course_external_tools (
+  course_id  INT NOT NULL REFERENCES courses(id),
+  tool       external_tool NOT NULL,
+  enabled    BOOL NOT NULL DEFAULT false,
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  PRIMARY KEY (course_id, tool)
 );
 
 -- Canvas LMS

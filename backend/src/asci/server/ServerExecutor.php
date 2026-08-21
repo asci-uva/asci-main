@@ -30,6 +30,7 @@ class ServerExecutor{
   public $synchronizationStore = null; // The synchronization storage
   public $canvasAssignmentStore = null; // The Canvas LMS assignment storage
   public $canvasSubmissionStore = null; // The Canvas LMS submission storage
+  public $externalToolStore = null; // The external tool enablement storage
 
   private $user = null;
   //Model state (NOT interacting with DB)
@@ -70,6 +71,7 @@ class ServerExecutor{
     $this->synchronizationStore = new \asci\server\database\DBSynchronization($this->db);
     $this->canvasAssignmentStore = new \asci\server\database\DBCanvasAssignment($this->db);
     $this->canvasSubmissionStore = new \asci\server\database\DBCanvasSubmission($this->db);
+    $this->externalToolStore = new \asci\server\database\DBExternalTools($this->db);
     // Check $_SERVER["uid"]; // their computing ID  (name and id can come from roster)
 
     // This may need to change with other authentication types
@@ -2720,6 +2722,25 @@ $usedCosSim = True;
       if ($result)
         return ["success" => "true", "course" => $result];
       return err("No Canvas LMS course assoicated with ASCI course");
+    }
+
+    public function getExternalToolsHandler($asci_course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "external-tools"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to read the external tools for this course");
+
+      return ["success" => "true", "tools" => $this->externalToolStore->getExternalTools($asci_course_id)];
+    }
+
+    public function setExternalToolEnabledHandler($asci_course_id, $tool, $enabled) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-external-tools"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to manage the external tools for this course");
+
+      if (!\asci\server\database\DBExternalTools::isValidTool($tool))
+        return $this->err("Unknown external tool: $tool");
+
+      $tools = $this->externalToolStore->setExternalToolEnabled($asci_course_id, $tool, (bool)$enabled);
+
+      return ["success" => "true", "tools" => $tools];
     }
 
     public function getCanvasLmsSyncSettingsHandler($asci_course_id) {

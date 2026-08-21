@@ -3,15 +3,18 @@ import { useUser } from "../context/UserContext";
 import { useCanvasSyncSettings } from "../utils/useCanvasSyncSettings";
 import { useCanvasTokenStatus } from "../utils/useCanvasTokenStatus";
 import { useCanvasLmsCourse } from "../utils/useCanvasLmsCourse";
-import { isStaffRole } from "../utils/roles";
+import { useExternalTools } from "../utils/useExternalTools";
+import { isInstructorRole, isStaffRole } from "../utils/roles";
 import CanvasLmsSync from "./CanvasLmsSync";
 import GradescopeSync from "./GradescopeSync";
 import CanvasLinkWarning from "./CanvasLinkWarning";
 import CanvasTokenExpiredWarning from "./CanvasTokenExpiredWarning";
+import ExternalToolToggle from "./ExternalToolToggle";
 
 const TABS = [
   { key: "canvas", label: "Canvas LMS" },
   { key: "gradescope", label: "Gradescope" },
+  { key: "piazza", label: "Piazza" },
 ];
 
 function Home(props) {
@@ -19,6 +22,7 @@ function Home(props) {
   const course = getCourse();
   const courseId = course.course_id;
   const isStaff = isStaffRole(course.role);
+  const canManageTools = isInstructorRole(course.role);
 
   const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible");
   const [sidebarCol, setSidebarCol] = useState("col-md-3");
@@ -30,6 +34,13 @@ function Home(props) {
     error: canvasTokenStatusError,
     refresh: refreshCanvasTokenStatus,
   } = useCanvasTokenStatus(props.url, courseId, isStaff);
+
+  const {
+    tools: externalTools,
+    loaded: externalToolsLoaded,
+    error: externalToolsError,
+    save: saveExternalTool,
+  } = useExternalTools(props.url, courseId, isStaff);
 
   const {
     course: canvasLmsCourse,
@@ -46,6 +57,18 @@ function Home(props) {
     props.url,
     courseId,
     canvasLmsCourse !== null && isStaff
+  );
+
+  const toolToggle = (tool, label) => (
+    <ExternalToolToggle
+      tool={tool}
+      label={label}
+      enabled={externalTools[tool] === true}
+      loaded={externalToolsLoaded}
+      error={externalToolsError}
+      canManage={canManageTools}
+      onSave={saveExternalTool}
+    />
   );
 
   const handleCollapse = () => {
@@ -116,6 +139,7 @@ function Home(props) {
               <div className="tab-content card-body" id="external-tools-tabContent">
                 <div className="tab-pane fade show active" id="ext-canvas" role="tabpanel" aria-labelledby="ext-canvas-tab">
                   <div className="col-md-12 my-auto">
+                    {toolToggle("canvas", "Canvas LMS")}
                     <CanvasLmsSync
                       course_id={courseId}
                       canvasTokenStatus={canvasTokenStatus}
@@ -136,7 +160,16 @@ function Home(props) {
 
                 <div className="tab-pane fade" id="ext-gradescope" role="tabpanel" aria-labelledby="ext-gradescope-tab">
                   <div className="col-md-12 my-auto">
-                    <GradescopeSync course_id={courseId} {...props} />
+                    {toolToggle("gradescope", "Gradescope")}
+                    {externalTools.gradescope === true && (
+                      <GradescopeSync course_id={courseId} {...props} />
+                    )}
+                  </div>
+                </div>
+
+                <div className="tab-pane fade" id="ext-piazza" role="tabpanel" aria-labelledby="ext-piazza-tab">
+                  <div className="col-md-12 my-auto">
+                    {toolToggle("piazza", "Piazza")}
                   </div>
                 </div>
               </div>

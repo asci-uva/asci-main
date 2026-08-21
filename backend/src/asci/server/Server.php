@@ -795,6 +795,18 @@ class Server
                 $this->setResponse($executor->syncCanvasLmsRosterHandler($asciCourseId, $autosync));
                 break;
 
+            case "getExternalTools":
+                $asciCourseId = $this->input["asciCourseId"];
+                $this->setResponse($executor->getExternalToolsHandler($asciCourseId));
+                break;
+
+            case "setExternalToolEnabled":
+                $asciCourseId = $this->input["asciCourseId"];
+                $tool = $this->input["tool"];
+                $enabled = ($this->input["enabled"] ?? false) === true;
+                $this->setResponse($executor->setExternalToolEnabledHandler($asciCourseId, $tool, $enabled));
+                break;
+
             case "getCanvasLmsSyncSettings":
                 $asciCourseId = $this->input["asciCourseId"];
                 $this->setResponse($executor->getCanvasLmsSyncSettingsHandler($asciCourseId));
