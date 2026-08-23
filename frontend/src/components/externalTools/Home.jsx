@@ -6,7 +6,9 @@ import { useCanvasLmsCourse } from "../utils/useCanvasLmsCourse";
 import { useExternalTools } from "../utils/useExternalTools";
 import { isInstructorRole, isStaffRole } from "../utils/roles";
 import CanvasLmsSync from "./CanvasLmsSync";
+import CanvasSyncActions from "./CanvasSyncActions";
 import GradescopeSync from "./GradescopeSync";
+import GradescopeCsvUpload from "./GradescopeCsvUpload";
 import CanvasLinkWarning from "./CanvasLinkWarning";
 import CanvasTokenExpiredWarning from "./CanvasTokenExpiredWarning";
 import ExternalToolToggle from "./ExternalToolToggle";
@@ -50,8 +52,10 @@ function Home(props) {
 
   const {
     settings: canvasSyncSettings,
+    setSettings: setCanvasSyncSettings,
     loaded: canvasSyncSettingsLoaded,
     error: canvasSyncSettingsError,
+    refresh: refreshCanvasSyncSettings,
     save: saveCanvasSyncSettings,
   } = useCanvasSyncSettings(
     props.url,
@@ -159,6 +163,19 @@ function Home(props) {
                         {...props}
                       />
                     )}
+                    {canvasEnabled && canvasLmsCourse !== null && (
+                      <CanvasSyncActions
+                        course_id={courseId}
+                        canvasTokenStatus={canvasTokenStatus}
+                        canvasTokenStatusLoaded={canvasTokenStatusLoaded}
+                        canvasLmsCourse={canvasLmsCourse}
+                        canvasSyncSettings={canvasSyncSettings}
+                        canvasSyncSettingsLoaded={canvasSyncSettingsLoaded}
+                        setCanvasSyncSettings={setCanvasSyncSettings}
+                        refreshCanvasSyncSettings={refreshCanvasSyncSettings}
+                        {...props}
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -166,7 +183,10 @@ function Home(props) {
                   <div className="col-md-12 my-auto">
                     {toolToggle("gradescope", "Gradescope")}
                     {externalTools.gradescope === true && (
-                      <GradescopeSync course_id={courseId} {...props} />
+                      <>
+                        <GradescopeSync course_id={courseId} {...props} />
+                        <GradescopeCsvUpload course_id={courseId} {...props} />
+                      </>
                     )}
                   </div>
                 </div>
