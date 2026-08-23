@@ -77,8 +77,10 @@ class PiazzaHandler {
   }
 
   private function cleanUserId($email) {
+    if ($email === null || strpos($email, "@") === false)
+      return false;
     list($id, $domain) = explode("@", $email);
-    return $id;
+    return strtolower(trim($id));
   }
 
   public function parsePiazzaStats($participants = []) {
@@ -87,7 +89,7 @@ class PiazzaHandler {
 
     $piazzaData = [];
     foreach($participants as $participant) {
-      $piazzaData[$participant->getComputingId()] = [
+      $piazzaData[strtolower($participant->getComputingId())] = [
         "user" => $participant,
         "stats" => [
           "days" => 0,
@@ -99,19 +101,12 @@ class PiazzaHandler {
     }
 
     foreach($piazzaRaw as $piazzaUser) {
-      $userid = $this->cleanUserId($piazzaUser["email"]);
-      if (isset($piazzaData[$userid])) {
+      $userid = $this->cleanUserId($piazzaUser["email"] ?? null);
+      if ($userid !== false && isset($piazzaData[$userid])) {
         $piazzaData[$userid]["stats"] = $piazzaUser;
       }
     }
     return $piazzaData;
-  }
-
-  private function cleanStreamUserId($email) {
-    if (strpos($email, "@") !== false) {
-      return $this->cleanUserId($email);
-    } 
-    return false;
   }
 
   public function parsePiazzaStream($participants = []) {
@@ -123,7 +118,7 @@ class PiazzaHandler {
     $indexPart = [];
     // get participants indexed by computing id 
     foreach($participants as $participant) {
-      $indexPart[$participant->getComputingId()] =  $participant;
+      $indexPart[strtolower($participant->getComputingId())] =  $participant;
     }
     
     // Open a temporary memory stream
@@ -139,7 +134,7 @@ class PiazzaHandler {
       
       if (count($data) != 11)
         continue; 
-      $userid = $this->cleanStreamUserId($data[9]);
+      $userid = $this->cleanUserId($data[9]);
       if ($userid !== false && isset($indexPart[$userid])) {
         array_push($piazzaData, [
           "post_no" => $data[1],
@@ -147,6 +142,7 @@ class PiazzaHandler {
           "subject" => $data[6],
           "contents" => $data[5],
           "type" => $data[7],
+          "endorsed" => strtolower(trim($data[10])) === "true",
           "user" => $indexPart[$userid]
         ]);
       }

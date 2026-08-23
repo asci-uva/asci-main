@@ -188,6 +188,7 @@ CREATE TABLE piazza_stream (
   submission text,
   subject text,
   action text,
+  endorsed boolean DEFAULT false,
   FOREIGN KEY (course_id) REFERENCES courses (id),
   FOREIGN KEY (user_id) REFERENCES users (id)
 );

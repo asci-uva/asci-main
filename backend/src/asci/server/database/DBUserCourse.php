@@ -286,7 +286,7 @@ class DBUserCourse
    
     public function updatePiazzaStreamForCourse($courseId, $piazzaStream)
     {
-      $insertquery = 'insert into piazza_stream (user_id, course_id, time, submission, subject, action) values ($1, $2, $3, $4, $5, $6);';
+      $insertquery = 'insert into piazza_stream (user_id, course_id, time, submission, subject, action, endorsed) values ($1, $2, $3, $4, $5, $6, $7);';
       $this->db->prepare("insertPiazzaStream", $insertquery);
 
       $res = $this->db->query("select time from piazza_stream where course_id = $1 order by time desc limit 1;", [$courseId]);
@@ -299,7 +299,7 @@ class DBUserCourse
         $ed = strtotime($event["timestamp"]);
         if ($date == null || $ed > $date) {
           $pgdate = date("Y-m-d H:i:s", $ed);
-          $this->db->execute("insertPiazzaStream", [$event["user"]->getUserId(), $courseId,$pgdate,$event["contents"],$event["subject"],$event["type"]  ]);
+          $this->db->execute("insertPiazzaStream", [$event["user"]->getUserId(), $courseId,$pgdate,$event["contents"],$event["subject"],$event["type"], $event["endorsed"] ? 't' : 'f' ]);
         }
       }
       return true;
