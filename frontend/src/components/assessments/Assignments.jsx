@@ -11,19 +11,29 @@ function Assignments(props) {
   const [assignments, setAssignments] = useState([]);
   const [submissionsByAssignment, setSubmissionsByAssignment] = useState({});
   const [students, setStudents] = useState([]);
-  const [loaded, setLoaded] = useState(false);
+  const [assignmentsLoaded, setAssignmentsLoaded] = useState(false);
+  const [submissionsLoaded, setSubmissionsLoaded] = useState(false);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const requestIdRef = useRef(0);
+  const submissionsRequestIdRef = useRef(0);
+
+  const loaded = assignmentsLoaded && submissionsLoaded;
 
   const loadSubmissions = () => {
     if (!courseId) return Promise.resolve();
+
+    const requestId = ++submissionsRequestIdRef.current;
+    const isCurrent = () => requestId === submissionsRequestIdRef.current;
 
     return postCommand(props.url, {
       asciCourseId: courseId,
       command: "getCanvasSubmissions",
     })
       .then((data) => {
+        if (!isCurrent()) return;
+        setSubmissionsLoaded(true);
+
         if (data.success !== "true") {
           console.log(data.error);
           return;
@@ -39,7 +49,11 @@ function Assignments(props) {
         setSubmissionsByAssignment(grouped);
         setStudents(data.students || []);
       })
-      .catch((e) => console.log(e));
+      .catch((e) => {
+        console.log(e);
+        if (!isCurrent()) return;
+        setSubmissionsLoaded(true);
+      });
   };
 
   const removeFlaggedAssignment = (assignment) => {
@@ -87,7 +101,7 @@ function Assignments(props) {
       .then((data) => {
         if (!isCurrent()) return;
         setRefreshing(false);
-        setLoaded(true);
+        setAssignmentsLoaded(true);
 
         if (data.success === "true") {
           setAssignments(data.assignments || []);
@@ -104,8 +118,9 @@ function Assignments(props) {
                 } no longer in Canvas and have been flagged.`
               );
             else toast.success("Successfully synced Canvas LMS assignments");
+
+            return loadSubmissions();
           }
-          return loadSubmissions();
         } else {
           console.log(data.error);
           setError(errorMessage(data.error, "Failed to load Canvas LMS assignments"));
@@ -117,7 +132,7 @@ function Assignments(props) {
         console.log(e);
         if (!isCurrent()) return;
         setRefreshing(false);
-        setLoaded(true);
+        setAssignmentsLoaded(true);
         setError("Failed to load Canvas LMS assignments");
         if (refresh) toast.error("Failed to sync Canvas LMS assignments");
       });
@@ -128,15 +143,18 @@ function Assignments(props) {
 
     if (props.canvasLmsCourse === null) {
       requestIdRef.current++;
+      submissionsRequestIdRef.current++;
       setAssignments([]);
       setSubmissionsByAssignment({});
       setStudents([]);
       setError(null);
-      setLoaded(true);
+      setAssignmentsLoaded(true);
+      setSubmissionsLoaded(true);
       return;
     }
 
     loadAssignments();
+    loadSubmissions();
   }, [props.canvasLmsCourse, props.canvasLmsCourseLoaded, courseId]);
 
   const lastSyncedAt = assignments.length > 0 ? assignments[0].last_synced_at : null;
