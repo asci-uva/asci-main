@@ -185,6 +185,8 @@ function Home(props) {
       });
   }, [props.url, courseId, isStaff, externalToolsLoaded, piazzaEnabled]);
 
+  const lastSyncedAt = assignments.length > 0 ? assignments[0].last_synced_at : null;
+
   const handleCollapse = () => {
     if (sidebarOpen === "sidebar-visible") {
       setSidebarCol("col-md-1");
@@ -226,6 +228,7 @@ function Home(props) {
                 assignments={assignments}
                 submissions={submissions}
                 canvasLmsCourse={canvasLmsCourse}
+                lastSyncedAt={lastSyncedAt}
                 loaded={assignmentsLoaded && studentsLoaded}
                 error={error}
               />
