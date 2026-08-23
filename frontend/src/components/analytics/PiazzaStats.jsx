@@ -181,13 +181,6 @@ function PiazzaStats(props) {
   );
 
   const body = () => {
-    if (props.student === null)
-      return (
-        <p className="text-muted mb-0">
-          Search for a student above to see their Piazza activity.
-        </p>
-      );
-
     if (!props.loaded) return <h5 className="mb-0">Loading…</h5>;
 
     if (props.error) return <p className="alert alert-warning mb-0">{props.error}</p>;

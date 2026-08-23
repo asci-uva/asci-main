@@ -1,5 +1,4 @@
 import React, { useRef, useState } from "react";
-import CollapsibleCard from "./CollapsibleCard";
 
 function fullName(student) {
   return [student.fname, student.lname].filter(Boolean).join(" ");
@@ -31,7 +30,7 @@ function StudentSearch(props) {
   };
 
   return (
-    <CollapsibleCard title="Find a Student">
+    <div className="mb-4">
       <div className="position-relative mb-2">
         <input
           id="analyticsSearchTextBox"
@@ -100,7 +99,7 @@ function StudentSearch(props) {
           </button>
         </p>
       )}
-    </CollapsibleCard>
+    </div>
   );
 }
 

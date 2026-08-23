@@ -6,13 +6,6 @@ function StudentInfo(props) {
   const student = props.student;
 
   const body = () => {
-    if (!student)
-      return (
-        <p className="text-muted mb-0">
-          Search for a student above to see their statistics for this course.
-        </p>
-      );
-
     return (
       <dl className="row mb-0">
         <dt className="col-sm-3">First Name</dt>

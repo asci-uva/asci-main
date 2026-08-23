@@ -216,48 +216,52 @@ function Home(props) {
           onSelect={setSelected}
         />
 
-        <StudentInfo student={selected} />
+        {selected !== null && (
+          <>
+            <StudentInfo student={selected} />
 
-        {canvasEnabled && (
-          <SubmissionStats
-            student={selected}
-            assignments={assignments}
-            submissions={submissions}
-            canvasLmsCourse={canvasLmsCourse}
-            loaded={assignmentsLoaded && studentsLoaded}
-            error={error}
-          />
+            {canvasEnabled && (
+              <SubmissionStats
+                student={selected}
+                assignments={assignments}
+                submissions={submissions}
+                canvasLmsCourse={canvasLmsCourse}
+                loaded={assignmentsLoaded && studentsLoaded}
+                error={error}
+              />
+            )}
+
+            <OfficeHoursStats
+              student={selected}
+              sessions={sessions}
+              loaded={sessionsLoaded}
+              error={officeHoursError}
+            />
+
+            {piazzaEnabled && (
+              <PiazzaStats
+                student={selected}
+                stats={piazzaStats}
+                stream={piazzaStream}
+                loaded={piazzaLoaded}
+                error={piazzaError}
+              />
+            )}
+
+            <StatComparison
+              student={selected}
+              canvasEnabled={canvasEnabled}
+              piazzaEnabled={piazzaEnabled}
+              sessions={sessions}
+              stream={piazzaStream}
+              assignments={assignments}
+              submissions={submissions}
+              loaded={
+                studentsLoaded && assignmentsLoaded && sessionsLoaded && piazzaLoaded
+              }
+            />
+          </>
         )}
-
-        <OfficeHoursStats
-          student={selected}
-          sessions={sessions}
-          loaded={sessionsLoaded}
-          error={officeHoursError}
-        />
-
-        {piazzaEnabled && (
-          <PiazzaStats
-            student={selected}
-            stats={piazzaStats}
-            stream={piazzaStream}
-            loaded={piazzaLoaded}
-            error={piazzaError}
-          />
-        )}
-
-        <StatComparison
-          student={selected}
-          canvasEnabled={canvasEnabled}
-          piazzaEnabled={piazzaEnabled}
-          sessions={sessions}
-          stream={piazzaStream}
-          assignments={assignments}
-          submissions={submissions}
-          loaded={
-            studentsLoaded && assignmentsLoaded && sessionsLoaded && piazzaLoaded
-          }
-        />
       </>
     );
   };

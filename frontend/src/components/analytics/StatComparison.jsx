@@ -391,13 +391,6 @@ function StatComparison(props) {
   }, [chartNode, series, analytics.labels]);
 
   const body = () => {
-    if (props.student === null)
-      return (
-        <p className="text-muted mb-0">
-          Search for a student above to compare their activity week by week.
-        </p>
-      );
-
     if (!props.loaded) return <h5 className="mb-0">Loading…</h5>;
 
     if (!anyAvailable)

@@ -273,13 +273,6 @@ function SubmissionStats(props) {
   }, [chartNode, hasData, analytics.onTime, analytics.late, analytics.missing]);
 
   const body = () => {
-    if (props.student === null)
-      return (
-        <p className="text-muted mb-0">
-          Search for a student above to see their submission breakdown.
-        </p>
-      );
-
     if (!props.loaded) return <h5 className="mb-0">Loading…</h5>;
 
     if (props.canvasLmsCourse === null)
