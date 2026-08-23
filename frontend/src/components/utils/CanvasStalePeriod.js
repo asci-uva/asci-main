@@ -38,3 +38,27 @@ export function formatLastSynced(lastSyncedAt) {
 
   return date.toLocaleString();
 }
+
+const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
+
+export function intervalToMs(intervalStr) {
+  const parts = intervalToParts(intervalStr);
+  return (
+    parts.years * 365 * DAY_MS +
+    parts.months * 30 * DAY_MS +
+    parts.days * DAY_MS +
+    parts.hours * HOUR_MS
+  );
+}
+
+export function isStaleSync(lastSyncedAt, stalePeriod) {
+  if (!lastSyncedAt) return true;
+
+  const date = new Date(lastSyncedAt);
+  if (isNaN(date.getTime())) return true;
+
+  if (!stalePeriod) return false;
+
+  return Date.now() - date.getTime() > intervalToMs(stalePeriod);
+}

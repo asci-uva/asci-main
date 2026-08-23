@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import CollapsibleCard from "./CollapsibleCard";
-import { formatLastSynced } from "../utils/CanvasStalePeriod";
+import { formatLastSynced, isStaleSync } from "../utils/CanvasStalePeriod";
 import c3 from "c3";
 import "c3/c3.css";
 import {
@@ -299,7 +299,15 @@ function SubmissionStats(props) {
 
     return (
       <>
-        <p className="text-muted">Last synced: {formatLastSynced(props.lastSyncedAt)}</p>
+        <p
+          className={
+            isStaleSync(props.lastSyncedAt, props.canvasLmsCourse.stale_period)
+              ? "text-danger"
+              : "text-muted"
+          }
+        >
+          Last synced: {formatLastSynced(props.lastSyncedAt)}
+        </p>
 
         <div className="row">
           <div className="col-md-7">

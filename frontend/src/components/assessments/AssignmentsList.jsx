@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useUser } from "../context/UserContext";
-import { formatLastSynced } from "../utils/CanvasStalePeriod";
+import { formatLastSynced, isStaleSync } from "../utils/CanvasStalePeriod";
 import { isInstructorRole } from "../utils/roles";
 import ConfirmModal from "../utils/ConfirmModal";
 
@@ -296,7 +296,15 @@ function AssignmentsList(props) {
       </div>
       <div className="card-body">
         {props.canvasLmsCourse !== null && props.loaded && !props.error && (
-          <p className="text-muted">Last synced: {formatLastSynced(props.lastSyncedAt)}</p>
+          <p
+            className={
+              isStaleSync(props.lastSyncedAt, props.canvasLmsCourse.stale_period)
+                ? "text-danger"
+                : "text-muted"
+            }
+          >
+            Last synced: {formatLastSynced(props.lastSyncedAt)}
+          </p>
         )}
 
         {body()}

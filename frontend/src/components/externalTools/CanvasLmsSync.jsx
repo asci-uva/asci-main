@@ -381,6 +381,38 @@ function CanvasLmsSync(props) {
                         ) : (
                             <div className="mb-3">
                                 <h5>Sync Settings</h5>
+                                <label className="form-label mb-0">Stale period</label>
+                                <div className="mb-3">
+                                    <div className="d-flex gap-2 mb-1">
+                                        <div>
+                                            <label className="form-label small">Years</label>
+                                            <select className="form-select" value={staleParts.years} onChange={(e) => setStalePart("years", e.target.value)}>
+                                                {range(11).map((n) => (<option key={n} value={n}>{n}</option>))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="form-label small">Months</label>
+                                            <select className="form-select" value={staleParts.months} onChange={(e) => setStalePart("months", e.target.value)}>
+                                                {range(12).map((n) => (<option key={n} value={n}>{n}</option>))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="form-label small">Days</label>
+                                            <select className="form-select" value={staleParts.days} onChange={(e) => setStalePart("days", e.target.value)}>
+                                                {range(31).map((n) => (<option key={n} value={n}>{n}</option>))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="form-label small">Hours</label>
+                                            <select className="form-select" value={staleParts.hours} onChange={(e) => setStalePart("hours", e.target.value)}>
+                                                {range(24).map((n) => (<option key={n} value={n}>{n}</option>))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <p className="text-muted">
+                                        Highlights synced dates after the stale period has elapsed
+                                    </p>
+                                </div>
                                 <div className="form-check mb-3">
                                     <input
                                         className="form-check-input"
@@ -392,33 +424,6 @@ function CanvasLmsSync(props) {
                                     <label className="form-check-label" htmlFor="autosyncEnabledCheckbox">
                                         Automatically sync roster when a staff member opens this course after the stale period has elapsed
                                     </label>
-                                </div>
-                                <label className="form-label">Stale period</label>
-                                <div className="d-flex gap-2 mb-3">
-                                    <div>
-                                        <label className="form-label small">Years</label>
-                                        <select className="form-select" value={staleParts.years} onChange={(e) => setStalePart("years", e.target.value)}>
-                                            {range(11).map((n) => (<option key={n} value={n}>{n}</option>))}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="form-label small">Months</label>
-                                        <select className="form-select" value={staleParts.months} onChange={(e) => setStalePart("months", e.target.value)}>
-                                            {range(12).map((n) => (<option key={n} value={n}>{n}</option>))}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="form-label small">Days</label>
-                                        <select className="form-select" value={staleParts.days} onChange={(e) => setStalePart("days", e.target.value)}>
-                                            {range(31).map((n) => (<option key={n} value={n}>{n}</option>))}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="form-label small">Hours</label>
-                                        <select className="form-select" value={staleParts.hours} onChange={(e) => setStalePart("hours", e.target.value)}>
-                                            {range(24).map((n) => (<option key={n} value={n}>{n}</option>))}
-                                        </select>
-                                    </div>
                                 </div>
                                 {getSaveSettingsButton()}
                             </div>
