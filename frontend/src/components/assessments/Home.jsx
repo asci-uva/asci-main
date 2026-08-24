@@ -21,7 +21,7 @@ function Home(props) {
     loaded: canvasLmsCourseLoaded,
   } = useCanvasLmsCourse(props.url, courseId, isStaff);
 
-  const { tools: externalTools } = useExternalTools(props.url, courseId, isStaff);
+  const { tools: externalTools, loaded: externalToolsLoaded } = useExternalTools(props.url, courseId, isStaff);
   const canvasEnabled = externalTools.canvas === true;
   const gradescopeEnabled = externalTools.gradescope === true;
 
@@ -32,20 +32,23 @@ function Home(props) {
   const tabs = [];
 
   if (isInstructorRole(course.role)) {
-    if (canvasEnabled)
-      tabs.push({
-        key: "assignments",
-        label: "Assignments",
-        content: (
-          <Assignments
-            course_id={courseId}
-            canvasLmsCourse={canvasLmsCourse}
-            canvasLmsCourseLoaded={canvasLmsCourseLoaded}
-            gradescopeEnabled={gradescopeEnabled}
-            {...props}
-          />
-        ),
-      });
+    tabs.push({
+      key: "assignments",
+      label: "Assignments",
+      content: canvasEnabled ? (
+        <Assignments
+          course_id={courseId}
+          canvasLmsCourse={canvasLmsCourse}
+          canvasLmsCourseLoaded={canvasLmsCourseLoaded}
+          gradescopeEnabled={gradescopeEnabled}
+          {...props}
+        />
+      ) : !externalToolsLoaded ? (
+        <h5 className="mb-0">Loading…</h5>
+      ) : (
+        <h5 className="mb-0">Enable Canvas LMS in External Tools to use Assignments</h5>
+      ),
+    });
     if (showQuests)
       tabs.push({ key: "quests", label: "Quests", content: <Quests {...props} /> });
   }
