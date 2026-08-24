@@ -515,12 +515,12 @@ class Server
                 $this->setResponse($result);
                 break;
 
-            case "createLlmPiazza":
             case "uploadPiazza":
-                // todo: clean up the commands
-                $result = $executor->uploadPiazza($this->input);
-                $result = $executor->uploadPiazzaLLM($this->input);
-                $this->setResponse($result);
+                $this->setResponse($executor->uploadPiazza($this->input));
+                break;
+
+            case "createLlmPiazza":
+                $this->setResponse($executor->uploadPiazzaLLM($this->input));
                 break;
             case "scrapeURL":
                 $executor->scrapeURL($this->input['URL']);

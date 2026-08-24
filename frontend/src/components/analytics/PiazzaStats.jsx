@@ -41,6 +41,13 @@ function belongsTo(row, student) {
   );
 }
 
+function isEndorsed(value) {
+  if (value === true) return true;
+
+  const text = String(value === null || value === undefined ? "" : value).toLowerCase();
+  return text === "t" || text === "true";
+}
+
 function toNumber(value) {
   if (value === null || value === undefined || value === "") return null;
 
@@ -70,6 +77,19 @@ export function contributionsOf(stream, student) {
     }))
     .filter((item) => item.date !== null)
     .sort((a, b) => a.date.getTime() - b.date.getTime());
+}
+
+export function endorsementsOf(stream, student) {
+  return (stream || []).filter(
+    (row) => isEndorsed(row.endorsed) && belongsTo(row, student)
+  ).length;
+}
+
+function classEndorsementAverage(stream, studentCount) {
+  if (!stream || stream.length === 0 || studentCount === 0) return null;
+
+  const endorsed = stream.filter((row) => isEndorsed(row.endorsed)).length;
+  return endorsed / studentCount;
 }
 
 function statsFor(stats, student) {
@@ -112,12 +132,19 @@ export function piazzaAnalytics(stats, stream, student, now = new Date()) {
   const span = weekSpan(contributionDates(stream), now);
   const classAverage = classAverages(stats);
 
+  const hasStream = Boolean(stream && stream.length > 0);
+  classAverage.endorsements = classEndorsementAverage(
+    stream,
+    classAverage.studentCount
+  );
+
   if (!student)
     return {
       weeks: [],
       series: [],
       totals: null,
       contributions: 0,
+      endorsements: null,
       weekCount: span === null ? 0 : span.weekCount,
       classAverage,
     };
@@ -131,6 +158,7 @@ export function piazzaAnalytics(stats, stream, student, now = new Date()) {
     series: seriesPresent(weeks),
     totals: statsFor(stats, student),
     contributions: contributions.length,
+    endorsements: hasStream ? endorsementsOf(stream, student) : null,
     weekCount: span === null ? 0 : span.weekCount,
     classAverage,
   };
@@ -169,6 +197,11 @@ function StatsTable({ analytics }) {
             <td className="text-muted">{formatStat(classAverage[metric.key])}</td>
           </tr>
         ))}
+        <tr>
+          <td>Instructor endorsements</td>
+          <td>{formatStat(analytics.endorsements)}</td>
+          <td className="text-muted">{formatStat(classAverage.endorsements)}</td>
+        </tr>
       </tbody>
     </table>
   );

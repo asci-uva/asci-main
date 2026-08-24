@@ -7,7 +7,6 @@ import { useUser } from "../context/UserContext";
 function UpdateChat(props) {
   const [courseFile, setCourseFile] = useState(null);
   const [additionalFiles, setAdditionalFiles] = useState([]);
-  const [piazzaFile, setPiazzaFile] = useState(null);
   const [uploadInProgress, setUploadInProgress] = useState(false);
   const {user, getCourse} = useUser();
   let course = getCourse();
@@ -17,9 +16,6 @@ function UpdateChat(props) {
     setCourseFile(event.target.files[0]);
     var files = Array.from(event.target.files);
     setAdditionalFiles(files.slice(1));
-  };
-  const handlePiazzaFileChange = (event) => {
-    setPiazzaFile(event.target.files[0]);
   };
   const handleURLChange = (event) => {
     setURL(event.target.value);
@@ -78,46 +74,6 @@ function UpdateChat(props) {
     await uploadAdditionalContent();
   };
   
-  const uploadPiazza = () => {
-    if (!piazzaFile) return;
-    toast("Uploading piazza data and creating RAG. Please wait...", { autoClose: false});
-
-    setUploadInProgress(true);
-
-    var formData = new FormData();
-
-    formData.append("command", "uploadPiazza");
-    //formData.append("command", "createLlmPiazza");
-    formData.append("user", user.userid);
-    formData.append("courseid", course.course_id);
-    formData.append('piazzacontent', piazzaFile);
-
-    fetch(props.uploadurl, {
-      method: "POST",
-      credentials: "include",
-      body: formData
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        toast.dismiss();
-        if (data) {
-          console.log("Piazza contents uploaded successfully!");
-          toast.success("Piazza contents uploaded successfully!");
-        } else {
-          console.error("Error uploading the piazza contents");
-          toast.error("Error uploading the piazza contents");
-        }
-        setUploadInProgress(false);
-      })
-      .catch((error) => {
-        console.error("There was an error:", error);
-        toast.error("There was an error uploading the piazza contents");
-        setUploadInProgress(false);
-      });
-
-  };
-
   const generateFileNameFromURL = (url) => {
   try {
     const parsed_url = new URL(url);
@@ -274,14 +230,6 @@ function UpdateChat(props) {
             </div>
             {/* <p className="form-text">This zip file should include any course content you would like the LLM to use when answering student questions.  Ideally, documents should be text, markdown, or PDF files.  Max upload size is 80MB.</p> */}
             <p className="form-text">Upload any course content you would like the LLM to use when answering student questions. Acceptable file types are .zip, .pdf, .docx, .pptx, .png, .jpg, and .txt files. Max upload size is 80MB.</p>
-          </form>
-          <form className="mb-3">
-            <p className="form-label">Piazza Export ZIP</p>
-            <div className="input-group mb-3"> 
-            <input className="form-control" type="file" onChange={handlePiazzaFileChange} accept=".zip" />
-            <button type="button" disabled={uploadInProgress} className="btn btn-primary" onClick={uploadPiazza}>Upload</button>
-            </div>
-            <p className="form-text">This zip file should be the exact file provided by Piazza when downloading all course content.  When requesting it from Piazza's statistics page, they will email you a link to this file.  We will ignore any posts with less than 10 views.  Max upload size is 80MB.</p>
           </form>
           <p>If you want to create a .txt file with all the text from a course webpage, you can use the tool below to scrape that text from the provided URL.</p>
           <p>Select "Upload" to automatically upload the txt file to the RAG chatbot after scraping. Select "Download" to download the txt file for review before manually uploading.</p>

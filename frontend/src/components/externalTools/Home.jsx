@@ -9,6 +9,7 @@ import CanvasLmsSync from "./CanvasLmsSync";
 import CanvasSyncActions from "./CanvasSyncActions";
 import GradescopeSync from "./GradescopeSync";
 import GradescopeCsvUpload from "./GradescopeCsvUpload";
+import PiazzaUpload from "./PiazzaUpload";
 import CanvasLinkWarning from "./CanvasLinkWarning";
 import CanvasTokenExpiredWarning from "./CanvasTokenExpiredWarning";
 import ExternalToolToggle from "./ExternalToolToggle";
@@ -194,6 +195,9 @@ function Home(props) {
                 <div className="tab-pane fade" id="ext-piazza" role="tabpanel" aria-labelledby="ext-piazza-tab">
                   <div className="col-md-12 my-auto">
                     {toolToggle("piazza", "Piazza")}
+                    {externalTools.piazza === true && (
+                      <PiazzaUpload course_id={courseId} {...props} />
+                    )}
                   </div>
                 </div>
               </div>

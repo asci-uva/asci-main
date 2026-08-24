@@ -184,6 +184,7 @@ CREATE TABLE piazza_stream (
   id SERIAL PRIMARY KEY,
   user_id INT,
   course_id INT,
+  post_no INT,
   time timestamp,
   submission text,
   subject text,
@@ -192,6 +193,9 @@ CREATE TABLE piazza_stream (
   FOREIGN KEY (course_id) REFERENCES courses (id),
   FOREIGN KEY (user_id) REFERENCES users (id)
 );
+
+CREATE UNIQUE INDEX piazza_stream_contribution_unique
+ON piazza_stream (course_id, post_no, user_id, time);
 
 CREATE TABLE piazza_raw_stats (
   id SERIAL PRIMARY KEY,

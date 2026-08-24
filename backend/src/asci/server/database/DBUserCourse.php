@@ -247,7 +247,7 @@ class DBUserCourse
 
     public function getPiazzaStreamForCourse($courseId)
     {
-      $query = 'select S.user_id, Us.computing_id, S.time, S.action
+      $query = 'select S.user_id, Us.computing_id, S.time, S.action, S.endorsed
                 from ((piazza_stream S join users Us on Us.id = S.user_id)
                       join user_courses C on C.user_id = S.user_id and C.course_id = S.course_id)
                 where S.course_id = $1 and C.role = \'student\' and S.time is not null
@@ -286,21 +286,22 @@ class DBUserCourse
    
     public function updatePiazzaStreamForCourse($courseId, $piazzaStream)
     {
-      $insertquery = 'insert into piazza_stream (user_id, course_id, time, submission, subject, action, endorsed) values ($1, $2, $3, $4, $5, $6, $7);';
+      $insertquery = 'insert into piazza_stream (user_id, course_id, post_no, time, submission, subject, action, endorsed)
+                      values ($1, $2, $3, $4, $5, $6, $7, $8)
+                      on conflict (course_id, post_no, user_id, time) do update set
+                        submission = excluded.submission,
+                        subject = excluded.subject,
+                        action = excluded.action,
+                        endorsed = excluded.endorsed;';
       $this->db->prepare("insertPiazzaStream", $insertquery);
-
-      $res = $this->db->query("select time from piazza_stream where course_id = $1 order by time desc limit 1;", [$courseId]);
-      $results = $this->db->fetchAll($res);
-      $date = null;
-      if (!empty($results))
-        $date = strtotime($results[0]["time"]);
 
       foreach ($piazzaStream as $event) {
         $ed = strtotime($event["timestamp"]);
-        if ($date == null || $ed > $date) {
-          $pgdate = date("Y-m-d H:i:s", $ed);
-          $this->db->execute("insertPiazzaStream", [$event["user"]->getUserId(), $courseId,$pgdate,$event["contents"],$event["subject"],$event["type"], $event["endorsed"] ? 't' : 'f' ]);
-        }
+        if ($ed === false)
+          continue;
+        $pgdate = date("Y-m-d H:i:s", $ed);
+        $postNo = is_numeric($event["post_no"]) ? (int) $event["post_no"] : null;
+        $this->db->execute("insertPiazzaStream", [$event["user"]->getUserId(), $courseId, $postNo, $pgdate, $event["contents"], $event["subject"], $event["type"], $event["endorsed"] ? 't' : 'f' ]);
       }
       return true;
     }
