@@ -1,11 +1,21 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import CollapsibleCard from "./CollapsibleCard";
 import c3 from "c3";
 import "c3/c3.css";
-import { toDate, weekSpan, weekStart, weeksFor } from "./activityTimeline";
+import {
+  COLUMN_WIDTH,
+  toDate,
+  weekSpan,
+  weekStart,
+  weeksFor,
+} from "./activityTimeline";
 import { courseVisitDates, visitsOf } from "./OfficeHoursStats";
 import { contributionDates, contributionsOf } from "./PiazzaStats";
 import { studentSubmissionAnalytics } from "./studentAnalytics";
+
+const CHART_HEIGHT = 320;
+
+const AXIS_WIDTH = 140;
 
 export const SOURCES = [
   {
@@ -296,6 +306,9 @@ function Toggles({ sources, analytics, enabled, metrics, onToggle, onMetric }) {
 
 function StatComparison(props) {
   const [chartNode, setChartNode] = useState(null);
+  const [scrollNode, setScrollNode] = useState(null);
+  const [scrollWidth, setScrollWidth] = useState(0);
+  const chartRef = useRef(null);
   const [enabled, setEnabled] = useState({
     officeHours: true,
     piazza: true,
@@ -335,6 +348,23 @@ function StatComparison(props) {
   const anyAvailable = sources.some((source) => analytics.available[source.key]);
 
   useEffect(() => {
+    if (scrollNode === null) return;
+
+    const measure = () => setScrollWidth(scrollNode.clientWidth);
+    measure();
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(scrollNode);
+
+    return () => observer.disconnect();
+  }, [scrollNode]);
+
+  const chartWidth = Math.max(
+    scrollWidth,
+    analytics.labels.length * COLUMN_WIDTH + AXIS_WIDTH
+  );
+
+  useEffect(() => {
     if (chartNode === null || series.length === 0) return;
 
     const formats = {};
@@ -344,7 +374,7 @@ function StatComparison(props) {
 
     const chart = c3.generate({
       bindto: chartNode,
-      size: { height: 320 },
+      size: { height: CHART_HEIGHT, width: chartWidth },
       data: {
         columns: series.map((entry) => [entry.id].concat(entry.values)),
         type: "line",
@@ -361,7 +391,7 @@ function StatComparison(props) {
         x: {
           type: "category",
           categories: analytics.labels,
-          tick: { culling: { max: 12 }, multiline: false },
+          tick: { multiline: false },
         },
         y: {
           min: 0,
@@ -387,8 +417,19 @@ function StatComparison(props) {
       },
     });
 
-    return () => chart.destroy();
+    chartRef.current = chart;
+
+    return () => {
+      chartRef.current = null;
+      chart.destroy();
+    };
   }, [chartNode, series, analytics.labels]);
+
+  useEffect(() => {
+    if (chartRef.current === null) return;
+
+    chartRef.current.resize({ height: CHART_HEIGHT, width: chartWidth });
+  }, [chartNode, series, analytics.labels, chartWidth]);
 
   const body = () => {
     if (!props.loaded) return <h5 className="mb-0">Loading…</h5>;
@@ -416,7 +457,9 @@ function StatComparison(props) {
         />
 
         {series.length > 0 ? (
-          <div ref={setChartNode}></div>
+          <div className="overflow-auto pb-2" ref={setScrollNode}>
+            <div ref={setChartNode} style={{ width: chartWidth + "px" }}></div>
+          </div>
         ) : (
           <p className="text-muted mb-0">
             Turn on a statistic above to graph it.

@@ -195,7 +195,7 @@ CREATE TABLE piazza_stream (
 );
 
 CREATE UNIQUE INDEX piazza_stream_contribution_unique
-ON piazza_stream (course_id, post_no, user_id, time);
+ON piazza_stream (course_id, post_no, user_id, time) NULLS NOT DISTINCT;
 
 CREATE TABLE piazza_raw_stats (
   id SERIAL PRIMARY KEY,

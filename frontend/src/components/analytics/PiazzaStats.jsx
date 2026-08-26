@@ -10,6 +10,12 @@ const CONTRIBUTION_SERIES = [
   { key: "other", label: "Other", color: "#9aa0a6" },
 ];
 
+function isUpdate(action) {
+  const text = String(action || "").toLowerCase();
+
+  return text.startsWith("updated") && !text.includes("answer");
+}
+
 function contributionSeries(action) {
   const text = String(action || "").toLowerCase();
 
@@ -63,13 +69,14 @@ function formatStat(value) {
 
 export function contributionDates(stream) {
   return (stream || [])
+    .filter((row) => !isUpdate(row.action))
     .map((row) => toDate(row.time))
     .filter((date) => date !== null);
 }
 
 export function contributionsOf(stream, student) {
   return (stream || [])
-    .filter((row) => belongsTo(row, student))
+    .filter((row) => belongsTo(row, student) && !isUpdate(row.action))
     .map((row) => ({
       date: toDate(row.time),
       value: 1,
@@ -81,14 +88,17 @@ export function contributionsOf(stream, student) {
 
 export function endorsementsOf(stream, student) {
   return (stream || []).filter(
-    (row) => isEndorsed(row.endorsed) && belongsTo(row, student)
+    (row) =>
+      isEndorsed(row.endorsed) && belongsTo(row, student) && !isUpdate(row.action)
   ).length;
 }
 
 function classEndorsementAverage(stream, studentCount) {
   if (!stream || stream.length === 0 || studentCount === 0) return null;
 
-  const endorsed = stream.filter((row) => isEndorsed(row.endorsed)).length;
+  const endorsed = stream.filter(
+    (row) => isEndorsed(row.endorsed) && !isUpdate(row.action)
+  ).length;
   return endorsed / studentCount;
 }
 
@@ -222,7 +232,7 @@ function PiazzaStats(props) {
       return (
         <h5 className="mb-0">
           No Piazza data has been uploaded for this course yet. Upload the Piazza
-          course export on the Course Panel page.
+          course export on the External Tools page.
         </h5>
       );
 
