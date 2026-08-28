@@ -7,7 +7,6 @@ import { useExternalTools } from "../utils/useExternalTools";
 import { isInstructorRole, isStaffRole } from "../utils/roles";
 import CanvasLmsSync from "./CanvasLmsSync";
 import CanvasSyncActions from "./CanvasSyncActions";
-import GradescopeSync from "./GradescopeSync";
 import GradescopeCsvUpload from "./GradescopeCsvUpload";
 import PiazzaUpload from "./PiazzaUpload";
 import CanvasLinkWarning from "./CanvasLinkWarning";
@@ -184,10 +183,7 @@ function Home(props) {
                   <div className="col-md-12 my-auto">
                     {toolToggle("gradescope", "Gradescope")}
                     {externalTools.gradescope === true && (
-                      <>
-                        <GradescopeSync course_id={courseId} {...props} />
-                        <GradescopeCsvUpload course_id={courseId} {...props} />
-                      </>
+                      <GradescopeCsvUpload course_id={courseId} {...props} />
                     )}
                   </div>
                 </div>

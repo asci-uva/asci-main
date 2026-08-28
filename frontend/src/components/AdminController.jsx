@@ -6,7 +6,6 @@ import {
   CreateNewCourse,
   CourseManagement,
   UpdateChat,
-  EditCourse,
 } from "./admin";
 import {
   Login,
@@ -38,10 +37,6 @@ const AdminController = (props) => {
         /> */}
         {/* <Route path="uploadRoster" element={<UploadRoster {...props} />} /> */}
         <Route path="error" element={<Error {...props} />} />
-        <Route
-          path="editCourse/:courseId"
-          element={<EditCourse {...props} />}
-        />
         <Route
           path="/coursePanel/:courseId"
           element={<CoursePanel {...props} />}

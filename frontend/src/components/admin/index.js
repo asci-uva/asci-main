@@ -2,6 +2,5 @@ export { default as Home } from "./Home";
 export { default as CreateNewCourse } from "./CreateNewCourse";
 export { default as CourseManagement } from "./CourseManagement";
 export { default as UpdateChat } from "./UpdateChat";
-export { default as EditCourse } from "./EditCourse";
 export { default as QuestCard } from "./QuestCard";
 export { default as ManagePoints } from "./ManagePoints";
