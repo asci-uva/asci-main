@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { isInstructorRole, formatRole } from "../utils/roles";
 
 const UserContext = createContext({
     userid: null,
@@ -8,7 +9,9 @@ const UserContext = createContext({
     logout: () => {}
 });
 
-const url = "http://localhost:8081/index.php";
+// Use REACT_APP_BACKEND_URL if set (empty = same-origin on Heroku).
+// For local dev: set REACT_APP_BACKEND_URL=http://localhost:8081 in .env
+const url = (process.env.REACT_APP_BACKEND_URL || "http://localhost:8081") + "/index.php";
 
 export const useUser = () => {
   return useContext(UserContext);
@@ -19,11 +22,11 @@ export const UserProvider = ({ children }) => {
   const [fname, setFname] = useState(null);
   const [lname, setLname] = useState(null);
   const [pname, setPname] = useState(null);
+  const [discordUsername, setDiscordUsername] = useState(null);
   const [courseList, setCourseList] = useState(null);
   const [course, setCourse] = useState(null);
   const [courseSettings, setCourseSettings] = useState(null);
   const [courseRoster, setCourseRoster] = useState([]);
-
   const login = (userInfo, callback) => {
     let json = {};
     json.command = "login";
@@ -50,6 +53,7 @@ export const UserProvider = ({ children }) => {
           setFname(data.user.fname);
           setLname(data.user.lname);
           setPname(data.user.pname);
+          setDiscordUsername(data.user.discord_username ?? null);
 
           setCourseList(data.courses);
           setCourse(null);
@@ -113,7 +117,7 @@ export const UserProvider = ({ children }) => {
                                 + " - "
                                 + courseList[key]["semester"]
                                 + " ("
-                                + courseList[key]["role"]
+                                + formatRole(courseList[key]["role"])
                                 + ")";
 
               cList[key] = courseName;
@@ -121,10 +125,40 @@ export const UserProvider = ({ children }) => {
         return cList;
   }
 
+  const updateDiscordUsername = (newDiscordUsername, callback) => {
+    const json = {
+      command: "setDiscordUsername",
+      user: userid,
+      computingId: userid,
+      discordUsername: newDiscordUsername || null,
+      courseId: course ? getCourse().course_id : null,
+    };
+
+    fetch(url, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(json),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success === "true") {
+          setDiscordUsername(newDiscordUsername || null);
+          if (callback) callback(true);
+        } else {
+          if (callback) callback(false, data.error);
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating Discord username:", error);
+        if (callback) callback(false);
+      });
+  };
+
   const isInstructor = () => {
 
     for(var key in courseList){
-      if(courseList[key]["role"] == "instructor") return true;
+      if(isInstructorRole(courseList[key]["role"])) return true;
     }
 
     return false;
@@ -208,6 +242,7 @@ export const UserProvider = ({ children }) => {
     setFname(null);
     setLname(null);
     setPname(null);
+    setDiscordUsername(null);
     setCourseList(null);
     setCourse(null);
     // Clear LocalStorage
@@ -220,8 +255,10 @@ export const UserProvider = ({ children }) => {
           userid,
           fname,
           lname,
-          pname
+          pname,
+          discord_username: discordUsername,
       },
+      updateDiscordUsername,
       courseList,
       courseListString,
       login,
@@ -238,7 +275,7 @@ export const UserProvider = ({ children }) => {
       courseRoster,
       getCourseRoster,
       refreshCourseRoster,
-      isInstructor
+      isInstructor,
   };
 
   return (

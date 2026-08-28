@@ -6,4 +6,4 @@ export { default as Error } from "./Error";
 export { default as SelectCourse } from "./SelectCourse";
 export { default as SelectCourseHome } from "./SelectCourseHome";
 export { default as CreateNewCourse } from "./CreateNewCourse";
-
+export { default as CreateNewUser } from "./CreateNewUser";

@@ -345,6 +345,18 @@ class DBSession
 
     }
 
+    public function getOfficeHoursSessionsForCourse($courseId) {
+        $query = 'SELECT S.id as session_id, U.user_id, Us.computing_id, S.entry_time, S.fulfillment_time, S.exit_time
+            FROM (((sessions S JOIN session_users U on S.id=U.session_id) JOIN users Us on U.user_id=Us.id)
+                  JOIN user_courses C on C.user_id=U.user_id and C.course_id=S.course_id)
+            WHERE S.course_id=$1 and C.role=\'student\' and S.fulfillment_time IS NOT NULL and S.exit_time IS NOT NULL
+            ORDER BY S.fulfillment_time';
+
+        $result = $this->db->query($query, array($courseId));
+
+        return $this->db->fetchAll($result);
+    }
+
     public function getRecentWorkingTAs($courseId) {
         $query = "SELECT u.* from ta_activity t, users u where t.course_id=$1 and t.exit_time > (now() - interval '2 minutes') and t.user_id = u.id";
         $result = $this->db->query($query, array($courseId));

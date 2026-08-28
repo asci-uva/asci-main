@@ -49,7 +49,7 @@ class Quest implements \Serializable
         $this->mnemonic = $data['mnemonic'] ?? null;
         $this->name = $data['name'] ?? null;
         $this->description = $data['description'] ?? null;
-        $this->total_point = $data['total_points'] ?? null;
+        $this->total_points = $data['total_points'] ?? null;
         return $this;
     }
 

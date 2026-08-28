@@ -106,9 +106,9 @@ class DBCourse
         }
         $userId = $row['id'];
         
-        // Create a usercourse relation to make the $user an instructor of the course
+        // Create a usercourse relation to make the $user the primary instructor of the course
         $insertUserCourseQuery = 'INSERT INTO user_courses (user_id, course_id, role) VALUES ($1, $2, $3)';
-        $params = array($userId, $courseId, 'instructor');
+        $params = array($userId, $courseId, \asci\util\Roles::PRIMARY_INSTRUCTOR);
     
         $result = $this->db->query($insertUserCourseQuery, $params);
     

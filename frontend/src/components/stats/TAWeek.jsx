@@ -76,7 +76,7 @@ function TAWeek(props) {
            </div>
            <button className="btn btn-info me-4 my-2" type="button" data-bs-toggle="collapse" data-bs-target="#smallCalendar" aria-expanded="false">Calendar</button>
           <div className="collapse" id="smallCalendar">
-            <div class="card card-body">
+            <div className="card card-body">
           <DayPilotNavigator
             selectMode={view}
             onTimeRangeSelected={ args => {

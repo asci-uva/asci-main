@@ -27,6 +27,10 @@ class ServerExecutor{
   public $userStore = null; // The user storage 
   public $courseStore = null; // The course storage 
   public $userCourseStore = null; // The UserCourse storage 
+  public $synchronizationStore = null; // The synchronization storage
+  public $canvasAssignmentStore = null; // The Canvas LMS assignment storage
+  public $canvasSubmissionStore = null; // The Canvas LMS submission storage
+  public $externalToolStore = null; // The external tool enablement storage
 
   private $user = null;
   //Model state (NOT interacting with DB)
@@ -64,6 +68,10 @@ class ServerExecutor{
     $this->userStore = new \asci\server\database\DBUser($this->db);
     $this->courseStore = new \asci\server\database\DBCourse($this->db);
     $this->userCourseStore = new \asci\server\database\DBUserCourse($this->db);
+    $this->synchronizationStore = new \asci\server\database\DBSynchronization($this->db);
+    $this->canvasAssignmentStore = new \asci\server\database\DBCanvasAssignment($this->db);
+    $this->canvasSubmissionStore = new \asci\server\database\DBCanvasSubmission($this->db);
+    $this->externalToolStore = new \asci\server\database\DBExternalTools($this->db);
     // Check $_SERVER["uid"]; // their computing ID  (name and id can come from roster)
 
     // This may need to change with other authentication types
@@ -79,6 +87,41 @@ class ServerExecutor{
 
   public function loadUser($uid) {
     $this->user = $this->userStore->getUser($uid);
+  }
+
+  /*
+   * Enforces archived-course access policy at the API boundary.
+   * Archived courses are instructor-only; non-instructors are denied direct access.
+   */
+  public function denyArchivedCourseForStudents($computing_id, $course_id, $command = null) {
+    if ($computing_id == null || $course_id == null) {
+      return;
+    }
+
+    $courses = $this->userCourseStore->getCoursesForUser($computing_id);
+    $roles = [];
+    foreach ($courses as $course) {
+      if ($course->getCourseId() == $course_id) {
+        $roles[] = strtolower((string)$course->getRole());
+      }
+    }
+
+    // User is not enrolled in this course; defer to normal permission checks.
+    if (count($roles) == 0) {
+      return;
+    }
+
+    // Instructors can access archived courses for management/restoration.
+    if (!empty(array_filter($roles, '\asci\util\Roles::isInstructorRole'))) {
+      return;
+    }
+
+    $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
+    $settings = $dbcrsset->getCourseSettings($course_id);
+
+    if ($settings != null && $settings->archived == "t") {
+      throw new \asci\exceptions\ASCIPermissionException("Course is archived and unavailable to non-instructors");
+    }
   }
 
 
@@ -154,8 +197,24 @@ class ServerExecutor{
     $courses = $this->userCourseStore->getCoursesForUser($computing_id);
 
     $result["courses"] = [];
+
+    /* Database Object we are going to need */
+    $dbcrsset = new \asci\server\database\DBCourseSettings($this->db);
+
     foreach ($courses as $course){
-      $result["courses"][$course->getCourseId()] = $course->toArray();
+      $settings = $dbcrsset->getCourseSettings($course->getCourseId());
+      if($settings == null) continue;
+
+      $isArchived = ($settings->archived == "t");
+      $role = strtolower((string)$course->getRole());
+      $isInstructor = \asci\util\Roles::isInstructorRole($role);
+
+      // Archived courses are only visible to instructors for management/restoration.
+      if($isArchived && !$isInstructor) continue;
+
+      $courseArray = $course->toArray();
+      $courseArray["archived"] = $settings->archived;
+      $result["courses"][$course->getCourseId()] = $courseArray;
     }
 
     $result["success"] = "true";
@@ -988,11 +1047,10 @@ $usedCosSim = True;
 
     //1: Check that the user has permission to access queue
     if (!$this->userCourseStore->userHasPermission($user, $course_id, "ta-queue"))
-      throw new \asci\exceptions\ASCIPermissionException("User is not enrolled as a TA in this course");
+      throw new \asci\exceptions\ASCIPermissionException("User is not enrolled as a TA in this course", $role);
 
     // Update the status in the database (i.e., that they are working)
-    $this->userCourseStore->updateTAStatus($user, $course_id);
-
+      $this->userCourseStore->updateTAStatus($user, $course_id);
   }
 
   /*
@@ -1457,6 +1515,23 @@ $usedCosSim = True;
 
   }
 
+  public function scrapeURL($url) {
+    if (!isset($url)) {
+      die("Missing URL");
+    }
+    
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+      die("Invalid URL");
+    }
+
+    $script = __DIR__ . "/scraper.py";
+    $command =  escapeshellcmd("python3 $script " . escapeshellarg($url) . " 2>&1");
+    $output = shell_exec($command);
+
+    echo json_encode(["content" => $output]);
+    exit();
+  }
+
   public function llmSummary($data) {
     $this->logger->addDebug("Handling LLM request", $data);
     //$arrayString = print_r($data, true);
@@ -1570,6 +1645,28 @@ $usedCosSim = True;
     return $result;
   }
 
+  /**
+   * Streaming version of llmChat: validates auth then streams SSE from LLM server.
+   */
+  public function llmChatStreaming($data) {
+    $this->logger->addDebug("Handling streaming LLM request", $data);
+
+    $course = $data["course"];
+    if($this->courseStore->getCourseById($course["course_id"]) === false)
+      throw new \asci\exceptions\ASCIException("Unknown course");
+
+    $computing_id = $data["user"];
+    $user = $this->userStore->getUser($computing_id);
+    if ($user == null)
+      throw new \asci\exceptions\ASCIException("Unknown user");
+
+    if (!$this->userCourseStore->userHasPermission($user, $course["course_id"], "llm-chat"))
+      throw new \asci\exceptions\ASCIPermissionException("User does not have permission to chat with llm");
+
+    $chat = new \asci\util\LlmChat();
+    $chat->getLlmResponseStreaming($data, $course);
+  }
+
   public function getCourseStats($course_id) {
     //1: Check that the current user has permission to access stats
     if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-stats"))
@@ -1639,7 +1736,7 @@ $usedCosSim = True;
             }
         }
 
-        $response["success"] = true;
+        $response["success"] = "true";
         return $response;
     }
 
@@ -1663,7 +1760,7 @@ $usedCosSim = True;
             }
         }
 
-        $response["success"] = true;
+        $response["success"] = "true";
         return $response;
     }
 
@@ -1691,8 +1788,8 @@ $usedCosSim = True;
      *
      * @return bool login success
      */
-    public function createUser($computing_id, $fname, $lname, $pname) {
-        $success = (new \asci\server\database\DBUser($this->db))->createUser($computing_id, $fname, $lname, $pname);
+    public function createUser($computing_id, $fname, $lname, $pname, $password) {
+        $success = (new \asci\server\database\DBUser($this->db))->createUser($computing_id, $fname, $lname, $pname, $password);
         $result = [];
         if ($success) {
             $result["success"] = true;
@@ -1883,6 +1980,47 @@ $usedCosSim = True;
         return $result;
     }
 
+    public function getQuestsByStatusHandler($user_id, $course_id, $status){
+        $result = [];
+
+        $quests = (new \asci\server\database\DBUserQuest($this->db))->getQuestsByStatus($user_id, $course_id, $status);
+        $result["quests"] = [];
+
+        $status = new  \asci\data\QuestInfo\QuestStatus($this->db, $course_id);
+
+        foreach ($quests as $quest){
+            // modify the quest status
+            $status -> changeStatus($quest);
+            $result["quests"][$quest->getQuestId()] = $quest->toArray();
+        }
+
+        $this->logger->addDebug("Quest result", array("quests" => $quests));
+
+        $result["success"] = "true";
+
+        return $result;
+    }
+
+    public function updateQuestStatusHandler($quest_id, $user_id, $course_id, $status){
+        $user = ((new \asci\server\database\DBUser($this->db))->getUser($user_id)) -> getId();
+        $success = (new \asci\server\database\DBUserQuest($this->db))->updateQuestStatus($quest_id, $user, $course_id, $status);
+        
+        // foreach ($quests as $quest){
+        //     // modify the quest status
+        //     $status -> changeStatus($quest);
+        //     $result["quests"][$quest->getQuestId()] = $quest->toArray();
+        // }
+      
+        $result = [];
+        if ($success) {
+            $result["success"] = true;
+        } else {
+            $result["success"] = false;
+        }
+
+        return $result;
+    }
+
     public function getPointsForUserHandler($computing_id, $course_id){
         $result = [];
 
@@ -1911,6 +2049,47 @@ $usedCosSim = True;
         $this->logger->addDebug("Quest result", array("quests" => $quests[0]));
 
         $result["success"] = "true";
+
+        return $result;
+    }
+
+    public function getCourseQuestsHandler($course){
+        $result = [];
+
+        $quests = (new \asci\server\database\DBCourseQuest($this->db))->getQuestsForCourse($course);
+        $result["quests"] = [];
+
+        foreach ($quests as $quest){
+          $result["quests"][$quest->getQuestId()] = $quest->toArray();
+        }
+
+        $this->logger->addDebug("Quest result", array("quests" => $quests[0]));
+
+        $result["success"] = "true";
+
+        return $result;
+    }
+
+    public function addQuestHandler($mnemonic, $name, $description, $total_points){
+        $success = (new \asci\server\database\DBQuest($this->db))->createQuest($mnemonic, $name, $description, $total_points);
+        $result = [];
+        if ($success) {
+            $result["success"] = true;
+        } else {
+            $result["success"] = false;
+        }
+
+        return $result;
+    }
+
+    public function deleteQuestHandler($quest){
+        $success = (new \asci\server\database\DBQuest($this->db))->deleteQuest($quest);
+        $result = [];
+        if ($success) {
+            $result["success"] = true;
+        } else {
+            $result["success"] = false;
+        }
 
         return $result;
     }
@@ -1981,4 +2160,844 @@ $usedCosSim = True;
         return $result;
     }
 
+    public function getCourseContentHandler($user, $course_id){
+      //permissions?
+      $this->serverURL = \asci\Config::$LLM_SERVER_URL;
+
+      $request = [
+          "course" => $course_id,
+          "command" => "getCourseContent"
+      ];
+
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, $this->serverURL);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array ('Content-Type: application/json'));
+      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      $response = curl_exec($ch);
+      if($errno = curl_errno($ch)) {
+        $error_message = curl_strerror($errno);
+        $this->logger->addError("cURL error ({$errno}):\n {$error_message}");
+      }
+      curl_close($ch);
+      return json_decode($response, true);
+    }
+
+    public function removeCourseContentHandler($user, $course_id, $filename){
+      //permissions?
+      $this->serverURL = \asci\Config::$LLM_SERVER_URL;
+
+      $request = [
+          "course" => $course_id,
+          "filename" => $filename,
+          "command" => "removeCourseContent"
+      ];
+
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, $this->serverURL);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array ('Content-Type: application/json'));
+      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      $response = curl_exec($ch);
+      if($errno = curl_errno($ch)) {
+        $error_message = curl_strerror($errno);
+        $this->logger->addError("cURL error ({$errno}):\n {$error_message}");
+      }
+      curl_close($ch);
+      return json_decode($response, true);
+    }
+
+    /**
+     * Fetches the list of text channels for a Discord guild.
+     * Requires \asci\Config::$DISCORD_BOT_TOKEN to be set.
+     */
+    public function getDiscordChannelsHandler($user, $course_id, $guild_id) {
+        if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-stats"))
+            throw new \asci\exceptions\ASCIPermissionException("User does not have permission to access course stats");
+
+        $token = \asci\Config::$DISCORD_BOT_TOKEN;
+        if (empty($token))
+            return ["success" => "false", "error" => "Discord bot token is not configured on the server."];
+
+        // Sanitize guild_id: must be a snowflake (numeric string)
+        if (!preg_match('/^\d{1,20}$/', $guild_id))
+            return ["success" => "false", "error" => "Invalid Guild ID format."];
+
+        $api_url = "https://discord.com/api/v10/guilds/" . $guild_id . "/channels";
+
+        $ch = curl_init($api_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Authorization: Bot " . $token,
+            "Content-Type: application/json",
+            "User-Agent: ASCI-App (https://github.com/uva-cs3240, 1.0)"
+        ]);
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code !== 200)
+            return ["success" => "false", "error" => "Discord API returned HTTP $http_code. Check your bot token and server ID."];
+
+        $data = json_decode($response, true);
+        if ($data === null)
+            return ["success" => "false", "error" => "Invalid response from Discord API."];
+
+        // Filter to text channels only (type 0 = GUILD_TEXT)
+        $text_channels = array_values(array_filter($data, fn($c) => isset($c["type"]) && $c["type"] === 0));
+
+        // Sort alphabetically by name
+        usort($text_channels, fn($a, $b) => strcmp($a["name"], $b["name"]));
+
+        $channels = array_map(fn($c) => [
+            "id"   => $c["id"],
+            "name" => $c["name"],
+        ], $text_channels);
+
+        return ["success" => "true", "channels" => $channels];
+    }
+
+    /**
+     * For a given Discord channel, fetches messages and returns every message
+     * ending in '?' along with the response time of the first reply from another user.
+     */
+    public function getDiscordActivityHandler($user, $course_id, $channel_id) {
+        if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-stats"))
+            throw new \asci\exceptions\ASCIPermissionException("User does not have permission to access course stats");
+
+        $token = \asci\Config::$DISCORD_BOT_TOKEN;
+        if (empty($token))
+            return ["success" => "false", "error" => "Discord bot token is not configured on the server."];
+
+        // Sanitize channel_id: must be a snowflake (numeric string)
+        if (!preg_match('/^\d{1,20}$/', $channel_id))
+            return ["success" => "false", "error" => "Invalid Channel ID format."];
+
+        // Fetch up to 100 messages (Discord's per-request max)
+        $api_url = "https://discord.com/api/v10/channels/" . $channel_id . "/messages?limit=100";
+
+        $ch = curl_init($api_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Authorization: Bot " . $token,
+            "Content-Type: application/json",
+            "User-Agent: ASCI-App (https://github.com/uva-cs3240, 1.0)"
+        ]);
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code !== 200)
+            return ["success" => "false", "error" => "Discord API returned HTTP $http_code for channel. Check bot permissions."];
+
+        $messages = json_decode($response, true);
+        if ($messages === null)
+            return ["success" => "false", "error" => "Invalid response from Discord API."];
+
+        // Discord returns messages newest-first; reverse to chronological order
+        $messages = array_reverse($messages);
+
+        // Build a resolver: lowercase discord_username -> "First Last (discord_name)"
+        $mapping = $this->userStore->getDiscordMappingForCourse($course_id);
+        $resolveName = function(string $discordName) use ($mapping): string {
+            $key = strtolower($discordName);
+            if (isset($mapping[$key])) {
+                $s = $mapping[$key];
+                return trim(($s['pname'] ?? $s['fname'] ?? '') . ' ' . ($s['lname'] ?? '')) . ' (' . $discordName . ')';
+            }
+            return $discordName;
+        };
+
+        $questions = [];
+
+        foreach ($messages as $idx => $msg) {
+            $content = trim($msg["content"] ?? "");
+            // A question: non-empty message ending with '?'
+            if ($content === "" || substr($content, -1) !== "?")
+                continue;
+
+            $asker_id = $msg["author"]["id"] ?? null;
+            $asker    = $resolveName($msg["author"]["global_name"] ?? ($msg["author"]["username"] ?? "Unknown"));
+            $asked_at = $msg["timestamp"] ?? null;
+            $t_asked  = $asked_at !== null ? strtotime($asked_at) : null;
+
+            // Collect ALL responses from different users, stopping at the next question
+            $responses = [];
+            $seen_responders = []; // track by user id to avoid duplicate entries per user
+            for ($j = $idx + 1; $j < count($messages); $j++) {
+                $reply = $messages[$j];
+                $reply_content = trim($reply["content"] ?? "");
+
+                // Stop collecting once we hit the next question from anyone
+                if ($reply_content !== "" && substr($reply_content, -1) === "?")
+                    break;
+
+                $reply_author_id = $reply["author"]["id"] ?? null;
+
+                // Skip the original asker and skip empty/bot messages
+                if ($reply_author_id === null || $reply_author_id === $asker_id)
+                    continue;
+
+                // Only record each responder's FIRST reply
+                if (isset($seen_responders[$reply_author_id]))
+                    continue;
+
+                $seen_responders[$reply_author_id] = true;
+
+                $responder = $resolveName($reply["author"]["global_name"] ?? ($reply["author"]["username"] ?? "Unknown"));
+                $response_time_seconds = null;
+                if ($t_asked !== null && isset($reply["timestamp"])) {
+                    $t_replied = strtotime($reply["timestamp"]);
+                    if ($t_replied !== false && $t_replied >= $t_asked)
+                        $response_time_seconds = $t_replied - $t_asked;
+                }
+
+                $responses[] = [
+                    "responder"             => $responder,
+                    "response_time_seconds" => $response_time_seconds,
+                ];
+            }
+
+            $questions[] = [
+                "question_text" => $content,
+                "asker"         => $asker,
+                "asked_at"      => $asked_at,
+                "responses"     => $responses,
+            ];
+        }
+
+        return ["success" => "true", "questions" => $questions];
+    }
+
+    /**
+     * For every text channel in a guild, computes per-member stats:
+     *   - questions_asked : how many messages ending in '?' they sent
+     *   - responses_given : how many times they were first to reply to someone else's question
+     *   - avg_response_seconds : average time (seconds) to their first reply across all questions they answered
+     *
+     * Returns:
+     *   { success: "true", channels: [ { channel_id, channel_name, members: [ { name, questions_asked, responses_given, avg_response_seconds } ] } ] }
+     */
+    public function getDiscordServerSummaryHandler($user, $course_id, $guild_id, $max_response_seconds = null) {
+        if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-stats"))
+            throw new \asci\exceptions\ASCIPermissionException("User does not have permission to access course stats");
+
+        $token = \asci\Config::$DISCORD_BOT_TOKEN;
+        if (empty($token))
+            return ["success" => "false", "error" => "Discord bot token is not configured on the server."];
+
+        if (!preg_match('/^\d{1,20}$/', $guild_id))
+            return ["success" => "false", "error" => "Invalid Guild ID format."];
+
+        // --- Step 1: fetch all text channels ---
+        $ch = curl_init("https://discord.com/api/v10/guilds/" . $guild_id . "/channels");
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                "Authorization: Bot " . $token,
+                "Content-Type: application/json",
+                "User-Agent: ASCI-App (https://github.com/uva-cs3240, 1.0)"
+            ]
+        ]);
+        $response  = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code !== 200)
+            return ["success" => "false", "error" => "Discord API returned HTTP $http_code fetching channels."];
+
+        $all_channels = json_decode($response, true);
+        if ($all_channels === null)
+            return ["success" => "false", "error" => "Invalid response from Discord API (channels)."];
+
+        // Text channels only (type 0), sorted alphabetically
+        $text_channels = array_values(array_filter($all_channels, fn($c) => isset($c["type"]) && $c["type"] === 0));
+        usort($text_channels, fn($a, $b) => strcmp($a["name"], $b["name"]));
+
+        // Build a resolver: lowercase discord_username -> "First Last (discord_name)"
+        $mapping = $this->userStore->getDiscordMappingForCourse($course_id);
+        $resolveName = function(string $discordName) use ($mapping): string {
+            $key = strtolower($discordName);
+            if (isset($mapping[$key])) {
+                $s = $mapping[$key];
+                return trim(($s['pname'] ?? $s['fname'] ?? '') . ' ' . ($s['lname'] ?? '')) . ' (' . $discordName . ')';
+            }
+            return $discordName;
+        };
+
+        $result_channels = [];
+
+        // --- Step 2: for each channel fetch messages and compute stats ---
+        foreach ($text_channels as $channel) {
+            $channel_id = $channel["id"];
+
+            $ch2 = curl_init("https://discord.com/api/v10/channels/" . $channel_id . "/messages?limit=100");
+            curl_setopt_array($ch2, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => [
+                    "Authorization: Bot " . $token,
+                    "Content-Type: application/json",
+                    "User-Agent: ASCI-App (https://github.com/uva-cs3240, 1.0)"
+                ]
+            ]);
+            $msg_response  = curl_exec($ch2);
+            $msg_http_code = curl_getinfo($ch2, CURLINFO_HTTP_CODE);
+            curl_close($ch2);
+
+            // Skip channels we can't read (no permission, etc.)
+            if ($msg_http_code !== 200) continue;
+
+            $messages = json_decode($msg_response, true);
+            if ($messages === null || count($messages) === 0) continue;
+
+            // Chronological order
+            $messages = array_reverse($messages);
+
+            // Per-user aggregates: [ user_id => [ name, questions_asked, total_response_seconds, responses_given ] ]
+            $members = [];
+
+            $ensure = function($uid, $name) use (&$members) {
+                if (!isset($members[$uid]))
+                    $members[$uid] = ["name" => $name, "questions_asked" => 0, "responses_given" => 0, "total_response_seconds" => 0];
+            };
+
+            foreach ($messages as $idx => $msg) {
+                $content     = trim($msg["content"] ?? "");
+                $author_id   = $msg["author"]["id"] ?? null;
+                $author_name = $resolveName($msg["author"]["global_name"] ?? ($msg["author"]["username"] ?? "Unknown"));
+
+                if ($author_id === null) continue;
+
+                $ensure($author_id, $author_name);
+
+                // Count as a question if it ends with '?'
+                if ($content === "" || substr($content, -1) !== "?") continue;
+
+                $members[$author_id]["questions_asked"]++;
+                $asked_at = $msg["timestamp"] ?? null;
+                $t_asked  = $asked_at !== null ? strtotime($asked_at) : null;
+
+                // Find all unique responders before the next question
+                $seen = [];
+                for ($j = $idx + 1; $j < count($messages); $j++) {
+                    $reply         = $messages[$j];
+                    $reply_content = trim($reply["content"] ?? "");
+
+                    // Stop at the next question
+                    if ($reply_content !== "" && substr($reply_content, -1) === "?") break;
+
+                    $rid   = $reply["author"]["id"] ?? null;
+                    $rname = $resolveName($reply["author"]["global_name"] ?? ($reply["author"]["username"] ?? "Unknown"));
+
+                    if ($rid === null || $rid === $author_id || isset($seen[$rid])) continue;
+                    $seen[$rid] = true;
+
+                    $ensure($rid, $rname);
+
+                    if ($t_asked !== null && isset($reply["timestamp"])) {
+                        $t_replied = strtotime($reply["timestamp"]);
+                        if ($t_replied !== false && $t_replied >= $t_asked) {
+                            $elapsed = $t_replied - $t_asked;
+                            // Skip this response if it exceeds the outlier cutoff
+                            if ($max_response_seconds !== null && $elapsed > $max_response_seconds)
+                                continue;
+                            $members[$rid]["responses_given"]++;
+                            $members[$rid]["total_response_seconds"] += $elapsed;
+                        }
+                    } else {
+                        $members[$rid]["responses_given"]++;
+                    }
+                }
+            }
+
+            // Build the output member list (only include users who participated)
+            $member_list = [];
+            foreach ($members as $uid => $m) {
+                $avg = $m["responses_given"] > 0
+                    ? round($m["total_response_seconds"] / $m["responses_given"])
+                    : null;
+                $member_list[] = [
+                    "name"                 => $m["name"],
+                    "questions_asked"      => $m["questions_asked"],
+                    "responses_given"      => $m["responses_given"],
+                    "avg_response_seconds" => $avg,
+                ];
+            }
+
+            // Sort by avg response time ascending (non-responders last)
+            usort($member_list, function($a, $b) {
+                if ($a["avg_response_seconds"] === null && $b["avg_response_seconds"] === null) return 0;
+                if ($a["avg_response_seconds"] === null) return 1;
+                if ($b["avg_response_seconds"] === null) return -1;
+                return $a["avg_response_seconds"] <=> $b["avg_response_seconds"];
+            });
+
+            // Only include channels that had at least one message from a real user
+            if (count($member_list) > 0) {
+                $result_channels[] = [
+                    "channel_id"   => $channel_id,
+                    "channel_name" => $channel["name"],
+                    "members"      => $member_list,
+                ];
+            }
+        }
+
+        return ["success" => "true", "channels" => $result_channels];
+    }
+
+    /**
+     * Sets the Discord username for a given computing_id.
+     * A student may update their own; instructors/TAs require course-manage permission.
+     */
+    public function setDiscordUsernameHandler($user, $course_id, $computing_id, $discord_username) {
+        if ($this->user->computing_id !== $computing_id) {
+            if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-manage"))
+                throw new \asci\exceptions\ASCIPermissionException("Not authorized to update this user's Discord username");
+        }
+
+        $success = $this->userStore->setDiscordUsername($computing_id, $discord_username);
+        return ["success" => $success ? "true" : "false"];
+    }
+
+    /**
+     * Returns the Discord username → student mapping for every enrolled user
+     * in the given course who has set a Discord username.
+     * Requires course-stats permission.
+     */
+    public function getDiscordMappingHandler($user, $course_id) {
+        if (!$this->userCourseStore->userHasPermission($this->user, $course_id, "course-stats"))
+            throw new \asci\exceptions\ASCIPermissionException("User does not have permission to access course stats");
+
+        $mapping = $this->userStore->getDiscordMappingForCourse($course_id);
+        return ["success" => "true", "mapping" => $mapping];
+    }
+
+    public function validateCanvasLmsAccessTokenHandler($asci_course_id, $canvas_lms_access_token) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to validate Canvas LMS access token");
+      
+      if ($canvas_lms_access_token === "")
+        return $this->err("Access token is empty");
+
+      $canvas = new \asci\server\CanvasLmsClient($canvas_lms_access_token, $this->logger);
+      $result = $canvas->get("/api/v1/users/self");
+      if (!$result["ok"])
+        return $this->err($result["error"]);
+
+      $this->synchronizationStore->addCanvasLmsAccessToken($this->user->id, $canvas_lms_access_token);
+
+      return ["success" => "true"];
+    }
+
+    public function getCanvasLmsTokenStatusHandler($asci_course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course-roster"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to read the Canvas LMS token status");
+
+      $primary_instructor_id = $this->synchronizationStore->getPrimaryInstructorUserId($asci_course_id);
+      $has_primary_instructor = $primary_instructor_id !== null;
+      $has_token = $has_primary_instructor
+        && $this->synchronizationStore->checkUserHasCanvasLmsAccessToken($primary_instructor_id);
+
+      $is_token_working = false;
+      $is_token_expired = false;
+      if ($has_token) {
+        $canvas = $this->canvasLmsClientForCourse($asci_course_id);
+        $result = $canvas->get("/api/v1/users/self");
+        $is_token_working = $result["ok"];
+        $is_token_expired = !$result["ok"]
+          && ($result["http_code"] === 401 || $this->canvasBodyIndicatesExpiredToken($result["body"]));
+      }
+
+      return [
+        "success" => "true",
+        "hasPrimaryInstructor" => $has_primary_instructor,
+        "hasToken" => $has_token,
+        "isTokenWorking" => $is_token_working,
+        "isTokenExpired" => $is_token_expired,
+        "isPrimaryInstructor" => $has_primary_instructor && $this->user->id == $primary_instructor_id,
+      ];
+    }
+
+    public function removeCanvasLmsAccessTokenHandler($asci_course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to remove Canvas LMS access token");
+
+      $result = $this->synchronizationStore->removeCanvasLmsAccessToken($this->user->id);
+
+      if ($result)
+        return ["success" => "true"];
+      return ["success" => "false"];
+    }
+
+    public function getCanvasLmsEnrollmentTermsHandler($asci_course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS enrollment terms");
+      
+      $canvas = $this->canvasLmsClientForCourse($asci_course_id);
+      if ($canvas === null)
+        return $this->err("The primary instructor for this course has not added a Canvas LMS access token");
+
+      $terms = $canvas->getAll("/api/v1/accounts/self/terms", "per_page=100", "enrollment_terms");
+      if ($terms === null)
+        return $this->err($canvas->getLastError());
+
+      $results=[];
+
+      foreach ($terms as $term) {
+        if (preg_match('/^\d{4} (Fall|Spring|Summer)$/', $term['name'])) {
+          $results[$term['id']] = $term['name'];
+        }
+      }
+
+      return ["success" => "true", "terms" => $results];
+    }
+
+    public function getCanvasLmsCoursesHandler($asci_course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to get Canvas LMS courses");
+
+      $canvas = $this->canvasLmsClientForCourse($asci_course_id);
+      if ($canvas === null)
+        return $this->err("The primary instructor for this course has not added a Canvas LMS access token");
+
+      $courses = $canvas->getAll("/api/v1/courses", "enrollment_type=teacher&per_page=100");
+      if ($courses === null)
+        return $this->err("Failed to fetch Canvas LMS courses");
+
+      $linked_courses = $this->synchronizationStore->getLinkedCanvasLmsCourses();
+      $linked_map = [];
+      if ($linked_courses) {
+        foreach ($linked_courses as $linked_course) {
+          $linked_map[(string) $linked_course["canvas_course_id"]] = [
+            "mnemonic" => $linked_course["mnemonic"],
+            "number" => $linked_course["number"],
+            "name" => $linked_course["name"],
+            "semester" => $linked_course["semester"],
+          ];
+        }
+      }
+
+      $results = [];
+      foreach ($courses as $course) {
+        $canvas_course_id = (string) $course["id"];
+        $linked = isset($linked_map[$canvas_course_id]);
+        $results[] = [
+          "id" => $course["id"],
+          "name" => $course["name"],
+          "course_code" => $course["course_code"],
+          "enrollment_term_id" => $course["enrollment_term_id"],
+          "linked" => $linked,
+          "linked_asci_course" => $linked ? $linked_map[$canvas_course_id] : null,
+        ];
+      }
+
+      return ["success" => "true", "courses" => $results];
+    }
+
+    public function linkCanvasLmsCourseHandler($asci_course_id, $canvas_lms_course) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to sync with a Canvas LMS course");
+
+      $result = $this->synchronizationStore->linkCanvasLmsCourse($asci_course_id, $canvas_lms_course);
+
+      return ["success" => "true", "course" => $result];
+    }
+
+    public function getCanvasLmsCourseHandler($asci_course_id) {
+      $result = $this->synchronizationStore->getCanvasLmsCourse($asci_course_id);
+
+      if ($result)
+        return ["success" => "true", "course" => $result];
+      return ["success" => "false"];
+    }
+    
+    public function unlinkCanvasLmsCourseHandler($asci_course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to desync from a Canvas LMS course");
+
+      $result = $this->synchronizationStore->unlinkCanvasLmsCourse($asci_course_id);
+
+      if ($result)
+        return ["success" => "true", "course" => $result];
+      return err("No Canvas LMS course assoicated with ASCI course");
+    }
+
+    public function getExternalToolsHandler($asci_course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "external-tools"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to read the external tools for this course");
+
+      return ["success" => "true", "tools" => $this->externalToolStore->getExternalTools($asci_course_id)];
+    }
+
+    public function setExternalToolEnabledHandler($asci_course_id, $tool, $enabled) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-external-tools"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to manage the external tools for this course");
+
+      if (!\asci\server\database\DBExternalTools::isValidTool($tool))
+        return $this->err("Unknown external tool: $tool");
+
+      $tools = $this->externalToolStore->setExternalToolEnabled($asci_course_id, $tool, (bool)$enabled);
+
+      return ["success" => "true", "tools" => $tools];
+    }
+
+    public function getCanvasLmsSyncSettingsHandler($asci_course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course-roster"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to read Canvas LMS sync settings");
+
+      $settings = $this->synchronizationStore->getCanvasLmsSyncSettings($asci_course_id);
+      if (!$settings)
+        return $this->err("No Canvas LMS course associated with ASCI course");
+
+      return ["success" => "true", "settings" => $settings];
+    }
+
+    public function setCanvasLmsSyncSettingsHandler($asci_course_id, $autosync_enabled, $stale_period) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-integration"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to change Canvas LMS sync settings");
+
+      if (!$this->isValidStalePeriod($stale_period))
+        return $this->err("Invalid stale period interval");
+
+      $existing = $this->synchronizationStore->getCanvasLmsSyncSettings($asci_course_id);
+      if (!$existing)
+        return $this->err("No Canvas LMS course associated with ASCI course");
+
+      $settings = $this->synchronizationStore->setCanvasLmsSyncSettings($asci_course_id, (bool)$autosync_enabled, $stale_period);
+
+      return ["success" => "true", "settings" => $settings];
+    }
+
+  public function syncCanvasLmsRosterHandler($asci_course_id, $autosync = false) {
+    if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "sync-canvas-lms-course-roster"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to sync the Canvas LMS roster");
+
+    $canvas_course = $this->synchronizationStore->getCanvasLmsCourse($asci_course_id);
+    if (!$canvas_course)
+      return $this->err("No Canvas LMS course associated with ASCI course");
+
+    $access_token = $this->synchronizationStore->getCanvasLmsAccessTokenForCourse($asci_course_id);
+    if (!$access_token)
+      return $this->err("The primary instructor for this course has not added a Canvas LMS access token");
+
+    $this->synchronizationStore->acquireRosterSyncLock($asci_course_id);
+
+    if ($autosync) {
+      $sync_settings = $this->synchronizationStore->getCanvasLmsSyncSettings($asci_course_id);
+      if ($sync_settings && !$sync_settings["is_stale"]) {
+        $this->synchronizationStore->releaseRosterSyncLock($asci_course_id);
+        return [
+          "success" => "true",
+          "skipped_sync" => true,
+          "course" => $this->synchronizationStore->getCanvasLmsCourse($asci_course_id),
+          "added" => [],
+          "updated" => [],
+          "removed" => [],
+          "skipped" => [],
+        ];
+      }
+    }
+
+    $canvas = new \asci\server\CanvasLmsClient($access_token, $this->logger);
+    $canvas_course_id = $canvas_course["canvas_course_id"];
+    $query = "enrollment_type[]=student&enrollment_type[]=ta&enrollment_type[]=teacher&include[]=enrollments&per_page=100";
+
+    $canvas_lms_users = $canvas->getAll("/api/v1/courses/$canvas_course_id/users", $query);
+    if ($canvas_lms_users === null) {
+      $this->synchronizationStore->releaseRosterSyncLock($asci_course_id);
+      return $this->err("Failed to fetch Canvas LMS roster");
+    }
+
+    $converted = [];
+    $skipped = [];
+    foreach ($canvas_lms_users as $canvas_lms_user) {
+      $person = $this->synchronizationStore->canvasLmsUserToAsciUser($canvas_lms_user);
+      if ($person === null) {
+        $skipped[] = $canvas_lms_user;
+      } else {
+        $converted[] = $person;
+      }
+    }
+
+    $result = $this->synchronizationStore->syncCanvasLmsRoster($asci_course_id, $converted);
+
+    $this->synchronizationStore->releaseRosterSyncLock($asci_course_id);
+
+    return [
+      "success" => "true",
+      "course" => $this->synchronizationStore->getCanvasLmsCourse($asci_course_id),
+      "added" => $result["added"],
+      "updated" => $result["updated"],
+      "removed" => $result["removed"],
+      "skipped" => $skipped,
+    ];
+  }
+
+  public function getCanvasAssignmentsHandler($asci_course_id, $refresh = false) {
+    if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "canvas-lms-assignments"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to view Canvas LMS assignments");
+
+    $canvas_course = $this->synchronizationStore->getCanvasLmsCourse($asci_course_id);
+    if (!$canvas_course)
+      return $this->err("No Canvas LMS course associated with ASCI course");
+
+    $assignments = $this->canvasAssignmentStore->getAssignmentsByCourseId($asci_course_id);
+
+    if (!$refresh)
+      return ["success" => "true", "synced" => false, "assignments" => $assignments];
+
+    $canvas = $this->canvasLmsClientForCourse($asci_course_id);
+    if ($canvas === null)
+      return $this->err("The primary instructor for this course has not added a Canvas LMS access token");
+
+    $canvas_course_id = $canvas_course["canvas_course_id"];
+    $canvas_assignments = $canvas->getAll("/api/v1/courses/$canvas_course_id/assignments", "per_page=100");
+    if ($canvas_assignments === null)
+      return $this->err("Failed to fetch Canvas LMS assignments");
+
+    $counts = $this->canvasAssignmentStore->syncAssignments($asci_course_id, $canvas_assignments);
+
+    return [
+      "success" => "true",
+      "synced" => true,
+      "assignments" => $this->canvasAssignmentStore->getAssignmentsByCourseId($asci_course_id),
+      "added" => $counts["added"],
+      "updated" => $counts["updated"],
+      "flagged" => $counts["flagged"],
+      "guarded" => $counts["guarded"],
+      "skipped" => $counts["skipped"],
+    ];
+  }
+
+  public function getCanvasSubmissionsHandler($asci_course_id) {
+    if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "canvas-lms-assignments"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to view Canvas LMS submissions");
+
+    return [
+      "success" => "true",
+      "submissions" => $this->canvasSubmissionStore->getSubmissionsByCourseId($asci_course_id),
+      "students" => $this->userStore->getStudentsForCourse($asci_course_id),
+    ];
+  }
+
+  public function getOfficeHoursSessionsHandler($asci_course_id) {
+    if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "office-hour-analytics"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to view office hour analytics");
+
+    $dbsession = new \asci\server\database\DBSession($this->db);
+
+    return [
+      "success" => "true",
+      "sessions" => $dbsession->getOfficeHoursSessionsForCourse($asci_course_id),
+    ];
+  }
+
+  public function getPiazzaAnalyticsHandler($asci_course_id) {
+    if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "piazza-analytics"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to view Piazza analytics");
+
+    return [
+      "success" => "true",
+      "stats" => $this->userCourseStore->getPiazzaStatsForCourse($asci_course_id),
+      "stream" => $this->userCourseStore->getPiazzaStreamForCourse($asci_course_id),
+    ];
+  }
+
+  public function removeFlaggedCanvasAssignmentHandler($asci_course_id, $canvas_assignment_id) {
+    if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "manage-canvas-lms-assignments"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to remove Canvas LMS assignments");
+
+    $submissions = $this->canvasAssignmentStore->deleteFlaggedAssignment($asci_course_id, $canvas_assignment_id);
+
+    if ($submissions === false)
+      return $this->err("That assignment is not flagged as missing from Canvas, so it was not removed");
+
+    return [
+      "success" => "true",
+      "removedSubmissions" => $submissions,
+      "assignments" => $this->canvasAssignmentStore->getAssignmentsByCourseId($asci_course_id),
+    ];
+  }
+
+  public function uploadGradescopeSubmissionsHandler($asci_course_id, $submissions) {
+    if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "upload-canvas-lms-submissions"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to upload Canvas LMS submissions");
+
+    $canvas_course = $this->synchronizationStore->getCanvasLmsCourse($asci_course_id);
+    if (!$canvas_course)
+      return $this->err("No Canvas LMS course associated with ASCI course");
+
+    if (!is_array($submissions))
+      return $this->err("No submissions were uploaded");
+
+    $imported = 0;
+    $updated = 0;
+    $skipped = 0;
+
+    foreach ($submissions as $submission) {
+      if (!isset($submission["canvasAssignmentId"]) || !isset($submission["rows"]) || !is_array($submission["rows"]))
+        continue;
+
+      $assignment = $this->canvasAssignmentStore->getAssignmentByCanvasId(
+        $asci_course_id, $submission["canvasAssignmentId"]
+      );
+
+      if (!$assignment) {
+        $this->logger->error("Uploaded submissions reference an unknown assignment, skipping", [
+          "course" => $asci_course_id,
+          "canvas_assignment_id" => $submission["canvasAssignmentId"]
+        ]);
+        $skipped += count($submission["rows"]);
+        continue;
+      }
+
+      $counts = $this->canvasSubmissionStore->importSubmissions(
+        $asci_course_id, $assignment["id"], $submission["rows"]
+      );
+
+      $imported += $counts["imported"];
+      $updated += $counts["updated"];
+      $skipped += $counts["skipped"];
+    }
+
+    return [
+      "success" => "true",
+      "imported" => $imported,
+      "updated" => $updated,
+      "skipped" => $skipped,
+    ];
+  }
+
+  private function canvasLmsClientForCourse($asci_course_id) {
+    $access_token = $this->synchronizationStore->getCanvasLmsAccessTokenForCourse($asci_course_id);
+    if (!$access_token)
+      return null;
+    return new \asci\server\CanvasLmsClient($access_token, $this->logger);
+  }
+
+  private function isValidStalePeriod($stale_period) {
+    if (!is_string($stale_period))
+      return false;
+    $trimmed = trim($stale_period);
+    if ($trimmed === "")
+      return false;
+    return preg_match('/^(\d+\s+(year|years|month|months|mon|mons|day|days|hour|hours)\s*)+$/', $trimmed) === 1;
+  }
+
+  private function canvasBodyIndicatesExpiredToken($body) {
+    if (!is_array($body) || !isset($body["errors"]) || !is_array($body["errors"]))
+      return false;
+    foreach ($body["errors"] as $err) {
+      if (!is_array($err))
+        continue;
+      if (isset($err["expired_at"]))
+        return true;
+      if (isset($err["message"]) && stripos($err["message"], "expired access token") !== false)
+        return true;
+    }
+    return false;
+  }
 }
+

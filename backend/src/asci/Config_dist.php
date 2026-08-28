@@ -98,7 +98,12 @@ class Config {
      */
     public static $GRADESCOPE_DOWNLOAD_PATH = '/tmp/asci/gradescope/';
 
-
+    /**
+     * @var string Discord Bot Token used to query the Discord API for channel activity.
+     * Create a bot at https://discord.com/developers/applications and paste the token here.
+     * The bot must be added to your Discord server with the "Read Message History" permission.
+     */
+    public static $DISCORD_BOT_TOKEN = '';
 
     /**
      * Full database connection information

@@ -77,53 +77,110 @@ class PiazzaHandler {
   }
 
   private function cleanUserId($email) {
+    if ($email === null || strpos($email, "@") === false)
+      return false;
     list($id, $domain) = explode("@", $email);
-    return $id;
+    return strtolower(trim($id));
   }
 
   public function parsePiazzaStats($participants = []) {
 
     $piazzaRaw = $this->readPiazzaUploadFile("users.json");
 
-    $piazzaData = [];
+    $indexPart = [];
     foreach($participants as $participant) {
-      $piazzaData[$participant->getComputingId()] = [
-        "user" => $participant,
-        "stats" => [
-          "days" => 0,
-          "posts" => 0,
-          "asks" => 0,
-          "answers" => 0,
-          "views" => 0
-        ]];
+      $indexPart[strtolower($participant->getComputingId())] = $participant;
     }
 
+    $piazzaData = [];
     foreach($piazzaRaw as $piazzaUser) {
-      $userid = $this->cleanUserId($piazzaUser["email"]);
-      if (isset($piazzaData[$userid])) {
-        $piazzaData[$userid]["stats"] = $piazzaUser;
+      $userid = $this->cleanUserId($piazzaUser["email"] ?? null);
+      if ($userid !== false && isset($indexPart[$userid])) {
+        $piazzaData[$userid] = [
+          "user" => $indexPart[$userid],
+          "stats" => [
+            "days" => $piazzaUser["days"] ?? null,
+            "posts" => $piazzaUser["posts"] ?? null,
+            "asks" => $piazzaUser["asks"] ?? null,
+            "answers" => $piazzaUser["answers"] ?? null,
+            "views" => $piazzaUser["views"] ?? null
+          ]];
       }
     }
     return $piazzaData;
   }
 
-  private function cleanStreamUserId($email) {
-    if (strpos($email, "@") !== false) {
-      return $this->cleanUserId($email);
-    } 
-    return false;
+  private static $STREAM_COLUMNS = [
+    "email" => ["index" => 9, "keywords" => ["email", "e-mail"]],
+    "endorsed" => ["index" => 10, "keywords" => ["endors"]],
+    "subject" => ["index" => 6, "keywords" => ["subject", "title"]],
+    "type" => ["index" => 7, "keywords" => ["part of post", "type", "kind"]],
+    "contents" => ["index" => 5, "keywords" => ["html removed", "body", "content"]],
+    "timestamp" => ["index" => 3, "keywords" => ["created", "date", "time"]],
+    "post_no" => ["index" => 1, "keywords" => ["post number", "post no", "post"]],
+  ];
+
+  private function fallbackStreamColumns() {
+    $fallback = [];
+    foreach (self::$STREAM_COLUMNS as $field => $spec) {
+      $fallback[$field] = $spec["index"];
+    }
+    return $fallback;
+  }
+
+  private function streamColumns($header) {
+    if ($header === null || count($header) === 0)
+      return $this->fallbackStreamColumns();
+
+    $names = [];
+    foreach ($header as $index => $name) {
+      $names[$index] = strtolower(trim((string) $name));
+    }
+
+    $found = [];
+    $claimed = [];
+    foreach (self::$STREAM_COLUMNS as $field => $spec) {
+      foreach ($spec["keywords"] as $keyword) {
+        $match = null;
+        foreach ($names as $index => $name) {
+          if (isset($claimed[$index]) || $name === "")
+            continue;
+          if (strpos($name, $keyword) !== false) {
+            $match = $index;
+            break;
+          }
+        }
+
+        if ($match !== null) {
+          $found[$field] = $match;
+          $claimed[$match] = true;
+          break;
+        }
+      }
+    }
+
+    if (count($found) !== count(self::$STREAM_COLUMNS))
+      return $this->fallbackStreamColumns();
+
+    return $found;
+  }
+
+  private function isBlankRow($data) {
+    return count($data) === 1 && ($data[0] === null || trim($data[0]) === "");
   }
 
   public function parsePiazzaStream($participants = []) {
 
     $piazzaRaw = $this->readPiazzaUploadFile("contributions.csv", false);
 
+    $piazzaRaw = preg_replace('/^\xEF\xBB\xBF/', '', $piazzaRaw);
+
     $piazzaData = [];
 
     $indexPart = [];
     // get participants indexed by computing id 
     foreach($participants as $participant) {
-      $indexPart[$participant->getComputingId()] =  $participant;
+      $indexPart[strtolower($participant->getComputingId())] =  $participant;
     }
     
     // Open a temporary memory stream
@@ -132,27 +189,56 @@ class PiazzaHandler {
     rewind($handle);
 
     $header = null;
+    $columns = null;
+    $widest = null;
+    $rows = 0;
+    $parsed = 0;
+
     while (($data = fgetcsv($handle, 0, ",")) !== false) {
-      if ($header == null) {
+      if ($this->isBlankRow($data))
+        continue;
+
+      if ($header === null) {
         $header = $data;
+        $columns = $this->streamColumns($header);
+        $widest = max($columns);
+        continue;
       }
-      
-      if (count($data) != 11)
-        continue; 
-      $userid = $this->cleanStreamUserId($data[9]);
+
+      $rows += 1;
+
+      if (count($data) <= $widest)
+        continue;
+
+      $parsed += 1;
+
+      $userid = $this->cleanUserId($data[$columns["email"]]);
       if ($userid !== false && isset($indexPart[$userid])) {
         array_push($piazzaData, [
-          "post_no" => $data[1],
-          "timestamp" => $data[3],
-          "subject" => $data[6],
-          "contents" => $data[5],
-          "type" => $data[7],
+          "post_no" => $data[$columns["post_no"]],
+          "timestamp" => $data[$columns["timestamp"]],
+          "subject" => $data[$columns["subject"]],
+          "contents" => $data[$columns["contents"]],
+          "type" => $data[$columns["type"]],
+          "endorsed" => $this->isEndorsedValue($data[$columns["endorsed"]]),
           "user" => $indexPart[$userid]
         ]);
       }
     }
     fclose($handle);
-    
+
+    if ($rows > 0 && $parsed === 0)
+      throw new \asci\exceptions\ASCIUploadException(
+        "None of the $rows rows in contributions.csv have the expected columns. "
+        . "The Piazza export format may have changed."
+      );
+
     return $piazzaData;
+  }
+
+  private function isEndorsedValue($value) {
+    $text = strtolower(trim((string) $value));
+
+    return $text === "true" || $text === "t" || $text === "yes" || $text === "1";
   }
 }

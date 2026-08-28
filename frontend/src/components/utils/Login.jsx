@@ -59,9 +59,13 @@ function Login(props) {
           <div className="col-md-4">
             <h1><i className="bi-door-open big-icon"></i></h1>
             <h2>Login</h2>
-            <p>Please log in with your user name and password</p>
+            <p>Please log in with your username and password</p>
           </div>
           <div className="col-md-8 my-auto">
+            <div>
+              <h1>ASCI</h1>
+              <h5>AI-Smart Classroom Initiative</h5>
+            </div>
             <form onSubmit={handleSubmit}>
               <LoginError/>
               <div className="mb-3">
@@ -84,6 +88,7 @@ function Login(props) {
                   className="form-control"
                   required
                   value={password}
+                  placeholder="Password"
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>

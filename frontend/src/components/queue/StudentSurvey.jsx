@@ -176,7 +176,7 @@ function StudentSurvey(props) {
 
   function getSurveyHtml(){
     return (
-      <div className="row">
+      <div className="row p-5">
 
         <div className="card my-3 p-0">
           <h5 className="card-header">Quick Survey</h5>
@@ -462,7 +462,7 @@ function StudentSurvey(props) {
 
   function getSurveyDoneHTML(){
     return (
-      <div>
+      <div className="page-container">
         <h2> Thank you for submitting the survey! </h2>
 
         <div className="text-center">
@@ -475,7 +475,7 @@ function StudentSurvey(props) {
 
   function getNoSurveyHTML(){
     return (
-      <div>
+      <div className="page-container">
         <h2> Oops! There is no survey for you to fill out right now! </h2>
 
         <div className="text-center">

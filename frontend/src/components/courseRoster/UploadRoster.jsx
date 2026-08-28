@@ -1,0 +1,321 @@
+import React, { useState, useEffect, useRef } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useUser } from "../context/UserContext";
+import { postCommand } from "../utils/postCommand";
+import ConfirmModal from "../utils/ConfirmModal";
+import { formatLastSynced } from "../utils/CanvasStalePeriod";
+import { errorMessage } from "../utils/errorMessage";
+import { isInstructorRole, isStaffRole } from "../utils/roles";
+
+function UploadRoster(props) {
+  const [rosterFile, setRosterFile] = useState(null);
+  const { user, getCourse, courseSettings, setCourseSettings, refreshCourseRoster, refreshCourseList } = useUser();
+  const [disabled, setDisabled] = useState(false);
+  const [showSyncRosterModal, setShowSyncRosterModal] = useState(false);
+  const [syncRosterButtonDisabled, setSyncRosterButtonDisabled] = useState(false);
+  const [showSyncRosterResults, setShowSyncRosterResults] = useState(false);
+  const [syncRosterResults, setSyncRosterResults] = useState({});
+  const autoSyncRan = useRef({});
+
+  let course = getCourse();
+
+  const handleFileChange = (event) => {
+    setRosterFile(event.target.files[0]);
+  };
+
+  const parseCSV = (data) => {
+    const rows = data.split("\n");
+    const users = [];
+    for (let i = 4; i < rows.length; i++) {
+      const cells = rows[i].split(",");
+      if (cells.length >= 6) {
+        let role = cells[5].toLowerCase().trim();
+        if (role === "teacher") {
+          role = "ta";
+        } else if (role === "student") {
+          role = "student";
+        }
+        users.push({
+          fname: cells[1].trim(),
+          lname: cells[0].trim(),
+          pname: cells[1].trim(),
+          computing_id: cells[3].trim(),
+          role: role,
+        });
+      }
+    }
+    return users;
+  };
+
+  const uploadRoster = () => {
+    if (!rosterFile) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const rosterData = parseCSV(event.target.result);
+        console.log(rosterData);
+        sendRosterToBackend(rosterData);
+      } catch (error) {
+        console.error("Error parsing the roster CSV:", error);
+      }
+    };
+    reader.readAsText(rosterFile);
+  };
+
+  const sendRosterToBackend = (rosterData) => {
+    setDisabled(false);
+
+    const payload = {
+      command: "uploadRoster",
+      roster: rosterData,
+      user: user.userid,
+      course_id: course.course_id
+    };
+
+    console.log("Upload roster payload: ", payload);
+
+    postCommand(props.url, payload)
+      .then((data) => {
+        console.log("Upload roster respond: ", data);
+        if (data.success === "true") {
+          console.log("Roster uploaded successfully!");
+          toast.success("Roster uploaded successfully!");
+          refreshCourseRoster();
+        } else {
+          console.error("Error uploading the roster");
+          toast.error("Error uploading the roster");
+        }
+      })
+      .catch((error) => {
+        console.error("There was an error:", error);
+        toast.error("There was an error uploading the roster");
+      });
+  };
+
+  const syncRoster = () => {
+    setShowSyncRosterModal(true);
+  };
+
+  const updateTimestampFromSync = (data) => {
+    if (data.course) {
+      props.setCanvasSyncSettings((prev) => ({
+        ...(prev || {}),
+        last_synced_at: data.course.last_synced_at,
+        stale_period: data.course.stale_period,
+        autosync_enabled: data.course.autosync_enabled,
+        is_stale: false, // a course that was just synced is by definition not stale
+      }));
+    } else {
+      props.refreshCanvasSyncSettings();
+    }
+  };
+
+  const performSyncCanvasLmsRoster = ({ silent = false, autosync = false } = {}) => {
+    if (!silent) setSyncRosterButtonDisabled(true);
+
+    const payload = {
+      asciCourseId: props.course_id,
+      command: "syncCanvasLmsRoster",
+      ...(autosync ? { autosync: true } : {}),
+    };
+
+    return postCommand(props.url, payload)
+      .then((data) => {
+        if (!silent) setSyncRosterButtonDisabled(false);
+        if (data.success === "true") {
+          console.log("Roster synced:", data);
+          refreshCourseRoster();
+          updateTimestampFromSync(data);
+          if (!silent) {
+            toast.success("Successfully synced Canvas LMS roster");
+            setShowSyncRosterResults(true);
+            setSyncRosterResults(data);
+          }
+        } else {
+          console.log(data.error);
+          toast.error(errorMessage(data.error, "Failed to sync Canvas LMS roster"));
+        }
+      })
+      .catch((error) => {
+        if (!silent) setSyncRosterButtonDisabled(false);
+        console.log(error);
+        toast.error(errorMessage(error, "Failed to sync Canvas LMS roster"));
+      });
+  };
+
+  const confirmSyncCanvasLmsRoster = () => {
+    setShowSyncRosterModal(false);
+    performSyncCanvasLmsRoster({ silent: false });
+  };
+
+  useEffect(() => {
+    if (!props.canvasEnabled) return;
+    if (props.canvasLmsCourse === null) return;
+    if (!props.canvasSyncSettings) return;
+    if (!props.canvasSyncSettings.autosync_enabled) return;
+    if (!props.canvasTokenStatus.hasToken || !props.canvasTokenStatus.isTokenWorking) return;
+    if (!course || !isStaffRole(course.role)) return;
+    if (!props.canvasSyncSettings.is_stale) return;
+
+    if (autoSyncRan.current[props.course_id]) return;
+    autoSyncRan.current[props.course_id] = true;
+
+    performSyncCanvasLmsRoster({ silent: true, autosync: true });
+  }, [props.canvasEnabled, props.canvasSyncSettings, props.canvasLmsCourse, props.canvasTokenStatus, props.course_id]);
+
+  function getSyncRosterButton() {
+    if (!isInstructorRole(course?.role))
+      return null;
+
+    if (!props.canvasTokenStatusLoaded)
+      return (
+        <button type="button" className="btn btn-primary" disabled>Loading…</button>
+      );
+
+    if (!props.canvasTokenStatus.hasToken)
+      return (
+        <>
+          <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot sync: the primary instructor has not added a Canvas LMS access token</p>
+          <button type="button" className="btn btn-primary" disabled>Synchronize Course Roster</button>
+        </>
+      );
+
+    if (syncRosterButtonDisabled)
+      return (
+        <button type="button" className="btn btn-primary" disabled>Syncing Roster (Please Wait)</button>
+      );
+
+    if (props.canvasTokenStatus.hasToken && !props.canvasTokenStatus.isTokenWorking)
+      return (
+        <button type="button" className="btn btn-primary" disabled>Synchronize Course Roster</button>
+      );
+
+    return (
+      <button type="button" className="btn btn-primary" onClick={syncRoster}>Synchronize Course Roster</button>
+    );
+  }
+
+  function getSyncRosterResults() {
+    const data = syncRosterResults;
+
+    const sections = [
+      { key: "added", label: "Added" },
+      { key: "updated", label: "Updated" },
+      { key: "removed", label: "Removed" },
+      { key: "skipped", label: "Skipped" },
+    ];
+
+    return (
+      <div className="mb-3" style={{ maxHeight: "400px", overflowY: "auto" }}>
+        {sections.map(({ key, label }) => {
+          if (key === "skipped" && (!data[key] || data[key].length === 0)) {
+            return null;
+          }
+          return (
+            <div key={key} className="mt-3">
+              <h6>{label} ({data[key]?.length || 0})</h6>
+              {data[key] && data[key].length > 0 ? (
+                <ul className="list-group">
+                  {data[key].map((user, i) => (
+                    <li key={i}>
+                      <div className="d-flex justify-content-between">
+                        <span>
+                          <span className="text-muted me-2">
+                            {user.computingId}
+                          </span>
+                          <span>{user.fname} {user.lname}</span>
+                        </span>
+
+                        <span className="text-muted">
+                          {user.role}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>None</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (!props.canvasLmsCourseLoaded || !props.externalToolsLoaded) {
+    return (
+      <div className="card mb-4">
+        <h4 className="card-header">Roster</h4>
+        <div className="card-body">
+          <p className="text-muted mb-0">Loading…</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card mb-4">
+      {props.canvasEnabled && props.canvasLmsCourse !== null ? (
+        <>
+          <h4 className="card-header">Synchronize Roster from Canvas LMS</h4>
+          <div className="card-body">
+            {props.canvasTokenStatus.hasToken && !props.canvasTokenStatus.isTokenWorking && (
+              <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot connect to Canvas LMS.</p>
+            )}
+            <div className="mb-3">
+              <h5>Canvas LMS Course Info</h5>
+              <p>
+                Course Code: {props.canvasLmsCourse.course_code} <br />
+                Course Name: {props.canvasLmsCourse.name}
+              </p>
+              {props.canvasSyncSettings && (
+                <p
+                  className={props.canvasSyncSettings.is_stale ? "text-danger" : ""}
+                >
+                  Last synced: {formatLastSynced(props.canvasSyncSettings.last_synced_at)}
+                </p>
+              )}
+              {getSyncRosterButton()}
+            </div>
+            {showSyncRosterResults && (
+              <div className="mb-3">
+                <h5>Roster Sync Results</h5>
+                {props.canvasTokenStatus.isTokenWorking ? (
+                  getSyncRosterResults()
+                ) : (
+                  <p className="alert alert-warning d-flex justify-content-between align-items-center">Cannot connect to Canvas LMS.</p>
+                )}
+              </div>
+            )}
+          </div>
+          <ConfirmModal
+            show={showSyncRosterModal}
+            title="Confirm Canvas Roster Sync"
+            onCancel={() => setShowSyncRosterModal(false)}
+            onConfirm={confirmSyncCanvasLmsRoster}
+          >
+            <p>Are you sure you want to sync the roster from <strong>{props.canvasLmsCourse.name}</strong> on Canvas LMS?</p>
+            <p className="alert alert-warning d-flex justify-content-between align-items-center mb-3">
+              Syncing the roster will remove all manually added users except for Instructors
+            </p>
+          </ConfirmModal>
+        </>
+      ) : (
+        <>
+          <h4 className="card-header">Upload Roster</h4>
+          <form className="p-3">
+            <div className="input-group">
+              <input className="form-control" type="file" onChange={handleFileChange} accept=".csv" />
+              <button type="button" className="btn btn-primary" onClick={uploadRoster}>Upload</button>
+            </div>
+          </form>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default UploadRoster;

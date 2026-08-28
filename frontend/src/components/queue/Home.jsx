@@ -3,6 +3,7 @@ import React from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import { isStaffRole } from "../utils/roles";
 
 //This page needs to:
 //See if student is logged in and kick to login page if not
@@ -88,7 +89,7 @@ function Home(props) {
       } else if (status === "in_progress") {
         navigate(docRoot + "/studentMeeting");
       }
-    } else if (role === "ta" || role === "instructor") {
+    } else if (isStaffRole(role)) {
       if (status === "none") {
         navigate(docRoot + "/handleStudent");
       } else if (status === "in_progress") {
@@ -99,7 +100,7 @@ function Home(props) {
     } else {
       //kick to login page
       console.log(
-        "HOME: Something went wrong, role is not student or ta or a instructor"
+        "HOME: Something went wrong, role is not student or course staff (ta/instructor/primary instructor)"
       );
       navigate(docRoot + "/error");
     }

@@ -9,6 +9,7 @@ class User implements \Serializable {
     public $fname;
     public $lname;
     public $pname;
+    public $discord_username;
     private $passwordHash;
 
 
@@ -18,12 +19,13 @@ class User implements \Serializable {
         
     }
 
-    public function fromData($id, $computing_id, $fname, $lname, $pname, $passwordHash=null){
+    public function fromData($id, $computing_id, $fname, $lname, $pname, $passwordHash=null, $discord_username=null){
         $this->id = $id;
         $this->computing_id = $computing_id;
         $this->fname = $fname;
         $this->lname = $lname;
         $this->pname = $pname;
+        $this->discord_username = $discord_username;
         $this->passwordHash = $passwordHash;
     }
 
@@ -33,6 +35,7 @@ class User implements \Serializable {
         $this->fname = $row['fname'] ?? null;
         $this->lname = $row['lname'] ?? null;
         $this->pname = $row['pname'] ?? null;
+        $this->discord_username = $row['discord_username'] ?? null;
         $this->passwordHash = $row['password'] ?? null;
         return $this;
     }
@@ -43,7 +46,8 @@ class User implements \Serializable {
             "computing_id" => $this->computing_id,
             "fname" => $this->fname,
             "lname" => $this->lname,
-            "pname" => $this->pname
+            "pname" => $this->pname,
+            "discord_username" => $this->discord_username
             // "passwordHash" => $this->passwordHash (do not put in the hash!)
         );
     }

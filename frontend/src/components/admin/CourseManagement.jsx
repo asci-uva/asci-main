@@ -65,6 +65,10 @@ function CourseManagement(props) {
               data.courses[key]["role"] +
               ")";
 
+            if (data.courses[key]["archived"] === "t") {
+              courseName += " [Archived]";
+            }
+
             c[key] = courseName;
           }
 

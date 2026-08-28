@@ -16,11 +16,29 @@ function StudentWaitingRoom(props) {
   const [tip, setTip] = useState("This is a really good tip.");
 
   const [issueSubject, setIssueSubject] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible p-3");
+  const [sidebarCol, setSidebarCol] = useState("col-md-3");
+  const [contentCol, setContentCol] = useState("page-container col-md-9 my-auto");
+
+  const handleCollapse = () => {
+    if(sidebarOpen === "sidebar-visible p-3")
+    {
+      setSidebarCol("col-md-1");
+      setContentCol("page-container col-md-11");
+      setSidebarOpen("sidebar-hidden");
+    }
+    else
+    {
+      setSidebarCol("col-md-3");
+      setContentCol("page-container col-md-9 my-auto");
+      setSidebarOpen("sidebar-visible p-3");
+    }
+  }
 
   //variables for managing polling the server
   let polling = false;
   let timeoutId = 0;
-  let pollTime = 300000;
+  let pollTime = 3000;
 
   let url = props.url;
   let docRoot = props.documentRoot;
@@ -206,14 +224,19 @@ function StudentWaitingRoom(props) {
   };
 
   return (
-    <div className="container p-4">
-      <div className="row my-auto">
-        <div className="col-md-4">
-          <h1><i className="bi-clock-history big-icon"></i></h1>
-          <h2>Waiting Room</h2>
-          <p>On the queue.</p>
+    <div className="container-fluid page-width">
+      <div className="full-page row g-0">
+        <div className={sidebarCol}>
+          <div className="sidebar">
+            <div className={sidebarOpen}>
+              <h1><i className="bi-clock-history big-icon"></i></h1>
+              <h2>Waiting Room</h2>
+              <p>On the queue.</p>  
+            </div>
+            <button type="button" className="sidebar-button" onClick={handleCollapse}><i className="bi-arrows-collapse-vertical"></i></button>
+          </div>
         </div>
-        <div className="col-md-8 my-auto">
+        <div className={contentCol}>
           <h4>
             You are currently in the queue for {course.name}. A TA Will
             be with you shortly

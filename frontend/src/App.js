@@ -11,10 +11,11 @@ function App() {
 
 //SOME GLOBAL CONSTANTS THAT ARE USED THROUGHOUT THE APP
 const documentRoot = "/asci";
-//const url = "https://kytos02.cs.virginia.edu/asci-server/index.php";
-// const documentRoot = "/ohq/ohq";
-const url = "http://localhost:8081/index.php";
-const uploadurl = "http://localhost:8081/fileupload.php";
+// REACT_APP_BACKEND_URL is set at build time (empty string on Heroku = same-origin).
+// For local dev create a .env file with: REACT_APP_BACKEND_URL=http://localhost:8081
+const backendBase = process.env.REACT_APP_BACKEND_URL || "http://localhost:8081";
+const url = backendBase + "/index.php";
+const uploadurl = backendBase + "/fileupload.php";
 
 const netbadgeEnabled = false; //if false, login page will have you type in a userId to use
 const debugMode = true; //if true, login page will have you type in a userId to use

@@ -1,4 +1,5 @@
-FROM postgres
+# FROM postgres
+FROM postgres:17
 
 ENV POSTGRES_USER asci
 ENV POSTGRES_PASSWORD asci
