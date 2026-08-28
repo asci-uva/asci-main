@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { postCommand } from "./postCommand";
+import { useUser } from "../context/UserContext";
 
 export function useCanvasLmsCourse(url, courseId, enabled) {
     const [course, setCourse] = useState(null);
     const [loaded, setLoaded] = useState(false);
+    const { user, getCourse } = useUser();
     const requestIdRef = useRef(0);
 
     const refresh = useCallback(() => {
@@ -15,6 +17,7 @@ export function useCanvasLmsCourse(url, courseId, enabled) {
         return postCommand(url, {
             asciCourseId: courseId,
             command: "getCanvasLmsCourse",
+            user: user.userid
         })
             .then((data) => {
                 if (!isCurrent()) return null;

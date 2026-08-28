@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { postCommand } from "./postCommand";
+import { useUser } from "../context/UserContext";
 
 export const DEFAULT_TOKEN_STATUS = {
     hasPrimaryInstructor: false,
@@ -13,6 +14,7 @@ export function useCanvasTokenStatus(url, courseId, enabled) {
     const [status, setStatus] = useState(DEFAULT_TOKEN_STATUS);
     const [loaded, setLoaded] = useState(false);
     const [error, setError] = useState(false);
+    const { user, getCourse } = useUser();
     const requestIdRef = useRef(0);
 
     const refresh = useCallback(() => {
@@ -24,6 +26,7 @@ export function useCanvasTokenStatus(url, courseId, enabled) {
         return postCommand(url, {
             asciCourseId: courseId,
             command: "getCanvasLmsTokenStatus",
+            user: user.userid
         })
             .then((data) => {
                 if (!isCurrent()) return null;

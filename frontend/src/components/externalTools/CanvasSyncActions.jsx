@@ -16,7 +16,7 @@ function LastSynced({ lastSyncedAt, stale }) {
 }
 
 function CanvasSyncActions(props) {
-  const { getCourse, refreshCourseRoster } = useUser();
+  const { user, getCourse, refreshCourseRoster } = useUser();
   const course = getCourse();
   const courseId = props.course_id;
 
@@ -37,6 +37,7 @@ function CanvasSyncActions(props) {
     postCommand(props.url, {
       asciCourseId: courseId,
       command: "getCanvasAssignments",
+      user: user.userid
     })
       .then((data) => {
         if (!isCurrent()) return;
@@ -60,6 +61,7 @@ function CanvasSyncActions(props) {
     postCommand(props.url, {
       asciCourseId: courseId,
       command: "syncCanvasLmsRoster",
+      user: user.userid
     })
       .then((data) => {
         if (data.success !== "true") {
@@ -94,6 +96,7 @@ function CanvasSyncActions(props) {
     return postCommand(props.url, {
       asciCourseId: courseId,
       command: "getCanvasAssignments",
+      user: user.userid,
       refresh: true,
     })
       .then((data) => {

@@ -5,7 +5,7 @@ import { isInstructorRole } from "../utils/roles";
 import UploadGradescopeCsv from "../assessments/UploadGradescopeCsv";
 
 function GradescopeCsvUpload(props) {
-  const { getCourse } = useUser();
+  const { user, getCourse } = useUser();
   const course = getCourse();
   const courseId = props.course_id;
 
@@ -28,6 +28,7 @@ function GradescopeCsvUpload(props) {
     return postCommand(props.url, {
       asciCourseId: courseId,
       command: "getCanvasSubmissions",
+      user: user.userid
     })
       .then((data) => {
         if (!isCurrent()) return;
@@ -64,6 +65,7 @@ function GradescopeCsvUpload(props) {
     postCommand(props.url, {
       asciCourseId: courseId,
       command: "getCanvasAssignments",
+      user: user.userid
     })
       .then((data) => {
         if (!isCurrent()) return;
