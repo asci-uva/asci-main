@@ -4,7 +4,7 @@
     color: #333;
 }
 
-@media screen and (max-width: 992px) and (min-width: 768px) {
+@media screen and (max-width: 1050px) and (min-width: 768px) {
   .big-icon {
     font-size: 100px;
   }
@@ -16,7 +16,6 @@
     text-align: right;
   }
 }
-
 
 .home-icon {
     font-size: 140px;
@@ -55,4 +54,92 @@
   color: black;
 }
 
+.analytics-pie .c3-chart-arc text {
+  fill: #0b0b0b;
+  font-weight: 600;
+}
+
+.card {
+  margin: 5px;
+  border: 1px solid rgb(127, 127, 142);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.quest-card {
+  padding: 15px;
+  margin: 5px;
+  border: 1px solid rgb(127, 127, 142);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* source for creating a collapsing sidebar: https://medium.com/swlh/creating-a-pure-css-sidebar-463ce30c1609 */
+.sidebar {
+  display: flex;
+  height: 100%;
+  padding: 0px;
+}
+
+.sidebar-button {
+  align-items: center;
+  display: flex;
+  justify-content: end;
+  border: 1px solid rgb(127, 127, 142);
+  border-radius: 2px;
+  font-size: 1.5rem;
+  color: white;
+  height: 100%;
+  /* background-color: #61a7f2; */
+  background-color: #212529;
+}
+
+.sidebar-button button i{
+  position: static;
+  top: 10px;
+}
+
+.sidebar-visible {
+  display: block;
+  justify-content: center;
+  width: 60%;
+  padding: 10px;
+  margin-top: 60px;
+  margin-right: 10px;
+  margin-left: 30px;
+}
+
+.sidebar-hidden {
+  display: none;
+}
+ 
+@media screen and (max-width: 767.5px) {
+  .sidebar-button {
+    display: none;
+  }
+}
+
+.full-page
+{
+  height: 100%;
+}
+
+.page-container {
+  padding: 40px;
+}
+
+.content {
+  overflow: auto;
+  height: 100vh;
+}
+
+.page-width {
+  width: 100%;
+  margin: 0px;
+  padding: 0px !important;
+}
+
+.container-fluid {
+  margin: 0px;
+  padding: 0px;
+}
 

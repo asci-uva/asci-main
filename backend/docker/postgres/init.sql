@@ -3,6 +3,7 @@ ALTER DATABASE asci SET timezone TO 'America/New_York';
 CREATE TYPE roles AS ENUM (
   'student',
   'instructor',
+  'primary_instructor',
   'ta'
 );
 
@@ -24,14 +25,24 @@ CREATE TYPE group_mapping_status AS ENUM (
   'inactive'
 );
 
+CREATE TYPE external_tool AS ENUM (
+  'canvas',
+  'gradescope',
+  'piazza'
+);
+
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   computing_id VARCHAR(12),
   fname TEXT,
   lname TEXT,
   pname TEXT,
+  discord_username VARCHAR(30),
   password TEXT
 );
+
+CREATE UNIQUE INDEX users_computing_id_lower_unique
+ON users (LOWER(computing_id));
 
 CREATE TABLE user_courses (
   user_id INT,
@@ -39,6 +50,10 @@ CREATE TABLE user_courses (
   role roles,
   PRIMARY KEY (user_id, course_id)
 );
+
+CREATE UNIQUE INDEX user_courses_one_primary_instructor
+ON user_courses (course_id)
+WHERE role = 'primary_instructor';
 
 CREATE TABLE courses (
   id SERIAL PRIMARY KEY,
@@ -99,12 +114,14 @@ CREATE TABLE survey (
 
 CREATE TABLE course_settings (
   course_id INT,
+  discord_server_id TEXT,
   show_queue_list BOOL DEFAULT (true),
   grouping_enabled BOOL DEFAULT (true),
   smart_grouping BOOL DEFAULT (true),
   self_grouping BOOL DEFAULT (true),
   show_quests BOOL DEFAULT (true),
-  llm_enabled BOOL DEFAULT (true)
+  llm_enabled BOOL DEFAULT (true),
+  archived BOOL DEFAULT (false)
 );
 
 CREATE TABLE logs (
@@ -167,13 +184,18 @@ CREATE TABLE piazza_stream (
   id SERIAL PRIMARY KEY,
   user_id INT,
   course_id INT,
+  post_no INT,
   time timestamp,
   submission text,
   subject text,
   action text,
+  endorsed boolean DEFAULT false,
   FOREIGN KEY (course_id) REFERENCES courses (id),
   FOREIGN KEY (user_id) REFERENCES users (id)
 );
+
+CREATE UNIQUE INDEX piazza_stream_contribution_unique
+ON piazza_stream (course_id, post_no, user_id, time) NULLS NOT DISTINCT;
 
 CREATE TABLE piazza_raw_stats (
   id SERIAL PRIMARY KEY,
@@ -195,7 +217,8 @@ CREATE TYPE quest_completion_status AS ENUM (
   'Locked',
   'Not started',
   'In progress',
-  'Completed'
+  'Completed',
+  'Completed - Pending Approval'
 );
 
 
@@ -213,7 +236,7 @@ CREATE TABLE user_quests (
   user_id INT,
   course_id INT,
   status quest_completion_status,
-  PRIMARY KEY (user_id, quest_id)
+  PRIMARY KEY (user_id, quest_id, course_id)
 );
 
 CREATE TABLE course_quests (
@@ -221,6 +244,97 @@ CREATE TABLE course_quests (
   course_id INT,
   PRIMARY KEY (course_id, quest_id)
 );
+
+-- External tools
+CREATE TABLE course_external_tools (
+  course_id  INT NOT NULL REFERENCES courses(id),
+  tool       external_tool NOT NULL,
+  enabled    BOOL NOT NULL DEFAULT false,
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  PRIMARY KEY (course_id, tool)
+);
+
+-- Canvas LMS
+CREATE TABLE canvas_lms_access_tokens (
+  user_id INT PRIMARY KEY,
+  access_token TEXT,
+  access_token_iv TEXT,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE canvas_lms_courses (
+  asci_course_id INT PRIMARY KEY,
+  canvas_course_id TEXT,
+  name TEXT,
+  course_code TEXT,
+  last_synced_at TIMESTAMP,
+  stale_period INTERVAL NOT NULL DEFAULT '7 days',
+  autosync_enabled BOOLEAN NOT NULL DEFAULT false,
+  FOREIGN KEY (asci_course_id) REFERENCES courses(id)
+);
+
+CREATE TABLE canvas_lms_assignments (
+  id SERIAL PRIMARY KEY,
+  asci_course_id INT NOT NULL,
+  canvas_assignment_id TEXT NOT NULL,
+  canvas_assignment_group_id TEXT,
+  name TEXT,
+  description TEXT,
+  html_url TEXT,
+  due_at TIMESTAMP,
+  unlock_at TIMESTAMP,
+  lock_at TIMESTAMP,
+  points_possible FLOAT,
+  grading_type TEXT,
+  submission_types TEXT[],
+  allowed_attempts INT,
+  position INT,
+  published BOOLEAN,
+  workflow_state TEXT,
+  omit_from_final_grade BOOLEAN,
+  canvas_created_at TIMESTAMP,
+  canvas_updated_at TIMESTAMP,
+  last_synced_at TIMESTAMP,
+  missing_from_canvas_at TIMESTAMP,
+  UNIQUE (asci_course_id, canvas_assignment_id),
+  FOREIGN KEY (asci_course_id) REFERENCES canvas_lms_courses(asci_course_id)
+);
+
+CREATE INDEX canvas_lms_assignments_course
+ON canvas_lms_assignments (asci_course_id);
+
+CREATE TABLE canvas_lms_submissions (
+  id SERIAL PRIMARY KEY,
+  canvas_lms_assignment_id INT NOT NULL,
+  canvas_user_id TEXT,
+  user_id INT,
+  canvas_submission_id TEXT,
+  score NUMERIC(6,2),
+  submitted_at TIMESTAMP,
+  lateness INTERVAL,
+  workflow_state TEXT,
+  attempt INT,
+  source TEXT,
+  last_synced_at TIMESTAMP,
+  last_uploaded_at TIMESTAMP,
+  CHECK (canvas_user_id IS NOT NULL OR user_id IS NOT NULL),
+  FOREIGN KEY (canvas_lms_assignment_id) REFERENCES canvas_lms_assignments(id) ON DELETE RESTRICT,
+  FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE UNIQUE INDEX canvas_lms_submissions_canvas_user
+ON canvas_lms_submissions (canvas_lms_assignment_id, canvas_user_id)
+WHERE canvas_user_id IS NOT NULL;
+
+CREATE UNIQUE INDEX canvas_lms_submissions_asci_user
+ON canvas_lms_submissions (canvas_lms_assignment_id, user_id)
+WHERE user_id IS NOT NULL;
+
+CREATE INDEX canvas_lms_submissions_assignment
+ON canvas_lms_submissions (canvas_lms_assignment_id);
+
+CREATE INDEX canvas_lms_submissions_user
+ON canvas_lms_submissions (user_id);
 
 ALTER TABLE queue ADD FOREIGN KEY (user_id) REFERENCES users (id);
 
@@ -294,7 +408,7 @@ INSERT INTO course_settings (course_id, show_queue_list, grouping_enabled, smart
 VALUES (2, true, true, true, true);
 
 INSERT INTO user_courses (user_id, course_id, role)
-VALUES (4, 3, 'instructor');
+VALUES (4, 3, 'primary_instructor');
 
 INSERT INTO user_courses (user_id, course_id, role)
 VALUES (2, 3, 'student');

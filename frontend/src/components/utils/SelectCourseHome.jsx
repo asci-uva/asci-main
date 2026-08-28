@@ -2,8 +2,8 @@ import React from "react";
 import {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 import { useUser } from "../context/UserContext";
-import { SelectCourse } from "./";
-import { CreateNewCourse } from "./";
+import SelectCourse from "./SelectCourse";
+import CreateNewCourse from "./CreateNewCourse";
 
 function SelectCourseHome(props) {
   

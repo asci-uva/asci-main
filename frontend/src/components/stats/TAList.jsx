@@ -64,7 +64,7 @@ function TAList(props) {
             {data[k].name} ({data[k].computing_id})
           </button>
         </h2>
-        <div id={"collapse"+k} className="accordion-collapse collapse" aria-labeledby={"heading"+k} data-bs-parent="#taAccordion">
+        <div id={"collapse"+k} className="accordion-collapse collapse" aria-labelledby={"heading"+k} data-bs-parent="#taAccordion">
           <div className="accordion-body">
             <table id="TATable" className="table table-striped table-hover table-sm">
               <thead>
@@ -92,7 +92,7 @@ function TAList(props) {
 
     return (
       <>
-        <div className="card mb-4">
+        <div className="full-page card mb-4">
         <h4 className="card-header">List View</h4>
         <div className="card-body">
           <div className="accordion" id="taAccordion">

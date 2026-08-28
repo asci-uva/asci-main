@@ -2,6 +2,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import QuestList from "./QuestList";
+import { useUser } from "../context/UserContext";
 
 //This page needs to:
 //See if student is logged in and kick to login page if not
@@ -12,18 +13,16 @@ function Home(props) {
 
   let docRoot = props.documentRoot;
   let url = props.url;
-  const [user, setUser] = useState(null);
+  const {user, course} = useUser();
 
   //This function runs on page load!
   useEffect(() => {
     console.log("ENTERING HOME");
     //need to redo this. check user set and course set first
-    if (localStorage.getItem("asci-user") === null) {
+    if (!user) {
       console.log("User is NOT set, navigating home");
       navigate(docRoot + "/../login");
-    } else {
-      setUser(localStorage.getItem("asci-user"));
-    }
+    } 
   }, []);
   
   return (

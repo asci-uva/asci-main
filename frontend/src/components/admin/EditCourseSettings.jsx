@@ -10,7 +10,7 @@ function EditCourseSettings(props) {
   const { courseId } = useParams();
   const navigate = useNavigate();
 
-  const { user, getCourse, courseSettings, setCourseSettings } = useUser();
+  const { user, getCourse, courseSettings, setCourseSettings, refreshCourseList } = useUser();
   let course = getCourse();
 
   console.log("course settings is: " , courseSettings);
@@ -22,6 +22,9 @@ function EditCourseSettings(props) {
 
   /* AI Settings */
   const [llmEnabled, setLlmEnabled] = useState(courseSettings.llm_enabled == "t");
+
+  /* Course Visibility Settings */
+  const [archived, setArchived] = useState(courseSettings.archived == "t");
 
   /* Quest Settings */
   const [showQuests, setShowQuests] = useState(courseSettings.show_quests == "t");
@@ -41,7 +44,8 @@ function EditCourseSettings(props) {
       grouping_enabled: groupingEnabled,
       smart_grouping: smartGrouping,
       llm_enabled: llmEnabled,
-      show_quests: showQuests,     //this one cannot actually be changed
+      show_quests: showQuests,
+      archived: archived,
     };
 
     request.settings = newSettings;
@@ -66,6 +70,12 @@ function EditCourseSettings(props) {
           toast.success("Settings updated successfully!");
 
           setCourseSettings(data.settings);
+
+          refreshCourseList({ user: user.userid }, (success) => {
+            if (!success) {
+              console.log("refreshing course list seems to have failed");
+            }
+          });
           
         } else {
           toast.error("Error updating course settings");
@@ -105,10 +115,22 @@ function EditCourseSettings(props) {
       setLlmEnabled(element.checked);
   }
 
+    const handleArchivedChange = (e) => {
+      const element = e.target;
+      console.log("changing boolean archived to " , element.checked);
+      setArchived(element.checked);
+    }
+
+  const handleShowQuestsChange = (e) => {
+      const element = e.target;
+      console.log("changing boolean showQuests to " , element.checked);
+      setShowQuests(element.checked);
+  }
+
   return (
     <>
       <div className="card mb-4">
-        <h4 className="card-header">ASCI@UVA Settings</h4>
+        <h4 className="card-header">ASCI Settings</h4>
           <div className="card-body">
 
             <h5>Queue Settings</h5>
@@ -133,11 +155,19 @@ function EditCourseSettings(props) {
               <label className="form-check-label" htmlFor="llmEnabled"><b>Enable LLM Chat Bot: </b>The LLM Chat Bot will be available to students on main chat bot page and while waiting on the queue</label>
             </div>
 
-            <h5>Quick Task Settings</h5>
+            <h5>Quest Settings</h5>
 
             <div className="form-check form-switch mb-3">
-              <input className="form-check-input" type="checkbox" id="showQuests" checked={false} disabled></input>
-              <label className="form-check-label" htmlFor="showQuests"><b>Enable Quick Tasks: </b>(Coming Soon...)</label>
+              {/* put disabled back if not working still */}
+              <input className="form-check-input" type="checkbox" id="showQuests" checked={showQuests} onChange={ handleShowQuestsChange }></input> 
+              <label className="form-check-label" htmlFor="showQuests"><b>Show Quests: </b>Encourage course engagement by allowing students to complete tasks and earn points for rewards</label>
+            </div>
+
+            <h5>Course Lifecycle</h5>
+
+            <div className="form-check form-switch mb-3">
+              <input className="form-check-input" type="checkbox" id="courseArchived" checked={archived} onChange={ handleArchivedChange }></input>
+              <label className="form-check-label" htmlFor="courseArchived"><b>Archive Course: </b>Hide this course from student and TA course selection while keeping instructor access for management and restoration</label>
             </div>
 
             <button type="button" className="btn btn-primary mb-3 mx-auto" onClick={handleSubmit}>Save Settings</button>

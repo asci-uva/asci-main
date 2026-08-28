@@ -35,7 +35,7 @@ class DBStats {
         (select distinct u.user_id, ut.pname, ut.lname, s.* from 
           sessions s, session_users su, user_courses u, users ut 
           where s.id = su.session_id and su.user_id = u.user_id 
-          and (u.role='instructor' or u.role='ta') 
+          and u.role in ('instructor', 'primary_instructor', 'ta')
           and s.status = 'completed' and fulfillment_time is not null
           and u.course_id = $1 and s.course_id = $1
           and ut.id = u.user_id $limit) s 
@@ -89,7 +89,7 @@ class DBStats {
     $query = "select su.user_id, to_char(s.fulfillment_time, 'YYYY-MM-DD\"T\"HH24:MI:SS') as fulfillment_time
       from session_users su, sessions s 
       where s.course_id = $1 and s.id = su.session_id 
-        and su.role in ('instructor', 'ta') $limit
+        and su.role in ('instructor', 'primary_instructor', 'ta') $limit
       order by s.fulfillment_time asc;";
 
     $result = null;
@@ -106,7 +106,7 @@ class DBStats {
     $query = "select uc.user_id, u.pname || ' ' || u.lname as name, u.computing_id
       from users u, user_courses uc 
       where u.id = uc.user_id and uc.course_id = $1
-      and uc.role in ('instructor', 'ta')
+      and uc.role in ('instructor', 'primary_instructor', 'ta')
       order by name asc;";
 
     $result = $this->db->query($query, array($course_id));

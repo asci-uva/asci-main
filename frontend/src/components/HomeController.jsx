@@ -3,8 +3,13 @@ import { Routes, Route } from "react-router-dom";
 import QueueController from "./QueueController";
 import ChatController from "./ChatController";
 import AdminController from "./AdminController";
+import ExternalToolsController from "./ExternalToolsController";
+import CourseRosterController from "./CourseRosterController";
+import AssessmentsController from "./AssessmentsController";
+import AnalyticsController from "./AnalyticsController";
 import PointsController from "./PointsController";
 import StatsController from "./StatsController";
+import SystemAdmin from "./SystemAdmin";
 import { Home, Cards } from "./home";
 import { Login, Error, Navigation, Logout, SelectCourseHome } from "./utils";
 import { useUser } from "./context/UserContext";
@@ -29,7 +34,7 @@ const HomeController = (props) => {
         documentRoot={props.documentRoot}
         debugMode={props.debugMode}
       />
-      <div className="container">
+      <div className="container-fluid">
       <Routes>
         <Route path="/" element={<Home {...props} />} />
         <Route path="changeCourse" element={<SelectCourseHome {...props} />} />
@@ -70,6 +75,54 @@ const HomeController = (props) => {
             />
           }
         />
+        {/* Use ExternalToolsController for all external tool routes */}
+        <Route
+          path={"externalTools/*"}
+          element={
+            <ExternalToolsController
+              documentRoot={props.documentRoot + "/externalTools"}
+              url={props.url}
+              uploadurl={props.uploadurl}
+              debugMode={props.debugMode}
+            />
+          }
+        />
+        {/* Use CourseRosterController for all course roster routes */}
+        <Route
+          path={"courseRoster/*"}
+          element={
+            <CourseRosterController
+              documentRoot={props.documentRoot + "/courseRoster"}
+              url={props.url}
+              uploadurl={props.uploadurl}
+              debugMode={props.debugMode}
+            />
+          }
+        />
+        {/* Use AssessmentsController for all assessment routes */}
+        <Route
+          path={"assessments/*"}
+          element={
+            <AssessmentsController
+              documentRoot={props.documentRoot + "/assessments"}
+              url={props.url}
+              uploadurl={props.uploadurl}
+              debugMode={props.debugMode}
+            />
+          }
+        />
+        {/* Use AnalyticsController for all per-student analytics routes */}
+        <Route
+          path={"analytics/*"}
+          element={
+            <AnalyticsController
+              documentRoot={props.documentRoot + "/analytics"}
+              url={props.url}
+              uploadurl={props.uploadurl}
+              debugMode={props.debugMode}
+            />
+          }
+        />
         {/* Use StatsController for all stats related routes */}
         <Route
           path={"stats/*"}
@@ -93,7 +146,7 @@ const HomeController = (props) => {
           }
         />
       </Routes>
-            </div>
+      </div>
     </>
   );
 };

@@ -31,18 +31,30 @@ class DBCourseSettings
 
         $query = 'UPDATE course_settings SET
             show_queue_list = $1,
-            grouping_enabled = $2,
-            smart_grouping = $3,
-            show_quests = $4,
-            llm_enabled = $5
-            WHERE course_id = $6';
+            discord_server_id = $2,
+            grouping_enabled = $3,
+            smart_grouping = $4,
+            show_quests = $5,
+            llm_enabled = $6,
+            archived = $7
+            WHERE course_id = $8';
+
+        // Normalize boolean values: handles PHP true/false, DB strings "t"/"f",
+        // and JSON strings "true"/"false" so both EditCourseSettings and DiscordActivity work.
+        $boolParam = function($v) {
+            if ($v === null) return null;
+            if ($v === true || $v === 't' || $v === 'true' || $v === '1' || $v === 1) return 't';
+            return 'f';
+        };
 
         $result = $this->db->query($query, array(
-            json_encode($course_settings->show_queue_list),
-            json_encode($course_settings->grouping_enabled),
-            json_encode($course_settings->smart_grouping),
-            json_encode($course_settings->show_quests),
-            json_encode($course_settings->llm_enabled),
+            $boolParam($course_settings->show_queue_list),
+            $course_settings->discord_server_id,
+            $boolParam($course_settings->grouping_enabled),
+            $boolParam($course_settings->smart_grouping),
+            $boolParam($course_settings->show_quests),
+            $boolParam($course_settings->llm_enabled),
+            $boolParam($course_settings->archived),
             $course_settings->course_id
         ));
 
@@ -65,6 +77,7 @@ class DBCourseSettings
             if (!$this->createCourseSettings($course_id)){
                 return null;
             } else {
+                $result = $this->db->query($query, array($course_id));
                 $settings = $this->db->fetchrow($result);
             }
         }

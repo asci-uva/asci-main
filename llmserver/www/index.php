@@ -55,16 +55,35 @@ try {
     if ($jsonInput == null) {
         throw new \ascillm\exceptions\ASCIException("Could not parse input");
     }
-    
-    // Instantiate and run the server
-    $server = new Server($jsonInput);
-    $server->run();
-    
-    // Return the content type and output of the server
-    foreach ($server->getResponseHeaders() as $header)
-        header($header);
-    
-    echo $server->getResponse();
+
+    // Check for streaming mode
+    $isStreaming = isset($jsonInput["stream"]) && $jsonInput["stream"] === true;
+
+    if ($isStreaming) {
+        // SSE streaming mode
+        header('Content-Type: text/event-stream');
+        header('Cache-Control: no-cache');
+        header('Connection: keep-alive');
+        header('X-Accel-Buffering: no');
+
+        // Disable output buffering
+        while (ob_get_level() > 0) {
+            ob_end_flush();
+        }
+        ob_implicit_flush(true);
+
+        $server = new Server($jsonInput);
+        $server->runStreaming();
+    } else {
+        // Standard JSON mode
+        $server = new Server($jsonInput);
+        $server->run();
+        
+        foreach ($server->getResponseHeaders() as $header)
+            header($header);
+        
+        echo $server->getResponse();
+    }
 } catch (Exception $e) {
     header("Content-Type: application/json");
     if ($e->getCode() > 0)

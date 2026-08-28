@@ -30,6 +30,7 @@ services:
       #- chat
 
     environment:
+      CANVAS_ENCRYPTION_KEY: asci
       TZ: "America/New_York"
 
 #  chat:
