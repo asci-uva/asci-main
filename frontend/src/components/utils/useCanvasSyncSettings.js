@@ -1,11 +1,13 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { postCommand } from "./postCommand";
+import { useUser } from "../context/UserContext";
 
 export function useCanvasSyncSettings(url, courseId, enabled) {
     const [settings, setSettings] = useState(null);
     const [loaded, setLoaded] = useState(false);
     const [error, setError] = useState(false);
     const requestIdRef = useRef(0);
+    const { user, getCourse } = useUser();
 
     const refresh = useCallback(() => {
         if (!courseId) return Promise.resolve(null);
@@ -16,6 +18,7 @@ export function useCanvasSyncSettings(url, courseId, enabled) {
         return postCommand(url, {
             asciCourseId: courseId,
             command: "getCanvasLmsSyncSettings",
+            user: user.userid
         })
             .then((data) => {
                 if (!isCurrent()) return null;
@@ -45,6 +48,7 @@ export function useCanvasSyncSettings(url, courseId, enabled) {
                 autosyncEnabled,
                 stalePeriod,
                 command: "setCanvasLmsSyncSettings",
+                user: user.userid
             }).then((data) => {
                 if (data.success === "true") {
                     setSettings(data.settings);

@@ -2,12 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { postCommand } from "../utils/postCommand";
 import { errorMessage } from "../utils/errorMessage";
+import { useUser } from "../context/UserContext";
 import AssignmentsList from "./AssignmentsList";
 import UploadGradescopeCsv from "./UploadGradescopeCsv";
 
 function Assignments(props) {
   const courseId = props.course_id;
 
+  const { user, getCourse } = useUser();
   const [assignments, setAssignments] = useState([]);
   const [submissionsByAssignment, setSubmissionsByAssignment] = useState({});
   const [students, setStudents] = useState([]);
@@ -29,6 +31,7 @@ function Assignments(props) {
     return postCommand(props.url, {
       asciCourseId: courseId,
       command: "getCanvasSubmissions",
+      user: user.userid
     })
       .then((data) => {
         if (!isCurrent()) return;
@@ -61,6 +64,7 @@ function Assignments(props) {
       asciCourseId: courseId,
       command: "removeFlaggedCanvasAssignment",
       canvasAssignmentId: assignment.canvas_assignment_id,
+      user: user.userid
     })
       .then((data) => {
         if (data.success === "true") {
@@ -96,6 +100,7 @@ function Assignments(props) {
     return postCommand(props.url, {
       asciCourseId: courseId,
       command: "getCanvasAssignments",
+      user: user.userid,
       ...(refresh ? { refresh: true } : {}),
     })
       .then((data) => {

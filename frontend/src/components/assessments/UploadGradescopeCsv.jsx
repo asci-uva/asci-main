@@ -67,7 +67,7 @@ function uploadSummary(matched, submissionsByAssignment, students) {
 }
 
 function UploadGradescopeCsv(props) {
-  const { getCourse } = useUser();
+  const { user, getCourse } = useUser();
   const course = getCourse();
 
   const [parsed, setParsed] = useState(null);
@@ -122,6 +122,7 @@ function UploadGradescopeCsv(props) {
     const payload = {
       command: "uploadGradescopeSubmissions",
       asciCourseId: props.course_id,
+      user: user.userid,
       submissions: parsed.matched.map((assignment) => ({
         canvasAssignmentId: assignment.canvasAssignment.canvas_assignment_id,
         rows: assignment.submissions,

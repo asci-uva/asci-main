@@ -13,7 +13,7 @@ import PiazzaStats from "./PiazzaStats";
 import StatComparison from "./StatComparison";
 
 function Home(props) {
-  const { getCourse } = useUser();
+  const { user, getCourse } = useUser();
   const course = getCourse();
   const courseId = course.course_id;
   const isStaff = isStaffRole(course.role);
@@ -62,6 +62,7 @@ function Home(props) {
     postCommand(props.url, {
       asciCourseId: courseId,
       command: "getCanvasSubmissions",
+      user: user.userid
     })
       .then((data) => {
         if (!isCurrent()) return;
@@ -98,6 +99,7 @@ function Home(props) {
     postCommand(props.url, {
       asciCourseId: courseId,
       command: "getCanvasAssignments",
+      user: user.userid
     })
       .then((data) => {
         if (!isCurrent()) return;
@@ -126,6 +128,7 @@ function Home(props) {
     postCommand(props.url, {
       asciCourseId: courseId,
       command: "getOfficeHoursSessions",
+      user: user.userid
     })
       .then((data) => {
         if (!isCurrent()) return;
@@ -164,6 +167,7 @@ function Home(props) {
     postCommand(props.url, {
       asciCourseId: courseId,
       command: "getPiazzaAnalytics",
+      user: user.userid
     })
       .then((data) => {
         if (!isCurrent()) return;

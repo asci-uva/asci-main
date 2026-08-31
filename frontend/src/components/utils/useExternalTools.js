@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { postCommand } from "./postCommand";
+import { useUser } from "../context/UserContext";
 
 const NO_TOOLS = {};
 
@@ -7,6 +8,7 @@ export function useExternalTools(url, courseId, enabled) {
     const [tools, setTools] = useState(NO_TOOLS);
     const [loaded, setLoaded] = useState(false);
     const [error, setError] = useState(false);
+    const { user, getCourse } = useUser();
     const requestIdRef = useRef(0);
 
     const refresh = useCallback(() => {
@@ -18,6 +20,7 @@ export function useExternalTools(url, courseId, enabled) {
         return postCommand(url, {
             asciCourseId: courseId,
             command: "getExternalTools",
+            user: user.userid
         })
             .then((data) => {
                 if (!isCurrent()) return null;
@@ -47,6 +50,7 @@ export function useExternalTools(url, courseId, enabled) {
                 tool,
                 enabled: isEnabled,
                 command: "setExternalToolEnabled",
+                user: user.userid
             }).then((data) => {
                 if (data.success === "true") setTools(data.tools || NO_TOOLS);
                 return data;
