@@ -18,46 +18,46 @@ function PendingApprovals(props) {
   const showQuests = settings != null && settings.show_quests == "t";
 
   const getUserQuests = (studentId) => {
-    let request = {
-      command: "getPendingQuests",
-      student: studentId,
-      course: course.course_id,
-      user: user.userid
-    };
+    // let request = {
+    //   command: "getPendingQuests",
+    //   student: studentId,
+    //   course: course.course_id,
+    //   user: user.userid
+    // };
 
-    fetch(url, {
-      method: 'POST', // or 'PUT'
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: "include",
-      body: JSON.stringify(request),
-    }).then(response => response.json())
-      .then(data => {
-        if (data.success === "true") {
-          let questList = {}
-          for (var key in data.quests) {
-            questList[key] = {};
-            // Add quest info
-            questList[key]["quest_id"] = data.quests[key]["quest_id"];
-            questList[key]["name"] = data.quests[key]["name"];
-            questList[key]["description"] = data.quests[key]["description"];
-            questList[key]["total_points"] = data.quests[key]["total_points"];
-            questList[key]["status"] = data.quests[key]["status"];
-            questList[key]["student"] = studentId;
-          }
+    // fetch(url, {
+    //   method: 'POST', // or 'PUT'
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   credentials: "include",
+    //   body: JSON.stringify(request),
+    // }).then(response => response.json())
+    //   .then(data => {
+    //     if (data.success === "true") {
+    //       let questList = {}
+    //       for (var key in data.quests) {
+    //         // questList[key] = {};
+    //         // // Add quest info
+    //         // questList[key]["quest_id"] = data.quests[key]["quest_id"];
+    //         // questList[key]["name"] = data.quests[key]["name"];
+    //         // questList[key]["description"] = data.quests[key]["description"];
+    //         // questList[key]["total_points"] = data.quests[key]["total_points"];
+    //         // questList[key]["status"] = data.quests[key]["status"];
+    //         // questList[key]["student"] = studentId;
+    //       }
 
-          setQuests(prev => ({...prev, [studentId]: questList}));
-        }
-        else {
-          console.log("Get User Quest: Server returned error");
-          navigate(root + "/error");
-        }
-      })
-      .catch((error) => {
-        console.log("Get User Quest: There was an error:", error);
-        navigate(root + "/error");
-      });
+    //       //setQuests(prev => ({...prev, [studentId]: questList}));
+    //     }
+    //     else {
+    //       console.log("Get User Quest: Server returned error");
+    //       navigate(root + "/error");
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     console.log("Get User Quest: There was an error:", error);
+    //     navigate(root + "/error");
+    //   });
   };
 
   const handleUpdate = async (questId, studentId, status) => {
