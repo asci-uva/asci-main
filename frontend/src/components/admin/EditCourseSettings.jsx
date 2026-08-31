@@ -155,13 +155,7 @@ function EditCourseSettings(props) {
               <label className="form-check-label" htmlFor="llmEnabled"><b>Enable LLM Chat Bot: </b>The LLM Chat Bot will be available to students on main chat bot page and while waiting on the queue</label>
             </div>
 
-            <h5>Quest Settings</h5>
-
-            <div className="form-check form-switch mb-3">
-              {/* put disabled back if not working still */}
-              <input className="form-check-input" type="checkbox" id="showQuests" checked={showQuests} onChange={ handleShowQuestsChange }></input> 
-              <label className="form-check-label" htmlFor="showQuests"><b>Show Quests: </b>Encourage course engagement by allowing students to complete tasks and earn points for rewards</label>
-            </div>
+            
 
             <h5>Course Lifecycle</h5>
 

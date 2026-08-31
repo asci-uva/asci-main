@@ -63,9 +63,6 @@ function Home(props) {
                   <li className="nav-item" role="presentation">
                     <button className="nav-link" id="pills-content-tab" data-bs-toggle="pill" data-bs-target="#pills-content" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Course Content</button>
                   </li>
-                  <li className="nav-item" role="presentation">
-                    <button className="nav-link" id="pills-quests-tab" data-bs-toggle="pill" data-bs-target="#pills-quests" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Quests</button>
-                  </li>
                 </ul>
               </div>
 
@@ -96,13 +93,7 @@ function Home(props) {
                   </div>
                 </div>
 
-                <div className="tab-pane fade" id="pills-quests" role="tabpanel" aria-labelledby="pills-contact-tab">
-                  <div className="row">
-                    <div className="col-md-12 my-auto">
-                      <ViewQuests course_id={courseList[course].course_id} {...props} />
-                    </div>
-                  </div>
-                </div>
+                
 
               </div>
             </div>

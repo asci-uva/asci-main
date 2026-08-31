@@ -65,12 +65,6 @@ function Home(props) {
                   <li className="nav-item" role="presentation">
                     <button className="nav-link" id="ta-help-overall-tab" data-bs-toggle="pill" data-bs-target="#ta-help-overall" type="button" role="tab" aria-controls="pills-home" aria-selected="false">TA Leaderboards</button>
                   </li>
-                  <li className="nav-item" role="presentation">
-                    <button className="nav-link" id="student-tracker" data-bs-toggle="pill" data-bs-target="#student-tracker-panel" type="button" role="tab" aria-controls="pills-home" aria-selected="false">Stud. Tracker</button>
-                  </li>
-                  <li className="nav-item" role="presentation">
-                    <button className="nav-link" id="discord-activity-tab" data-bs-toggle="pill" data-bs-target="#discord-activity-panel" type="button" role="tab" aria-controls="pills-home" aria-selected="false">Discord Activity</button>
-                  </li>
                 </ul>
               </div>
 
@@ -94,11 +88,6 @@ function Home(props) {
                 <div className="tab-pane fade" id="student-tracker-panel" role="tabpanel" aria-labelledby="student-tracker"> 
                   <div className="col-md-12 my-auto">
                     <StudentsBehind course_id={courseList[course].course_id} {...props} /> 
-                  </div>
-                </div>
-                <div className="tab-pane fade" id="discord-activity-panel" role="tabpanel" aria-labelledby="discord-activity-tab"> 
-                  <div className="col-md-12 my-auto">
-                    <DiscordActivity course_id={courseList[course].course_id} {...props} /> 
                   </div>
                 </div>
               </div>
