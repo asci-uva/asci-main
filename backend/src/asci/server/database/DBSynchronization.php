@@ -173,7 +173,7 @@ class DBSynchronization
     }
 
     public function addCanvasLmsAccessToken($userId, $access_token) {
-        $key = CONFIG::$SSL_ENCRYPTION_SEED;
+        $key = CONFIG::$TOKEN_ENCRYPTION_KEY;
         $iv = openssl_random_pseudo_bytes(16);
         $encrypted = openssl_encrypt($access_token, 'AES-256-CBC', $key, 0, $iv);
         $iv_base64 = base64_encode($iv);
@@ -212,7 +212,7 @@ class DBSynchronization
         if (!$result)
             return null;
 
-        $key = CONFIG::$SSL_ENCRYPTION_SEED;
+        $key = CONFIG::$TOKEN_ENCRYPTION_KEY;
         $iv = base64_decode($result["access_token_iv"]);
         $decrypted = openssl_decrypt($result["access_token"], 'AES-256-CBC', $key, 0, $iv);
 

@@ -44,7 +44,7 @@ class Config {
      * @var string seed that is used to generate encryption key for tokens (e.g., storing Canvas tokens)
      * Needs to be set to a sufficiently long string for security purposes in production.
      */
-    public static $SSL_ENCRYPTION_SEED = 'asci';
+    public static $TOKEN_ENCRYPTION_KEY = 'asci';
 
     /**
      * @var boolean if false, pull next waiting on queue as potential group members
