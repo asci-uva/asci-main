@@ -4,6 +4,7 @@ namespace asci\server\database;
 
 use asci\data\Assignment as Assignment;
 use asci\data\User as User;
+use asci\Config as Config;
 
 class DBSynchronization
 {
@@ -172,7 +173,7 @@ class DBSynchronization
     }
 
     public function addCanvasLmsAccessToken($userId, $access_token) {
-        $key = getenv("CANVAS_ENCRYPTION_KEY");
+        $key = CONFIG::$SSL_ENCRYPTION_SEED;
         $iv = openssl_random_pseudo_bytes(16);
         $encrypted = openssl_encrypt($access_token, 'AES-256-CBC', $key, 0, $iv);
         $iv_base64 = base64_encode($iv);
@@ -211,7 +212,7 @@ class DBSynchronization
         if (!$result)
             return null;
 
-        $key = getenv("CANVAS_ENCRYPTION_KEY");
+        $key = CONFIG::$SSL_ENCRYPTION_SEED;
         $iv = base64_decode($result["access_token_iv"]);
         $decrypted = openssl_decrypt($result["access_token"], 'AES-256-CBC', $key, 0, $iv);
 

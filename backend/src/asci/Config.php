@@ -41,6 +41,12 @@ class Config {
     public static $AUTH_MODE = "password"; 
 
     /**
+     * @var string seed that is used to generate encryption key for tokens (e.g., storing Canvas tokens)
+     * Needs to be set to a sufficiently long string for security purposes in production.
+     */
+    public static $SSL_ENCRYPTION_SEED = 'asci';
+
+    /**
      * @var boolean if false, pull next waiting on queue as potential group members
      * if true, use cosine similarity checking to pick potential group members
      */
@@ -97,6 +103,7 @@ class Config {
      * data
      */
     public static $GRADESCOPE_DOWNLOAD_PATH = '/tmp/asci/gradescope/';
+
 
 
 

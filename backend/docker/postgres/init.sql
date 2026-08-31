@@ -366,16 +366,16 @@ ALTER TABLE group_mapping ADD FOREIGN KEY (to_session) REFERENCES sessions (id);
 -- make up two dummy courses. Make them student and TA in each 
 
 INSERT INTO users (id, computing_id, fname, lname , pname, password)
-VALUES (1, 'mrf8t', 'Mark', 'Floryan', 'Mark', '$2y$10$qVG/HZRB4KXyd6eFkFc2hOXX0r2hyLYN3siL2XyxieChtRiBDUEMC');
+VALUES (1, 'mrf8t', 'Mark', 'Floryan', 'Mark', '$2y$10$diohkfZSkNpwzTW9ONHrvusUK/GdjFCoNNUpm8qzQGAuJFAEJq0dC');
 
 INSERT INTO users (id, computing_id, fname, lname , pname, password)
-VALUES (2, 'nb3f', 'Nada', 'Basit', 'Nada', '$2y$10$qVG/HZRB4KXyd6eFkFc2hOXX0r2hyLYN3siL2XyxieChtRiBDUEMC');
+VALUES (2, 'nb3f', 'Nada', 'Basit', 'Nada', '$2y$10$diohkfZSkNpwzTW9ONHrvusUK/GdjFCoNNUpm8qzQGAuJFAEJq0dC');
 
 INSERT INTO users (id, computing_id, fname, lname , pname, password)
-VALUES (3, 'jh2jf', 'John', 'Hott', 'Robbie', '$2y$10$qVG/HZRB4KXyd6eFkFc2hOXX0r2hyLYN3siL2XyxieChtRiBDUEMC');
+VALUES (3, 'jh2jf', 'John', 'Hott', 'Robbie', '$2y$10$diohkfZSkNpwzTW9ONHrvusUK/GdjFCoNNUpm8qzQGAuJFAEJq0dC');
 
 INSERT INTO users (id, computing_id, fname, lname , pname, password)
-VALUES (4, 'hz9xs', 'Hanzhang', 'Zhao', 'Hanzhang', '$2y$10$qVG/HZRB4KXyd6eFkFc2hOXX0r2hyLYN3siL2XyxieChtRiBDUEMC');
+VALUES (4, 'hz9xs', 'Hanzhang', 'Zhao', 'Hanzhang', '$2y$10$diohkfZSkNpwzTW9ONHrvusUK/GdjFCoNNUpm8qzQGAuJFAEJq0dC');
 
 INSERT INTO courses (id, mnemonic, number, name, semester)
 VALUES (1, 'CS', '2130', 'CSO1', 'SP-23');
@@ -390,7 +390,7 @@ INSERT INTO user_courses (user_id, course_id, role)
 VALUES (1, 1, 'student');
 
 INSERT INTO user_courses (user_id, course_id, role)
-VALUES (1, 2, 'ta');
+VALUES (1, 2, 'primary_instructor');
 
 INSERT INTO user_courses (user_id, course_id, role)
 VALUES (2, 1, 'ta');
