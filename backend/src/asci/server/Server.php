@@ -137,7 +137,7 @@ class Server
                 $user = $_SESSION["uid"];
             }
 
-            if ($user !== null && $command !== "login" && $command !== "logout" && $requestedUser !== null && $user !== $requestedUser) {
+            if ($command !== "login" && $command !== "logout" && ($requestedUser == null || $user !== $requestedUser)) {
                 throw new \asci\exceptions\ASCIAuthenticationException("Session userId does not match provided user id", 401);
             }
         }

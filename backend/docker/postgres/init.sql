@@ -460,3 +460,8 @@ VALUES (1, 1, '2024-01-08 04:05:00', '2024-01-08 04:10:00');
 
 INSERT INTO session_users (session_id, user_id)
 VALUES (1, 1);
+
+SELECT setval(
+    pg_get_serial_sequence('users', 'id'),
+    COALESCE((SELECT MAX(id) FROM users), 1)
+);

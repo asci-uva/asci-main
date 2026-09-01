@@ -62,7 +62,7 @@ function CanvasLmsSync(props) {
     const [staleParts, setStaleParts] = useState({ years: 0, months: 0, days: 7, hours: 0 });
     const [saveSettingsButtonDisabled, setSaveSettingsButtonDisabled] = useState(false);
 
-    const { getCourse } = useUser();
+    const { user, getCourse } = useUser();
     const isPrimaryInstructor = getCourse() && getCourse().role === PRIMARY_INSTRUCTOR;
 
     const filteredAndSortedCanvasLmsCourses = [...canvasLmsCourses]
@@ -134,6 +134,7 @@ function CanvasLmsSync(props) {
 
         const payload = {
             asciCourseId: props.course_id,
+            user: user.userid,
             canvasLmsAccessToken: trimmedCanvasLmsAccessToken,
             command: "validateCanvasLmsAccessToken",
         };
@@ -169,6 +170,7 @@ function CanvasLmsSync(props) {
 
         const payload = {
             asciCourseId: props.course_id,
+            user: user.userid,
             command: "removeCanvasLmsAccessToken",
         };
 
@@ -195,6 +197,7 @@ function CanvasLmsSync(props) {
     const getEnrollmentYears = () => {
         const payload = {
             asciCourseId: props.course_id,
+            user: user.userid,
             command: "getCanvasLmsEnrollmentTerms",
         };
 
@@ -217,6 +220,7 @@ function CanvasLmsSync(props) {
     const getCanvasLmsCourses = () => {
         const payload = {
             asciCourseId: props.course_id,
+            user: user.userid,
             command: "getCanvasLmsCourses",
         };
 
@@ -243,6 +247,7 @@ function CanvasLmsSync(props) {
 
         const payload = {
             asciCourseId: props.course_id,
+            user: user.userid,
             canvasLmsCourse: selectedCanvasLmsCourse,
             command: "linkCanvasLmsCourse"
         };
@@ -271,6 +276,7 @@ function CanvasLmsSync(props) {
 
         const payload = {
             asciCourseId: props.course_id,
+            user: user.userid,
             command: "unlinkCanvasLmsCourse"
         };
 
