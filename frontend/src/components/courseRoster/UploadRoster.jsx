@@ -118,6 +118,7 @@ function UploadRoster(props) {
     const payload = {
       asciCourseId: props.course_id,
       command: "syncCanvasLmsRoster",
+      user: user.userid,
       ...(autosync ? { autosync: true } : {}),
     };
 

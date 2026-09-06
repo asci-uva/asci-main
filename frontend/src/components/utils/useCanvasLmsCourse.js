@@ -33,7 +33,7 @@ export function useCanvasLmsCourse(url, courseId, enabled) {
                 setLoaded(true);
                 return null;
             });
-    }, [url, courseId]);
+    }, [url, courseId, user.userid]);
 
     useEffect(() => {
         if (enabled) {

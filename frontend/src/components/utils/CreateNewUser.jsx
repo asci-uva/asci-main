@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// import { useUser } from "../context/UserContext";
+import { useUser } from "../context/UserContext";
 
 function CreateNewUser(props) {
   // let url = props.url;
@@ -10,7 +10,7 @@ function CreateNewUser(props) {
 
   const navigate = useNavigate();
 
-  // const { user, refreshCourseList, isInstructor } = useUser();
+  const { user } = useUser();
 
   const [computing_id, setComputingID] = useState("");
   const [fname, setFName] = useState("");
@@ -26,20 +26,21 @@ function CreateNewUser(props) {
       pname,
       password,
       command: "createUser",
+      user: user.userid,
     };
 
     // Call the backend API to update the course
     createUser(createdUser);
   };
 
-  const createUser = (user) => {
+  const createUser = (payload) => {
     fetch(props.url, {
       method: "POST",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(user),
+      body: JSON.stringify(payload),
     })
       .then((response) => response.json())
       .then((data) => {

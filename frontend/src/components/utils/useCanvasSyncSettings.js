@@ -39,7 +39,7 @@ export function useCanvasSyncSettings(url, courseId, enabled) {
                 setLoaded(true);
                 return null;
             });
-    }, [url, courseId]);
+    }, [url, courseId, user.userid]);
 
     const save = useCallback(
         (autosyncEnabled, stalePeriod) =>
@@ -55,7 +55,7 @@ export function useCanvasSyncSettings(url, courseId, enabled) {
                 }
                 return data;
             }),
-        [url, courseId]
+        [url, courseId, user.userid]
     );
 
     useEffect(() => {

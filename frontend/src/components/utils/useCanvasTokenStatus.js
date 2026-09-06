@@ -54,7 +54,7 @@ export function useCanvasTokenStatus(url, courseId, enabled) {
                 setLoaded(true);
                 return null;
             });
-    }, [url, courseId]);
+    }, [url, courseId, user.userid]);
 
     useEffect(() => {
         if (enabled) {
