@@ -102,6 +102,30 @@ class Server
     }
 
     /*
+     * Returns the course id this request is about, whichever key it arrived under.
+     *
+     * Commands have accumulated four spellings for the same value: "courseId",
+     * "course_id", "course" and (for the Canvas/Gradescope commands, which also
+     * carry a Canvas course id) "asciCourseId". Request-level guards must accept
+     * all of them, or they silently skip whichever commands use the other names.
+     * Some callers send the whole course object rather than the id.
+     */
+    public function requestedCourseId()
+    {
+        $course_id = $this->input["courseId"]
+                  ?? $this->input["course_id"]
+                  ?? $this->input["course"]
+                  ?? $this->input["asciCourseId"]
+                  ?? null;
+
+        if (is_array($course_id)) {
+            $course_id = $course_id["course_id"] ?? null;
+        }
+
+        return $course_id;
+    }
+
+    /*
      * This function returns the username that should be used for this request
      * if netbadge is in play, checks that provided username matches the one provided
      * by the request JSON. If not, returns an error.
@@ -175,14 +199,15 @@ class Server
           $executor->loadUser($user);
 
                     // Strict archive enforcement: block student access to archived courses even for direct API calls.
-                    $requested_course_id = $this->input["courseId"] ?? $this->input["course_id"] ?? $this->input["course"] ?? null;
-                    if (is_array($requested_course_id)) {
-                        $requested_course_id = $requested_course_id["course_id"] ?? null;
-                    }
-                    $executor->denyArchivedCourseForStudents($user, $requested_course_id, $this->input["command"]);
+                    $executor->denyArchivedCourseForStudents($user, $this->requestedCourseId(), $this->input["command"]);
         }
 
         /* This section acquires a lock for the given course IF a courseId was provided */
+        /* NOTE: deliberately NOT requestedCourseId(). The lock is held for the whole
+         * request, and the commands using the other course-id keys include Canvas
+         * syncs that make slow external API calls; locking those would block every
+         * other request for the course (queue included) for the duration. Widening
+         * this needs the lock scoped to the DB-mutating section first. */
         /* ------------------------------------------------------------------ */
         $course_id = $this->input["courseId"] ?? null;
         $lock = null;
