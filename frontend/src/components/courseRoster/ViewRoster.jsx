@@ -20,41 +20,24 @@ function ViewRoster(props) {
 
   /* Handle searching through the table */
   /* ---------------------------------- */
+  const [search, setSearch] = useState("");
+
   const onSearchBarChange = (e) => {
-    console.log("searching!");
-    var input, filter, table, tr, td, i, txtValue;
-    input = document.getElementById("rosterSearchTextBox");
-    filter = input.value.toUpperCase();
-    table = document.getElementById("rosterTable");
-    tr = table.getElementsByTagName("tr");
-
-    // Loop through all table rows, and hide those who don't match the search query
-    for (i = 0; i < tr.length; i++) {
-      var tdAll = tr[i].getElementsByTagName("td");
-      var match = false;
-      for(var j = 0; j < tdAll.length; j++){
-        td = tdAll[j];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            match = true;
-            break;
-            
-          } else {
-            //keep searching
-            
-          }
-        }
-      }
-
-      if(match) tr[i].style.display = "";
-      else tr[i].style.display = "none";
-    }
+    setSearch(e.target.value);
   }
-  /* ---------------------------------- */
-  /* ---------------------------------- */
 
-  
+  const matchesSearch = (person) => {
+    const filter = search.trim().toUpperCase();
+    if (filter === "") return true;
+
+    return [person.computing_id, person.fname, person.lname, person.pname, formatRole(person.role)]
+      .some(field => (field ?? "").toString().toUpperCase().includes(filter));
+  }
+
+  const roster = Object.keys(courseRoster ?? {}).map(k => courseRoster[k]);
+  const visibleRoster = roster.filter(matchesSearch);
+  /* ---------------------------------- */
+  /* ---------------------------------- */
 
 
   const RosterTableHeaderRow = () => {
@@ -82,7 +65,12 @@ function ViewRoster(props) {
     );
   }
 
-  const RosterTable = ({data}) => {    
+  const RosterTable = ({data}) => {
+    if(roster.length === 0)
+      return (
+        <h5>There does not appear to be anyone enrolled yet. </h5>
+      );
+
     if(data.length > 0){
       return (
             <table id="rosterTable" className="table table-striped table-hover table-sm">
@@ -97,7 +85,7 @@ function ViewRoster(props) {
       );
     }
     else return (
-      <h5>There does not appear to be anyone enrolled yet. </h5>
+      <h5>No one on the roster matches that search.</h5>
     );
   }
 
@@ -109,11 +97,12 @@ function ViewRoster(props) {
             <input
               id="rosterSearchTextBox"
               type="text" className="mb-1"
+              value={search}
               onChange={onSearchBarChange}
               placeholder="Search..." />
           </div>
           <div style={{height: 500 + 'px'}} className="overflow-auto">
-            <RosterTable data={courseRoster} />
+            <RosterTable data={visibleRoster} />
           </div>
         </div>
       </div>
