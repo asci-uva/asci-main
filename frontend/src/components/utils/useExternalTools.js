@@ -41,7 +41,7 @@ export function useExternalTools(url, courseId, enabled) {
                 setLoaded(true);
                 return null;
             });
-    }, [url, courseId]);
+    }, [url, courseId, user.userid]);
 
     const save = useCallback(
         (tool, isEnabled) =>
@@ -55,7 +55,7 @@ export function useExternalTools(url, courseId, enabled) {
                 if (data.success === "true") setTools(data.tools || NO_TOOLS);
                 return data;
             }),
-        [url, courseId]
+        [url, courseId, user.userid]
     );
 
     useEffect(() => {
