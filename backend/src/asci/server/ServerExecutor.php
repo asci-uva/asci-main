@@ -1493,8 +1493,8 @@ $usedCosSim = True;
       throw new \asci\exceptions\ASCIException("Unknown user");
 
     //1: Check that the user has permission to access queue
-    if (!$this->userCourseStore->userHasPermission($user, $course["course_id"], "upload-llm"))
-      throw new \asci\exceptions\ASCIPermissionException("User does not have permission to upload llm data");
+    if (!$this->userCourseStore->userHasPermission($user, $course["course_id"], "upload-piazza"))
+      throw new \asci\exceptions\ASCIPermissionException("User does not have permission to upload Piazza data");
 
     $people = $this->userCourseStore->getParticipantsForCourse($course["course_id"]);
 
@@ -1864,98 +1864,6 @@ $usedCosSim = True;
 
         $result["success"] = "true";
 
-        return $result;
-    }
-
-    public function runGradescopeDataDownload($email, $password, $courseNumber, $courseId)
-    {
-        $result = [];
-        // check the gradescope_download python script path
-        $scriptPath = \asci\Config::$GRADESCOPE_SYNC_SCRIPT;
-        if (!file_exists($scriptPath)) {
-            $this->logger->error("Python script does not exist at $scriptPath");
-            $result["success"]="false";
-            $result["message"]="Download Gradescope data Python script not found";
-            return $result;
-        }
-
-        // setup the chromium and chrome-driver path in Docker
-        $chromedriverPath = \asci\Config::$CHROME_DRIVER_PATH; 
-        $chromiumPath = \asci\Config::$CHROMIUM_PATH;
-        
-        // Construct an absolute path for the download directory
-
-        $downloadUniqueNum = rand();
-        $downloadPath = \asci\Config::$GRADESCOPE_DOWNLOAD_PATH . DIRECTORY_SEPARATOR . $downloadUniqueNum . DIRECTORY_SEPARATOR;
-        $this->logger->debug("Download path is: $downloadPath");
-
-        // Escaping arguments to ensure safe command execution
-        $cmd = sprintf(
-            'python3 %s %s %s %s %s %s %s 2>&1',      
-            escapeshellarg($scriptPath),
-            escapeshellarg($email),
-            escapeshellarg($password),
-            escapeshellarg($downloadPath),
-            escapeshellarg($chromedriverPath),
-            escapeshellarg($chromiumPath),
-            escapeshellarg($courseNumber)
-        );
-
-        // Execute the Python script with the provided arguments
-        exec($cmd, $output, $returnVar);
-
-        //<TODO: Change this to return the filedpath directly. Don't scan output like this>
-        $downloadedFileName = '';
-        foreach ($output as $line) {
-            // Look for the line that contains the filename
-            if (strpos($line, "Latest downloaded file:") !== false) {
-                // Extract the filename from the line
-                $downloadedFileName = trim(str_replace("Latest downloaded file:", "", $line));
-                break;
-            }
-        }
-
-
-        // if the download failed, return success as null. Else return success as true
-        if ($returnVar !== 0) {
-            // Handle the error case
-            // echo "Error: Download Gradescope data Python script returned an error.\n";
-            // foreach ($output as $line) {
-            //     echo $line . "\n";
-            // }
-            $result["success"]="false";
-            $result["message"]="Download Gradescope data Python script returned an error.";
-            return $result;
-        } else {
-            
-            /* Ok, it worked, call the second function directly */
-            $result = $this->updateGradescopeDataByCourseHandler($courseId, $downloadUniqueNum, $downloadedFileName);
-
-            /* delete the downloaded file and directory */
-            unlink($downloadPath . $downloadedFileName);
-            rmdir($downloadPath);
-
-            return $result;
-
-        }
-    }
-
-    
-    public function updateGradescopeDataByCourseHandler($course_id, $download_unique_id, $download_file_name) {
-        $result = [];
-
-        $missingStudents = (new \asci\server\database\DBSynchronization($this->db))->updateGradescopeAssignmentSubmissionByCourseId($course_id, $download_unique_id, $download_file_name);
-
-        if($missingStudents){
-            $result["missingStudents"] = $missingStudents;
-            $result["message"]="GradeScope downloaded data successfully inserted into the database.";
-            $result["success"] = "true";
-        }
-        else{
-            $result["missingStudents"] = [];
-            $result["message"]="GradeScope downloaded data failed to be inserted into the database.";
-            $result["success"] = "false";
-        }
         return $result;
     }
 

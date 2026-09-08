@@ -104,10 +104,11 @@ class Server
     /*
      * Returns the course id this request is about, whichever key it arrived under.
      *
-     * Commands have accumulated four spellings for the same value: "courseId",
-     * "course_id", "course" and (for the Canvas/Gradescope commands, which also
-     * carry a Canvas course id) "asciCourseId". Request-level guards must accept
-     * all of them, or they silently skip whichever commands use the other names.
+     * Commands have accumulated five spellings for the same value: "courseId",
+     * "course_id", "course", "courseid" (the multipart file uploads) and, for the
+     * Canvas/Gradescope commands that also carry a Canvas course id, "asciCourseId".
+     * Request-level guards must accept all of them, or they silently skip whichever
+     * commands use the other names.
      * Some callers send the whole course object rather than the id.
      */
     public function requestedCourseId()
@@ -116,6 +117,7 @@ class Server
                   ?? $this->input["course_id"]
                   ?? $this->input["course"]
                   ?? $this->input["asciCourseId"]
+                  ?? $this->input["courseid"]
                   ?? null;
 
         if (is_array($course_id)) {
@@ -717,21 +719,6 @@ class Server
             case "getAssignmentByCourse":
                 $course_id = $this->input["course_id"];
                 $this->setResponse($executor->getAssignmentsHandler($course_id));
-                break;
-
-            case "downloadGradescopeData":
-                $gradescope_username = $this->input["email"];
-                $gradescope_password = $this->input["password"];
-                $gradescope_courseNumber = $this->input["courseNumber"];
-                $course_id = $this->input["course_id"];
-                $this->setResponse($executor->runGradescopeDataDownload($gradescope_username, $gradescope_password, $gradescope_courseNumber, $course_id));
-                break;
-            
-
-            case "updateGradescopeDataByCourse":
-                $course_id = $this->input["course_id"];
-                $download_file_name = $this->input["download_file_name"];
-                $this->setResponse($executor->updateGradescopeDataByCourseHandler($course_id, $download_file_name));
                 break;
 
             case "getStudentsFallingBehind":
