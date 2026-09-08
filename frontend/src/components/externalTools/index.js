@@ -1,4 +1,4 @@
-export { default as Home } from "./Home";
+export { default as ExternalToolsPanel } from "./ExternalToolsPanel";
 export { default as CanvasLmsSync } from "./CanvasLmsSync";
 export { default as CanvasSyncActions } from "./CanvasSyncActions";
 export { default as CanvasLinkWarning } from "./CanvasLinkWarning";

@@ -63,18 +63,6 @@ function Cards(props) {
         <div className="col-lg-4 col-md-6 mb-4">
           <div className="card p-3">
             <div className="card-img-top text-center">
-              <i className="bi-puzzle home-icon"></i>
-            </div>
-            <div className="card-body">
-              <p className="card-text text-center"><Link to="externalTools" className="btn btn-primary">External Tools</Link></p>
-            </div>
-          </div>
-        </div>
-      ) : null }
-      { isInstructorRole(course.role) ? (
-        <div className="col-lg-4 col-md-6 mb-4">
-          <div className="card p-3">
-            <div className="card-img-top text-center">
               <i className="bi-bar-chart-line home-icon"></i>
             </div>
             <div className="card-body">

@@ -3,7 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import QueueController from "./QueueController";
 import ChatController from "./ChatController";
 import AdminController from "./AdminController";
-import ExternalToolsController from "./ExternalToolsController";
 import CourseRosterController from "./CourseRosterController";
 import AssessmentsController from "./AssessmentsController";
 import AnalyticsController from "./AnalyticsController";
@@ -69,18 +68,6 @@ const HomeController = (props) => {
           element={
             <AdminController
               documentRoot={props.documentRoot + "/admin"}
-              url={props.url}
-              uploadurl={props.uploadurl}
-              debugMode={props.debugMode}
-            />
-          }
-        />
-        {/* Use ExternalToolsController for all external tool routes */}
-        <Route
-          path={"externalTools/*"}
-          element={
-            <ExternalToolsController
-              documentRoot={props.documentRoot + "/externalTools"}
               url={props.url}
               uploadurl={props.uploadurl}
               debugMode={props.debugMode}

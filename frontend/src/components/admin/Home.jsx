@@ -4,7 +4,7 @@ import EditCourseInfo from "./EditCourseInfo";
 import EditCourseSettings from "./EditCourseSettings";
 import UpdateChat from "./UpdateChat";
 import CurrentCourseContent from "./CurrentCourseContent";
-import ViewQuests from "./ViewQuests";
+import ExternalToolsPanel from "../externalTools/ExternalToolsPanel";
 
 function Home(props) {
   const { courseList, course } = useUser();
@@ -40,7 +40,7 @@ function Home(props) {
                 <h1><i className="bi-gear-wide-connected big-icon"></i></h1>
                 <h2>Admin</h2>
                 <p>
-                  On this page, you can make adjustments to your course and manage its content. The roster and the tools this course syncs with have pages of their own.
+                  On this page, you can make adjustments to your course, manage its content, and connect it to tools outside of ASCI. The roster has a page of its own.
                 </p>
               </div>
               <button type="button" className="sidebar-button" onClick={handleCollapse}><i className="bi-arrows-collapse-vertical"></i></button>
@@ -61,7 +61,10 @@ function Home(props) {
                     <button className="nav-link" id="pills-sync-tab" data-bs-toggle="pill" data-bs-target="#pills-sync" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Course Content Uploads</button>
                   </li>
                   <li className="nav-item" role="presentation">
-                    <button className="nav-link" id="pills-content-tab" data-bs-toggle="pill" data-bs-target="#pills-content" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Course Content</button>
+                    <button className="nav-link" id="pills-content-tab" data-bs-toggle="pill" data-bs-target="#pills-content" type="button" role="tab" aria-controls="pills-content" aria-selected="false">Course Content</button>
+                  </li>
+                  <li className="nav-item" role="presentation">
+                    <button className="nav-link" id="pills-external-tools-tab" data-bs-toggle="pill" data-bs-target="#pills-external-tools" type="button" role="tab" aria-controls="pills-external-tools" aria-selected="false">External Tools</button>
                   </li>
                 </ul>
               </div>
@@ -85,7 +88,7 @@ function Home(props) {
                   </div>
                 </div>
 
-                <div className="tab-pane fade" id="pills-content" role="tabpanel" aria-labelledby="pills-contact-tab">
+                <div className="tab-pane fade" id="pills-content" role="tabpanel" aria-labelledby="pills-content-tab">
                   <div className="row">
                     <div className="col-md-12 my-auto">
                       <CurrentCourseContent course_id={courseList[course].course_id} refresh={refresh} {...props} />
@@ -93,7 +96,13 @@ function Home(props) {
                   </div>
                 </div>
 
-                
+                <div className="tab-pane fade" id="pills-external-tools" role="tabpanel" aria-labelledby="pills-external-tools-tab">
+                  <div className="row">
+                    <div className="col-md-12 my-auto">
+                      <ExternalToolsPanel {...props} />
+                    </div>
+                  </div>
+                </div>
 
               </div>
             </div>
