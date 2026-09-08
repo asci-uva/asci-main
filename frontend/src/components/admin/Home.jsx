@@ -58,9 +58,6 @@ function Home(props) {
                     <button className="nav-link active" id="pills-general-tab" data-bs-toggle="pill" data-bs-target="#pills-general" type="button" role="tab" aria-controls="pills-home" aria-selected="true">General</button>
                   </li>
                   <li className="nav-item" role="presentation">
-                    <button className="nav-link" id="pills-sync-tab" data-bs-toggle="pill" data-bs-target="#pills-sync" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Course Content Uploads</button>
-                  </li>
-                  <li className="nav-item" role="presentation">
                     <button className="nav-link" id="pills-content-tab" data-bs-toggle="pill" data-bs-target="#pills-content" type="button" role="tab" aria-controls="pills-content" aria-selected="false">Course Content</button>
                   </li>
                   <li className="nav-item" role="presentation">
@@ -80,18 +77,13 @@ function Home(props) {
                   </div>
                 </div>
 
-                <div className="tab-pane fade" id="pills-sync" role="tabpanel" aria-labelledby="pills-contact-tab">
-                  <div className="row">
-                    <div className="col-md-12 my-auto">
-                      <UpdateChat course_id={courseList[course].course_id} uploadSuccess={refreshContent} {...props} />
-                    </div>
-                  </div>
-                </div>
-
                 <div className="tab-pane fade" id="pills-content" role="tabpanel" aria-labelledby="pills-content-tab">
                   <div className="row">
                     <div className="col-md-12 my-auto">
                       <CurrentCourseContent course_id={courseList[course].course_id} refresh={refresh} {...props} />
+                    </div>
+                    <div className="col-md-12 my-auto">
+                      <UpdateChat course_id={courseList[course].course_id} uploadSuccess={refreshContent} {...props} />
                     </div>
                   </div>
                 </div>
