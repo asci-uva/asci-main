@@ -2706,6 +2706,9 @@ $usedCosSim = True;
     }
 
     public function getCanvasLmsCourseHandler($asci_course_id) {
+      if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "external-tools"))
+        throw new \asci\exceptions\ASCIPermissionException("User does not have permission to read the Canvas LMS course for this course");
+
       $result = $this->synchronizationStore->getCanvasLmsCourse($asci_course_id);
 
       if ($result)
