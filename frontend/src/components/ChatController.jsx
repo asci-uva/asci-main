@@ -18,19 +18,19 @@ const ChatController = (props) => {
     let settings = getCourseSettings();
     const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible");
     const [sidebarCol, setSidebarCol] = useState("col-md-3");
-    const [chatCol, setChatCol] = useState("page-container content col-md-9 my-auto");
+    const [chatCol, setChatCol] = useState("page-container col-md-9");
 
     const handleCollapse = () => {
       if(sidebarOpen === "sidebar-visible")
       {
         setSidebarCol("col-md-1");
-        setChatCol("page-container content col-md-11");
+        setChatCol("page-container col-md-11");
         setSidebarOpen("sidebar-hidden");
       }
       else
       {
         setSidebarCol("col-md-3");
-        setChatCol("page-container content col-md-9 my-auto");
+        setChatCol("page-container col-md-9");
         setSidebarOpen("sidebar-visible");
       }
     }

@@ -127,11 +127,6 @@
   padding: 40px;
 }
 
-.content {
-  overflow: auto;
-  height: 100vh;
-}
-
 .page-width {
   width: 100%;
   margin: 0px;

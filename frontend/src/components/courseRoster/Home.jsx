@@ -17,7 +17,7 @@ function Home(props) {
 
   const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible");
   const [sidebarCol, setSidebarCol] = useState("col-md-3");
-  const [contentCol, setContentCol] = useState("page-container content col-md-9 my-auto");
+  const [contentCol, setContentCol] = useState("page-container col-md-9");
 
   const {
     status: canvasTokenStatus,
@@ -48,11 +48,11 @@ function Home(props) {
   const handleCollapse = () => {
     if (sidebarOpen === "sidebar-visible") {
       setSidebarCol("col-md-1");
-      setContentCol("page-container content col-md-11");
+      setContentCol("page-container col-md-11");
       setSidebarOpen("sidebar-hidden");
     } else {
       setSidebarCol("col-md-3");
-      setContentCol("page-container content col-md-9 my-auto");
+      setContentCol("page-container col-md-9");
       setSidebarOpen("sidebar-visible");
     }
   };
