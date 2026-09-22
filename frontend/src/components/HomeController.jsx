@@ -7,7 +7,6 @@ import CourseRosterController from "./CourseRosterController";
 import AssessmentsController from "./AssessmentsController";
 import AnalyticsController from "./AnalyticsController";
 import PointsController from "./PointsController";
-import StatsController from "./StatsController";
 import SystemAdmin from "./SystemAdmin";
 import { Home, Cards } from "./home";
 import { Login, Error, Navigation, Logout, SelectCourseHome } from "./utils";
@@ -106,17 +105,6 @@ const HomeController = (props) => {
               documentRoot={props.documentRoot + "/analytics"}
               url={props.url}
               uploadurl={props.uploadurl}
-              debugMode={props.debugMode}
-            />
-          }
-        />
-        {/* Use StatsController for all stats related routes */}
-        <Route
-          path={"stats/*"}
-          element={
-            <StatsController
-              documentRoot={props.documentRoot + "/stats"}
-              url={props.url}
               debugMode={props.debugMode}
             />
           }

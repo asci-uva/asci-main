@@ -58,13 +58,6 @@ function Navigation(props) {
               ) : null }
               { isInstructorRole(course.role) ? (
                 <li className="nav-item">
-                  <NavLink className="nav-link" to="/asci/stats">
-                    <i className="bi-bar-chart-line"></i> Statistics
-                  </NavLink>
-                </li>
-              ) : null }
-              { isInstructorRole(course.role) ? (
-                <li className="nav-item">
                   <NavLink className="nav-link" to="/asci/assessments">
                     <i className="bi-clipboard-check"></i> Assessments
                   </NavLink>
@@ -95,13 +88,6 @@ function Navigation(props) {
                 <li className="">
                   <NavLink className="dropdown-item" to="/asci/courseRoster">
                     <i className="bi-people-fill"></i> Roster
-                  </NavLink>
-                </li>
-              ) : null }
-              { isInstructorRole(course.role) ? (
-                <li className="">
-                  <NavLink className="dropdown-item" to="/asci/stats">
-                    <i className="bi-bar-chart-line"></i> Statistics
                   </NavLink>
                 </li>
               ) : null }

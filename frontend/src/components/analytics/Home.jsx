@@ -4,7 +4,8 @@ import { postCommand } from "../utils/postCommand";
 import { errorMessage } from "../utils/errorMessage";
 import { useCanvasLmsCourse } from "../utils/useCanvasLmsCourse";
 import { useExternalTools } from "../utils/useExternalTools";
-import { isStaffRole } from "../utils/roles";
+import { isStaffRole, isInstructorRole } from "../utils/roles";
+import StaffAnalytics from "./StaffAnalytics";
 import StudentSearch from "./StudentSearch";
 import StudentInfo from "./StudentInfo";
 import SubmissionStats from "./SubmissionStats";
@@ -17,6 +18,7 @@ function Home(props) {
   const course = getCourse();
   const courseId = course.course_id;
   const isStaff = isStaffRole(course.role);
+  const isInstructor = isInstructorRole(course.role);
 
   const [students, setStudents] = useState([]);
   const [submissions, setSubmissions] = useState([]);
@@ -36,6 +38,8 @@ function Home(props) {
   const assignmentsRequestRef = useRef(0);
   const sessionsRequestRef = useRef(0);
   const piazzaRequestRef = useRef(0);
+
+  const [activeTab, setActiveTab] = useState(isInstructor ? "staff" : "students");
 
   const [sidebarOpen, setSidebarOpen] = useState("sidebar-visible");
   const [sidebarCol, setSidebarCol] = useState("col-md-3");
@@ -203,16 +207,7 @@ function Home(props) {
     }
   };
 
-  const body = () => {
-    if (!isStaff)
-      return (
-        <div className="card">
-          <div className="card-body">
-            <h5 className="mb-0">Analytics are available to course staff only.</h5>
-          </div>
-        </div>
-      );
-
+  const studentsBody = () => {
     return (
       <>
         <StudentSearch
@@ -273,6 +268,54 @@ function Home(props) {
     );
   };
 
+  const body = () => {
+    if (!isStaff)
+      return (
+        <div className="card">
+          <div className="card-body">
+            <h5 className="mb-0">Analytics are available to course staff only.</h5>
+          </div>
+        </div>
+      );
+
+    if (!isInstructor) return studentsBody();
+
+    return (
+      <>
+        <ul className="nav nav-tabs mb-4" role="tablist">
+          <li className="nav-item" role="presentation">
+            <button
+              type="button"
+              className={activeTab === "staff" ? "nav-link active" : "nav-link"}
+              role="tab"
+              aria-selected={activeTab === "staff"}
+              onClick={() => setActiveTab("staff")}
+            >
+              Staff
+            </button>
+          </li>
+          <li className="nav-item" role="presentation">
+            <button
+              type="button"
+              className={activeTab === "students" ? "nav-link active" : "nav-link"}
+              role="tab"
+              aria-selected={activeTab === "students"}
+              onClick={() => setActiveTab("students")}
+            >
+              Students
+            </button>
+          </li>
+        </ul>
+
+        {activeTab === "staff" ? (
+          <StaffAnalytics courseId={courseId} {...props} />
+        ) : (
+          studentsBody()
+        )}
+      </>
+    );
+  };
+
   return (
     <>
       <div className="container-fluid page-width">
@@ -283,7 +326,8 @@ function Home(props) {
                 <h1><i className="bi-person-lines-fill big-icon"></i></h1>
                 <h2>Analytics</h2>
                 <p>
-                  Look up a student to see how they are doing in this course, from
+                  See how your course has been going, from how engaged the TAs have
+                  been with office hours to how an individual student is doing, from
                   the work they have handed in to the grades they have earned.
                 </p>
               </div>
