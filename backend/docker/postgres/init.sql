@@ -121,7 +121,8 @@ CREATE TABLE course_settings (
   self_grouping BOOL DEFAULT (true),
   show_quests BOOL DEFAULT (true),
   llm_enabled BOOL DEFAULT (true),
-  archived BOOL DEFAULT (false)
+  archived BOOL DEFAULT (false),
+  queue_enabled BOOL DEFAULT (true)
 );
 
 CREATE TABLE logs (

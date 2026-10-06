@@ -36,8 +36,9 @@ class DBCourseSettings
             smart_grouping = $4,
             show_quests = $5,
             llm_enabled = $6,
-            archived = $7
-            WHERE course_id = $8';
+            archived = $7,
+            queue_enabled = COALESCE($8, queue_enabled)
+            WHERE course_id = $9';
 
         // Normalize boolean values: handles PHP true/false, DB strings "t"/"f",
         // and JSON strings "true"/"false" so both EditCourseSettings and DiscordActivity work.
@@ -55,6 +56,7 @@ class DBCourseSettings
             $boolParam($course_settings->show_quests),
             $boolParam($course_settings->llm_enabled),
             $boolParam($course_settings->archived),
+            $boolParam($course_settings->queue_enabled),
             $course_settings->course_id
         ));
 
