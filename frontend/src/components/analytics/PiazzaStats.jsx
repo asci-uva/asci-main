@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import CollapsibleCard from "./CollapsibleCard";
+import LastUploaded from "../utils/LastUploaded";
 import { Timeline, toDate, weekSpan, weeksFor } from "./activityTimeline";
 
 const CONTRIBUTION_SERIES = [
@@ -238,6 +239,10 @@ function PiazzaStats(props) {
 
     return (
       <>
+        <p className="mb-3">
+          <LastUploaded lastUploadedAt={props.lastUploadedAt} />
+        </p>
+
         {analytics.weeks.length > 0 ? (
           <Timeline
             weeks={analytics.weeks}

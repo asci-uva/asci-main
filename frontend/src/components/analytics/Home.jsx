@@ -52,9 +52,11 @@ function Home(props) {
 
   const {
     tools: externalTools,
+    lastUploads,
     loaded: externalToolsLoaded,
   } = useExternalTools(props.url, courseId, isStaff);
   const canvasEnabled = externalTools.canvas === true;
+  const gradescopeEnabled = externalTools.gradescope === true;
   const piazzaEnabled = externalTools.piazza === true;
 
   useEffect(() => {
@@ -228,6 +230,8 @@ function Home(props) {
                 submissions={submissions}
                 canvasLmsCourse={canvasLmsCourse}
                 lastSyncedAt={lastSyncedAt}
+                gradescopeEnabled={gradescopeEnabled}
+                gradescopeLastUploadedAt={lastUploads.gradescope}
                 loaded={assignmentsLoaded && studentsLoaded}
                 error={error}
               />
@@ -245,6 +249,7 @@ function Home(props) {
                 student={selected}
                 stats={piazzaStats}
                 stream={piazzaStream}
+                lastUploadedAt={lastUploads.piazza}
                 loaded={piazzaLoaded}
                 error={piazzaError}
               />

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import CollapsibleCard from "./CollapsibleCard";
 import { formatLastSynced, isStaleSync } from "../utils/CanvasStalePeriod";
+import LastUploaded from "../utils/LastUploaded";
 import c3 from "c3";
 import "c3/c3.css";
 import {
@@ -307,6 +308,15 @@ function SubmissionStats(props) {
           }
         >
           Last synced: {formatLastSynced(props.lastSyncedAt)}
+          {props.gradescopeEnabled && (
+            <>
+              <br />
+              <LastUploaded
+                label="Last Gradescope upload"
+                lastUploadedAt={props.gradescopeLastUploadedAt}
+              />
+            </>
+          )}
         </p>
 
         <div className="row">

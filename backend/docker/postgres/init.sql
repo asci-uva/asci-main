@@ -251,6 +251,7 @@ CREATE TABLE course_external_tools (
   tool       external_tool NOT NULL,
   enabled    BOOL NOT NULL DEFAULT false,
   updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  last_uploaded_at TIMESTAMP,
   PRIMARY KEY (course_id, tool)
 );
 

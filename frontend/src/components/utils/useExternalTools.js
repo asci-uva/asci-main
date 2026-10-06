@@ -3,9 +3,11 @@ import { postCommand } from "./postCommand";
 import { useUser } from "../context/UserContext";
 
 const NO_TOOLS = {};
+const NO_UPLOADS = {};
 
 export function useExternalTools(url, courseId, enabled) {
     const [tools, setTools] = useState(NO_TOOLS);
+    const [lastUploads, setLastUploads] = useState(NO_UPLOADS);
     const [loaded, setLoaded] = useState(false);
     const [error, setError] = useState(false);
     const { user, getCourse } = useUser();
@@ -26,6 +28,7 @@ export function useExternalTools(url, courseId, enabled) {
                 if (!isCurrent()) return null;
                 if (data.success === "true") {
                     setTools(data.tools || NO_TOOLS);
+                    setLastUploads(data.lastUploads || NO_UPLOADS);
                     setError(false);
                     setLoaded(true);
                     return data.tools;
@@ -61,16 +64,18 @@ export function useExternalTools(url, courseId, enabled) {
     useEffect(() => {
         if (enabled) {
             setTools(NO_TOOLS);
+            setLastUploads(NO_UPLOADS);
             setError(false);
             setLoaded(false);
             refresh();
         } else {
             requestIdRef.current++;
             setTools(NO_TOOLS);
+            setLastUploads(NO_UPLOADS);
             setError(false);
             setLoaded(false);
         }
     }, [enabled, refresh]);
 
-    return { tools, loaded, error, refresh, save };
+    return { tools, lastUploads, setLastUploads, loaded, error, refresh, save };
 }

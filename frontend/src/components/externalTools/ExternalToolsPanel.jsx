@@ -35,6 +35,8 @@ function ExternalToolsPanel(props) {
 
   const {
     tools: externalTools,
+    lastUploads,
+    setLastUploads,
     loaded: externalToolsLoaded,
     error: externalToolsError,
     save: saveExternalTool,
@@ -146,7 +148,13 @@ function ExternalToolsPanel(props) {
           <div className="col-md-12 my-auto">
             {toolToggle("gradescope", "Gradescope")}
             {externalTools.gradescope === true && (
-              <GradescopeCsvUpload course_id={courseId} {...props} />
+              <GradescopeCsvUpload
+                course_id={courseId}
+                lastUploadedAt={lastUploads.gradescope}
+                lastUploadedLoaded={externalToolsLoaded}
+                onLastUploadsChange={setLastUploads}
+                {...props}
+              />
             )}
           </div>
         </div>
@@ -155,7 +163,13 @@ function ExternalToolsPanel(props) {
           <div className="col-md-12 my-auto">
             {toolToggle("piazza", "Piazza")}
             {externalTools.piazza === true && (
-              <PiazzaUpload course_id={courseId} {...props} />
+              <PiazzaUpload
+                course_id={courseId}
+                lastUploadedAt={lastUploads.piazza}
+                lastUploadedLoaded={externalToolsLoaded}
+                onLastUploadsChange={setLastUploads}
+                {...props}
+              />
             )}
           </div>
         </div>

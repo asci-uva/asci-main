@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useUser } from "../context/UserContext";
 import { isInstructorRole } from "../utils/roles";
+import LastUploaded from "../utils/LastUploaded";
 
 function PiazzaUpload(props) {
   const { user, getCourse } = useUser();
@@ -56,6 +57,8 @@ function PiazzaUpload(props) {
 
         toast.success("Piazza export uploaded successfully!");
         clearFile();
+        if (data.lastUploads && props.onLastUploadsChange)
+          props.onLastUploadsChange(data.lastUploads);
         if (props.onUploaded) props.onUploaded();
       })
       .catch((error) => {
@@ -74,7 +77,7 @@ function PiazzaUpload(props) {
       <div className="card-body">
         <form className="mb-0">
           <label className="form-label">Piazza Export ZIP</label>
-          <div className="input-group mb-3">
+          <div className="input-group">
             <input
               className="form-control"
               type="file"
@@ -91,6 +94,12 @@ function PiazzaUpload(props) {
             >
               {uploadInProgress ? "Uploading (Please Wait)" : "Upload"}
             </button>
+          </div>
+          <div className="mt-1 mb-3">
+            <LastUploaded
+              lastUploadedAt={props.lastUploadedAt}
+              loaded={props.lastUploadedLoaded}
+            />
           </div>
           <p className="form-text mb-0">
             Upload the ZIP file exactly as Piazza provides it. Request it from

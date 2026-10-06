@@ -1508,8 +1508,11 @@ $usedCosSim = True;
     $piazzaStream = $piazza->parsePiazzaStream($people);
     $this->userCourseStore->updatePiazzaStreamForCourse($course["course_id"], $piazzaStream);
 
+    $lastUploads = $this->externalToolStore->markUploaded($course["course_id"], "piazza");
+
     $result = [
-      "success" => "true"
+      "success" => "true",
+      "lastUploads" => $lastUploads,
     ];
     return $result;
 
@@ -2639,7 +2642,11 @@ $usedCosSim = True;
       if (!$this->userCourseStore->userHasPermission($this->user, $asci_course_id, "external-tools"))
         throw new \asci\exceptions\ASCIPermissionException("User does not have permission to read the external tools for this course");
 
-      return ["success" => "true", "tools" => $this->externalToolStore->getExternalTools($asci_course_id)];
+      return [
+        "success" => "true",
+        "tools" => $this->externalToolStore->getExternalTools($asci_course_id),
+        "lastUploads" => $this->externalToolStore->getLastUploads($asci_course_id),
+      ];
     }
 
     public function setExternalToolEnabledHandler($asci_course_id, $tool, $enabled) {
@@ -2873,11 +2880,14 @@ $usedCosSim = True;
       $skipped += $counts["skipped"];
     }
 
+    $lastUploads = $this->externalToolStore->markUploaded($asci_course_id, "gradescope");
+
     return [
       "success" => "true",
       "imported" => $imported,
       "updated" => $updated,
       "skipped" => $skipped,
+      "lastUploads" => $lastUploads,
     ];
   }
 

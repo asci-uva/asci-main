@@ -59,4 +59,34 @@ class DBExternalTools
 
         return $this->getExternalTools($course_id);
     }
+
+    public function getLastUploads($course_id) {
+        $rows = $this->db->fetchall($this->db->query(
+            'SELECT tool, last_uploaded_at FROM course_external_tools WHERE course_id = $1',
+            [$course_id]
+        ));
+
+        $uploads = [];
+        foreach (self::$TOOLS as $tool)
+            $uploads[$tool] = null;
+
+        foreach ($rows ?: [] as $row) {
+            if (self::isValidTool($row['tool']))
+                $uploads[$row['tool']] = $row['last_uploaded_at'];
+        }
+
+        return $uploads;
+    }
+
+    public function markUploaded($course_id, $tool) {
+        $this->db->query(
+            'INSERT INTO course_external_tools (course_id, tool, last_uploaded_at)
+             VALUES ($1, $2, now())
+             ON CONFLICT (course_id, tool)
+             DO UPDATE SET last_uploaded_at = EXCLUDED.last_uploaded_at',
+            [$course_id, $tool]
+        );
+
+        return $this->getLastUploads($course_id);
+    }
 }

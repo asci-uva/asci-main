@@ -5,6 +5,7 @@ import { postCommand } from "../utils/postCommand";
 import { errorMessage } from "../utils/errorMessage";
 import { isInstructorRole } from "../utils/roles";
 import ConfirmModal from "../utils/ConfirmModal";
+import LastUploaded from "../utils/LastUploaded";
 import { parseGradescopeCsv, matchAssignments, isZeroLateness } from "../utils/parseGradescopeCsv";
 
 function identityKey(person) {
@@ -136,6 +137,8 @@ function UploadGradescopeCsv(props) {
         if (data.success === "true") {
           setResults(data);
           toast.success("Uploaded Gradescope submissions");
+          if (data.lastUploads && props.onLastUploadsChange)
+            props.onLastUploadsChange(data.lastUploads);
           if (props.onUploaded) props.onUploaded();
         } else {
           console.log(data.error);
@@ -215,6 +218,14 @@ function UploadGradescopeCsv(props) {
           <input className="form-control" type="file" onChange={handleFileChange} accept=".csv" />
           <UploadButton />
         </div>
+        {props.lastUploadedLoaded !== undefined && (
+          <div className="mt-1">
+            <LastUploaded
+              lastUploadedAt={props.lastUploadedAt}
+              loaded={props.lastUploadedLoaded}
+            />
+          </div>
+        )}
 
         <Preview />
         <Results />
