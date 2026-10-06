@@ -30,13 +30,13 @@ class DBCourseSettings
     public function update($course_settings){
 
         $query = 'UPDATE course_settings SET
-            show_queue_list = $1,
-            discord_server_id = $2,
-            grouping_enabled = $3,
-            smart_grouping = $4,
-            show_quests = $5,
-            llm_enabled = $6,
-            archived = $7,
+            show_queue_list = COALESCE($1, show_queue_list),
+            discord_server_id = COALESCE($2, discord_server_id),
+            grouping_enabled = COALESCE($3, grouping_enabled),
+            smart_grouping = COALESCE($4, smart_grouping),
+            show_quests = COALESCE($5, show_quests),
+            llm_enabled = COALESCE($6, llm_enabled),
+            archived = COALESCE($7, archived),
             queue_enabled = COALESCE($8, queue_enabled)
             WHERE course_id = $9';
 

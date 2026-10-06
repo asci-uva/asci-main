@@ -23,11 +23,13 @@ function Navigation(props) {
         </button>
         <div className="collapse navbar-collapse" id="ascinav"> 
           <ul className="navbar-nav me-auto mb-2 mb-md-0">
+            { settings!=null && settings.queue_enabled=="t" ? (
             <li className="nav-item">
               <NavLink className="nav-link" to="/asci/queue">
                 <i className="bi-list-ol"></i> Queue
               </NavLink>
             </li>
+            ) : null }
             { settings!=null && settings.llm_enabled=="t" && settings.archived!="t" ? (
             <li className="nav-item">
               <NavLink className="nav-link" to="/asci/chat">
