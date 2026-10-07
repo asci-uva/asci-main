@@ -1,6 +1,6 @@
 import React from "react";
 
-function ConfirmModal({ show, title, onCancel, onConfirm, confirmLabel = "Confirm", cancelLabel = "Cancel", children }) {
+function ConfirmModal({ show, title, onCancel, onConfirm, confirmLabel = "Confirm", cancelLabel = "Cancel", confirmClassName = "btn-primary", children }) {
     if (!show) return null;
 
     return (
@@ -15,7 +15,7 @@ function ConfirmModal({ show, title, onCancel, onConfirm, confirmLabel = "Confir
                     </div>
                     <div className="modal-footer">
                         <button className="btn btn-secondary" onClick={onCancel}>{cancelLabel}</button>
-                        <button className="btn btn-primary" onClick={onConfirm}>{confirmLabel}</button>
+                        <button className={`btn ${confirmClassName}`} onClick={onConfirm}>{confirmLabel}</button>
                     </div>
                 </div>
             </div>

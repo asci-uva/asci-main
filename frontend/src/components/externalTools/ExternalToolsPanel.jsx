@@ -13,7 +13,7 @@ import GradescopeCsvUpload from "./GradescopeCsvUpload";
 import PiazzaUpload from "./PiazzaUpload";
 import CanvasLinkWarning from "./CanvasLinkWarning";
 import CanvasTokenExpiredWarning from "./CanvasTokenExpiredWarning";
-import ExternalToolToggle from "./ExternalToolToggle";
+import ConfirmModal from "../utils/ConfirmModal";
 import QueueSettings from "./QueueSettings";
 
 function ExternalToolsPanel(props) {
@@ -61,20 +61,10 @@ function ExternalToolsPanel(props) {
   const isEnabled = (key) => tools.find((t) => t.key === key).enabled;
   const canvasEnabled = isEnabled("canvas");
 
-  const toolToggle = (tool, label) => (
-    <ExternalToolToggle
-      tool={tool}
-      label={label}
-      enabled={isEnabled(tool)}
-      loaded={externalToolsLoaded}
-      error={externalToolsError}
-      canManage={canManageTools}
-      onSave={setToolEnabled}
-    />
-  );
-
   const [activeKey, setActiveKey] = useState(null);
   const [adding, setAdding] = useState(false);
+  const [toolToRemove, setToolToRemove] = useState(null);
+  const [removing, setRemoving] = useState(false);
 
   const enabledTools = tools.filter((t) => t.enabled);
   const availableTools = tools.filter((t) => !t.enabled);
@@ -102,6 +92,40 @@ function ExternalToolsPanel(props) {
         toast.error(errorMessage(e, `Failed to add ${tool.label}`));
       });
   };
+
+  const handleRemoveTool = () => {
+    const tool = toolToRemove;
+    setToolToRemove(null);
+    setRemoving(true);
+    setToolEnabled(tool.key, false)
+      .then((data) => {
+        setRemoving(false);
+        if (data.success === "true") toast.success(`${tool.label} removed from this course`);
+        else {
+          console.log(data.error);
+          toast.error(errorMessage(data.error, `Failed to remove ${tool.label}`));
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+        setRemoving(false);
+        toast.error(errorMessage(e, `Failed to remove ${tool.label}`));
+      });
+  };
+
+  const removeButton = (key) =>
+    canManageTools && (
+      <div className="border-top pt-3 mt-3">
+        <button
+          type="button"
+          className="btn btn-danger"
+          disabled={removing}
+          onClick={() => setToolToRemove(tools.find((t) => t.key === key))}
+        >
+          <i className="bi-trash"></i> Remove Tool
+        </button>
+      </div>
+    );
 
   if (!externalToolsLoaded)
     return <p className="text-muted mb-0">Loading…</p>;
@@ -175,8 +199,8 @@ function ExternalToolsPanel(props) {
         {isEnabled("queue") && (
           <div className={paneClass("queue")} id="ext-queue" role="tabpanel" aria-labelledby="ext-queue-tab">
             <div className="col-md-12 my-auto">
-              {toolToggle("queue", "Queue")}
               <QueueSettings course_id={courseId} {...props} />
+              {removeButton("queue")}
             </div>
           </div>
         )}
@@ -184,10 +208,10 @@ function ExternalToolsPanel(props) {
         {isEnabled("llm") && (
           <div className={paneClass("llm")} id="ext-llm" role="tabpanel" aria-labelledby="ext-llm-tab">
             <div className="col-md-12 my-auto">
-              {toolToggle("llm", "LLM Chat Bot")}
               <p className="text-muted mb-0">
                 The LLM Chat Bot is available to students on the main chat bot page and while waiting on the queue.
               </p>
+              {removeButton("llm")}
             </div>
           </div>
         )}
@@ -195,7 +219,6 @@ function ExternalToolsPanel(props) {
         {canvasEnabled && (
           <div className={paneClass("canvas")} id="ext-canvas" role="tabpanel" aria-labelledby="ext-canvas-tab">
             <div className="col-md-12 my-auto">
-              {toolToggle("canvas", "Canvas LMS")}
               <CanvasLmsSync
                 course_id={courseId}
                 canvasTokenStatus={canvasTokenStatus}
@@ -224,6 +247,7 @@ function ExternalToolsPanel(props) {
                   {...props}
                 />
               )}
+              {removeButton("canvas")}
             </div>
           </div>
         )}
@@ -231,7 +255,6 @@ function ExternalToolsPanel(props) {
         {isEnabled("gradescope") && (
           <div className={paneClass("gradescope")} id="ext-gradescope" role="tabpanel" aria-labelledby="ext-gradescope-tab">
             <div className="col-md-12 my-auto">
-              {toolToggle("gradescope", "Gradescope")}
               <GradescopeCsvUpload
                 course_id={courseId}
                 lastUploadedAt={lastUploads.gradescope}
@@ -239,6 +262,7 @@ function ExternalToolsPanel(props) {
                 onLastUploadsChange={setLastUploads}
                 {...props}
               />
+              {removeButton("gradescope")}
             </div>
           </div>
         )}
@@ -246,7 +270,6 @@ function ExternalToolsPanel(props) {
         {isEnabled("piazza") && (
           <div className={paneClass("piazza")} id="ext-piazza" role="tabpanel" aria-labelledby="ext-piazza-tab">
             <div className="col-md-12 my-auto">
-              {toolToggle("piazza", "Piazza")}
               <PiazzaUpload
                 course_id={courseId}
                 lastUploadedAt={lastUploads.piazza}
@@ -254,10 +277,24 @@ function ExternalToolsPanel(props) {
                 onLastUploadsChange={setLastUploads}
                 {...props}
               />
+              {removeButton("piazza")}
             </div>
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        show={toolToRemove !== null}
+        title={`Remove ${toolToRemove?.label}?`}
+        confirmLabel="Remove Tool"
+        confirmClassName="btn-danger"
+        onCancel={() => setToolToRemove(null)}
+        onConfirm={handleRemoveTool}
+      >
+        <p className="mb-0">
+          {toolToRemove?.label} will be turned off for this course. Its settings and data will be kept.
+        </p>
+      </ConfirmModal>
     </>
   );
 }
