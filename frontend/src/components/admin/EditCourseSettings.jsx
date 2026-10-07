@@ -15,14 +15,6 @@ function EditCourseSettings(props) {
 
   console.log("course settings is: " , courseSettings);
 
-  /* Queue Settings */
-  const [showQueueList, setShowQueueList] = useState(courseSettings.show_queue_list == "t");
-  const [groupingEnabled, setGroupingEnabled] = useState(courseSettings.grouping_enabled == "t");
-  const [smartGrouping, setSmartGrouping] = useState(courseSettings.smart_grouping == "t");
-
-  /* AI Settings */
-  const [llmEnabled, setLlmEnabled] = useState(courseSettings.llm_enabled == "t");
-
   /* Course Visibility Settings */
   const [archived, setArchived] = useState(courseSettings.archived == "t");
 
@@ -40,10 +32,6 @@ function EditCourseSettings(props) {
     
     let newSettings = {
       course_id: course.course_id,
-      show_queue_list: showQueueList,
-      grouping_enabled: groupingEnabled,
-      smart_grouping: smartGrouping,
-      llm_enabled: llmEnabled,
       show_quests: showQuests,
       archived: archived,
     };
@@ -91,30 +79,6 @@ function EditCourseSettings(props) {
       });
   };
 
-  const handleShowQueueListChange = (e) => {
-      const element = e.target;
-      console.log("changing boolean showQueueList to " , element.checked);
-      setShowQueueList(element.checked);
-  }
-
-  const handleGroupingEnabledChange = (e) => {
-      const element = e.target;
-      console.log("changing boolean groupingEnabled to " , element.checked);
-      setGroupingEnabled(element.checked);
-  }
-
-  const handleSmartGroupingChange = (e) => {
-      const element = e.target;
-      console.log("changing boolean smartGrouping to " , element.checked);
-      setSmartGrouping(element.checked);
-  }
-
-  const handleLlmEnabledChange = (e) => {
-      const element = e.target;
-      console.log("changing boolean llmEnabled to " , element.checked);
-      setLlmEnabled(element.checked);
-  }
-
     const handleArchivedChange = (e) => {
       const element = e.target;
       console.log("changing boolean archived to " , element.checked);
@@ -132,30 +96,6 @@ function EditCourseSettings(props) {
       <div className="card mb-4">
         <h4 className="card-header">ASCI Settings</h4>
           <div className="card-body">
-
-            <h5>Queue Settings</h5>
-
-            <div className="form-check form-switch mb-3">
-              <input className="form-check-input" type="checkbox" id="showQueueList" checked={showQueueList} onChange={ handleShowQueueListChange }></input>
-              <label className="form-check-label" htmlFor="showQueueList"><b>Show Full Queue: </b>Entire queue will be shown to teaching assistants</label>
-            </div>
-            <div className="form-check form-switch mb-3">
-              <input className="form-check-input" type="checkbox" id="groupingEnabled" checked={groupingEnabled} onChange={ handleGroupingEnabledChange }></input>
-              <label className="form-check-label" htmlFor="groupingEnabled"><b>Enable Groups: </b>Allow students to be helped in groups</label>
-            </div>
-            <div className="form-check form-switch mb-3">
-              <input className="form-check-input" type="checkbox" id="smartGrouping" checked={smartGrouping} onChange={ handleSmartGroupingChange }></input>
-              <label className="form-check-label" htmlFor="smartGrouping"><b>Enable Smart Grouping: </b>Recommended student groups will be presented to TAs based on student issues</label>
-            </div>
-
-            <h5>AI Settings</h5>
-
-            <div className="form-check form-switch mb-3">
-              <input className="form-check-input" type="checkbox" id="llmEnabled" checked={llmEnabled} onChange={ handleLlmEnabledChange }></input>
-              <label className="form-check-label" htmlFor="llmEnabled"><b>Enable LLM Chat Bot: </b>The LLM Chat Bot will be available to students on main chat bot page and while waiting on the queue</label>
-            </div>
-
-            
 
             <h5>Course Lifecycle</h5>
 

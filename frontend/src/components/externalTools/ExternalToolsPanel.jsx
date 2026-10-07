@@ -3,7 +3,7 @@ import { useUser } from "../context/UserContext";
 import { useCanvasSyncSettings } from "../utils/useCanvasSyncSettings";
 import { useCanvasTokenStatus } from "../utils/useCanvasTokenStatus";
 import { useCanvasLmsCourse } from "../utils/useCanvasLmsCourse";
-import { useCourseTools } from "../utils/useCourseTools";
+import { useCourseTools, COURSE_TOOLS } from "../utils/useCourseTools";
 import { isInstructorRole, isStaffRole } from "../utils/roles";
 import CanvasLmsSync from "./CanvasLmsSync";
 import CanvasSyncActions from "./CanvasSyncActions";
@@ -12,12 +12,7 @@ import PiazzaUpload from "./PiazzaUpload";
 import CanvasLinkWarning from "./CanvasLinkWarning";
 import CanvasTokenExpiredWarning from "./CanvasTokenExpiredWarning";
 import ExternalToolToggle from "./ExternalToolToggle";
-
-const TABS = [
-  { key: "canvas", label: "Canvas LMS" },
-  { key: "gradescope", label: "Gradescope" },
-  { key: "piazza", label: "Piazza" },
-];
+import QueueSettings from "./QueueSettings";
 
 function ExternalToolsPanel(props) {
   const { getCourse } = useUser();
@@ -34,7 +29,7 @@ function ExternalToolsPanel(props) {
   } = useCanvasTokenStatus(props.url, courseId, isStaff);
 
   const {
-    externalTools,
+    tools,
     lastUploads,
     setLastUploads,
     loaded: externalToolsLoaded,
@@ -61,13 +56,14 @@ function ExternalToolsPanel(props) {
     canvasLmsCourse !== null && isStaff
   );
 
-  const canvasEnabled = externalTools.canvas === true;
+  const isEnabled = (key) => tools.find((t) => t.key === key).enabled;
+  const canvasEnabled = isEnabled("canvas");
 
   const toolToggle = (tool, label) => (
     <ExternalToolToggle
       tool={tool}
       label={label}
-      enabled={externalTools[tool] === true}
+      enabled={isEnabled(tool)}
       loaded={externalToolsLoaded}
       error={externalToolsError}
       canManage={canManageTools}
@@ -89,7 +85,7 @@ function ExternalToolsPanel(props) {
       )}
 
       <ul className="nav nav-pills mb-3" id="course-tools-tab" role="tablist">
-        {TABS.map((tab, idx) => (
+        {COURSE_TOOLS.map((tab, idx) => (
           <li className="nav-item" role="presentation" key={tab.key}>
             <button
               className={`nav-link ${idx === 0 ? "active" : ""}`}
@@ -108,7 +104,23 @@ function ExternalToolsPanel(props) {
       </ul>
 
       <div className="tab-content" id="course-tools-tabContent">
-        <div className="tab-pane fade show active" id="ext-canvas" role="tabpanel" aria-labelledby="ext-canvas-tab">
+        <div className="tab-pane fade show active" id="ext-queue" role="tabpanel" aria-labelledby="ext-queue-tab">
+          <div className="col-md-12 my-auto">
+            {toolToggle("queue", "Queue")}
+            {isEnabled("queue") && <QueueSettings course_id={courseId} {...props} />}
+          </div>
+        </div>
+
+        <div className="tab-pane fade" id="ext-llm" role="tabpanel" aria-labelledby="ext-llm-tab">
+          <div className="col-md-12 my-auto">
+            {toolToggle("llm", "LLM Chat Bot")}
+            <p className="text-muted mb-0">
+              The LLM Chat Bot is available to students on the main chat bot page and while waiting on the queue.
+            </p>
+          </div>
+        </div>
+
+        <div className="tab-pane fade" id="ext-canvas" role="tabpanel" aria-labelledby="ext-canvas-tab">
           <div className="col-md-12 my-auto">
             {toolToggle("canvas", "Canvas LMS")}
             {canvasEnabled && (
@@ -147,7 +159,7 @@ function ExternalToolsPanel(props) {
         <div className="tab-pane fade" id="ext-gradescope" role="tabpanel" aria-labelledby="ext-gradescope-tab">
           <div className="col-md-12 my-auto">
             {toolToggle("gradescope", "Gradescope")}
-            {externalTools.gradescope === true && (
+            {isEnabled("gradescope") && (
               <GradescopeCsvUpload
                 course_id={courseId}
                 lastUploadedAt={lastUploads.gradescope}
@@ -162,7 +174,7 @@ function ExternalToolsPanel(props) {
         <div className="tab-pane fade" id="ext-piazza" role="tabpanel" aria-labelledby="ext-piazza-tab">
           <div className="col-md-12 my-auto">
             {toolToggle("piazza", "Piazza")}
-            {externalTools.piazza === true && (
+            {isEnabled("piazza") && (
               <PiazzaUpload
                 course_id={courseId}
                 lastUploadedAt={lastUploads.piazza}
