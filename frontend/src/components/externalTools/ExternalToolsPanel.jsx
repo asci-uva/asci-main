@@ -173,17 +173,15 @@ function ExternalToolsPanel(props) {
             >
               <i className="bi-plus-lg"></i> Add Tool
             </button>
-            {availableTools.length > 0 && (
-              <ul className="dropdown-menu dropdown-menu-end">
-                {availableTools.map((tool) => (
-                  <li key={tool.key}>
-                    <button className="dropdown-item" type="button" disabled={adding} onClick={() => handleAddTool(tool)}>
-                      {tool.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <ul className="dropdown-menu dropdown-menu-end">
+              {availableTools.map((tool) => (
+                <li key={tool.key}>
+                  <button className="dropdown-item" type="button" disabled={adding} onClick={() => handleAddTool(tool)}>
+                    {tool.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </li>
         )}
       </ul>
