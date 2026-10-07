@@ -16,7 +16,7 @@ import CanvasTokenExpiredWarning from "./CanvasTokenExpiredWarning";
 import ConfirmModal from "../utils/ConfirmModal";
 import QueueSettings from "./QueueSettings";
 
-function ExternalToolsPanel(props) {
+function CourseToolsPanel(props) {
   const { getCourse } = useUser();
   const course = getCourse();
   const courseId = course.course_id;
@@ -297,4 +297,4 @@ function ExternalToolsPanel(props) {
   );
 }
 
-export default ExternalToolsPanel;
+export default CourseToolsPanel;

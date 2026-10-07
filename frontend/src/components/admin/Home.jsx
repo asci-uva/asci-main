@@ -4,7 +4,7 @@ import EditCourseInfo from "./EditCourseInfo";
 import EditCourseSettings from "./EditCourseSettings";
 import UpdateChat from "./UpdateChat";
 import CurrentCourseContent from "./CurrentCourseContent";
-import ExternalToolsPanel from "../externalTools/ExternalToolsPanel";
+import CourseToolsPanel from "../courseTools/CourseToolsPanel";
 
 function Home(props) {
   const { courseList, course } = useUser();
@@ -91,7 +91,7 @@ function Home(props) {
                 <div className="tab-pane fade" id="pills-course-tools" role="tabpanel" aria-labelledby="pills-course-tools-tab">
                   <div className="row">
                     <div className="col-md-12 my-auto">
-                      <ExternalToolsPanel {...props} />
+                      <CourseToolsPanel {...props} />
                     </div>
                   </div>
                 </div>

@@ -1,4 +1,4 @@
-export { default as ExternalToolsPanel } from "./ExternalToolsPanel";
+export { default as CourseToolsPanel } from "./CourseToolsPanel";
 export { default as CanvasLmsSync } from "./CanvasLmsSync";
 export { default as CanvasSyncActions } from "./CanvasSyncActions";
 export { default as CanvasLinkWarning } from "./CanvasLinkWarning";
