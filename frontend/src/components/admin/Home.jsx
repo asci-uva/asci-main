@@ -40,7 +40,7 @@ function Home(props) {
                 <h1><i className="bi-gear-wide-connected big-icon"></i></h1>
                 <h2>Admin</h2>
                 <p>
-                  On this page, you can make adjustments to your course, manage its content, and connect it to tools outside of ASCI. The roster has a page of its own.
+                  On this page, you can make adjustments to your course, manage its content, and choose which tools it uses. The roster has a page of its own.
                 </p>
               </div>
               <button type="button" className="sidebar-button" onClick={handleCollapse}><i className="bi-arrows-collapse-vertical"></i></button>
@@ -61,7 +61,7 @@ function Home(props) {
                     <button className="nav-link" id="pills-content-tab" data-bs-toggle="pill" data-bs-target="#pills-content" type="button" role="tab" aria-controls="pills-content" aria-selected="false">Course Content</button>
                   </li>
                   <li className="nav-item" role="presentation">
-                    <button className="nav-link" id="pills-external-tools-tab" data-bs-toggle="pill" data-bs-target="#pills-external-tools" type="button" role="tab" aria-controls="pills-external-tools" aria-selected="false">External Tools</button>
+                    <button className="nav-link" id="pills-course-tools-tab" data-bs-toggle="pill" data-bs-target="#pills-course-tools" type="button" role="tab" aria-controls="pills-course-tools" aria-selected="false">Course Tools</button>
                   </li>
                 </ul>
               </div>
@@ -88,7 +88,7 @@ function Home(props) {
                   </div>
                 </div>
 
-                <div className="tab-pane fade" id="pills-external-tools" role="tabpanel" aria-labelledby="pills-external-tools-tab">
+                <div className="tab-pane fade" id="pills-course-tools" role="tabpanel" aria-labelledby="pills-course-tools-tab">
                   <div className="row">
                     <div className="col-md-12 my-auto">
                       <ExternalToolsPanel {...props} />

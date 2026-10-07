@@ -233,7 +233,7 @@ function PiazzaStats(props) {
       return (
         <h5 className="mb-0">
           No Piazza data has been uploaded for this course yet. Upload the Piazza
-          course export on the External Tools page.
+          course export on the Course Tools page.
         </h5>
       );
 

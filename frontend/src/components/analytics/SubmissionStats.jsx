@@ -281,7 +281,7 @@ function SubmissionStats(props) {
       return (
         <h5 className="mb-0">
           This course is not linked to a Canvas LMS course, so there are no
-          assignments to report on. Link it on the External Tools page.
+          assignments to report on. Link it on the Course Tools page.
         </h5>
       );
 

@@ -3,7 +3,7 @@ import { useUser } from "../context/UserContext";
 import { useCanvasSyncSettings } from "../utils/useCanvasSyncSettings";
 import { useCanvasTokenStatus } from "../utils/useCanvasTokenStatus";
 import { useCanvasLmsCourse } from "../utils/useCanvasLmsCourse";
-import { useExternalTools } from "../utils/useExternalTools";
+import { useCourseTools } from "../utils/useCourseTools";
 import { isInstructorRole, isStaffRole } from "../utils/roles";
 import CanvasLmsSync from "./CanvasLmsSync";
 import CanvasSyncActions from "./CanvasSyncActions";
@@ -34,13 +34,13 @@ function ExternalToolsPanel(props) {
   } = useCanvasTokenStatus(props.url, courseId, isStaff);
 
   const {
-    tools: externalTools,
+    externalTools,
     lastUploads,
     setLastUploads,
     loaded: externalToolsLoaded,
     error: externalToolsError,
-    save: saveExternalTool,
-  } = useExternalTools(props.url, courseId, isStaff);
+    setToolEnabled,
+  } = useCourseTools(props.url, courseId, isStaff);
 
   const {
     course: canvasLmsCourse,
@@ -71,7 +71,7 @@ function ExternalToolsPanel(props) {
       loaded={externalToolsLoaded}
       error={externalToolsError}
       canManage={canManageTools}
-      onSave={saveExternalTool}
+      onSave={setToolEnabled}
     />
   );
 
@@ -88,7 +88,7 @@ function ExternalToolsPanel(props) {
         />
       )}
 
-      <ul className="nav nav-pills mb-3" id="external-tools-tab" role="tablist">
+      <ul className="nav nav-pills mb-3" id="course-tools-tab" role="tablist">
         {TABS.map((tab, idx) => (
           <li className="nav-item" role="presentation" key={tab.key}>
             <button
@@ -107,7 +107,7 @@ function ExternalToolsPanel(props) {
         ))}
       </ul>
 
-      <div className="tab-content" id="external-tools-tabContent">
+      <div className="tab-content" id="course-tools-tabContent">
         <div className="tab-pane fade show active" id="ext-canvas" role="tabpanel" aria-labelledby="ext-canvas-tab">
           <div className="col-md-12 my-auto">
             {toolToggle("canvas", "Canvas LMS")}

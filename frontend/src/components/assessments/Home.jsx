@@ -41,7 +41,7 @@ function Home(props) {
       ) : !externalToolsLoaded ? (
         <h5 className="mb-0">Loading…</h5>
       ) : (
-        <h5 className="mb-0">Enable Canvas LMS in External Tools to use Assignments</h5>
+        <h5 className="mb-0">Add Canvas LMS in Course Tools to use Assignments</h5>
       ),
     });
   }

@@ -253,7 +253,7 @@ function AssignmentsList(props) {
     if (props.canvasLmsCourse === null)
       return (
         <h5>
-          This course is not linked to a Canvas LMS course. Link it on the External Tools
+          This course is not linked to a Canvas LMS course. Link it on the Course Tools
           page to see its assignments here.
         </h5>
       );
